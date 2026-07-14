@@ -271,7 +271,7 @@ function buildRegionShops(region: RegionKey, count: number, start: number): Inst
   });
 }
 
-export const installerShops: InstallerShop[] = [
+export const installerShops: InstallerShop[] = ([
   ...buildRegionShops("seoul", 50, 1),
   {
     id: "SHOP-SEOUL-REAL-001",
@@ -314,7 +314,7 @@ export const installerShops: InstallerShop[] = [
   ...buildRegionShops("jeolla", 5, 86),
   ...buildRegionShops("gangwon", 4, 91),
   ...buildRegionShops("jeju", 3, 95),
-].map((shop, index) => ({
+] as InstallerShop[]).map((shop, index): InstallerShop => ({
   ...shop,
   id: shop.id.startsWith("SHOP-BS") || shop.id.startsWith("SHOP-MISA") || shop.id.startsWith("SHOP-SEOUL-REAL") ? shop.id : `SHOP-${String(index + 1).padStart(3, "0")}`,
 }));

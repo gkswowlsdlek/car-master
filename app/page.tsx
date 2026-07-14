@@ -2,15 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { initialChatMessages, sampleScheduleProposal, type ChatMessage } from "../lib/chat-data";
+import { priceBrands, pricePackages, vehicleClassLabels, type PriceBrand, type PricePackage, type VehicleClass } from "../data/pricePackages";
+import { classifyVehicleModel, vehicleClassGuides } from "../data/vehicleClasses";
 import {
-  brands,
   distanceKm,
   findSearchLocation,
   formatDistance,
   installerShops,
-  regionLabels,
   searchLocations,
-  workTypes,
   type Brand,
   type InstallerShop,
   type SearchLocation,
@@ -19,9 +18,8 @@ import {
 import { calculateSettlement, formatWon } from "../lib/fees";
 
 type Role = "dealer" | "shop" | "admin";
-type Screen = "landing" | "login" | "dealerDashboard" | "dealerMap" | "request" | "requestSummary" | "deals" | "dealerSettlement" | "dealerProfile" | "shopRequests" | "chat" | "ops";
+type Screen = "landing" | "login" | "dealerDashboard" | "priceGuide" | "dealerMap" | "request" | "requestSummary" | "deals" | "dealerSettlement" | "dealerProfile" | "shopRequests" | "chat" | "ops";
 type RequestStatus = "draft" | "sent" | "accepted" | "scheduleAgreed";
-type MobileMapTab = "map" | "list";
 type DealStatus = "시공점 확인중" | "진행중" | "작업완료";
 type DemoAccount = {
   id: string;
@@ -45,10 +43,17 @@ type ServiceRequest = {
   vehicleType: "신차" | "재시공";
   deliveryArea: string;
   preferredBrand: Brand;
-  works: WorkType[];
+  works: string[];
   inboundStart: string;
   inboundEnd: string;
   memo: string;
+  vehicleClass: VehicleClass | "";
+  selectedPackageId?: string;
+  selectedPackageName?: string;
+  selectedPackageBrand?: string;
+  expectedPrice?: string;
+  includedServices?: string[];
+  optionalServices?: string[];
 };
 
 type DealerDeal = {
@@ -58,8 +63,10 @@ type DealerDeal = {
   shopName: string;
   shopAddress: string;
   region: string;
-  works: WorkType[];
+  works: string[];
   packageName: string;
+  vehicleClass?: VehicleClass | "";
+  expectedPrice?: string;
   status: DealStatus;
   inboundAt?: string;
   outboundAt?: string;
@@ -70,11 +77,12 @@ type DealerDeal = {
   messages: ChatMessage[];
 };
 
-type DealerIconName = "dashboard" | "shop" | "request" | "chat" | "deals" | "settlement" | "profile" | "logout" | "bell" | "arrow" | "card";
+type DealerIconName = "dashboard" | "price" | "shop" | "request" | "chat" | "deals" | "settlement" | "profile" | "logout" | "bell" | "arrow" | "card";
 
 function DealerIcon({ name }: { name: DealerIconName }) {
   const paths: Record<DealerIconName, React.ReactNode> = {
     dashboard: <><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></>,
+    price: <><path d="M4 7h16v12H4z" /><path d="M4 11h16" /><path d="M8 15h3" /><path d="M16 15h1" /><path d="M7 7V5h10v2" /></>,
     shop: <><path d="M4 10v10h16V10" /><path d="M3 10l2-6h14l2 6" /><path d="M8 20v-6h8v6" /><path d="M3 10c1.2 2 3.8 2 5 0 1.2 2 3.8 2 5 0 1.2 2 3.8 2 5 0 1 1.6 2.2 1.8 3 1" /></>,
     request: <><path d="M6 3h9l3 3v15H6z" /><path d="M14 3v4h4" /><path d="M9 12h6M9 16h6" /></>,
     chat: <><path d="M4 5h16v11H9l-5 4z" /><path d="M8 9h8M8 12h6" /></>,
@@ -126,15 +134,9 @@ const demoAccounts: DemoAccount[] = [
 ];
 
 const transactionSteps = [
-  "시공 요청 전송",
-  "시공점 확인",
-  "일정 협의",
-  "예약 확정",
-  "결제 대기",
-  "입고 예정",
-  "입고 완료",
-  "시공 중",
-  "시공 완료",
+  "시공점 확인중",
+  "진행중",
+  "작업완료",
 ];
 
 const dealStatuses: DealStatus[] = ["시공점 확인중", "진행중", "작업완료"];
@@ -146,9 +148,9 @@ const statusTone: Record<DealStatus, string> = {
 };
 
 const dashboardMetrics: { label: string; value: string; filter: DealStatus | "전체" }[] = [
-  { label: "오늘 진행중 거래", value: "12건", filter: "진행중" },
-  { label: "오늘 신규 요청", value: "5건", filter: "시공점 확인중" },
-  { label: "작업완료", value: "3건", filter: "작업완료" },
+  { label: "시공점 확인중", value: "3건", filter: "시공점 확인중" },
+  { label: "진행중", value: "5건", filter: "진행중" },
+  { label: "작업완료", value: "8건", filter: "작업완료" },
 ];
 
 const initialDealerDeals: DealerDeal[] = [
@@ -360,6 +362,13 @@ const defaultRequest: ServiceRequest = {
   inboundStart: "2026-07-24",
   inboundEnd: "2026-07-25",
   memo: "하남 미사 인도 예정 차량입니다. 고객 출고 전 신차검수와 블랙박스 포함 패키지 가능 여부 확인 부탁드립니다.",
+  vehicleClass: "특대형",
+  selectedPackageId: "vertex-900",
+  selectedPackageName: "버텍스 900",
+  selectedPackageBrand: "버텍스",
+  expectedPrice: "가격 입력 예정",
+  includedServices: ["신차검수", "생활보호 PPF 4종", "기본 코팅"],
+  optionalServices: [],
 };
 
 function pathForScreen(screen: Screen, role: Role) {
@@ -377,10 +386,10 @@ export default function Home() {
   const [query, setQuery] = useState("경기 하남시 미사");
   const [location, setLocation] = useState<SearchLocation>(searchLocations[3]);
   const [selectedShopId, setSelectedShopId] = useState("SHOP-MISA-001");
-  const [brandFilter, setBrandFilter] = useState<Brand | "전체">("전체");
-  const [workFilter, setWorkFilter] = useState<WorkType | "전체">("전체");
-  const [onlyAvailable, setOnlyAvailable] = useState(true);
-  const [onlyApproved, setOnlyApproved] = useState(true);
+  const [brandFilter] = useState<Brand | "전체">("전체");
+  const [workFilter] = useState<WorkType | "전체">("전체");
+  const [onlyAvailable] = useState(true);
+  const [onlyApproved] = useState(true);
   const [request, setRequest] = useState<ServiceRequest>(defaultRequest);
   const [requestStatus, setRequestStatus] = useState<RequestStatus>("draft");
   const [messages, setMessages] = useState<ChatMessage[]>(initialChatMessages);
@@ -390,10 +399,14 @@ export default function Home() {
   const [dealFilter, setDealFilter] = useState<DealStatus | "전체">("전체");
   const [dealerChatDraft, setDealerChatDraft] = useState("");
   const [favoriteShopIds, setFavoriteShopIds] = useState<string[]>(["SHOP-MISA-001", "SHOP-BS-001"]);
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [showFavoritesOnly] = useState(false);
   const [requestSuccess, setRequestSuccess] = useState<DealerDeal | null>(null);
   const [conversationLoaded, setConversationLoaded] = useState(false);
   const [hasStoredConversation, setHasStoredConversation] = useState(false);
+  const [priceBrandFilter, setPriceBrandFilter] = useState<"전체" | PriceBrand>("전체");
+  const [priceSearch, setPriceSearch] = useState("");
+  const [priceVehicleClass, setPriceVehicleClass] = useState<VehicleClass>("특대형");
+  const [selectedPricePackageId, setSelectedPricePackageId] = useState(pricePackages[0].id);
 
   const shopsWithDistance = useMemo(() => {
     return installerShops
@@ -414,6 +427,13 @@ export default function Home() {
   const activeDealerDealsCount = dealerDeals.filter((deal) => deal.status !== "작업완료").length;
   const unreadDealerMessages = dealerDeals.reduce((sum, deal) => sum + deal.unread, 0);
   const fee = calculateSettlement(600000, 3, 2.9);
+  const filteredPricePackages = pricePackages.filter((item) => {
+    const keyword = priceSearch.trim().toLowerCase();
+    const matchesBrand = priceBrandFilter === "전체" || item.brand === priceBrandFilter;
+    const matchesSearch = !keyword || `${item.brand} ${item.name} ${item.description}`.toLowerCase().includes(keyword);
+    return matchesBrand && matchesSearch && item.available;
+  });
+  const selectedPricePackage = pricePackages.find((item) => item.id === selectedPricePackageId) ?? pricePackages[0];
 
   useEffect(() => {
     const loadConversation = (storedValue: string | null) => {
@@ -437,7 +457,7 @@ export default function Home() {
     };
 
     loadConversation(localStorage.getItem(conversationStorageKey));
-    setConversationLoaded(true);
+    queueMicrotask(() => setConversationLoaded(true));
 
     const handleStorage = (event: StorageEvent) => {
       if (event.key === conversationStorageKey) loadConversation(event.newValue);
@@ -452,14 +472,35 @@ export default function Home() {
     if (!hasStoredConversation && requestStatus === "draft" && messages.length === initialChatMessages.length) return;
     const stored: StoredConversation = { requestStatus, messages, request, selectedShopId };
     localStorage.setItem(conversationStorageKey, JSON.stringify(stored));
-    setHasStoredConversation(true);
+    queueMicrotask(() => setHasStoredConversation(true));
   }, [conversationLoaded, hasStoredConversation, messages, request, requestStatus, selectedShopId]);
 
   useEffect(() => {
     if (!visibleShops.some(({ shop }) => shop.id === selectedShopId) && visibleShops[0]) {
-      setSelectedShopId(visibleShops[0].shop.id);
+      queueMicrotask(() => setSelectedShopId(visibleShops[0].shop.id));
     }
   }, [selectedShopId, visibleShops]);
+
+  const applyPricePackageToRequest = (pricePackage: PricePackage, nextVehicleClass = priceVehicleClass, optionalServices: string[] = []) => {
+    const expectedPrice = pricePackage.prices[nextVehicleClass];
+    const workItems = [pricePackage.name, ...pricePackage.includedServices, ...optionalServices];
+    setSelectedPricePackageId(pricePackage.id);
+    setPriceVehicleClass(nextVehicleClass);
+    setRequest((current) => ({
+      ...current,
+      preferredBrand: pricePackage.brand as Brand,
+      works: workItems,
+      memo: `${pricePackage.name} / ${workItems.slice(1).join(" / ")}`,
+      vehicleClass: nextVehicleClass,
+      selectedPackageId: pricePackage.id,
+      selectedPackageName: pricePackage.name,
+      selectedPackageBrand: pricePackage.brand,
+      expectedPrice,
+      includedServices: pricePackage.includedServices,
+      optionalServices,
+    }));
+    goToScreen("request");
+  };
 
   const searchArea = (nextQuery = query) => {
     const nextLocation = findSearchLocation(nextQuery);
@@ -478,7 +519,9 @@ export default function Home() {
       shopAddress: selectedShop.address,
       region: request.deliveryArea,
       works: request.works,
-      packageName: request.preferredBrand,
+      packageName: request.selectedPackageName ?? request.works[0] ?? request.preferredBrand,
+      vehicleClass: request.vehicleClass,
+      expectedPrice: request.expectedPrice,
       status: "시공점 확인중",
       inboundAt: request.inboundStart,
       lastMessage: "시공 요청을 전송했습니다.",
@@ -486,7 +529,7 @@ export default function Home() {
       unread: 0,
       messages: [
         { id: `${dealNumber}-m1`, sender: "system", text: "시공 요청을 전송했습니다.", time: "지금" },
-        { id: `${dealNumber}-m2`, sender: "dealer", text: `${request.model} / ${request.deliveryArea} / ${request.works.join(", ")} / ${request.inboundStart} 입고 예정입니다.`, time: "지금" },
+        { id: `${dealNumber}-m2`, sender: "dealer", text: `${request.model} / ${request.vehicleClass || "등급 확인"} / ${request.deliveryArea} / ${request.selectedPackageName ?? request.works.join(", ")} / ${request.expectedPrice ?? "가격 입력 예정"} / ${request.inboundStart} 입고 예정입니다.`, time: "지금" },
       ],
     };
     setDealerDeals((current) => [newDeal, ...current]);
@@ -510,6 +553,23 @@ export default function Home() {
   const acceptRequest = () => {
     setHasStoredConversation(true);
     setRequestStatus("accepted");
+    setDealerDeals((current) =>
+      current.map((deal) =>
+        deal.id === selectedDealId || (deal.status === "시공점 확인중" && deal.model === request.model)
+          ? {
+              ...deal,
+              status: "진행중",
+              lastMessage: "시공점이 요청을 수락했습니다. 거래 채팅이 활성화되었습니다.",
+              updatedAt: "지금",
+              messages: [
+                ...deal.messages,
+                { id: `${deal.id}-accepted`, sender: "shop", text: "요청 수락했습니다. 입고 일정과 작업 내용을 채팅에서 조율하겠습니다.", time: "지금" },
+                { id: `${deal.id}-accepted-system`, sender: "system", text: "시공점 수락으로 거래 채팅이 활성화되었습니다.", time: "지금" },
+              ],
+            }
+          : deal,
+      ),
+    );
     setMessages((current) => [
       ...current,
       {
@@ -526,6 +586,34 @@ export default function Home() {
       },
     ]);
     goToScreen("chat");
+  };
+
+  const completeShopWork = () => {
+    setHasStoredConversation(true);
+    setRequestStatus("scheduleAgreed");
+    setDealerDeals((current) =>
+      current.map((deal) =>
+        deal.id === selectedDealId || deal.model === request.model
+          ? {
+              ...deal,
+              status: "작업완료",
+              completedAt: "지금",
+              lastMessage: "작업완료 처리되었습니다.",
+              updatedAt: "지금",
+              messages: [
+                ...deal.messages,
+                { id: `${deal.id}-done`, sender: "shop", text: "작업완료 처리했습니다. 출고 전 확인 부탁드립니다.", time: "지금" },
+                { id: `${deal.id}-done-system`, sender: "system", text: "거래 상태가 작업완료로 변경되었습니다.", time: "지금" },
+              ],
+            }
+          : deal,
+      ),
+    );
+    setMessages((current) => [
+      ...current,
+      { id: `m${current.length + 1}`, sender: "shop", text: "작업완료 처리했습니다. 출고 전 확인 부탁드립니다.", time: "지금" },
+      { id: `m${current.length + 2}`, sender: "system", text: "거래 상태가 작업완료로 변경되었습니다.", time: "지금" },
+    ]);
   };
 
   const agreeSchedule = () => {
@@ -674,16 +762,18 @@ export default function Home() {
             : null;
 
     if (routeAccount) {
-      loginWithAccount(routeAccount, { replace: true });
+      queueMicrotask(() => loginWithAccount(routeAccount, { replace: true }));
       return;
     }
 
     if (pathname === "/login") {
-      setScreen("login");
+      queueMicrotask(() => setScreen("login"));
       return;
     }
 
-    setScreen("landing");
+    queueMicrotask(() => setScreen("landing"));
+    // The initial route bootstrap intentionally runs once on first mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (screen === "landing") {
@@ -698,11 +788,12 @@ export default function Home() {
     role === "dealer"
       ? [
           { id: "dealerDashboard", label: "대시보드", icon: "dashboard" },
+          { id: "priceGuide", label: "금액표", icon: "price" },
+          { id: "request", label: "내 시공 요청", icon: "request" },
           { id: "dealerMap", label: "전국 시공점 찾기", icon: "shop" },
-          { id: "request", label: "시공 요청", icon: "request" },
+          { id: "deals", label: "거래 관리", icon: "deals" },
           { id: "chat", label: "거래 채팅", icon: "chat" },
-          { id: "deals", label: "진행중 거래", icon: "deals" },
-          { id: "dealerSettlement", label: "정산", icon: "settlement" },
+          { id: "dealerSettlement", label: "결제 및 정산", icon: "settlement" },
           { id: "dealerProfile", label: "마이페이지", icon: "profile" },
         ]
       : role === "shop"
@@ -774,8 +865,24 @@ export default function Home() {
             onOpenDeal={(dealId) => openDeal(dealId, "chat")}
             onNewRequest={() => goToScreen("request")}
             onFindShop={() => goToScreen("dealerMap")}
+            onPriceGuide={() => goToScreen("priceGuide")}
             onOpenChat={() => goToScreen("chat")}
-            onSettlement={() => goToScreen("dealerSettlement")}
+          />
+        )}
+
+        {screen === "priceGuide" && (
+          <PriceGuideScreen
+            packages={filteredPricePackages}
+            selectedPackage={selectedPricePackage}
+            selectedPackageId={selectedPricePackageId}
+            setSelectedPackageId={setSelectedPricePackageId}
+            brandFilter={priceBrandFilter}
+            setBrandFilter={setPriceBrandFilter}
+            search={priceSearch}
+            setSearch={setPriceSearch}
+            vehicleClass={priceVehicleClass}
+            setVehicleClass={setPriceVehicleClass}
+            onRequest={applyPricePackageToRequest}
           />
         )}
 
@@ -790,17 +897,7 @@ export default function Home() {
             selectedDistance={selectedDistance}
             selectedShopId={selectedShopId}
             setSelectedShopId={setSelectedShopId}
-            brandFilter={brandFilter}
-            setBrandFilter={setBrandFilter}
-            workFilter={workFilter}
-            setWorkFilter={setWorkFilter}
-            onlyAvailable={onlyAvailable}
-            setOnlyAvailable={setOnlyAvailable}
-            onlyApproved={onlyApproved}
-            setOnlyApproved={setOnlyApproved}
             favoriteShopIds={favoriteShopIds}
-            showFavoritesOnly={showFavoritesOnly}
-            setShowFavoritesOnly={setShowFavoritesOnly}
             toggleFavoriteShop={toggleFavoriteShop}
             onRequest={() => goToScreen("request")}
           />
@@ -810,9 +907,14 @@ export default function Home() {
           <RequestScreen
             request={request}
             setRequest={setRequest}
+            searchArea={searchArea}
+            visibleShops={visibleShops}
             selectedShop={selectedShop}
             selectedDistance={selectedDistance}
+            selectedShopId={selectedShopId}
+            setSelectedShopId={setSelectedShopId}
             onSummary={() => goToScreen("requestSummary")}
+            onPriceGuide={() => goToScreen("priceGuide")}
           />
         )}
 
@@ -835,7 +937,7 @@ export default function Home() {
         )}
 
         {screen === "shopRequests" && (
-          <ShopRequests request={request} selectedShop={selectedShop} status={requestStatus} onAccept={acceptRequest} onReject={() => setRequestStatus("draft")} onOpenChat={() => goToScreen("chat")} />
+          <ShopRequests request={request} selectedShop={selectedShop} status={requestStatus} onAccept={acceptRequest} onReject={() => setRequestStatus("draft")} onOpenChat={() => goToScreen("chat")} onComplete={completeShopWork} />
         )}
 
         {screen === "chat" && (
@@ -899,7 +1001,7 @@ function LandingPage({ onLogin, onDealerStart }: { onLogin: () => void; onDealer
             <p className="eyebrow">리스·렌트 딜러를 위한 전국 자동차 시공 네트워크</p>
             <h1>전국 어디서든,<br />고객과 가까운 시공점을<br />한 번에 찾으세요.</h1>
             <p className="hero-desc">
-              고객 차량 인도 지역을 검색하면 가까운 승인 시공점과 취급 브랜드를 한눈에 확인하고,
+              고객 차량 인도 지역을 검색하면 가까운 등록 시공점과 취급 브랜드를 한눈에 확인하고,
               시공 요청부터 일정 조율까지 하나의 거래 흐름으로 관리할 수 있습니다.
             </p>
             <div className="hero-buttons">
@@ -907,7 +1009,7 @@ function LandingPage({ onLogin, onDealerStart }: { onLogin: () => void; onDealer
               <button className="secondary" onClick={onDealerStart}>파트너 시공점 등록</button>
             </div>
             <div className="trust-metrics" aria-label="서비스 신뢰 지표">
-              <span><b>100+</b>승인 시공점</span>
+              <span><b>100+</b>등록 시공점</span>
               <span><b>7+</b>주요 썬팅 브랜드</span>
               <span><b>48h</b>요청 응답 기준</span>
             </div>
@@ -919,7 +1021,7 @@ function LandingPage({ onLogin, onDealerStart }: { onLogin: () => void; onDealer
           <article>
             <span>01</span>
             <h2>지역 기반 시공점 검색</h2>
-            <p>고객 차량 인도 지역을 기준으로 가까운 승인 시공점을 지도와 목록에서 빠르게 확인합니다.</p>
+            <p>고객 차량 인도 지역을 기준으로 가까운 등록 시공점을 지도와 목록에서 빠르게 확인합니다.</p>
           </article>
           <article>
             <span>02</span>
@@ -946,7 +1048,7 @@ function LandingPage({ onLogin, onDealerStart }: { onLogin: () => void; onDealer
         <section className="partner-strip" id="partners">
           <div>
             <p className="eyebrow">PARTNER NETWORK</p>
-            <h2>카마스터 승인 시공점만 노출합니다.</h2>
+            <h2>카마스터 등록 시공점을 노출합니다.</h2>
             <p>딜러는 가까운 시공점을 빠르게 찾고, 시공점은 명확한 요청 정보로 응답합니다.</p>
           </div>
           <button className="primary" onClick={onDealerStart}>딜러로 시작하기</button>
@@ -963,7 +1065,7 @@ function LandingServicePreview() {
     <div className="hero-preview-panel">
       <div className="preview-toolbar">
         <span>딜러 요청 미리보기</span>
-        <b>승인 시공점 연결</b>
+        <b>등록 시공점 연결</b>
       </div>
       <div className="preview-content">
         <article className="preview-request-card">
@@ -977,7 +1079,7 @@ function LandingServicePreview() {
         </article>
 
         <article className="landing-shop-card static">
-          <span className="verified-badge">카마스터 승인 시공점</span>
+          <span className="verified-badge">카마스터 등록 시공점</span>
           <h2>{heroShop.name}</h2>
           <p>부산 해운대구 · 고객 위치에서 1.2km</p>
           <dl>
@@ -1023,7 +1125,7 @@ function LoginScreen({ accounts, onLogin }: { accounts: DemoAccount[]; onLogin: 
           <strong>Car-Master</strong>
           <small>리스·렌트 딜러용 전국 시공 네트워크</small>
         </div>
-        <h1>고객 차량 인도 지역만 입력하면 가까운 승인 시공점을 바로 찾습니다.</h1>
+        <h1>고객 차량 인도 지역만 입력하면 가까운 등록 시공점을 바로 찾습니다.</h1>
         <p>시공 요청 전송, 시공점 수락, 거래 전용 채팅, 입고일과 출고일 조율까지 샘플 데이터로 시연할 수 있습니다.</p>
       </section>
       <section className="login-card">
@@ -1045,6 +1147,139 @@ function LoginScreen({ accounts, onLogin }: { accounts: DemoAccount[]; onLogin: 
   );
 }
 
+function PriceGuideScreen({
+  packages,
+  selectedPackage,
+  selectedPackageId,
+  setSelectedPackageId,
+  brandFilter,
+  setBrandFilter,
+  search,
+  setSearch,
+  vehicleClass,
+  setVehicleClass,
+  onRequest,
+}: {
+  packages: PricePackage[];
+  selectedPackage: PricePackage;
+  selectedPackageId: string;
+  setSelectedPackageId: (id: string) => void;
+  brandFilter: "전체" | PriceBrand;
+  setBrandFilter: (brand: "전체" | PriceBrand) => void;
+  search: string;
+  setSearch: (value: string) => void;
+  vehicleClass: VehicleClass;
+  setVehicleClass: (value: VehicleClass) => void;
+  onRequest: (pricePackage: PricePackage, vehicleClass: VehicleClass, optionalServices?: string[]) => void;
+}) {
+  return (
+    <section className="dealer-screen price-guide-screen">
+      <div className="page-title price-guide-title">
+        <div>
+          <p className="eyebrow">PRICE GUIDE · v0.2.5</p>
+          <h1>신차패키지 금액표</h1>
+          <p>시공차 등급과 원하는 필름을 선택해 예상 시공 금액을 확인하세요.</p>
+          <small>표기 금액은 샘플 예상 금액이며 차량 옵션과 추가 작업에 따라 달라질 수 있습니다.</small>
+        </div>
+      </div>
+
+      <div className="price-guide-toolbar">
+        <div className="price-brand-tabs">
+          {priceBrands.map((brand) => (
+            <button key={brand} className={brandFilter === brand ? "active" : ""} onClick={() => setBrandFilter(brand)}>
+              {brand}
+            </button>
+          ))}
+        </div>
+        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="브랜드 또는 필름명을 검색하세요. 예: 버텍스 900" />
+      </div>
+
+      <section className="vehicle-class-guide">
+        <div>
+          <h2>차량 등급 안내</h2>
+          <p>시공차 등급은 유리 면적과 시공 시간을 기준으로 구분하며, 요청 후 시공점이 최종 확인합니다.</p>
+        </div>
+        <div className="vehicle-class-tabs">
+          {vehicleClassGuides.map((guide) => (
+            <button key={guide.className} className={vehicleClass === guide.className ? "active" : ""} onClick={() => setVehicleClass(guide.className)}>
+              <b>{guide.className}</b>
+              <span>{guide.examples.slice(0, 3).join(", ")}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div className="price-guide-layout">
+        <section className="price-package-grid">
+          {packages.length === 0 ? (
+            <div className="empty-state">검색 조건에 맞는 상품이 없습니다.</div>
+          ) : packages.map((item) => (
+            <PricePackageCard
+              key={item.id}
+              item={item}
+              vehicleClass={vehicleClass}
+              selected={item.id === selectedPackageId}
+              onDetail={() => setSelectedPackageId(item.id)}
+              onRequest={() => onRequest(item, vehicleClass)}
+            />
+          ))}
+        </section>
+        <PricePackageDetail item={selectedPackage} vehicleClass={vehicleClass} onRequest={() => onRequest(selectedPackage, vehicleClass)} />
+      </div>
+    </section>
+  );
+}
+
+function PricePackageCard({ item, vehicleClass, selected, onDetail, onRequest }: { item: PricePackage; vehicleClass: VehicleClass; selected: boolean; onDetail: () => void; onRequest: () => void }) {
+  return (
+    <article className={`price-package-card ${selected ? "selected" : ""}`}>
+      <div className="price-package-head">
+        <span>{item.brand}</span>
+        {item.recommended && <em>추천 상품</em>}
+      </div>
+      <h2>{item.name}</h2>
+      <p>{item.description}</p>
+      <dl className="price-table-mini">
+        {vehicleClassLabels.map((label) => (
+          <div key={label} className={label === vehicleClass ? "active" : ""}>
+            <dt>{label}</dt>
+            <dd>{item.prices[label]}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="included-services">
+        <b>기본 포함</b>
+        {item.includedServices.slice(0, 4).map((service) => <span key={service}>{service}</span>)}
+      </div>
+      <div className="price-card-actions">
+        <button className="secondary" onClick={onDetail}>상세보기</button>
+        <button className="primary" onClick={onRequest}>이 상품으로 시공 요청</button>
+      </div>
+    </article>
+  );
+}
+
+function PricePackageDetail({ item, vehicleClass, onRequest }: { item: PricePackage; vehicleClass: VehicleClass; onRequest: () => void }) {
+  return (
+    <aside className="price-package-detail">
+      <span>{item.brand}</span>
+      <h2>{item.name}</h2>
+      <p>{item.description}</p>
+      <div className="detail-price-box">
+        <small>{vehicleClass} 예상 패키지 금액</small>
+        <b>{item.prices[vehicleClass]}</b>
+      </div>
+      <dl>
+        <div><dt>추천 차량</dt><dd>{item.recommendedVehicles}</dd></div>
+        <div><dt>기본 포함 작업</dt><dd>{item.includedServices.join(", ")}</dd></div>
+        <div><dt>선택 가능 추가 작업</dt><dd>{item.optionalServices.join(", ")}</dd></div>
+        <div><dt>안내사항</dt><dd>{item.notice}</dd></div>
+      </dl>
+      <button className="primary full" onClick={onRequest}>이 상품으로 시공 요청</button>
+    </aside>
+  );
+}
+
 function DealerMapScreen(props: {
   query: string;
   setQuery: (value: string) => void;
@@ -1055,17 +1290,7 @@ function DealerMapScreen(props: {
   selectedDistance: string;
   selectedShopId: string;
   setSelectedShopId: (id: string) => void;
-  brandFilter: Brand | "전체";
-  setBrandFilter: (brand: Brand | "전체") => void;
-  workFilter: WorkType | "전체";
-  setWorkFilter: (work: WorkType | "전체") => void;
-  onlyAvailable: boolean;
-  setOnlyAvailable: (value: boolean) => void;
-  onlyApproved: boolean;
-  setOnlyApproved: (value: boolean) => void;
   favoriteShopIds: string[];
-  showFavoritesOnly: boolean;
-  setShowFavoritesOnly: (value: boolean) => void;
   toggleFavoriteShop: (shopId: string) => void;
   onRequest: () => void;
 }) {
@@ -1079,17 +1304,7 @@ function DealerMapScreen(props: {
     selectedDistance,
     selectedShopId,
     setSelectedShopId,
-    brandFilter,
-    setBrandFilter,
-    workFilter,
-    setWorkFilter,
-    onlyAvailable,
-    setOnlyAvailable,
-    onlyApproved,
-    setOnlyApproved,
     favoriteShopIds,
-    showFavoritesOnly,
-    setShowFavoritesOnly,
     toggleFavoriteShop,
     onRequest,
   } = props;
@@ -1100,7 +1315,7 @@ function DealerMapScreen(props: {
         <div>
           <p className="eyebrow">DEALER FLOW</p>
           <h1>고객 차량 시공 지역을 검색하세요</h1>
-          <p>검색 지역 주변의 카마스터 승인 시공점을 거리순 목록으로 확인하고 시공 요청을 보낼 수 있습니다.</p>
+          <p>검색 지역 주변의 카마스터 등록 시공점을 거리순 목록으로 확인하고 시공 요청을 보낼 수 있습니다.</p>
           <p>현재 시연 로그인 사용자는 한재진딜러 1명이며, 목록에는 아직 별도 로그인 계정이 없는 입점 시공점 100여 곳이 노출됩니다.</p>
         </div>
       </div>
@@ -1113,7 +1328,7 @@ function DealerMapScreen(props: {
       <div className="shop-finder-layout">
         <aside className="results-panel finder-results">
           <div className="results-head">
-            <b>{location.label} 주변 승인 시공점</b>
+            <b>{location.label} 주변 등록 시공점</b>
             <span>{visibleShops.length}곳 · 거리순</span>
           </div>
           {visibleShops.length === 0 ? (
@@ -1156,8 +1371,6 @@ function DealerMapScreen(props: {
             shop={selectedShop}
             distance={selectedDistance}
             onRequest={onRequest}
-            isFavorite={favoriteShopIds.includes(selectedShop.id)}
-            onToggleFavorite={() => toggleFavoriteShop(selectedShop.id)}
           />
         </div>
       </div>
@@ -1165,105 +1378,20 @@ function DealerMapScreen(props: {
   );
 }
 
-function MapSurface({
-  location,
-  shops,
-  selectedShopId,
-  setSelectedShopId,
-  mapMode,
-  setMapMode,
-}: {
-  location: SearchLocation;
-  shops: { shop: InstallerShop; distance: number }[];
-  selectedShopId: string;
-  setSelectedShopId: (id: string) => void;
-  mapMode: "sample" | "naver";
-  setMapMode: (value: "sample" | "naver") => void;
-}) {
-  useEffect(() => {
-    const clientId = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID;
-    if (!clientId) {
-      setMapMode("sample");
-      return;
-    }
-
-    const existing = document.querySelector<HTMLScriptElement>("script[data-carmaster-naver]");
-    if (existing) return;
-
-    const script = document.createElement("script");
-    script.dataset.carmasterNaver = "true";
-    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${clientId}`;
-    script.onload = () => setMapMode("naver");
-    script.onerror = () => setMapMode("sample");
-    document.head.appendChild(script);
-  }, [setMapMode]);
-
-  const grouped = useMemo(() => {
-    return Object.entries(
-      installerShops.reduce<Record<string, number>>((acc, shop) => {
-        acc[shop.region] = (acc[shop.region] ?? 0) + 1;
-        return acc;
-      }, {}),
-    );
-  }, []);
-
-  return (
-    <div className="sample-map" data-provider={mapMode}>
-      <div className="korea-outline">
-        <span>대한민국 전체 지도</span>
-        <small>{mapMode === "naver" ? "API 로딩 완료 시 실제 지도 어댑터로 교체 가능한 구조입니다." : "환경변수가 없어 샘플 지도 UI로 표시 중입니다."}</small>
-      </div>
-      {grouped.map(([region, count], index) => (
-        <div key={region} className={`cluster cluster-${region}`}>
-          <b>{count}</b>
-          <span>{regionLabels[region as keyof typeof regionLabels]}</span>
-        </div>
-      ))}
-      <button className="customer-marker" style={projectToMap(location.lat, location.lng)} title="고객 위치">
-        고객 위치
-      </button>
-      {shops.slice(0, 24).map(({ shop }) => (
-        <button
-          key={shop.id}
-          className={`map-pin ${shop.id === selectedShopId ? "selected" : ""}`}
-          style={projectToMap(shop.lat, shop.lng)}
-          onClick={() => setSelectedShopId(shop.id)}
-          title={shop.name}
-        >
-          {shop.name.slice(0, 1)}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function projectToMap(lat: number, lng: number) {
-  const x = ((lng - 124.5) / (131.2 - 124.5)) * 100;
-  const y = (1 - (lat - 33.0) / (38.7 - 33.0)) * 100;
-  return {
-    left: `${Math.min(92, Math.max(8, x))}%`,
-    top: `${Math.min(88, Math.max(8, y))}%`,
-  };
-}
-
 function ShopMapCard({
   shop,
   distance,
   onRequest,
-  isFavorite,
-  onToggleFavorite,
 }: {
   shop: InstallerShop;
   distance: string;
   onRequest: () => void;
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
 }) {
   return (
     <article className="map-card">
       <div className="map-card-head">
         <div>
-          <span className="verified-badge">카마스터 승인 시공점</span>
+          <span className="verified-badge">카마스터 등록 시공점</span>
           <h2>{shop.name}</h2>
           <p>{shop.address}</p>
         </div>
@@ -1273,6 +1401,10 @@ function ShopMapCard({
         <div><dt>거리</dt><dd>{distance}</dd></div>
         <div><dt>가능 브랜드</dt><dd>{shop.brands.slice(0, 4).join(", ")}</dd></div>
         <div><dt>가능 작업</dt><dd>{shop.works.slice(0, 4).join(", ")}</dd></div>
+        <div><dt>영업시간</dt><dd>{shop.hours}</dd></div>
+        <div><dt>평균 응답</dt><dd>{shop.responseTime}</dd></div>
+        <div><dt>요청 가능</dt><dd>{shop.available ? "가능" : "마감"}</dd></div>
+        <div><dt>사업자 정보</dt><dd>{shop.approved ? "등록" : "확인 필요"}</dd></div>
       </dl>
       <div className="card-actions">
         <button className="primary" onClick={onRequest}>시공 요청하기</button>
@@ -1291,29 +1423,38 @@ function DealerDashboard({
   onOpenDeal,
   onNewRequest,
   onFindShop,
+  onPriceGuide,
   onOpenChat,
-  onSettlement,
 }: {
   deals: DealerDeal[];
   onFilterDeals: (filter: DealStatus | "전체") => void;
   onOpenDeal: (dealId: string) => void;
   onNewRequest: () => void;
   onFindShop: () => void;
+  onPriceGuide: () => void;
   onOpenChat: () => void;
-  onSettlement: () => void;
 }) {
   const recentRequests = deals.filter((deal) => deal.status === "시공점 확인중").slice(0, 3);
   const recentChats = deals.filter((deal) => deal.messages.length > 0).slice(0, 3);
   const recentDone = deals.filter((deal) => deal.status === "작업완료").slice(0, 3);
+  const todayInbound = deals.filter((deal) => deal.inboundAt?.includes("2026-07-14")).slice(0, 3);
 
   return (
     <section className="dealer-dashboard">
       <div className="dealer-welcome">
         <div>
-          <h1>오늘 해야 할 일</h1>
-          <p>요청, 채팅, 완료 거래를 한눈에 확인하세요.</p>
+          <h1>안녕하세요, 한재진 딜러님</h1>
+          <p>오늘의 시공 요청과 진행 중인 거래를 확인하세요.</p>
         </div>
         <span>2026년 7월 14일 화요일</span>
+      </div>
+
+      <div className="dashboard-action-row">
+        <button className="primary new-request-cta" onClick={onNewRequest}>
+          <DealerIcon name="request" />
+          새 시공 요청
+        </button>
+        <button className="secondary" onClick={onFindShop}>전국 시공점 찾기</button>
       </div>
 
       <div className="metric-grid today-task-grid">
@@ -1329,6 +1470,29 @@ function DealerDashboard({
         <TodayListCard title="최근 요청" deals={recentRequests} emptyText="확인중인 요청이 없습니다." onOpenDeal={onOpenDeal} />
         <TodayListCard title="최근 채팅" deals={recentChats} emptyText="최근 채팅이 없습니다." onOpenDeal={onOpenChat} />
         <TodayListCard title="최근 완료거래" deals={recentDone} emptyText="완료된 거래가 없습니다." onOpenDeal={onOpenDeal} />
+      </div>
+
+      <div className="dashboard-extra-grid">
+        <section className="today-list-card inbound-card">
+          <div className="section-head"><h2>오늘 입고 예정 차량</h2></div>
+          <div>
+            {todayInbound.length === 0 ? <p>오늘 입고 예정 차량이 없습니다.</p> : todayInbound.map((deal) => (
+              <button key={deal.id} onClick={() => onOpenDeal(deal.id)}>
+                <span><b>{deal.model}</b><small>{deal.inboundAt} · {deal.shopName}</small></span>
+                <StatusBadge status={deal.status} />
+              </button>
+            ))}
+          </div>
+        </section>
+        <section className="dealer-package-banner">
+          <span>이번 주 추천 신차패키지</span>
+          <b>버텍스 900 · 솔라가드 프리미엄 · 브이쿨 K</b>
+          <p>금액표에서 차량 등급별 예상 금액을 보고 바로 시공 요청으로 연결하세요.</p>
+          <div>
+            <button className="primary" onClick={onPriceGuide}>금액표 전체보기</button>
+            <button className="secondary" onClick={onNewRequest}>바로 시공 요청</button>
+          </div>
+        </section>
       </div>
     </section>
   );
@@ -1353,55 +1517,156 @@ function TodayListCard({ title, deals, emptyText, onOpenDeal }: { title: string;
 function RequestScreen({
   request,
   setRequest,
+  searchArea,
+  visibleShops,
   selectedShop,
   selectedDistance,
+  selectedShopId,
+  setSelectedShopId,
   onSummary,
+  onPriceGuide,
 }: {
   request: ServiceRequest;
   setRequest: (request: ServiceRequest) => void;
+  searchArea: (query?: string) => void;
+  visibleShops: { shop: InstallerShop; distance: number }[];
   selectedShop: InstallerShop;
   selectedDistance: string;
+  selectedShopId: string;
+  setSelectedShopId: (id: string) => void;
   onSummary: () => void;
+  onPriceGuide: () => void;
 }) {
+  const modelPresets = ["제네시스 GV80", "현대 그랜저", "기아 카니발", "테슬라 모델Y"];
+  const workPresets = ["전면 30%", "전면 35%", "측후면 15%", "측후면 5%", "신차검수", "PPF 2종", "PPF 4종", "유리막코팅", "블랙박스"];
+  const datePresets = [
+    { label: "이번 주", value: "이번 주 협의" },
+    { label: "다음 주", value: "다음 주 협의" },
+    { label: "일정 미정", value: "일정 미정" },
+  ];
+  const workText = request.works.join(", ");
+  const detectedVehicleClass = classifyVehicleModel(request.model);
+  const isReady = Boolean(request.model.trim() && request.deliveryArea.trim() && workText.trim() && request.inboundStart.trim() && selectedShop);
+
+  const updateModel = (model: string) => {
+    const nextClass = classifyVehicleModel(model);
+    setRequest({ ...request, model, vehicleClass: nextClass || request.vehicleClass });
+  };
+
+  const updateWorkText = (value: string) => {
+    setRequest({ ...request, works: value ? [value] : [], memo: value });
+  };
+
+  const updateVehicleClass = (vehicleClass: VehicleClass) => {
+    const selectedPackage = request.selectedPackageId ? pricePackages.find((item) => item.id === request.selectedPackageId) : null;
+    setRequest({ ...request, vehicleClass, expectedPrice: selectedPackage?.prices[vehicleClass] ?? request.expectedPrice });
+  };
+
+  const addWorkPreset = (value: string) => {
+    const current = workText.split(",").map((item) => item.trim()).filter(Boolean);
+    if (current.includes(value)) return;
+    const next = [...current, value].join(", ");
+    updateWorkText(next);
+  };
+
+  const findShops = () => {
+    searchArea(request.deliveryArea);
+  };
+
   return (
-    <section className="form-screen simple-request-screen">
+    <section className="form-screen simple-request-screen practical-request-screen">
       <div className="page-title simple-request-title">
         <div>
-          <p className="eyebrow">REQUEST</p>
-          <h1>시공 요청</h1>
-          <p>차량모델, 시공지역, 작업내용, 입고예정일만 입력하면 요청을 시작합니다.</p>
+          <p className="eyebrow">REQUEST FLOW · v0.2.4</p>
+          <h1>내 시공 요청</h1>
+          <p>차량모델, 시공지역, 작업내용, 입고예정일 4가지만 입력하고 등록 시공점을 선택하세요.</p>
         </div>
       </div>
-      <div className="simple-request-layout">
-        <form className="simple-request-card">
-          <label>
+
+      <div className="request-steps" aria-label="시공 요청 단계">
+        <span className="active">1. 요청정보 입력</span>
+        <span className={visibleShops.length ? "active" : ""}>2. 시공점 선택</span>
+        <span className={isReady ? "active" : ""}>3. 요청 확인</span>
+      </div>
+
+      {request.selectedPackageName && (
+        <section className="selected-package-summary">
+          <div>
+            <span>선택 상품 요약</span>
+            <b>{request.selectedPackageBrand} · {request.selectedPackageName}</b>
+            <p>{request.vehicleClass || detectedVehicleClass || "등급 선택 필요"} · 예상 금액 {request.expectedPrice ?? "가격 입력 예정"}</p>
+          </div>
+          <button type="button" onClick={onPriceGuide}>상품 변경</button>
+        </section>
+      )}
+
+      <div className="practical-request-layout">
+        <form className="simple-request-card practical-request-card">
+          <label className="wide-field">
             <span>차량모델</span>
-            <input value={request.model} onChange={(event) => setRequest({ ...request, model: event.target.value })} placeholder="예: GV80" />
+            <input value={request.model} onChange={(event) => updateModel(event.target.value)} placeholder="예: 제네시스 GV80" />
+            <small>차량 크기와 시공 가능 범위를 구분하는 기준 정보입니다.</small>
+            <div className="quick-chip-row">
+              {modelPresets.map((model) => <button type="button" key={model} onClick={() => updateModel(model)}>{model}</button>)}
+            </div>
+            <div className="vehicle-class-picker">
+              <span>차량 등급</span>
+              {vehicleClassLabels.map((label) => (
+                <button type="button" key={label} className={(request.vehicleClass || detectedVehicleClass) === label ? "active" : ""} onClick={() => updateVehicleClass(label)}>{label}</button>
+              ))}
+            </div>
           </label>
+
           <label>
             <span>시공지역</span>
-            <input value={request.deliveryArea} onChange={(event) => setRequest({ ...request, deliveryArea: event.target.value })} placeholder="예: 강남구" />
+            <input value={request.deliveryArea} onChange={(event) => setRequest({ ...request, deliveryArea: event.target.value })} onBlur={findShops} placeholder="예: 경기 하남시 미사" />
+            <small>실제 지도 API 없이 샘플 지역 검색으로 등록 시공점 목록이 바뀝니다.</small>
           </label>
-          <label>
-            <span>작업내용</span>
-            <select
-              value={request.works[0] ?? "신차패키지"}
-              onChange={(event) => setRequest({ ...request, works: [event.target.value as WorkType], memo: `${event.target.value} 요청` })}
-            >
-              {workTypes.map((work) => <option key={work}>{work}</option>)}
-            </select>
-          </label>
+
           <label>
             <span>입고예정일</span>
-            <input type="date" value={request.inboundStart} onChange={(event) => setRequest({ ...request, inboundStart: event.target.value, inboundEnd: event.target.value })} />
+            <input value={request.inboundStart} onChange={(event) => setRequest({ ...request, inboundStart: event.target.value, inboundEnd: event.target.value })} placeholder="예: 2026-07-24 또는 일정 미정" />
+            <div className="quick-chip-row">
+              {datePresets.map((preset) => (
+                <button type="button" key={preset.value} onClick={() => setRequest({ ...request, inboundStart: preset.value, inboundEnd: preset.value })}>{preset.label}</button>
+              ))}
+            </div>
           </label>
-          <button type="button" className="primary request-submit-button" onClick={onSummary}>요청하기</button>
+
+          <label className="wide-field">
+            <span>작업내용</span>
+            <textarea value={workText} onChange={(event) => updateWorkText(event.target.value)} placeholder="예: 버텍스 900 전면 30%, 측후면 15%, 신차검수, PPF 2종" />
+            <div className="quick-chip-row">
+              {workPresets.map((work) => <button type="button" key={work} onClick={() => addWorkPreset(work)}>{work}</button>)}
+            </div>
+          </label>
+
+          <button type="button" className="primary request-submit-button" onClick={onSummary} disabled={!isReady}>시공 요청 보내기</button>
         </form>
-        <aside className="simple-request-guide">
-          <span>선택된 시공점</span>
-          <b>{selectedShop.name}</b>
-          <small>{selectedShop.district} · {selectedDistance}</small>
-          <p>요청 후 상태는 먼저 <strong>시공점 확인중</strong>으로 표시됩니다.</p>
+
+        <aside className="request-shop-selection">
+          <div className="request-shop-head">
+            <span>2. 시공점 선택</span>
+            <button type="button" onClick={findShops}>시공점 찾기</button>
+          </div>
+          <p>{request.deliveryArea || "시공지역"} 주변 등록 시공점 {visibleShops.length}곳</p>
+          <div className="request-shop-list">
+            {visibleShops.slice(0, 5).map(({ shop, distance }) => (
+              <button type="button" key={shop.id} className={shop.id === selectedShopId ? "selected" : ""} onClick={() => setSelectedShopId(shop.id)}>
+                <strong>{shop.name}</strong>
+                <small>{shop.district} · {formatDistance(distance)} · {shop.available ? "요청 가능" : "요청 마감"}</small>
+                <span>가능 브랜드: {shop.brands.slice(0, 3).join(", ")}</span>
+                <span>가능 작업: {shop.works.slice(0, 3).join(", ")}</span>
+                <em>영업시간 {shop.hours} · 평균 응답 {shop.responseTime} · 사업자 정보 등록</em>
+              </button>
+            ))}
+          </div>
+          <div className="selected-request-shop">
+            <span>선택된 등록 시공점</span>
+            <b>{selectedShop.name}</b>
+            <small>{selectedShop.district} · {selectedDistance}</small>
+            <p>요청 후 거래 상태는 <strong>시공점 확인중</strong>으로 생성되고, 수락 전 채팅은 비활성화됩니다.</p>
+          </div>
         </aside>
       </div>
     </section>
@@ -1419,8 +1684,20 @@ function RequestSummary({ request, selectedShop, selectedDistance, onBack, onSen
           <b>{request.model}</b>
         </article>
         <article>
+          <h3>차량 등급</h3>
+          <b>{request.vehicleClass || "시공점 확인"}</b>
+        </article>
+        <article>
           <h3>시공지역</h3>
           <b>{request.deliveryArea}</b>
+        </article>
+        <article>
+          <h3>선택 브랜드</h3>
+          <b>{request.selectedPackageBrand ?? request.preferredBrand}</b>
+        </article>
+        <article>
+          <h3>선택 상품</h3>
+          <b>{request.selectedPackageName ?? "직접 입력 요청"}</b>
         </article>
         <article>
           <h3>작업내용</h3>
@@ -1435,10 +1712,15 @@ function RequestSummary({ request, selectedShop, selectedDistance, onBack, onSen
           <b>{selectedShop.name}</b>
           <p>{selectedShop.district} · {selectedDistance}</p>
         </article>
+        <article>
+          <h3>예상 금액</h3>
+          <b>{request.expectedPrice ?? "가격 입력 예정"}</b>
+          <p>표기 금액은 기본 패키지 기준이며 최종 금액은 시공점 확인 후 달라질 수 있습니다.</p>
+        </article>
       </div>
       <div className="summary-actions">
         <button className="secondary" onClick={onBack}>수정하기</button>
-        <button className="primary" onClick={onSend}>요청하기</button>
+        <button className="primary" onClick={onSend}>시공 요청 보내기</button>
       </div>
     </section>
   );
@@ -1470,7 +1752,7 @@ function DealsScreen({
       <div className="page-title">
         <div>
           <p className="eyebrow">ACTIVE DEALS</p>
-          <h1>진행중 거래</h1>
+          <h1>거래 관리</h1>
           <p>여러 차량의 시공 요청, 일정, 입고 상태와 최근 메시지를 함께 관리합니다.</p>
         </div>
       </div>
@@ -1497,7 +1779,7 @@ function DealsScreen({
               <span>
                 <b>{deal.model}</b>
                 <em>{deal.packageName}</em>
-                <i>{deal.region}</i>
+                <i>{deal.region} · {deal.expectedPrice ?? "가격 입력 예정"}</i>
               </span>
               <span>
                 <StatusBadge status={deal.status} />
@@ -1528,6 +1810,9 @@ function DealDetail({ deal, actionLabel, onAction }: { deal: DealerDeal; actionL
       <dl>
         <div><dt>시공점</dt><dd>{deal.shopName}</dd></div>
         <div><dt>주소</dt><dd>{deal.shopAddress}</dd></div>
+        <div><dt>상품</dt><dd>{deal.packageName}</dd></div>
+        <div><dt>차량 등급</dt><dd>{deal.vehicleClass || "시공점 확인"}</dd></div>
+        <div><dt>예상 금액</dt><dd>{deal.expectedPrice ?? "가격 입력 예정"}</dd></div>
         <div><dt>요청 작업</dt><dd>{deal.works.join(", ")}</dd></div>
         <div><dt>입고 예정</dt><dd>{deal.inboundAt ?? "-"}</dd></div>
         <div><dt>출고 예정</dt><dd>{deal.outboundAt ?? deal.completedAt ?? "-"}</dd></div>
@@ -1538,7 +1823,7 @@ function DealDetail({ deal, actionLabel, onAction }: { deal: DealerDeal; actionL
   );
 }
 
-function ShopRequests({ request, selectedShop, status, onAccept, onReject, onOpenChat }: { request: ServiceRequest; selectedShop: InstallerShop; status: RequestStatus; onAccept: () => void; onReject: () => void; onOpenChat: () => void }) {
+function ShopRequests({ request, selectedShop, status, onAccept, onReject, onOpenChat, onComplete }: { request: ServiceRequest; selectedShop: InstallerShop; status: RequestStatus; onAccept: () => void; onReject: () => void; onOpenChat: () => void; onComplete: () => void }) {
   const hasRequest = status !== "draft";
 
   return (
@@ -1559,6 +1844,16 @@ function ShopRequests({ request, selectedShop, status, onAccept, onReject, onOpe
             <h2>{request.maker} {request.model} · {request.vehicleType}</h2>
             <p>{request.deliveryArea} · {request.preferredBrand} · {request.works.join(", ")}</p>
             <small>예상 입고 {request.inboundStart} ~ {request.inboundEnd}</small>
+            <dl className="shop-request-info">
+              <div><dt>차량모델</dt><dd>{request.model}</dd></div>
+              <div><dt>차량 등급</dt><dd>{request.vehicleClass || "시공점 확인"}</dd></div>
+              <div><dt>시공지역</dt><dd>{request.deliveryArea}</dd></div>
+              <div><dt>브랜드</dt><dd>{request.selectedPackageBrand ?? request.preferredBrand}</dd></div>
+              <div><dt>상품명</dt><dd>{request.selectedPackageName ?? "직접 입력 요청"}</dd></div>
+              <div><dt>작업내용</dt><dd>{request.works.join(", ")}</dd></div>
+              <div><dt>입고예정일</dt><dd>{request.inboundStart}</dd></div>
+              <div><dt>예상 금액</dt><dd>{request.expectedPrice ?? "가격 입력 예정"}</dd></div>
+            </dl>
           </div>
           <aside>
             <b>{selectedShop.name}</b>
@@ -1572,7 +1867,10 @@ function ShopRequests({ request, selectedShop, status, onAccept, onReject, onOpe
                 </div>
               </>
             ) : (
-              <button className="primary full" onClick={onOpenChat}>거래 채팅 열기</button>
+              <div className="card-actions">
+                <button className="secondary" onClick={onComplete}>작업완료 처리</button>
+                <button className="primary" onClick={onOpenChat}>거래 채팅 열기</button>
+              </div>
             )}
           </aside>
         </article>
@@ -1634,6 +1932,8 @@ function DealerChatScreen({
             <div>
               <b>{selectedDeal.model}</b>
               <span>{selectedDeal.packageName}</span>
+              <span>{selectedDeal.vehicleClass || "등급 확인"}</span>
+              <span>{selectedDeal.expectedPrice ?? "가격 입력 예정"}</span>
               <span>{selectedDeal.region}</span>
               <span>입고예정일 {selectedDeal.inboundAt ?? "-"}</span>
             </div>
@@ -1690,7 +1990,7 @@ function ChatScreen({
   sendMessage: () => void;
   onAgree: () => void;
 }) {
-  const activeStep = status === "scheduleAgreed" ? 3 : status === "accepted" ? 2 : status === "sent" ? 1 : 0;
+  const activeStep = status === "accepted" || status === "scheduleAgreed" ? 1 : 0;
   const chatEnabled = status === "accepted" || status === "scheduleAgreed";
 
   return (
@@ -1736,9 +2036,11 @@ function ChatScreen({
           <h3>거래 요약</h3>
           <dl>
             <div><dt>차량</dt><dd>{request.maker} {request.model}</dd></div>
+            <div><dt>차량 등급</dt><dd>{request.vehicleClass || "시공점 확인"}</dd></div>
             <div><dt>지역</dt><dd>{request.deliveryArea}</dd></div>
             <div><dt>시공점</dt><dd>{selectedShop.name}</dd></div>
-            <div><dt>희망 브랜드</dt><dd>{request.preferredBrand}</dd></div>
+            <div><dt>상품</dt><dd>{request.selectedPackageName ?? request.preferredBrand}</dd></div>
+            <div><dt>예상 금액</dt><dd>{request.expectedPrice ?? "가격 입력 예정"}</dd></div>
             <div><dt>요청 작업</dt><dd>{request.works.join(", ")}</dd></div>
             <div><dt>거래 상태</dt><dd>{transactionSteps[activeStep]}</dd></div>
           </dl>
@@ -1858,10 +2160,40 @@ function OperationsScreen({ fee }: { fee: ReturnType<typeof calculateSettlement>
         </div>
       </div>
       <div className="ops-grid">
-        <article><span>관리자</span><b>승인 시공점 94곳</b><p>사업자 인증은 이번 버전에서 샘플 상태로만 표시합니다.</p></article>
+        <article><span>관리자</span><b>등록 시공점 94곳</b><p>사업자 정보 등록 여부는 이번 버전에서 샘플 상태로만 표시합니다.</p></article>
         <article><span>결제</span><b>{formatWon(fee.gross)}</b><p>실제 PG 결제는 제외 범위이며 테스트 금액만 표시합니다.</p></article>
         <article><span>정산</span><b>{formatWon(fee.net)}</b><p>플랫폼 3%, PG 2.9% 차감 샘플 계산입니다.</p></article>
       </div>
+      <section className="admin-price-panel">
+        <div className="section-head">
+          <div>
+            <h2>금액표 관리 샘플</h2>
+            <p>실제 DB 저장 없이 샘플 데이터 기준으로 상품과 차량 등급별 금액을 확인합니다.</p>
+          </div>
+        </div>
+        <div className="admin-price-table">
+          <div className="admin-price-row head">
+            <span>브랜드</span>
+            <span>상품명</span>
+            <span>중형</span>
+            <span>대형</span>
+            <span>특대형</span>
+            <span>상태</span>
+            <span>관리</span>
+          </div>
+          {pricePackages.map((item) => (
+            <div className="admin-price-row" key={item.id}>
+              <span>{item.brand}</span>
+              <b>{item.name}</b>
+              <span>{item.prices["중형"]}</span>
+              <span>{item.prices["대형"]}</span>
+              <span>{item.prices["특대형"]}</span>
+              <span>{item.available ? "판매중" : "중지"}</span>
+              <button>수정</button>
+            </div>
+          ))}
+        </div>
+      </section>
     </section>
   );
 }

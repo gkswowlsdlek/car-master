@@ -2377,3 +2377,773 @@ legend { padding: 0 6px; font-size: 13px; font-weight: 900; }
     min-height: 74px;
   }
 }
+
+/* Car-Master v0.2.4 Practical Dealer Request Flow */
+.dashboard-action-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: -8px 0 24px;
+}
+
+.dashboard-action-row button {
+  min-height: 58px;
+  border-radius: 16px;
+  padding: 0 22px;
+  font-size: 16px;
+  font-weight: 850;
+}
+
+.new-request-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.new-request-cta svg {
+  width: 22px;
+  height: 22px;
+}
+
+.dashboard-extra-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.dealer-package-banner {
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  min-height: 260px;
+  border: 1px solid #dbe7ff;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #f8fbff, #eef5ff);
+  padding: 30px;
+  box-shadow: 0 16px 40px rgba(37,99,235,.06);
+}
+
+.dealer-package-banner span {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.dealer-package-banner b {
+  color: #111827;
+  font-size: 26px;
+  line-height: 1.25;
+}
+
+.dealer-package-banner p {
+  margin: 0;
+  color: #667085;
+  font-size: 15px;
+}
+
+.dealer-package-banner button {
+  width: max-content;
+  min-height: 50px;
+  border-radius: 14px;
+  padding: 0 18px;
+}
+
+.practical-request-screen {
+  max-width: 1500px;
+}
+
+.request-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
+.request-steps span {
+  border: 1px solid #e7ebf0;
+  border-radius: 14px;
+  background: #fff;
+  color: #98a2b3;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.request-steps span.active {
+  border-color: #cfe0ff;
+  background: #eef4ff;
+  color: #2563eb;
+}
+
+.practical-request-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 460px;
+  gap: 22px;
+  align-items: start;
+}
+
+.practical-request-card {
+  grid-template-columns: 1fr 1fr;
+}
+
+.practical-request-card .wide-field {
+  grid-column: 1 / -1;
+}
+
+.practical-request-card textarea {
+  min-height: 132px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 17px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.practical-request-card small {
+  color: #667085;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.quick-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quick-chip-row button {
+  min-height: 36px;
+  border: 1px solid #e5eaf2;
+  border-radius: 999px;
+  background: #fff;
+  color: #344054;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.quick-chip-row button:hover {
+  border-color: #bfd3ff;
+  color: #2563eb;
+}
+
+.request-shop-selection {
+  position: sticky;
+  top: 106px;
+  display: grid;
+  gap: 14px;
+  border: 1px solid #e7ebf0;
+  border-radius: 24px;
+  background: #fff;
+  padding: 22px;
+  box-shadow: 0 18px 46px rgba(17,24,39,.04);
+}
+
+.request-shop-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.request-shop-head span {
+  color: #111827;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.request-shop-head button {
+  min-height: 38px;
+  border: 1px solid #dbe6ff;
+  border-radius: 12px;
+  background: #eef4ff;
+  color: #2563eb;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.request-shop-selection > p {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+}
+
+.request-shop-list {
+  display: grid;
+  gap: 10px;
+  max-height: 488px;
+  overflow: auto;
+  padding-right: 3px;
+}
+
+.request-shop-list > button {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #edf0f4;
+  border-radius: 18px;
+  background: #fbfcfe;
+  padding: 16px;
+  text-align: left;
+}
+
+.request-shop-list > button.selected {
+  border-color: #2563eb;
+  background: #f4f8ff;
+  box-shadow: inset 4px 0 0 #2563eb;
+}
+
+.request-shop-list strong {
+  color: #111827;
+  font-size: 17px;
+}
+
+.request-shop-list small,
+.request-shop-list span,
+.request-shop-list em {
+  color: #667085;
+  font-size: 13px;
+  font-style: normal;
+}
+
+.selected-request-shop {
+  display: grid;
+  gap: 6px;
+  border-radius: 18px;
+  background: #f8fafc;
+  padding: 18px;
+}
+
+.selected-request-shop span {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.selected-request-shop b {
+  color: #111827;
+  font-size: 20px;
+}
+
+.selected-request-shop small,
+.selected-request-shop p {
+  margin: 0;
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.request-submit-button:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.shop-request-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0 0;
+}
+
+.shop-request-info div {
+  border: 1px solid #edf0f4;
+  border-radius: 14px;
+  background: #fbfcfe;
+  padding: 13px;
+}
+
+.shop-request-info dt {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.shop-request-info dd {
+  margin: 5px 0 0;
+  color: #111827;
+  font-size: 15px;
+  font-weight: 850;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-extra-grid,
+  .practical-request-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .request-shop-selection {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .dashboard-action-row {
+    display: grid;
+  }
+
+  .dashboard-action-row button,
+  .dealer-package-banner button {
+    width: 100%;
+  }
+
+  .request-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .practical-request-card {
+    grid-template-columns: 1fr;
+  }
+
+  .practical-request-card textarea {
+    min-height: 118px;
+    font-size: 18px;
+  }
+
+  .request-shop-selection {
+    padding: 18px;
+  }
+}
+
+/* Car-Master v0.2.5 Dealer Price Guide */
+.price-guide-screen {
+  max-width: 1600px;
+}
+
+.price-guide-title small {
+  display: block;
+  margin-top: 10px;
+  color: #667085;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.price-guide-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.price-brand-tabs,
+.vehicle-class-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.price-brand-tabs button,
+.vehicle-class-tabs button,
+.vehicle-class-picker button {
+  border: 1px solid #e5eaf2;
+  border-radius: 999px;
+  background: #fff;
+  color: #667085;
+  font-weight: 850;
+}
+
+.price-brand-tabs button {
+  min-height: 42px;
+  padding: 0 16px;
+}
+
+.price-brand-tabs button.active,
+.vehicle-class-tabs button.active,
+.vehicle-class-picker button.active {
+  border-color: #2563eb;
+  background: #eef4ff;
+  color: #2563eb;
+}
+
+.price-guide-toolbar input {
+  min-height: 54px;
+  border: 1px solid #e5eaf2;
+  border-radius: 16px;
+  background: #fff;
+  padding: 0 18px;
+  font-size: 16px;
+}
+
+.vehicle-class-guide {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  border: 1px solid #e7ebf0;
+  border-radius: 22px;
+  background: #fff;
+  padding: 22px;
+  margin-bottom: 22px;
+  box-shadow: 0 14px 34px rgba(17,24,39,.035);
+}
+
+.vehicle-class-guide h2 {
+  margin: 0 0 8px;
+  color: #111827;
+  font-size: 22px;
+}
+
+.vehicle-class-guide p {
+  margin: 0;
+  color: #667085;
+  line-height: 1.55;
+}
+
+.vehicle-class-tabs button {
+  display: grid;
+  gap: 4px;
+  min-width: 180px;
+  min-height: 70px;
+  border-radius: 18px;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.vehicle-class-tabs b {
+  color: inherit;
+  font-size: 17px;
+}
+
+.vehicle-class-tabs span {
+  overflow: hidden;
+  color: #667085;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.price-guide-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 22px;
+  align-items: start;
+}
+
+.price-package-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.price-package-card {
+  display: grid;
+  gap: 16px;
+  border: 1px solid #e7ebf0;
+  border-radius: 24px;
+  background: #fff;
+  padding: 24px;
+  box-shadow: 0 16px 38px rgba(17,24,39,.04);
+}
+
+.price-package-card.selected {
+  border-color: #2563eb;
+  box-shadow: inset 4px 0 0 #2563eb, 0 18px 42px rgba(37,99,235,.08);
+}
+
+.price-package-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.price-package-head span,
+.price-package-detail > span {
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #2563eb;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.price-package-head em {
+  border-radius: 999px;
+  background: #fff7dc;
+  color: #9a6700;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.price-package-card h2,
+.price-package-detail h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 26px;
+}
+
+.price-package-card p,
+.price-package-detail p {
+  margin: 0;
+  color: #667085;
+  line-height: 1.55;
+}
+
+.price-table-mini {
+  display: grid;
+  gap: 8px;
+}
+
+.price-table-mini div {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: center;
+  border: 1px solid #eef1f5;
+  border-radius: 14px;
+  background: #fbfcfe;
+  padding: 12px;
+}
+
+.price-table-mini div.active {
+  border-color: #bfd3ff;
+  background: #f4f8ff;
+}
+
+.price-table-mini dt {
+  color: #667085;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.price-table-mini dd {
+  margin: 0;
+  color: #111827;
+  font-size: 17px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.included-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.included-services b {
+  width: 100%;
+  color: #344054;
+  font-size: 13px;
+}
+
+.included-services span {
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: #344054;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.price-card-actions {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+}
+
+.price-card-actions button,
+.price-package-detail button {
+  min-height: 52px;
+  border-radius: 14px;
+}
+
+.price-package-detail {
+  position: sticky;
+  top: 106px;
+  display: grid;
+  gap: 16px;
+  border: 1px solid #e7ebf0;
+  border-radius: 24px;
+  background: #fff;
+  padding: 26px;
+  box-shadow: 0 18px 46px rgba(17,24,39,.05);
+}
+
+.detail-price-box {
+  display: grid;
+  gap: 6px;
+  border-radius: 18px;
+  background: #f4f8ff;
+  padding: 18px;
+}
+
+.detail-price-box small {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.detail-price-box b {
+  color: #111827;
+  font-size: 28px;
+}
+
+.price-package-detail dl {
+  display: grid;
+  gap: 10px;
+}
+
+.price-package-detail dl div {
+  border-top: 1px solid #eef1f5;
+  padding-top: 10px;
+}
+
+.price-package-detail dt {
+  color: #667085;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.price-package-detail dd {
+  margin: 5px 0 0;
+  color: #111827;
+  line-height: 1.55;
+}
+
+.selected-package-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  border: 1px solid #cfe0ff;
+  border-radius: 22px;
+  background: #f4f8ff;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+
+.selected-package-summary span {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.selected-package-summary b {
+  display: block;
+  margin-top: 4px;
+  color: #111827;
+  font-size: 22px;
+}
+
+.selected-package-summary p {
+  margin: 5px 0 0;
+  color: #667085;
+}
+
+.selected-package-summary button {
+  min-height: 44px;
+  border: 1px solid #dbe6ff;
+  border-radius: 14px;
+  background: #fff;
+  color: #2563eb;
+  padding: 0 14px;
+  font-weight: 850;
+}
+
+.vehicle-class-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.vehicle-class-picker > span {
+  width: 100%;
+  color: #667085;
+  font-size: 13px;
+}
+
+.vehicle-class-picker button {
+  min-height: 36px;
+  padding: 0 13px;
+}
+
+.admin-price-panel {
+  margin-top: 18px;
+  border: 1px solid #e7ebf0;
+  border-radius: 20px;
+  background: #fff;
+  padding: 22px;
+  box-shadow: 0 14px 34px rgba(17,24,39,.035);
+}
+
+.admin-price-table {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-price-row {
+  display: grid;
+  grid-template-columns: 100px minmax(150px, 1fr) repeat(3, minmax(110px, .8fr)) 80px 70px;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #eef1f5;
+  border-radius: 12px;
+  padding: 12px;
+  color: #344054;
+  font-size: 13px;
+}
+
+.admin-price-row.head {
+  background: #f8fafc;
+  color: #667085;
+  font-weight: 900;
+}
+
+.admin-price-row b {
+  color: #111827;
+}
+
+.admin-price-row button {
+  min-height: 34px;
+  border: 1px solid #dbe6ff;
+  border-radius: 10px;
+  background: #eef4ff;
+  color: #2563eb;
+  font-weight: 850;
+}
+
+@media (max-width: 1180px) {
+  .price-guide-layout,
+  .vehicle-class-guide {
+    grid-template-columns: 1fr;
+  }
+
+  .price-package-detail {
+    position: static;
+  }
+
+  .admin-price-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-price-row.head {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .price-guide-toolbar,
+  .price-package-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vehicle-class-tabs button {
+    width: 100%;
+  }
+
+  .price-card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .selected-package-summary {
+    display: grid;
+  }
+}
