@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { initialChatMessages, sampleScheduleProposal, type ChatMessage } from "../lib/chat-data";
 import { priceBrands, pricePackages, vehicleClassLabels, type PriceBrand, type PricePackage, type VehicleClass } from "../data/pricePackages";
@@ -106,7 +105,9 @@ function DealerIcon({ name }: { name: DealerIconName }) {
 }
 
 function LogoImage({ compact = false }: { compact?: boolean }) {
-  return <Image className={compact ? "logo-image compact" : "logo-image"} src="/carmaster-logo-transparent.png" alt="Car-Master" width={960} height={260} priority />;
+  // Vinext's image optimizer can fail in the local worker, so use the public asset directly.
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img className={compact ? "logo-image compact" : "logo-image"} src="/carmaster-logo-transparent.png" alt="Car-Master" />;
 }
 
 const roleLabel: Record<Role, string> = {
