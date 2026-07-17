@@ -3837,3 +3837,81 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+/* Car-Master v0.2.8 PATCH 1 */
+.login-ad-page { min-height: 100vh; display: grid; place-items: center; padding: 40px 24px; background: linear-gradient(135deg,#f7faff 0%,#eef4ff 100%); }
+.login-ad-layout { width: min(1120px,100%); display: grid; grid-template-columns: minmax(0,1.45fr) minmax(320px,.65fr); gap: 38px; align-items: center; }
+.login-service-intro { padding: 34px 20px; }
+.login-intro-brand img { width: 210px; height: auto; display: block; margin-bottom: 32px; }
+.login-service-intro h1 { margin: 12px 0 18px; color: #0c2342; font-size: clamp(36px,4.4vw,58px); line-height: 1.16; letter-spacing: -.045em; }
+.login-service-intro > p:not(.eyebrow) { max-width: 680px; color: #52647b; font-size: 17px; line-height: 1.75; }
+.login-service-intro ul { display: grid; gap: 12px; margin: 28px 0; padding: 0; list-style: none; color: #263e5e; }
+.login-service-intro li::before { content: "✓"; margin-right: 10px; color: #2463eb; font-weight: 800; }
+.login-intro-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.compact-login-card { align-self: center; min-height: 0; padding: 30px; border: 1px solid #e1e8f2; border-radius: 18px; box-shadow: 0 22px 60px rgba(12,35,66,.12); }
+.demo-login-hint { display: block; margin-top: 14px; color: #8a96a8; text-align: center; line-height: 1.5; }
+.simplified-dashboard { max-width: 1120px; }
+.dashboard-core-metrics { grid-template-columns: repeat(3,1fr) !important; }
+.dashboard-quick-actions { margin: 18px 0; padding: 20px; border: 1px solid #e3e9f2; border-radius: 14px; background: #fff; }
+.dashboard-quick-actions > div:last-child { display: flex; flex-wrap: wrap; gap: 10px; }
+.dashboard-recent-deals { margin-top: 18px; }
+.dashboard-recent-deals .section-head > button { color: #2463eb; }
+.other-brand-notice { margin: 14px 0; padding: 16px 18px; border: 1px solid #f0d9a8; border-radius: 12px; background: #fffaf0; color: #6c5422; }
+.other-brand-notice p { margin: 5px 0 0; line-height: 1.6; }
+.vehicle-class-detail-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 18px 0; }
+.vehicle-class-detail-options button { display: grid; gap: 4px; padding: 11px; border: 1px solid #dce4ef; border-radius: 10px; background: #fff; text-align: left; }
+.vehicle-class-detail-options button.active { border-color: #2463eb; background: #eef4ff; color: #1649b8; }
+.vehicle-class-detail-options small { line-height: 1.35; }
+.prototype-price-note { padding: 10px; border-radius: 8px; background: #fff7e6; color: #8b5a00 !important; font-size: 12px !important; }
+.service-request-form textarea { width: 100%; min-height: 92px; resize: vertical; }
+.service-request-form .vehicle-class-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.service-request-form .vehicle-class-picker > span,.service-request-form .vehicle-class-picker > p { grid-column: 1/-1; }
+.service-request-form .vehicle-class-picker button { height: auto; min-height: 66px; display: grid; gap: 4px; text-align: left; }
+.service-request-form .vehicle-class-picker small { white-space: normal; line-height: 1.35; }
+.service-request-form .vehicle-class-picker p { margin: 4px 0 0; color: #78869a; font-size: 12px; line-height: 1.55; }
+.district-search-screen .page-title small { display: block; margin-top: 7px; color: #748399; }
+.location-search-error { margin: 16px 0; padding: 20px; border: 1px solid #f0c6c6; border-radius: 12px; background: #fff7f7; color: #8d2d2d; }
+.location-search-error p { margin: 7px 0 0; color: #805b5b; }
+.enhanced-shop-row { min-height: 132px; }
+.enhanced-shop-row > span:nth-child(2) { display: grid; gap: 5px; }
+.enhanced-shop-row em { color: #65758b; font-style: normal; }
+.brand-check-badge { display: inline-flex; width: fit-content; margin-top: 5px; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-style: normal; font-weight: 700; }
+.brand-check-badge.supported { background: #e9f8f0; color: #147447; }
+.brand-check-badge.inquiry { background: #fff4dd; color: #8b5a00; }
+.installer-brand-badges { margin: 12px 0; }
+.transaction-management-screen,.profile-editor { width: 100%; max-width: 1380px; margin: 0 auto; padding: 28px 30px 42px; }
+.transaction-tabs { display: flex; gap: 6px; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; }
+.transaction-tabs button { padding: 12px 18px; border-bottom: 2px solid transparent; }
+.transaction-tabs button.active { border-color: #2463eb; color: #1649b8; font-weight: 800; }
+.transaction-filters { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+.transaction-filters input { max-width: 520px; }
+.transaction-filters label { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+.transaction-room-layout { display: grid; grid-template-columns: 330px minmax(0,1fr); gap: 16px; }
+.transaction-list,.transaction-detail,.transaction-payment-table,.profile-editor-grid,.admin-transaction-panel { border: 1px solid #e1e8f1; border-radius: 14px; background: #fff; }
+.transaction-list { display: grid; align-content: start; overflow: hidden; }
+.transaction-list > button { display: grid; gap: 5px; padding: 15px; border-bottom: 1px solid #edf1f6; text-align: left; }
+.transaction-list > button.selected { background: #eef4ff; box-shadow: inset 3px 0 #2463eb; }
+.transaction-list small,.transaction-list em { color: #728096; font-style: normal; }
+.transaction-detail { padding: 22px; }
+.transaction-detail-head { display: flex; justify-content: space-between; gap: 16px; }
+.transaction-detail-head h2 { margin: 5px 0; }.transaction-detail-head p { margin: 0; color: #68778c; }
+.transaction-briefing,.transaction-chat,.transaction-settlement-summary { margin-top: 18px; padding: 18px; border: 1px solid #e8edf4; border-radius: 12px; }
+.transaction-briefing dl { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }.transaction-briefing dl div { display: grid; gap: 4px; }.transaction-briefing dt { color: #7a8799; }.transaction-briefing dd { margin: 0; font-weight: 700; }
+.transaction-stage-flow { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin-top: 16px; }.transaction-stage-flow button { padding: 10px 4px; border: 1px solid #dfe6ef; border-radius: 8px; }.transaction-stage-flow button.active { border-color: #2463eb; background: #2463eb; color: #fff; }
+.transaction-chat > div:first-of-type { max-height: 280px; overflow: auto; }.transaction-chat p { display: grid; width: fit-content; max-width: 78%; padding: 10px; border-radius: 10px; background: #f1f4f8; }.transaction-chat p.mine { margin-left: auto; background: #e7efff; }.transaction-chat p small { margin-bottom: 4px; color: #77869a; }.transaction-chat > div:last-child,.transaction-settlement-summary > div { display: flex; gap: 8px; }
+.transaction-hide-button { margin-top: 18px; color: #8a5660; }.transaction-payment-table { overflow: hidden; }.transaction-payment-table > button { width: 100%; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 10px; padding: 14px; border-bottom: 1px solid #edf1f5; text-align: left; }
+.profile-editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 22px; }.profile-editor-grid label { display: grid; gap: 7px; }.profile-editor-actions { display: flex; gap: 8px; margin-top: 14px; }
+.profile-notification-settings { margin-top: 14px; padding: 20px; border: 1px solid #e1e8f1; border-radius: 14px; background: #fff; }.profile-notification-settings label { display: inline-flex; align-items: center; gap: 7px; margin: 8px 18px 0 0; }
+.admin-transaction-panel { margin-top: 20px; padding: 20px; }.admin-transaction-panel .section-head input { max-width: 430px; }.admin-transaction-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }.admin-transaction-layout > div { display: grid; align-content: start; }.admin-transaction-layout > div button { display: grid; grid-template-columns: 1fr 1.5fr auto; gap: 10px; padding: 12px; border-bottom: 1px solid #edf1f5; text-align: left; }.admin-transaction-layout aside { padding: 16px; border-radius: 10px; background: #f6f8fb; }
+@media (max-width: 760px) { .transaction-management-screen,.profile-editor { padding: 18px 14px 28px; }.transaction-room-layout,.admin-transaction-layout { grid-template-columns: 1fr; }.transaction-list { max-height: 320px; overflow: auto; }.transaction-filters { display: grid; }.transaction-briefing dl,.profile-editor-grid { grid-template-columns: 1fr; }.transaction-stage-flow { grid-template-columns: repeat(3,1fr); }.transaction-payment-table > button { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 760px) {
+  .login-ad-page { display: block; min-height: auto; padding: 18px 14px 30px; }
+  .login-ad-layout { grid-template-columns: 1fr; gap: 16px; }
+  .login-service-intro { padding: 20px 4px; }
+  .login-intro-brand img { width: 170px; margin-bottom: 22px; }
+  .login-service-intro h1 { font-size: 34px; }
+  .compact-login-card { width: 100%; padding: 24px; }
+  .dashboard-core-metrics { grid-template-columns: 1fr !important; }
+  .dashboard-quick-actions > div:last-child { display: grid; }
+  .vehicle-class-detail-options,.service-request-form .vehicle-class-picker { grid-template-columns: 1fr; }
+  .service-request-form .vehicle-class-picker > span,.service-request-form .vehicle-class-picker > p { grid-column: 1; }
+}

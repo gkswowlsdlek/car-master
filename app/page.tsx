@@ -2,36 +2,36 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { initialChatMessages, sampleScheduleProposal, type ChatMessage } from "../lib/chat-data";
-import { priceBrands, pricePackages, vehicleClassLabels, type PriceBrand, type PricePackage, type VehicleClass } from "../data/pricePackages";
+import { priceBrands, pricePackages, vehicleClassLabels, type PriceBrand, type PriceGuideFilter, type PricePackage, type VehicleClass } from "../data/pricePackages";
+import { calculateVehicleClassPrice } from "../data/vehicle-class-options";
+import { formatGuidePrice } from "../data/installation-price-guide";
 import { classifyVehicleModel } from "../data/vehicleClasses";
 import {
-  distanceKm,
-  findSearchLocation,
   formatDistance,
   installerShops,
-  searchLocations,
   type Brand,
   type InstallerShop,
-  type SearchLocation,
+  type SearchLocation as LegacySearchLocation,
   type WorkType,
 } from "../lib/dealer-flow-data";
 import { calculateSettlement, formatWon } from "../lib/fees";
+import { LoginScreen as PatchLoginScreen } from "../components/auth/LoginScreen";
+import { DealerDashboard as PatchDealerDashboard } from "../components/dealer/DealerDashboard";
+import { PriceGuideScreen as PatchPriceGuideScreen } from "../components/dealer/PriceGuideScreen";
+import { ServiceRequestForm } from "../components/dealer/ServiceRequestForm";
+import { DealerMapScreen as PatchDealerMapScreen } from "../components/dealer/DealerMapScreen";
+import { districtCenters } from "../data/district-centers";
+import { searchLocation } from "../services/location-search";
+import { searchNearbyInstallers, calculateDistanceKm, formatDistanceKm } from "../services/installer-search";
+import type { SearchLocation } from "../types/location";
+import { TransactionManagementScreen } from "../components/transactions/TransactionManagementScreen";
+import { ProfileEditor } from "../components/profile/ProfileEditor";
+import { AdminTransactionPanel } from "../components/admin/AdminTransactionPanel";
+import { transactionRepository } from "../repositories/transaction-repository";
+import { chatRepository } from "../repositories/chat-repository";
+import type { ChatRoom, Transaction, TransactionChatMessage } from "../types/transactions";
+import type { DealerDeal, DealStage, DealStatus, DemoAccount, RequestStatus, RequestType, Role, Screen, ServiceRequest } from "../types/dealer";
 
-type Role = "dealer" | "shop" | "admin";
-type Screen = "landing" | "login" | "dealerDashboard" | "priceGuide" | "dealerMap" | "request" | "requestSummary" | "deals" | "dealerSettlement" | "dealerProfile" | "shopRequests" | "chat" | "ops";
-type RequestStatus = "draft" | "sent" | "accepted" | "scheduleAgreed";
-type DealStatus = "시공점 확인중" | "진행중" | "작업완료" | "취소";
-type RequestType = "견적 문의" | "실제 시공 요청";
-type DealStage = "접수" | "입고" | "시공중" | "완료";
-type DemoAccount = {
-  id: string;
-  email: string;
-  password: string;
-  name: string;
-  role: Role;
-  entryScreen: Screen;
-  shopId?: string;
-};
 type StoredConversation = {
   requestStatus: RequestStatus;
   messages: ChatMessage[];
@@ -39,53 +39,6 @@ type StoredConversation = {
   selectedShopId: string;
 };
 
-type ServiceRequest = {
-  maker: string;
-  model: string;
-  vehicleType: "신차" | "재시공";
-  deliveryArea: string;
-  preferredBrand: Brand;
-  works: string[];
-  inboundStart: string;
-  inboundEnd: string;
-  memo: string;
-  requestType: RequestType;
-  extraWorkNote: string;
-  vehicleClass: VehicleClass | "";
-  selectedPackageId?: string;
-  selectedPackageName?: string;
-  selectedPackageBrand?: string;
-  selectedPackageProduct?: string;
-  expectedPrice?: string;
-  includedServices?: string[];
-  optionalServices?: string[];
-};
-
-type DealerDeal = {
-  id: string;
-  maker: string;
-  model: string;
-  shopName: string;
-  shopAddress: string;
-  region: string;
-  works: string[];
-  packageName: string;
-  packageBrand?: string;
-  packageProduct?: string;
-  requestType?: RequestType;
-  extraWorkNote?: string;
-  vehicleClass?: VehicleClass | "";
-  expectedPrice?: string;
-  status: DealStatus;
-  stage?: DealStage;
-  inboundAt?: string;
-  outboundAt?: string;
-  completedAt?: string;
-  lastMessage: string;
-  updatedAt: string;
-  unread: number;
-  messages: ChatMessage[];
-};
 
 type DealerIconName = "dashboard" | "price" | "shop" | "request" | "chat" | "deals" | "settlement" | "profile" | "logout" | "bell" | "arrow" | "card";
 
@@ -126,7 +79,7 @@ const demoAccounts: DemoAccount[] = [
     id: "hanjaejin-dealer",
     email: "1",
     password: "1",
-    name: "한재진딜러",
+    name: "한재진",
     role: "dealer",
     entryScreen: "dealerDashboard",
   },
@@ -408,17 +361,23 @@ const defaultRequest: ServiceRequest = {
   deliveryArea: "경기 하남시 미사",
   preferredBrand: "버텍스",
   works: ["버텍스 900"],
+  workDescription: "버텍스 900 썬팅",
+  extraRequest: "PPF, 블랙박스",
   inboundStart: "2026-07-24",
   inboundEnd: "2026-07-25",
   memo: "버텍스 900 시공 가격 가이드 기준 상담 요청입니다.",
   requestType: "실제 시공 요청",
   extraWorkNote: "PPF, 블랙박스",
   vehicleClass: "국산 승용",
-  selectedPackageId: "vertex-6-900",
+  selectedPackageId: "vertex-900",
   selectedPackageName: "900",
   selectedPackageBrand: "버텍스",
   selectedPackageProduct: "900",
   expectedPrice: "650,000원",
+  baseGuidePrice: 650000,
+  surcharge: 0,
+  finalGuidePrice: 650000,
+  priceRequiresInquiry: false,
   includedServices: ["썬팅 시공 패키지", "기본 마감 점검"],
   optionalServices: [],
 };
@@ -434,8 +393,10 @@ export default function Home() {
   const [role, setRole] = useState<Role>("dealer");
   const [account, setAccount] = useState<DemoAccount>(demoAccounts[0]);
   const [screen, setScreen] = useState<Screen>("landing");
-  const [query, setQuery] = useState("경기 하남시 미사");
-  const [location, setLocation] = useState<SearchLocation>(searchLocations[3]);
+  const initialDistrict = districtCenters.find((item) => item.id === "gyeonggi-hanam")!;
+  const [query, setQuery] = useState("하남시");
+  const [location, setLocation] = useState<SearchLocation>({ id: initialDistrict.id, city: initialDistrict.city, district: initialDistrict.district, label: initialDistrict.label, latitude: initialDistrict.latitude, longitude: initialDistrict.longitude });
+  const [locationSearchError, setLocationSearchError] = useState("");
   const [selectedShopId, setSelectedShopId] = useState("SHOP-MISA-001");
   const [brandFilter] = useState<Brand | "전체">("전체");
   const [workFilter] = useState<WorkType | "전체">("전체");
@@ -447,40 +408,53 @@ export default function Home() {
   const [messageDraft, setMessageDraft] = useState("");
   const [dealerDeals, setDealerDeals] = useState<DealerDeal[]>(initialDealerDeals);
   const [selectedDealId, setSelectedDealId] = useState(initialDealerDeals[0].id);
-  const [dealFilter, setDealFilter] = useState<DealStatus | "전체">("전체");
+  const [, setDealFilter] = useState<DealStatus | "전체">("전체");
   const [dealerChatDraft, setDealerChatDraft] = useState("");
   const [favoriteShopIds, setFavoriteShopIds] = useState<string[]>(["SHOP-MISA-001", "SHOP-BS-001"]);
   const [showFavoritesOnly] = useState(false);
   const [requestSuccess, setRequestSuccess] = useState<DealerDeal | null>(null);
   const [conversationLoaded, setConversationLoaded] = useState(false);
   const [hasStoredConversation, setHasStoredConversation] = useState(false);
-  const [priceBrandFilter, setPriceBrandFilter] = useState<"전체" | PriceBrand>("전체");
+  const [priceBrandFilter, setPriceBrandFilter] = useState<PriceGuideFilter>("전체");
   const [priceSearch, setPriceSearch] = useState("");
   const [priceVehicleClass, setPriceVehicleClass] = useState<VehicleClass>("국산 승용");
   const [selectedPricePackageId, setSelectedPricePackageId] = useState(pricePackages[0].id);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
+  const [selectedTransactionId, setSelectedTransactionId] = useState("");
+
+  useEffect(() => {
+    const loadTransactions = () => { const values = transactionRepository.getAll(); setTransactions(values); if (!selectedTransactionId && values[0]) setSelectedTransactionId(values[0].id); };
+    const loadRooms = () => setChatRooms(chatRepository.getAll());
+    loadTransactions(); loadRooms();
+    const unsubscribeTransactions = transactionRepository.subscribe(loadTransactions);
+    const unsubscribeRooms = chatRepository.subscribe(loadRooms);
+    return () => { unsubscribeTransactions(); unsubscribeRooms(); };
+  }, [selectedTransactionId]);
 
   const shopsWithDistance = useMemo(() => {
-    return installerShops
-      .map((shop) => ({ shop, distance: distanceKm(location, shop) }))
+    return searchNearbyInstallers(location, installerShops)
       .filter(({ shop }) => (onlyApproved ? shop.approved : true))
       .filter(({ shop }) => (onlyAvailable ? shop.available : true))
       .filter(({ shop }) => (brandFilter === "전체" ? true : shop.brands.includes(brandFilter)))
       .filter(({ shop }) => (workFilter === "전체" ? true : shop.works.includes(workFilter)))
-      .filter(({ shop }) => (showFavoritesOnly ? favoriteShopIds.includes(shop.id) : true))
-      .sort((a, b) => a.distance - b.distance);
+      .filter(({ shop }) => (showFavoritesOnly ? favoriteShopIds.includes(shop.id) : true));
   }, [brandFilter, favoriteShopIds, location, onlyApproved, onlyAvailable, showFavoritesOnly, workFilter]);
 
-  const visibleShops = shopsWithDistance.slice(0, 28);
+  const visibleSearchResults = shopsWithDistance.slice(0, 28);
+  const visibleShops = visibleSearchResults.map(({ shop, distanceKm }) => ({ shop, distance: distanceKm }));
   const selectedShop = installerShops.find((shop) => shop.id === selectedShopId) ?? visibleShops[0]?.shop ?? installerShops[0];
-  const selectedDistance = formatDistance(distanceKm(location, selectedShop));
-  const filteredDealerDeals = dealFilter === "전체" ? dealerDeals.filter((deal) => deal.status !== "작업완료") : dealerDeals.filter((deal) => deal.status === dealFilter);
+  const selectedDistance = formatDistanceKm(calculateDistanceKm(location, { latitude: selectedShop.lat, longitude: selectedShop.lng }));
   const selectedDeal = dealerDeals.find((deal) => deal.id === selectedDealId) ?? requestSuccess ?? dealerDeals[0];
   const activeDealerDealsCount = dealerDeals.filter((deal) => deal.status !== "작업완료").length;
   const unreadDealerMessages = dealerDeals.reduce((sum, deal) => sum + deal.unread, 0);
   const fee = calculateSettlement(600000, 3, 2.9);
   const filteredPricePackages = pricePackages.filter((item) => {
     const keyword = priceSearch.trim().toLowerCase();
-    const matchesBrand = priceBrandFilter === "전체" || item.brand === priceBrandFilter;
+    const matchesBrand = priceBrandFilter === "전체"
+      || priceBrandFilter === "기타" && item.brandGroup === "기타"
+      || priceBrandFilter === "솔라가드" && item.brand.startsWith("솔라가드")
+      || item.brand === priceBrandFilter;
     const matchesSearch = !keyword || `${item.brand} ${item.name} ${item.description}`.toLowerCase().includes(keyword);
     return matchesBrand && matchesSearch && item.available;
   });
@@ -498,7 +472,12 @@ export default function Home() {
         if (!stored.requestStatus || !stored.request || !Array.isArray(stored.messages)) return;
         setHasStoredConversation(true);
         setRequestStatus(stored.requestStatus);
-        setRequest(stored.request);
+        setRequest({
+          ...defaultRequest,
+          ...stored.request,
+          workDescription: stored.request.workDescription ?? stored.request.works?.join(", ") ?? "",
+          extraRequest: stored.request.extraRequest ?? stored.request.extraWorkNote ?? "",
+        });
         setMessages(stored.messages);
         setSelectedShopId(stored.selectedShopId);
       } catch {
@@ -538,7 +517,10 @@ export default function Home() {
   }, [role]);
 
   const applyPricePackageToRequest = useCallback((pricePackage: PricePackage, nextVehicleClass = priceVehicleClass, optionalServices: string[] = [], requestType: RequestType = "실제 시공 요청") => {
-    const expectedPrice = pricePackage.prices[nextVehicleClass];
+    const price = calculateVehicleClassPrice(pricePackage.guidePrice, nextVehicleClass);
+    const expectedPrice = price.priceRequiresInquiry
+      ? nextVehicleClass === "국산 대형/SUV" ? "추가금 발생 가능" : "별도 견적"
+      : formatGuidePrice(price.finalGuidePrice ?? pricePackage.guidePrice);
     const workItems = [pricePackage.name, ...pricePackage.includedServices, ...optionalServices];
     setSelectedPricePackageId(pricePackage.id);
     setPriceVehicleClass(nextVehicleClass);
@@ -546,6 +528,8 @@ export default function Home() {
       ...current,
       preferredBrand: pricePackage.brand as Brand,
       works: workItems,
+      workDescription: `${pricePackage.brand} ${pricePackage.product} 썬팅`,
+      extraRequest: current.extraRequest,
       memo: `${pricePackage.name} / ${workItems.slice(1).join(" / ")}`,
       requestType,
       vehicleClass: nextVehicleClass,
@@ -554,6 +538,10 @@ export default function Home() {
       selectedPackageBrand: pricePackage.brand,
       selectedPackageProduct: pricePackage.product,
       expectedPrice,
+      baseGuidePrice: pricePackage.guidePrice,
+      surcharge: price.surcharge,
+      finalGuidePrice: price.finalGuidePrice,
+      priceRequiresInquiry: price.priceRequiresInquiry,
       includedServices: pricePackage.includedServices,
       optionalServices,
     }));
@@ -579,15 +567,27 @@ export default function Home() {
     return () => document.removeEventListener("click", handlePriceAction, true);
   }, [priceVehicleClass, applyPricePackageToRequest]);
 
-  const searchArea = (nextQuery = query) => {
-    const nextLocation = findSearchLocation(nextQuery);
-    setQuery(nextLocation.label);
+  const searchArea = async (nextQuery = query) => {
+    const nextLocation = await searchLocation(nextQuery);
+    if (!nextLocation) {
+      setLocationSearchError("검색 가능한 행정구역을 찾지 못했습니다.");
+      return;
+    }
+    setLocationSearchError("");
+    setQuery(nextLocation.district);
     setLocation(nextLocation);
-    setRequest((current) => ({ ...current, deliveryArea: nextLocation.label }));
+    setRequest((current) => ({ ...current, deliveryArea: `${nextLocation.city} ${nextLocation.district}` }));
   };
 
   const sendRequest = () => {
-    const dealNumber = `CM-260713-${String(dealerDeals.length + 1).padStart(3, "0")}`;
+    const today = new Date();
+    const datePart = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, "0")}${String(today.getDate()).padStart(2, "0")}`;
+    const nextSequence = transactionRepository.getAll().reduce((max, item) => {
+      const match = item.id.match(/-(\d{4})$/); return Math.max(max, Number(match?.[1] ?? 0));
+    }, 0) + 1;
+    const dealNumber = `CM-${datePart}-${String(nextSequence).padStart(4, "0")}`;
+    const chatRoomId = `CHAT-${dealNumber}`;
+    const createdAt = today.toISOString();
     const newDeal: DealerDeal = {
       id: dealNumber,
       maker: request.maker,
@@ -614,6 +614,19 @@ export default function Home() {
         { id: `${dealNumber}-m2`, sender: "dealer", text: `${request.model} / ${request.deliveryArea} / ${request.selectedPackageName ?? request.works.join(", ")} / 추가 작업 ${request.extraWorkNote || "없음"} / ${request.inboundStart} 입고 예정입니다.`, time: "지금" },
       ],
     };
+    const transaction: Transaction = {
+      id: dealNumber, dealerId: demoAccounts[0].id, installerId: selectedShop.id, installerName: selectedShop.name,
+      vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass },
+      service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription || request.works.join(", "), extraRequest: request.extraRequest || request.extraWorkNote },
+      pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.finalGuidePrice, paymentStatus: "미결제" },
+      schedule: { requestedInboundAt: request.inboundStart }, status: { stage: "접수", createdAt, updatedAt: createdAt },
+      visibility: { hiddenByDealer: false, hiddenByInstaller: false }, chatRoomId, lastMessage: `${request.requestType}을 전송했습니다.`,
+    };
+    const room: ChatRoom = { id: chatRoomId, transactionId: dealNumber, createdAt, updatedAt: createdAt, messages: [
+      { id: `${chatRoomId}-SYSTEM-1`, roomId: chatRoomId, senderId: "system", senderRole: "system", text: `${request.requestType} 거래방이 생성되었습니다.`, createdAt, readBy: [demoAccounts[0].id] },
+      { id: `${chatRoomId}-SYSTEM-2`, roomId: chatRoomId, senderId: "system", senderRole: "system", text: `${request.model} / ${request.workDescription || request.works.join(", ")} / 추가 요청 ${request.extraRequest || "없음"} / ${request.inboundStart}`, createdAt, readBy: [demoAccounts[0].id] },
+    ] };
+    transactionRepository.create(transaction); chatRepository.create(room); setSelectedTransactionId(dealNumber);
     setDealerDeals((current) => [newDeal, ...current]);
     setSelectedDealId(newDeal.id);
     setDealFilter("전체");
@@ -755,6 +768,16 @@ export default function Home() {
     setDealerChatDraft("");
   };
 
+  const sendTransactionMessage = (transaction: Transaction, message: TransactionChatMessage) => {
+    chatRepository.addMessage(transaction.chatRoomId, message);
+    transactionRepository.update({ ...transaction, lastMessage: message.text, status: { ...transaction.status, updatedAt: message.createdAt } });
+  };
+
+  const hideTransaction = (id: string, targetRole: "dealer" | "shop") => {
+    if (targetRole === "dealer") transactionRepository.hideForDealer(id);
+    else transactionRepository.hideForInstaller(id);
+  };
+
   const agreeDealerSchedule = () => {
     if (!selectedDeal) return;
     setDealerDeals((current) =>
@@ -825,15 +848,15 @@ export default function Home() {
         setSelectedShopId("SHOP-MISA-001");
         setRequest(defaultRequest);
       }
-      setQuery("경기 하남시 미사");
-      setLocation(searchLocations[3]);
+      setQuery("하남시");
+      setLocation({ id: initialDistrict.id, city: initialDistrict.city, district: initialDistrict.district, label: initialDistrict.label, latitude: initialDistrict.latitude, longitude: initialDistrict.longitude });
       setScreen("dealerDashboard");
     }
 
     if (nextAccount.role === "shop") {
       setSelectedShopId(nextAccount.shopId ?? "SHOP-MISA-001");
-      setQuery("경기 하남시 미사");
-      setLocation(searchLocations[3]);
+      setQuery("하남시");
+      setLocation({ id: initialDistrict.id, city: initialDistrict.city, district: initialDistrict.district, label: initialDistrict.label, latitude: initialDistrict.latitude, longitude: initialDistrict.longitude });
       if (!storedConversationExists) {
         setRequest(defaultRequest);
         setRequestStatus((current) => current === "draft" ? "sent" : current);
@@ -884,7 +907,7 @@ export default function Home() {
   }
 
   if (screen === "login") {
-    return <LoginScreen accounts={demoAccounts} onLogin={loginWithAccount} />;
+    return <PatchLoginScreen accounts={demoAccounts} onLogin={loginWithAccount} />;
   }
 
   const navItems: { id: Screen; label: string; icon?: DealerIconName; disabled?: boolean }[] =
@@ -896,13 +919,13 @@ export default function Home() {
           { id: "dealerMap", label: "전국 시공점 찾기", icon: "shop" },
           { id: "deals", label: "거래 관리", icon: "deals" },
           { id: "chat", label: "거래 채팅", icon: "chat" },
-          { id: "dealerSettlement", label: "결제 및 정산", icon: "settlement" },
           { id: "dealerProfile", label: "마이페이지", icon: "profile" },
         ]
       : role === "shop"
         ? [
             { id: "shopRequests", label: "새 요청 처리" },
             { id: "chat", label: "거래 채팅", disabled: requestStatus === "draft" || requestStatus === "sent" },
+            { id: "dealerProfile", label: "마이페이지" },
           ]
         : [
             { id: "ops", label: "관리·결제·정산" },
@@ -932,7 +955,7 @@ export default function Home() {
           {role === "dealer" ? (
             <>
               <div className="dealer-avatar">한</div>
-              <span><b>한재진 딜러</b><small>딜러 권한</small><small>소속: 한재진딜러</small></span>
+              <span><b>한재진 </b><small>딜러 권한</small><small>소속: 한재진딜러</small></span>
               <button onClick={() => goToScreen("login")}><DealerIcon name="logout" />로그아웃</button>
             </>
           ) : (
@@ -954,14 +977,14 @@ export default function Home() {
           {role === "dealer" ? (
             <div className="dealer-top-actions">
               <button aria-label="알림"><DealerIcon name="bell" /><i>{unreadDealerMessages}</i></button>
-              <span><b>한재진 딜러</b><small>한재진딜러</small></span>
+              <span><b>한재진 </b><small>한재진</small></span>
               <div className="dealer-avatar small">한</div>
             </div>
           ) : <button onClick={() => goToScreen("login")}>로그아웃</button>}
         </header>
 
         {screen === "dealerDashboard" && (
-          <DealerDashboard
+          <PatchDealerDashboard
             deals={dealerDeals}
             onFilterDeals={openFilteredDeals}
             onOpenDeal={(dealId) => openDeal(dealId, "chat")}
@@ -973,7 +996,7 @@ export default function Home() {
         )}
 
         {screen === "priceGuide" && (
-          <PriceGuideScreen
+          <PatchPriceGuideScreen
             packages={filteredPricePackages}
             selectedPackage={selectedPricePackage}
             selectedPackageId={selectedPricePackageId}
@@ -989,18 +1012,20 @@ export default function Home() {
         )}
 
         {screen === "dealerMap" && (
-          <DealerMapScreen
+          <PatchDealerMapScreen
             query={query}
             setQuery={setQuery}
             searchArea={searchArea}
             location={location}
-            visibleShops={visibleShops}
+            searchError={locationSearchError}
+            results={visibleSearchResults}
             selectedShop={selectedShop}
-            selectedDistance={selectedDistance}
             selectedShopId={selectedShopId}
             setSelectedShopId={setSelectedShopId}
             favoriteShopIds={favoriteShopIds}
             toggleFavoriteShop={toggleFavoriteShop}
+            selectedBrand={request.selectedPackageBrand}
+            isOtherBrand={pricePackages.find((item) => item.id === request.selectedPackageId)?.brandGroup === "기타"}
             onRequest={() => goToScreen("request")}
           />
         )}
@@ -1024,22 +1049,11 @@ export default function Home() {
           <RequestSummary request={request} selectedShop={selectedShop} selectedDistance={selectedDistance} onBack={() => goToScreen("request")} onSend={sendRequest} />
         )}
 
-        {screen === "deals" && (
-          <DealsScreen
-            deals={filteredDealerDeals}
-            allDeals={dealerDeals}
-            selectedDeal={selectedDeal}
-            filter={dealFilter}
-            setFilter={setDealFilter}
-            onOpenDeal={(dealId) => openDeal(dealId, "deals")}
-            onOpenChat={(dealId) => openDeal(dealId, "chat")}
-            requestSuccess={requestSuccess}
-            clearRequestSuccess={() => setRequestSuccess(null)}
-          />
-        )}
+        {screen === "deals" && <TransactionManagementScreen role="dealer" userId={account.id} transactions={transactions} rooms={chatRooms} selectedId={selectedTransactionId} onSelect={setSelectedTransactionId} onSend={sendTransactionMessage} onHide={hideTransaction} onUpdate={(value) => transactionRepository.update(value)} />}
 
         {screen === "shopRequests" && (
-          <ShopRequests request={request} selectedShop={selectedShop} status={requestStatus} onAccept={acceptRequest} onReject={() => setRequestStatus("draft")} onOpenChat={() => goToScreen("chat")} onComplete={completeShopWork} />
+          <><ShopRequests request={request} selectedShop={selectedShop} status={requestStatus} onAccept={acceptRequest} onReject={() => setRequestStatus("draft")} onOpenChat={() => goToScreen("chat")} onComplete={completeShopWork} />
+          {transactions.length > 0 && <TransactionManagementScreen role="shop" userId={account.id} transactions={transactions.filter((item) => item.installerId === selectedShop.id)} rooms={chatRooms} selectedId={selectedTransactionId} onSelect={setSelectedTransactionId} onSend={sendTransactionMessage} onHide={hideTransaction} onUpdate={(value) => transactionRepository.update(value)} />}</>
         )}
 
         {screen === "chat" && (
@@ -1071,9 +1085,9 @@ export default function Home() {
           )
         )}
 
-        {screen === "ops" && <OperationsScreen fee={fee} />}
+        {screen === "ops" && <OperationsScreen fee={fee} transactions={transactions} rooms={chatRooms} />}
         {screen === "dealerSettlement" && <DealerSettlementScreen deals={dealerDeals} />}
-        {screen === "dealerProfile" && <DealerProfileScreen onLogout={() => goToScreen("login")} />}
+        {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} />}
       </main>
     </div>
   );
@@ -1226,7 +1240,7 @@ function LandingServicePreview() {
   );
 }
 
-function LoginScreen({ accounts, onLogin }: { accounts: DemoAccount[]; onLogin: (account: DemoAccount) => void }) {
+export function LegacyLoginScreen({ accounts, onLogin }: { accounts: DemoAccount[]; onLogin: (account: DemoAccount) => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -1273,7 +1287,7 @@ function LoginScreen({ accounts, onLogin }: { accounts: DemoAccount[]; onLogin: 
   );
 }
 
-function PriceGuideScreen({
+export function LegacyPriceGuideScreen({
   packages,
   selectedPackage,
   selectedPackageId,
@@ -1423,11 +1437,11 @@ function PricePackageDetail({ item, vehicleClass, onQuote, onRequest }: { item: 
     </aside>
   );
 }
-function DealerMapScreen(props: {
+export function LegacyDealerMapScreen(props: {
   query: string;
   setQuery: (value: string) => void;
   searchArea: (query?: string) => void;
-  location: SearchLocation;
+  location: LegacySearchLocation;
   visibleShops: { shop: InstallerShop; distance: number }[];
   selectedShop: InstallerShop;
   selectedDistance: string;
@@ -1459,7 +1473,7 @@ function DealerMapScreen(props: {
           <p className="eyebrow">DEALER FLOW</p>
           <h1>고객 차량 시공 지역을 검색하세요</h1>
           <p>검색 지역 주변의 카마스터 등록 시공점을 거리순 목록으로 확인하고 시공 요청을 보낼 수 있습니다.</p>
-          <p>현재 시연 로그인 사용자는 한재진딜러 1명이며, 목록에는 아직 별도 로그인 계정이 없는 입점 시공점 100여 곳이 노출됩니다.</p>
+          <p>현재 시연 로그인 사용자는 한재진 1명이며, 목록에는 아직 별도 로그인 계정이 없는 입점 시공점 100여 곳이 노출됩니다.</p>
         </div>
       </div>
 
@@ -1560,7 +1574,7 @@ function StatusBadge({ status }: { status: DealStatus }) {
   return <span className={`deal-status ${statusTone[status]}`}>{status}</span>;
 }
 
-function DealerDashboard({
+export function LegacyDealerDashboard({
   deals,
   onFilterDeals,
   onOpenDeal,
@@ -1586,7 +1600,7 @@ function DealerDashboard({
     <section className="dealer-dashboard">
       <div className="dealer-welcome">
         <div>
-          <h1>안녕하세요, 한재진 딜러님</h1>
+          <h1>안녕하세요, 한재진님</h1>
           <p>오늘의 시공 요청과 진행 중인 거래를 확인하세요.</p>
         </div>
         <span>2026년 7월 14일 화요일</span>
@@ -1671,7 +1685,7 @@ function RequestScreen({
 }: {
   request: ServiceRequest;
   setRequest: (request: ServiceRequest) => void;
-  searchArea: (query?: string) => void;
+  searchArea: (query?: string) => Promise<void>;
   visibleShops: { shop: InstallerShop; distance: number }[];
   selectedShop: InstallerShop;
   selectedDistance: string;
@@ -1736,7 +1750,8 @@ function RequestScreen({
       )}
 
       <div className="practical-request-layout">
-        <form className="simple-request-card practical-request-card">
+        <ServiceRequestForm request={request} setRequest={setRequest} onFindShops={findShops} onSummary={onSummary} hasSelectedShop={Boolean(selectedShop)} />
+        <form className="legacy-request-form" hidden aria-hidden="true">
           <label className="wide-field">
             <span>차량모델</span>
             <input value={request.model} onChange={(event) => updateModel(event.target.value)} placeholder="예: 제네시스 GV80" />
@@ -1872,7 +1887,7 @@ function RequestSummary({ request, selectedShop, selectedDistance, onBack, onSen
   );
 }
 
-function DealsScreen({
+export function LegacyDealsScreen({
   deals,
   allDeals,
   selectedDeal,
@@ -2359,7 +2374,7 @@ function DealerSettlementScreen({ deals }: { deals: DealerDeal[] }) {
   );
 }
 
-function DealerProfileScreen({ onLogout }: { onLogout: () => void }) {
+export function LegacyDealerProfileScreen({ onLogout }: { onLogout: () => void }) {
   const [notifications, setNotifications] = useState({ request: true, chat: true, schedule: true, marketing: false });
   const [saved, setSaved] = useState(false);
   const toggle = (key: keyof typeof notifications) => setNotifications((current) => ({ ...current, [key]: !current[key] }));
@@ -2376,7 +2391,7 @@ function DealerProfileScreen({ onLogout }: { onLogout: () => void }) {
               <label>이름<input defaultValue="한재진" /></label>
               <label>연락처<input defaultValue="010-1234-5678" /></label>
               <label>이메일<input type="email" defaultValue="dealer@car-master.kr" /></label>
-              <label>소속 에이전시<input defaultValue="한재진딜러" /></label>
+              <label>소속 에이전시<input defaultValue="한재진" /></label>
               <label className="wide">사업자 또는 소속 정보<input defaultValue="리스·렌트 차량관리 사업부 / 서울 강남구" /></label>
             </div>
             <div className="profile-save"><button className="primary" onClick={() => setSaved(true)}>변경사항 저장</button></div>
@@ -2388,7 +2403,7 @@ function DealerProfileScreen({ onLogout }: { onLogout: () => void }) {
         </div>
         <aside className="profile-side">
           <section className="dealer-panel profile-summary-card">
-            <div className="dealer-avatar large">한</div><h2>한재진 딜러</h2><p>한재진딜러</p><span>딜러 권한</span><dl><div><dt>최근 로그인</dt><dd>오늘 09:04</dd></div><div><dt>진행 중 거래</dt><dd>9건</dd></div></dl>
+            <div className="dealer-avatar large">한</div><h2>한재진 </h2><p>한재진</p><span>딜러 권한</span><dl><div><dt>최근 로그인</dt><dd>오늘 09:04</dd></div><div><dt>진행 중 거래</dt><dd>9건</dd></div></dl>
           </section>
           <section className="dealer-panel notification-card">
             <h2>알림 수신 설정</h2>
@@ -2408,7 +2423,7 @@ function DealerProfileScreen({ onLogout }: { onLogout: () => void }) {
   );
 }
 
-function OperationsScreen({ fee }: { fee: ReturnType<typeof calculateSettlement> }) {
+function OperationsScreen({ fee, transactions, rooms }: { fee: ReturnType<typeof calculateSettlement>; transactions: Transaction[]; rooms: ChatRoom[] }) {
   const adminStats = [
     { label: "전체 거래 수", value: "128건", note: "샘플 누적 거래" },
     { label: "회원 수", value: "42명", note: "딜러·시공점·관리자" },
@@ -2431,6 +2446,7 @@ function OperationsScreen({ fee }: { fee: ReturnType<typeof calculateSettlement>
         ))}
       </div>
       <p className="sample-disclaimer">실제 결제, 정산, 회원 인증, DB 저장은 이번 버전 제외 범위입니다. 참고 계산값: 샘플 거래 {formatWon(fee.gross)} / 순액 {formatWon(fee.net)}</p>
+      <AdminTransactionPanel transactions={transactions} rooms={rooms} />
       <section className="admin-price-panel">
         <div className="section-head">
           <div>

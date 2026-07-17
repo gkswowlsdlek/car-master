@@ -1,0 +1,7 @@
+import type { ChatRoom, Transaction } from "../../types/transactions";
+import { useState } from "react";
+export function AdminTransactionPanel({ transactions, rooms }: { transactions: Transaction[]; rooms: ChatRoom[] }) {
+  const [query, setQuery] = useState(""); const [selectedId, setSelectedId] = useState("");
+  const visible = transactions.filter((item) => `${item.id} ${item.vehicle.model} ${item.dealerId} ${item.installerName} ${item.status.stage}`.toLowerCase().includes(query.toLowerCase())); const selected = transactions.find((item) => item.id === selectedId); const room = rooms.find((item) => item.transactionId === selectedId);
+  return <section className="admin-transaction-panel"><div className="section-head"><div><h2>전체 거래 검색</h2><p>사용자 숨김 여부와 관계없이 보관된 거래를 표시합니다.</p></div><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="거래번호, 차량, 딜러, 시공점, 상태" /></div><div className="admin-transaction-layout"><div>{visible.map((item) => <button key={item.id} onClick={() => setSelectedId(item.id)}><b>{item.id}</b><span>{item.vehicle.model} · {item.installerName}</span><em>{item.status.stage}</em></button>)}</div>{selected && <aside><h3>{selected.id}</h3><p>{selected.service.workDescription}</p><p>결제: {selected.pricing.paymentStatus}</p><p>딜러 숨김: {selected.visibility.hiddenByDealer ? "예" : "아니오"}</p><p>시공점 숨김: {selected.visibility.hiddenByInstaller ? "예" : "아니오"}</p><h4>전체 채팅</h4>{room?.messages.map((message) => <p key={message.id}>{message.senderRole}: {message.text}</p>)}</aside>}</div></section>;
+}
