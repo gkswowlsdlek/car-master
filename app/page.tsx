@@ -11,6 +11,7 @@ import { ServiceRequestScreen } from "../components/dealer/ServiceRequestScreen"
 import { LandingPage } from "../components/landing/LandingPage";
 import { AppShell } from "../components/layout/AppShell";
 import { ProfileEditor } from "../components/profile/ProfileEditor";
+import { ShopDashboard } from "../components/shop/ShopDashboard";
 import { TransactionManagementScreen } from "../components/transactions/TransactionManagementScreen";
 import { defaultRequest } from "../data/default-request";
 import { demoAccounts } from "../data/demo-accounts";
@@ -148,6 +149,7 @@ export default function Home() {
     {screen === "dealerMap" && <DealerMapScreen query={query} setQuery={setQuery} searchArea={searchArea} location={location} searchError={locationError} results={nearbyResults} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} favoriteShopIds={favoriteShopIds} toggleFavoriteShop={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => goToScreen("request")} />}
     {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={() => void searchArea(request.deliveryArea)} onSummary={() => goToScreen("requestSummary")} onPriceGuide={() => goToScreen("priceGuide")} />}
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
+    {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} onOpenTransactions={() => goToScreen("shopRequests")} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} />}
     {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUpdate={(value) => transactionRepository.update(value)} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} />}
     {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} activity={profileActivity} />}
     {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} />}

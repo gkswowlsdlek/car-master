@@ -1,7 +1,20 @@
 import { pricePackages } from "../../data/pricePackages";
 import type { ChatRoom, Transaction } from "../../types/transactions";
 import { AdminTransactionPanel } from "./AdminTransactionPanel";
+
 export function AdminOverview({ transactions, rooms }: { transactions: Transaction[]; rooms: ChatRoom[] }) {
-  const stats = [{ label: "전체 거래", value: transactions.length }, { label: "진행 중", value: transactions.filter((item) => !["완료", "취소"].includes(item.status.stage)).length }, { label: "완료", value: transactions.filter((item) => item.status.stage === "완료").length }, { label: "정산 완료", value: transactions.filter((item) => item.pricing.paymentStatus === "정산완료").length }];
-  return <section className="section admin-overview"><header className="page-title"><div><p className="eyebrow">OPERATIONS OVERVIEW</p><h1>관리자 전체 현황</h1><p className="page-subtitle">거래와 결제 상태를 한곳에서 확인합니다.</p></div></header><div className="summary-grid">{stats.map((item) => <article className="card" key={item.label}><span>{item.label}</span><b>{item.value}건</b></article>)}</div><AdminTransactionPanel transactions={transactions} rooms={rooms} /><section className="card admin-price-summary"><div className="section-heading"><div><span>PRICE GUIDE</span><h2>가격 가이드 현황</h2></div><b>{pricePackages.length}개 상품</b></div></section></section>;
+  const referenceTime = Math.max(0, ...transactions.map((item) => new Date(item.status.updatedAt).getTime()));
+  const stalled = transactions.filter((item) => item.status.stage !== "완료" && item.status.stage !== "취소" && referenceTime - new Date(item.status.updatedAt).getTime() > 1000 * 60 * 60 * 24 * 3).length;
+  const stats = [
+    { label: "전체 거래", value: transactions.length, note: "플랫폼 누적" },
+    { label: "진행 중", value: transactions.filter((item) => !["완료", "취소"].includes(item.status.stage)).length, note: "현재 운영 거래" },
+    { label: "확인 필요", value: transactions.filter((item) => item.status.stage === "접수").length + stalled, note: "신규·장기 미응답" },
+    { label: "정산 완료", value: transactions.filter((item) => item.pricing.paymentStatus === "정산완료").length, note: "누적 정산" },
+  ];
+  return <section className="section admin-overview">
+    <header className="workspace-heading"><div><p className="eyebrow">BETA OPERATIONS</p><h1>베타 운영 현황</h1><p>사용자 거래와 응답이 필요한 상태를 한곳에서 확인합니다.</p></div><span className="admin-live-badge"><i /> 운영 모니터링 중</span></header>
+    <div className="summary-grid admin-summary-grid">{stats.map((item) => <article className="card" key={item.label}><span>{item.label}</span><b>{item.value}건</b><small>{item.note}</small></article>)}</div>
+    <div className="admin-alert-strip"><div><span>!</span><p><b>운영 확인</b> 신규 요청 {transactions.filter((item) => item.status.stage === "접수").length}건과 장기 미응답 {stalled}건을 확인해 주세요.</p></div><div><span>가격 상품</span><b>{pricePackages.length}개 운영 중</b></div></div>
+    <AdminTransactionPanel transactions={transactions} rooms={rooms} />
+  </section>;
 }
