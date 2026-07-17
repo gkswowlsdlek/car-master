@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { initialChatMessages, sampleScheduleProposal, type ChatMessage } from "../lib/chat-data";
 import { priceBrands, pricePackages, vehicleClassLabels, type PriceBrand, type PricePackage, type VehicleClass } from "../data/pricePackages";
-import { classifyVehicleModel, vehicleClassGuides } from "../data/vehicleClasses";
+import { classifyVehicleModel } from "../data/vehicleClasses";
 import {
   distanceKm,
   findSearchLocation,
@@ -55,6 +55,7 @@ type ServiceRequest = {
   selectedPackageId?: string;
   selectedPackageName?: string;
   selectedPackageBrand?: string;
+  selectedPackageProduct?: string;
   expectedPrice?: string;
   includedServices?: string[];
   optionalServices?: string[];
@@ -69,6 +70,8 @@ type DealerDeal = {
   region: string;
   works: string[];
   packageName: string;
+  packageBrand?: string;
+  packageProduct?: string;
   requestType?: RequestType;
   extraWorkNote?: string;
   vehicleClass?: VehicleClass | "";
@@ -403,22 +406,22 @@ const defaultRequest: ServiceRequest = {
   model: "GV80",
   vehicleType: "신차",
   deliveryArea: "경기 하남시 미사",
-  preferredBrand: "솔라가드",
-  works: ["신차패키지", "신차검수", "생활보호 PPF", "블랙박스"],
+  preferredBrand: "버텍스",
+  works: ["버텍스 900"],
   inboundStart: "2026-07-24",
   inboundEnd: "2026-07-25",
-  memo: "하남 미사 인도 예정 차량입니다. 고객 출고 전 신차검수와 블랙박스 포함 패키지 가능 여부 확인 부탁드립니다.",
+  memo: "버텍스 900 시공 가격 가이드 기준 상담 요청입니다.",
   requestType: "실제 시공 요청",
   extraWorkNote: "PPF, 블랙박스",
-  vehicleClass: "특대형",
-  selectedPackageId: "vertex-900",
-  selectedPackageName: "버텍스 900",
+  vehicleClass: "국산 승용",
+  selectedPackageId: "vertex-6-900",
+  selectedPackageName: "900",
   selectedPackageBrand: "버텍스",
-  expectedPrice: "가격 입력 예정",
-  includedServices: ["신차검수", "생활보호 PPF 4종", "기본 코팅"],
+  selectedPackageProduct: "900",
+  expectedPrice: "650,000원",
+  includedServices: ["썬팅 시공 패키지", "기본 마감 점검"],
   optionalServices: [],
 };
-
 function pathForScreen(screen: Screen, role: Role) {
   if (screen === "landing") return "/";
   if (screen === "login") return "/login";
@@ -453,7 +456,7 @@ export default function Home() {
   const [hasStoredConversation, setHasStoredConversation] = useState(false);
   const [priceBrandFilter, setPriceBrandFilter] = useState<"전체" | PriceBrand>("전체");
   const [priceSearch, setPriceSearch] = useState("");
-  const [priceVehicleClass, setPriceVehicleClass] = useState<VehicleClass>("특대형");
+  const [priceVehicleClass, setPriceVehicleClass] = useState<VehicleClass>("국산 승용");
   const [selectedPricePackageId, setSelectedPricePackageId] = useState(pricePackages[0].id);
 
   const shopsWithDistance = useMemo(() => {
@@ -529,7 +532,12 @@ export default function Home() {
     }
   }, [selectedShopId, visibleShops]);
 
-  const applyPricePackageToRequest = (pricePackage: PricePackage, nextVehicleClass = priceVehicleClass, optionalServices: string[] = [], requestType: RequestType = "실제 시공 요청") => {
+  const goToScreen = useCallback((nextScreen: Screen) => {
+    setScreen(nextScreen);
+    window.history.pushState(null, "", pathForScreen(nextScreen, role));
+  }, [role]);
+
+  const applyPricePackageToRequest = useCallback((pricePackage: PricePackage, nextVehicleClass = priceVehicleClass, optionalServices: string[] = [], requestType: RequestType = "실제 시공 요청") => {
     const expectedPrice = pricePackage.prices[nextVehicleClass];
     const workItems = [pricePackage.name, ...pricePackage.includedServices, ...optionalServices];
     setSelectedPricePackageId(pricePackage.id);
@@ -542,14 +550,34 @@ export default function Home() {
       requestType,
       vehicleClass: nextVehicleClass,
       selectedPackageId: pricePackage.id,
-      selectedPackageName: pricePackage.name,
+      selectedPackageName: pricePackage.product,
       selectedPackageBrand: pricePackage.brand,
+      selectedPackageProduct: pricePackage.product,
       expectedPrice,
       includedServices: pricePackage.includedServices,
       optionalServices,
     }));
     goToScreen("request");
-  };
+  }, [goToScreen, priceVehicleClass]);
+
+  useEffect(() => {
+    const handlePriceAction = (event: MouseEvent) => {
+      const target = event.target instanceof Element ? event.target.closest("[data-price-package-id][data-price-action]") : null;
+      if (!target) return;
+
+      const packageId = target.getAttribute("data-price-package-id");
+      const action = target.getAttribute("data-price-action");
+      const selectedPackage = pricePackages.find((item) => item.id === packageId);
+      if (!selectedPackage) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      applyPricePackageToRequest(selectedPackage, priceVehicleClass, [], action === "quote" ? "견적 문의" : "실제 시공 요청");
+    };
+
+    document.addEventListener("click", handlePriceAction, true);
+    return () => document.removeEventListener("click", handlePriceAction, true);
+  }, [priceVehicleClass, applyPricePackageToRequest]);
 
   const searchArea = (nextQuery = query) => {
     const nextLocation = findSearchLocation(nextQuery);
@@ -568,7 +596,9 @@ export default function Home() {
       shopAddress: selectedShop.address,
       region: request.deliveryArea,
       works: request.works,
-      packageName: request.selectedPackageName ?? request.works[0] ?? request.preferredBrand,
+      packageName: request.selectedPackageBrand && request.selectedPackageProduct ? `${request.selectedPackageBrand} ${request.selectedPackageProduct}` : request.selectedPackageName ?? request.works[0] ?? request.preferredBrand,
+      packageBrand: request.selectedPackageBrand,
+      packageProduct: request.selectedPackageProduct ?? request.selectedPackageName,
       requestType: request.requestType,
       extraWorkNote: request.extraWorkNote,
       vehicleClass: request.vehicleClass,
@@ -785,11 +815,6 @@ export default function Home() {
     setFavoriteShopIds((current) => (current.includes(shopId) ? current.filter((id) => id !== shopId) : [...current, shopId]));
   };
 
-  const goToScreen = (nextScreen: Screen) => {
-    setScreen(nextScreen);
-    window.history.pushState(null, "", pathForScreen(nextScreen, role));
-  };
-
   const loginWithAccount = (nextAccount: DemoAccount, options: { replace?: boolean } = {}) => {
     const storedConversationExists = typeof window !== "undefined" && Boolean(localStorage.getItem(conversationStorageKey));
     setAccount(nextAccount);
@@ -866,7 +891,7 @@ export default function Home() {
     role === "dealer"
       ? [
           { id: "dealerDashboard", label: "대시보드", icon: "dashboard" },
-          { id: "priceGuide", label: "권장 시공가", icon: "price" },
+          { id: "priceGuide", label: "시공 가격 가이드", icon: "price" },
           { id: "request", label: "내 시공 요청", icon: "request" },
           { id: "dealerMap", label: "전국 시공점 찾기", icon: "shop" },
           { id: "deals", label: "거래 관리", icon: "deals" },
@@ -1057,14 +1082,14 @@ export default function Home() {
 function LandingPage({ onLogin, onDealerStart }: { onLogin: () => void; onDealerStart: () => void }) {
   const features = [
     { title: "카카오톡 상담을 거래방으로 정리", description: "차량, 작업, 입고예정일이 자동 브리핑으로 남아 대화가 흩어지지 않습니다." },
-    { title: "권장 시공가에서 바로 요청", description: "브랜드와 제품을 고른 뒤 견적 문의 또는 실제 시공 요청으로 이어집니다." },
+    { title: "시공 가격 가이드에서 바로 요청", description: "브랜드와 제품을 고른 뒤 견적 문의 또는 실제 시공 요청으로 이어집니다." },
     { title: "시공점 선택과 일정 조율", description: "지역 기반으로 시공점을 고르고, 수락 후 거래방에서 입고·출고 일정을 맞춥니다." },
   ];
-  const steps = ["권장 시공가 확인", "견적 문의 또는 시공 요청", "차량정보 입력", "시공점 선택", "거래방에서 일정 조율"];
+  const steps = ["시공 가격 가이드 확인", "견적 문의 또는 시공 요청", "차량정보 입력", "시공점 선택", "거래방에서 일정 조율"];
   const faqs = [
     { q: "실제 결제나 정산이 연결되어 있나요?", a: "아직 아닙니다. 현재 버전은 딜러 업무 흐름 검증을 위한 샘플 데이터 기반 프로토타입입니다." },
     { q: "시공점과 바로 채팅할 수 있나요?", a: "시공 요청 또는 견적 문의 후 시공점이 수락하면 거래방 채팅이 활성화됩니다." },
-    { q: "권장 시공가는 확정 가격인가요?", a: "아닙니다. 실제 금액은 시공점, 차량 크기, 추가 작업에 따라 달라질 수 있습니다." },
+    { q: "시공 가격 가이드는 확정 가격인가요?", a: "아닙니다. 실제 금액은 시공점, 차량 크기, 추가 작업에 따라 달라질 수 있습니다." },
   ];
 
   return (
@@ -1075,7 +1100,7 @@ function LandingPage({ onLogin, onDealerStart }: { onLogin: () => void; onDealer
         </button>
         <nav>
           <a href="#service">서비스 소개</a>
-          <a href="#price">권장 시공가</a>
+          <a href="#price">시공 가격 가이드</a>
           <a href="#faq">고객센터</a>
         </nav>
         <div className="landing-actions">
@@ -1089,7 +1114,7 @@ function LandingPage({ onLogin, onDealerStart }: { onLogin: () => void; onDealer
             <p className="eyebrow">딜러를 위한 자동차 용품 시공 업무 플랫폼</p>
             <h1>자동차 용품 시공,<br />카카오톡 대신<br />카마스터 하나로.</h1>
             <p className="hero-desc">
-              차량모델, 시공지역, 작업내용, 입고예정일만 입력하면 권장 시공가 확인부터
+              차량모델, 시공지역, 작업내용, 입고예정일만 입력하면 시공 가격 가이드 확인부터
               시공점 선택, 거래방 생성, 일정 조율까지 한 화면 흐름으로 관리합니다.
             </p>
             <div className="hero-buttons">
@@ -1132,10 +1157,10 @@ function LandingPage({ onLogin, onDealerStart }: { onLogin: () => void; onDealer
         <section className="price-guide-strip" id="price">
           <div>
             <p className="eyebrow">PRICE GUIDE</p>
-            <h2>권장 시공가를 먼저 확인하고 문의를 시작하세요.</h2>
-            <p>버텍스, 솔라가드, 브이쿨 등 샘플 상품을 기준으로 권장 시공가 구조를 확인할 수 있습니다.</p>
+            <h2>시공 가격 가이드를 먼저 확인하고 문의를 시작하세요.</h2>
+            <p>버텍스, 솔라가드, 브이쿨 등 샘플 상품을 기준으로 시공 가격 가이드 구조를 확인할 수 있습니다.</p>
           </div>
-          <button className="primary" onClick={onDealerStart}>권장 시공가 보기</button>
+          <button className="primary" onClick={onDealerStart}>시공 가격 가이드 보기</button>
         </section>
 
         <section className="landing-faq" id="faq">
@@ -1172,9 +1197,9 @@ function LandingServicePreview() {
       </div>
       <div className="preview-content">
         <article className="preview-request-card">
-          <span className="status-chip">권장 시공가</span>
+          <span className="status-chip">시공 가격 가이드</span>
           <h2>버텍스 900</h2>
-          <p>국산 승용 기준 · 가격 입력 예정</p>
+          <p>국산 승용 기준 · 가이드 가격 확인 필요</p>
           <div>
             <b>다음 행동</b>
             <span>견적 문의 / 실제 시공 요청</span>
@@ -1258,7 +1283,6 @@ function PriceGuideScreen({
   search,
   setSearch,
   vehicleClass,
-  setVehicleClass,
   onRequest,
 }: {
   packages: PricePackage[];
@@ -1273,16 +1297,31 @@ function PriceGuideScreen({
   setVehicleClass: (value: VehicleClass) => void;
   onRequest: (pricePackage: PricePackage, vehicleClass: VehicleClass, optionalServices?: string[], requestType?: RequestType) => void;
 }) {
+  const groupedPackages = priceBrands
+    .filter((brand): brand is PriceBrand => brand !== "전체")
+    .map((brand) => ({ brand, items: packages.filter((item) => item.brand === brand) }))
+    .filter((group) => group.items.length > 0);
+  const totalProducts = groupedPackages.reduce((sum, group) => sum + group.items.length, 0);
+
   return (
     <section className="dealer-screen price-guide-screen">
       <div className="page-title price-guide-title">
         <div>
-          <p className="eyebrow">RECOMMENDED PRICE · v0.3 검증</p>
-          <h1>권장 시공가</h1>
-          <p>필름 브랜드와 제품을 먼저 고른 뒤, 견적 문의 또는 실제 시공 요청으로 이어가세요.</p>
-          <small>현재 금액은 샘플 구조입니다. 실제 권장가는 추후 관리자가 입력합니다.</small>
+          <p className="eyebrow">INSTALLATION PRICE GUIDE · v0.2.7</p>
+          <h1>시공 가격 가이드</h1>
+          <p>국산 승용 기준</p>
+          <small>국산 승용차의 썬팅 시공 패키지를 기준으로 한 카마스터 시공 가격 가이드입니다.</small>
+        </div>
+        <div className="price-title-summary">
+          <span>브랜드 {groupedPackages.length}개</span>
+          <b>제품 {totalProducts}개</b>
         </div>
       </div>
+
+      <section className="price-guide-note" aria-label="시공 가격 가이드 안내">
+        <b>국산 승용 기준</b>
+        <p>딜러가 차량 출고 전 주요 썬팅 브랜드의 기준 가격을 빠르게 확인할 수 있습니다.</p>
+      </section>
 
       <div className="price-guide-toolbar">
         <div className="price-brand-tabs">
@@ -1292,38 +1331,29 @@ function PriceGuideScreen({
             </button>
           ))}
         </div>
-        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="제품명을 검색하세요. 예: 버텍스 900" />
+        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="브랜드 또는 필름명을 검색하세요" />
       </div>
 
-      <section className="vehicle-class-guide">
-        <div>
-          <h2>국산 승용 기준 권장 시공가</h2>
-          <p>딜러가 상담 전 빠르게 확인하는 기준가입니다. 대형 차량, 수입차, 추가 작업은 실제 견적에서 달라질 수 있습니다.</p>
-        </div>
-        <div className="vehicle-class-tabs">
-          {vehicleClassGuides.map((guide) => (
-            <button key={guide.className} className={vehicleClass === guide.className ? "active" : ""} onClick={() => setVehicleClass(guide.className)}>
-              <b>{guide.className}</b>
-              <span>{guide.examples.slice(0, 3).join(", ")}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
       <div className="price-guide-layout">
-        <section className="price-package-grid">
+        <section className="price-brand-card-grid">
           {packages.length === 0 ? (
-            <div className="empty-state">검색 조건에 맞는 상품이 없습니다.</div>
-          ) : packages.map((item) => (
-            <PricePackageCard
-              key={item.id}
-              item={item}
-              vehicleClass={vehicleClass}
-              selected={item.id === selectedPackageId}
-              onDetail={() => setSelectedPackageId(item.id)}
-              onQuote={() => onRequest(item, vehicleClass, [], "견적 문의")}
-              onRequest={() => onRequest(item, vehicleClass, [], "실제 시공 요청")}
-            />
+            <div className="empty-state">선택한 조건에 맞는 시공 가격 가이드가 없습니다. 검색 범위를 넓혀보세요.</div>
+          ) : groupedPackages.map((group) => (
+            <section className="price-brand-card" key={group.brand}>
+              <h2>{group.brand}</h2>
+              <div className="price-product-list">
+                {group.items.map((item) => (
+                  <PricePackageRow
+                    key={item.id}
+                    item={item}
+                    selected={item.id === selectedPackageId}
+                    onDetail={() => setSelectedPackageId(item.id)}
+                    onQuote={() => onRequest(item, vehicleClass, [], "견적 문의")}
+                    onRequest={() => onRequest(item, vehicleClass, [], "실제 시공 요청")}
+                  />
+                ))}
+              </div>
+            </section>
           ))}
         </section>
         <PricePackageDetail
@@ -1333,36 +1363,33 @@ function PriceGuideScreen({
           onRequest={() => onRequest(selectedPackage, vehicleClass, [], "실제 시공 요청")}
         />
       </div>
+
+      <section className="price-guide-disclaimer">
+        <p>※ 본 가격은 국산 승용차 기준 시공 가격 가이드입니다.</p>
+        <p>※ 시공점, 차량 크기, 필름 농도 및 작업 조건에 따라 최종 금액은 달라질 수 있습니다.</p>
+        <p>※ 대형 차량, 특대형 차량, 파노라마 선루프, 기존 필름 제거 및 추가 작업은 별도 비용이 발생할 수 있습니다.</p>
+        <p>※ 정확한 금액은 시공점과 거래방에서 최종 확인해주세요.</p>
+      </section>
     </section>
   );
 }
 
-function PricePackageCard({ item, vehicleClass, selected, onDetail, onQuote, onRequest }: { item: PricePackage; vehicleClass: VehicleClass; selected: boolean; onDetail: () => void; onQuote: () => void; onRequest: () => void }) {
+function PricePackageRow({ item, selected, onDetail, onQuote, onRequest }: { item: PricePackage; selected: boolean; onDetail: () => void; onQuote: () => void; onRequest: () => void }) {
+  const runAction = (event: React.MouseEvent<HTMLButtonElement>, action: () => void) => {
+    event.preventDefault();
+    event.stopPropagation();
+    action();
+  };
+
   return (
-    <article className={`price-package-card ${selected ? "selected" : ""}`}>
-      <div className="price-package-head">
-        <span>{item.brand}</span>
-        {item.recommended && <em>추천 상품</em>}
-      </div>
-      <h2>{item.name}</h2>
-      <p>{item.description}</p>
-      <dl className="price-table-mini">
-        {vehicleClassLabels.map((label) => (
-          <div key={label} className={label === vehicleClass ? "active" : ""}>
-            <dt>{label}</dt>
-            <dd>{item.prices[label]}</dd>
-          </div>
-        ))}
-      </dl>
-      <div className="included-services">
-        <b>기본 포함</b>
-        {item.includedServices.slice(0, 4).map((service) => <span key={service}>{service}</span>)}
-      </div>
-      <div className="price-card-actions">
-        <button className="secondary" onClick={onDetail}>상세보기</button>
-        <button className="secondary" onClick={onQuote}>견적 문의</button>
-        <button className="primary" onClick={onRequest}>실제 시공 요청</button>
-      </div>
+    <article className={`price-package-row ${selected ? "selected" : ""}`}>
+      <button type="button" className="price-row-product" onClick={onDetail} data-testid={`price-detail-${item.id}`}>
+        <span>{item.product}</span>
+        {item.notice !== item.description && <em>{item.notice}</em>}
+      </button>
+      <button type="button" className="price-row-price" onClick={onDetail} data-testid={`price-price-${item.id}`}>{item.priceLabel}</button>
+      <button type="button" className="secondary" onMouseDown={(event) => runAction(event, onQuote)} onClick={(event) => runAction(event, onQuote)} data-price-action="quote" data-price-package-id={item.id} data-testid={`price-quote-${item.id}`}>견적 문의</button>
+      <button type="button" className="primary" onMouseDown={(event) => runAction(event, onRequest)} onClick={(event) => runAction(event, onRequest)} data-price-action="request" data-price-package-id={item.id} data-testid={`price-request-${item.id}`}>시공 요청</button>
     </article>
   );
 }
@@ -1370,31 +1397,32 @@ function PricePackageCard({ item, vehicleClass, selected, onDetail, onQuote, onR
 function PricePackageDetail({ item, vehicleClass, onQuote, onRequest }: { item: PricePackage; vehicleClass: VehicleClass; onQuote: () => void; onRequest: () => void }) {
   return (
     <aside className="price-package-detail">
-      <span>{item.brand}</span>
-      <h2>{item.name}</h2>
-      <p>{item.description}</p>
+      <span>시공 가격 가이드</span>
+      <h2>{item.brand} {item.product}</h2>
+      <p>{vehicleClass} 기준</p>
       <div className="detail-price-box">
-        <small>{vehicleClass} · 국산 승용 기준 권장 시공가</small>
-        <b>{item.prices[vehicleClass]}</b>
+        <small>국산 승용 기준</small>
+        <b>{item.priceLabel}</b>
       </div>
       <dl>
-        <div><dt>추천 차량</dt><dd>{item.recommendedVehicles}</dd></div>
-        <div><dt>기본 포함 작업</dt><dd>{item.includedServices.join(", ")}</dd></div>
-        <div><dt>선택 가능 추가 작업</dt><dd>{item.optionalServices.join(", ")}</dd></div>
-        <div><dt>안내사항</dt><dd>{item.notice}</dd></div>
+        <div><dt>브랜드</dt><dd>{item.brand}</dd></div>
+        <div><dt>제품명</dt><dd>{item.product}</dd></div>
+        <div><dt>선루프</dt><dd>파노라마 선루프 및 추가 유리 면적은 별도 비용이 발생할 수 있습니다.</dd></div>
+        <div><dt>SUV</dt><dd>대형 차량 및 특대형 차량은 최종 금액이 달라질 수 있습니다.</dd></div>
+        <div><dt>추가 작업</dt><dd>{item.optionalServices.join(", ")}</dd></div>
+        <div><dt>안내</dt><dd>{item.notice}</dd></div>
       </dl>
       <div className="price-notice-box">
-        <p>※ 시공점마다 실제 금액은 소폭 달라질 수 있습니다.</p>
-        <p>※ 대형 차량 및 추가 작업은 추가 비용이 발생할 수 있습니다.</p>
+        <p>※ 시공점별 최종 견적은 달라질 수 있습니다.</p>
+        <p>※ 정확한 금액은 거래방에서 시공점과 최종 확인해주세요.</p>
       </div>
       <div className="price-detail-actions">
         <button className="secondary" onClick={onQuote}>견적 문의</button>
-        <button className="primary" onClick={onRequest}>실제 시공 요청</button>
+        <button className="primary" onClick={onRequest}>시공 요청</button>
       </div>
     </aside>
   );
 }
-
 function DealerMapScreen(props: {
   query: string;
   setQuery: (value: string) => void;
@@ -1600,11 +1628,11 @@ function DealerDashboard({
           </div>
         </section>
         <section className="dealer-package-banner">
-          <span>오늘 먼저 확인할 권장 시공가</span>
+          <span>오늘 먼저 확인할 시공 가격 가이드</span>
           <b>버텍스 900 · 솔라가드 프리미엄 · 브이쿨 K</b>
           <p>브랜드와 제품을 고르면 견적 문의 또는 실제 시공 요청으로 바로 이어집니다.</p>
           <div>
-            <button className="primary" onClick={onPriceGuide}>권장 시공가 확인</button>
+            <button className="primary" onClick={onPriceGuide}>시공 가격 가이드 확인</button>
             <button className="secondary" onClick={onNewRequest}>바로 시공 요청</button>
           </div>
         </section>
@@ -1701,7 +1729,7 @@ function RequestScreen({
           <div>
             <span>선택 상품 요약</span>
             <b>{request.requestType} · {request.selectedPackageBrand} · {request.selectedPackageName}</b>
-            <p>{request.vehicleClass || detectedVehicleClass || "등급 선택 필요"} · 권장 시공가 {request.expectedPrice ?? "가격 입력 예정"}</p>
+            <p>{request.vehicleClass || detectedVehicleClass || "등급 선택 필요"} · 시공 가격 가이드 {request.expectedPrice ?? "가이드 가격 확인 필요"}</p>
           </div>
           <button type="button" onClick={onPriceGuide}>상품 변경</button>
         </section>
@@ -1831,8 +1859,8 @@ function RequestSummary({ request, selectedShop, selectedDistance, onBack, onSen
           <p>{selectedShop.district} · {selectedDistance}</p>
         </article>
         <article>
-          <h3>예상 금액</h3>
-          <b>{request.expectedPrice ?? "가격 입력 예정"}</b>
+          <h3>시공 가격 가이드</h3>
+          <b>{request.expectedPrice ?? "가이드 가격 확인 필요"}</b>
           <p>표기 금액은 기본 패키지 기준이며 최종 금액은 시공점 확인 후 달라질 수 있습니다.</p>
         </article>
       </div>
@@ -1901,7 +1929,7 @@ function DealsScreen({
               <span>
                 <b>{deal.model}</b>
                 <em>{deal.requestType ?? "실제 시공 요청"} · {deal.packageName}</em>
-                <i>{deal.region} · {deal.expectedPrice ?? "가격 입력 예정"}</i>
+                <i>{deal.region} · {deal.expectedPrice ?? "가이드 가격 확인 필요"}</i>
               </span>
               <span>
                 <StatusBadge status={deal.status} />
@@ -1931,6 +1959,9 @@ function DealDetail({ deal, actionLabel, onAction }: { deal: DealerDeal; actionL
       <ProgressSteps activeStep={activeStep} steps={dealStatuses} />
       <WorkBriefingCard
         vehicle={deal.model}
+        brand={deal.packageBrand}
+        product={deal.packageProduct}
+        guidePrice={deal.expectedPrice}
         work={deal.packageName}
         extraWork={deal.extraWorkNote || "없음"}
         inboundAt={deal.inboundAt ?? "-"}
@@ -1943,7 +1974,7 @@ function DealDetail({ deal, actionLabel, onAction }: { deal: DealerDeal; actionL
         <div><dt>상품</dt><dd>{deal.packageName}</dd></div>
         <div><dt>요청 유형</dt><dd>{deal.requestType ?? "실제 시공 요청"}</dd></div>
         <div><dt>차량 등급</dt><dd>{deal.vehicleClass || "시공점 확인"}</dd></div>
-        <div><dt>예상 금액</dt><dd>{deal.expectedPrice ?? "가격 입력 예정"}</dd></div>
+        <div><dt>시공 가격 가이드</dt><dd>{deal.expectedPrice ?? "가이드 가격 확인 필요"}</dd></div>
         <div><dt>요청 작업</dt><dd>{deal.works.join(", ")}</dd></div>
         <div><dt>추가 작업 문의</dt><dd>{deal.extraWorkNote || "없음"}</dd></div>
         <div><dt>입고 예정</dt><dd>{deal.inboundAt ?? "-"}</dd></div>
@@ -1957,6 +1988,9 @@ function DealDetail({ deal, actionLabel, onAction }: { deal: DealerDeal; actionL
 
 function WorkBriefingCard({
   vehicle,
+  brand,
+  product,
+  guidePrice,
   work,
   extraWork,
   inboundAt,
@@ -1964,6 +1998,9 @@ function WorkBriefingCard({
   requestType,
 }: {
   vehicle: string;
+  brand?: string;
+  product?: string;
+  guidePrice?: string;
   work: string;
   extraWork: string;
   inboundAt: string;
@@ -1979,6 +2016,9 @@ function WorkBriefingCard({
       <dl>
         <div><dt>유형</dt><dd>{requestType}</dd></div>
         <div><dt>차량</dt><dd>{vehicle}</dd></div>
+        <div><dt>브랜드</dt><dd>{brand ?? work.split(" ")[0] ?? "-"}</dd></div>
+        <div><dt>제품</dt><dd>{product ?? work.replace(`${brand ?? ""} `, "")}</dd></div>
+        <div><dt>시공 가격 가이드</dt><dd>{guidePrice ?? "가이드 가격 확인 필요"}</dd></div>
         <div><dt>작업</dt><dd>{work}</dd></div>
         <div><dt>추가 작업</dt><dd>{extraWork || "없음"}</dd></div>
         <div><dt>입고 예정일</dt><dd>{inboundAt}</dd></div>
@@ -2028,6 +2068,9 @@ function ShopRequests({ request, selectedShop, status, onAccept, onReject, onOpe
             <small>예상 입고 {request.inboundStart} ~ {request.inboundEnd}</small>
             <WorkBriefingCard
               vehicle={request.model}
+              brand={request.selectedPackageBrand ?? request.preferredBrand}
+              product={request.selectedPackageProduct ?? request.selectedPackageName}
+              guidePrice={request.expectedPrice}
               work={request.selectedPackageName ?? request.works[0] ?? request.preferredBrand}
               extraWork={request.extraWorkNote || "없음"}
               inboundAt={request.inboundStart}
@@ -2043,7 +2086,7 @@ function ShopRequests({ request, selectedShop, status, onAccept, onReject, onOpe
               <div><dt>작업내용</dt><dd>{request.works.join(", ")}</dd></div>
               <div><dt>추가 작업 문의</dt><dd>{request.extraWorkNote || "없음"}</dd></div>
               <div><dt>입고예정일</dt><dd>{request.inboundStart}</dd></div>
-              <div><dt>예상 금액</dt><dd>{request.expectedPrice ?? "가격 입력 예정"}</dd></div>
+              <div><dt>시공 가격 가이드</dt><dd>{request.expectedPrice ?? "가이드 가격 확인 필요"}</dd></div>
             </dl>
           </div>
           <aside>
@@ -2126,7 +2169,7 @@ function DealerChatScreen({
               <b>{selectedDeal.model}</b>
               <span>{selectedDeal.packageName}</span>
               <span>{selectedDeal.vehicleClass || "등급 확인"}</span>
-              <span>{selectedDeal.expectedPrice ?? "가격 입력 예정"}</span>
+              <span>{selectedDeal.expectedPrice ?? "가이드 가격 확인 필요"}</span>
               <span>{selectedDeal.region}</span>
               <span>입고예정일 {selectedDeal.inboundAt ?? "-"}</span>
             </div>
@@ -2134,6 +2177,9 @@ function DealerChatScreen({
           </div>
           <WorkBriefingCard
             vehicle={selectedDeal.model}
+            brand={selectedDeal.packageBrand}
+            product={selectedDeal.packageProduct}
+            guidePrice={selectedDeal.expectedPrice}
             work={selectedDeal.packageName}
             extraWork={selectedDeal.extraWorkNote || "없음"}
             inboundAt={selectedDeal.inboundAt ?? "-"}
@@ -2213,6 +2259,9 @@ function ChatScreen({
           </div>
           <WorkBriefingCard
             vehicle={request.model}
+            brand={request.selectedPackageBrand ?? request.preferredBrand}
+            product={request.selectedPackageProduct ?? request.selectedPackageName}
+            guidePrice={request.expectedPrice}
             work={request.selectedPackageName ?? request.works[0] ?? request.preferredBrand}
             extraWork={request.extraWorkNote || "없음"}
             inboundAt={request.inboundStart}
@@ -2250,7 +2299,7 @@ function ChatScreen({
             <div><dt>지역</dt><dd>{request.deliveryArea}</dd></div>
             <div><dt>시공점</dt><dd>{selectedShop.name}</dd></div>
             <div><dt>상품</dt><dd>{request.selectedPackageName ?? request.preferredBrand}</dd></div>
-            <div><dt>예상 금액</dt><dd>{request.expectedPrice ?? "가격 입력 예정"}</dd></div>
+            <div><dt>시공 가격 가이드</dt><dd>{request.expectedPrice ?? "가이드 가격 확인 필요"}</dd></div>
             <div><dt>요청 작업</dt><dd>{request.works.join(", ")}</dd></div>
             <div><dt>거래 상태</dt><dd>{transactionSteps[activeStep]}</dd></div>
           </dl>
@@ -2385,27 +2434,23 @@ function OperationsScreen({ fee }: { fee: ReturnType<typeof calculateSettlement>
       <section className="admin-price-panel">
         <div className="section-head">
           <div>
-            <h2>금액표 관리 샘플</h2>
-            <p>실제 DB 저장 없이 샘플 데이터 기준으로 상품과 차량 등급별 금액을 확인합니다.</p>
+            <h2>시공 가격 가이드 관리 샘플</h2>
+            <p>실제 DB 저장 없이 국산 승용 기준 시공 가격 가이드 데이터를 확인합니다.</p>
           </div>
         </div>
         <div className="admin-price-table">
           <div className="admin-price-row head">
             <span>브랜드</span>
             <span>상품명</span>
-            <span>중형</span>
-            <span>대형</span>
-            <span>특대형</span>
+            <span>국산 승용 기준</span>
             <span>상태</span>
             <span>관리</span>
           </div>
           {pricePackages.map((item) => (
             <div className="admin-price-row" key={item.id}>
               <span>{item.brand}</span>
-              <b>{item.name}</b>
-              <span>{item.prices["중형"]}</span>
-              <span>{item.prices["대형"]}</span>
-              <span>{item.prices["특대형"]}</span>
+              <b>{item.product}</b>
+              <span>{item.priceLabel}</span>
               <span>{item.available ? "판매중" : "중지"}</span>
               <button>수정</button>
             </div>

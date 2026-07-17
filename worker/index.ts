@@ -3,7 +3,7 @@ import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } fr
 import handler from "vinext/server/app-router-entry";
 
 interface Env {
-  ASSETS: Fetcher;
+  ASSETS?: Fetcher;
   DB: D1Database;
   IMAGES: {
     input(stream: ReadableStream): {
@@ -30,6 +30,15 @@ const worker = {
     const url = new URL(request.url);
 
     if (url.pathname === "/_vinext/image") {
+      if (!env.ASSETS || typeof env.ASSETS.fetch !== "function") {
+        const sourceUrl = url.searchParams.get("url");
+        if (sourceUrl?.startsWith("/")) {
+          return Response.redirect(new URL(sourceUrl, request.url).toString(), 302);
+        }
+
+        return new Response("Image optimization assets are not available in this local environment.", { status: 404 });
+      }
+
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
       return handleImageOptimization(request, {
         fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),

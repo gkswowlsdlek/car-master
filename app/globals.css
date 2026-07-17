@@ -3525,3 +3525,315 @@ textarea {
     overflow-wrap: anywhere;
   }
 }
+
+/* Car-Master v0.2.7 Recommended Price Guide */
+.price-guide-title {
+  align-items: end;
+}
+
+.price-guide-title h1 {
+  letter-spacing: 0;
+}
+
+.price-title-summary {
+  display: grid;
+  gap: 4px;
+  justify-items: end;
+  border: 1px solid #e6ebf2;
+  border-radius: 16px;
+  background: #fff;
+  padding: 14px 16px;
+}
+
+.price-title-summary span {
+  color: #667085;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.price-title-summary b {
+  color: #111827;
+  font-size: 22px;
+}
+
+.price-table-board {
+  display: grid;
+  gap: 14px;
+}
+
+.price-guide-note {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #dbe7ff;
+  border-radius: 16px;
+  background: #f4f8ff;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+
+.price-guide-note b {
+  color: #1d4ed8;
+  font-size: 16px;
+}
+
+.price-guide-note p {
+  margin: 0;
+  color: #344054;
+  font-weight: 750;
+}
+
+.price-brand-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+}
+
+.price-brand-card {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #e7ebf0;
+  border-radius: 18px;
+  background: #fff;
+  padding: 18px;
+  box-shadow: 0 10px 28px rgba(17,24,39,.035);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.price-brand-card h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 20px;
+}
+
+.price-product-list {
+  display: grid;
+  gap: 8px;
+}
+
+.price-table-head,
+.price-package-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 140px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.price-table-head {
+  position: sticky;
+  top: 82px;
+  z-index: 2;
+  border: 1px solid #e6ebf2;
+  border-radius: 14px;
+  background: rgba(255,255,255,.94);
+  padding: 12px 16px;
+  color: #667085;
+  font-size: 13px;
+  font-weight: 900;
+  backdrop-filter: blur(12px);
+}
+
+.price-brand-group {
+  display: grid;
+  gap: 8px;
+}
+
+.price-brand-group h2 {
+  margin: 12px 0 2px;
+  color: #111827;
+  font-size: 18px;
+}
+
+.price-row-list {
+  display: grid;
+  gap: 8px;
+}
+
+.price-package-row {
+  border: 1px solid #e7ebf0;
+  border-radius: 16px;
+  background: #fff;
+  padding: 12px 14px;
+  box-shadow: 0 8px 22px rgba(17,24,39,.025);
+  cursor: pointer;
+}
+
+.price-package-row.selected {
+  border-color: #2563eb;
+  box-shadow: inset 4px 0 0 #2563eb, 0 10px 28px rgba(37,99,235,.075);
+}
+
+.price-row-product,
+.price-row-price {
+  min-height: auto;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  min-width: 0;
+}
+
+.price-row-product {
+  display: grid;
+  gap: 4px;
+  align-items: center;
+}
+
+.price-row-product span {
+  color: #344054;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.price-row-product em {
+  justify-self: start;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #2563eb;
+  padding: 6px 9px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.price-row-price {
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 950;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.price-package-row > button.secondary,
+.price-package-row > button.primary {
+  min-height: 42px;
+  border-radius: 12px;
+  padding: 0 14px;
+}
+
+.price-package-row > button.secondary {
+  grid-column: 1;
+}
+
+.price-package-row > button.primary {
+  grid-column: 2;
+}
+
+.price-package-detail h2 {
+  font-size: 34px;
+}
+
+.price-package-detail .detail-price-box b {
+  font-size: 34px;
+}
+
+.price-guide-disclaimer {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #e7ebf0;
+  border-radius: 18px;
+  background: #fff;
+  padding: 18px 20px;
+  margin-top: 20px;
+}
+
+.price-guide-disclaimer p {
+  margin: 0;
+  color: #475467;
+  line-height: 1.5;
+}
+
+.admin-price-row {
+  grid-template-columns: 120px minmax(120px, 1fr) 160px 90px 80px;
+}
+
+@media (max-width: 980px) {
+  .price-guide-title {
+    align-items: start;
+  }
+
+  .price-title-summary {
+    justify-items: start;
+  }
+
+  .price-table-head {
+    display: none;
+  }
+
+  .price-brand-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .price-package-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px 12px;
+    align-items: center;
+  }
+
+  .price-row-product {
+    grid-column: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .price-row-product span {
+    font-size: 13px;
+  }
+
+  .price-row-product b {
+    font-size: 20px;
+  }
+
+  .price-row-product em {
+    grid-column: auto;
+  }
+
+  .price-row-price {
+    justify-self: end;
+    font-size: 24px;
+  }
+
+  .price-package-row > button.secondary,
+  .price-package-row > button.primary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .price-title-summary {
+    width: 100%;
+  }
+
+  .price-brand-tabs button {
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .price-package-row {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .price-row-price {
+    justify-self: start;
+    font-size: 30px;
+  }
+
+  .price-package-row > button.secondary,
+  .price-package-row > button.primary {
+    min-height: 46px;
+  }
+
+  .price-package-detail h2,
+  .price-package-detail .detail-price-box b {
+    font-size: 30px;
+  }
+
+  .admin-price-row {
+    grid-template-columns: 1fr;
+  }
+}
