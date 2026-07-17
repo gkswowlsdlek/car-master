@@ -41,6 +41,10 @@ function pathForScreen(screen: Screen, role: Role) {
   return "/dealer";
 }
 
+function roleTransactionsForActivity(transactions: Transaction[], role: Role, shopId?: string) {
+  return role === "shop" ? transactions.filter((item) => item.installerId === shopId) : transactions;
+}
+
 export default function Home() {
   const [role, setRole] = useState<Role>("dealer");
   const [account, setAccount] = useState<DemoAccount>(demoAccounts[0]);
@@ -87,6 +91,12 @@ export default function Home() {
   }, [login]);
 
   const activeTransactionId = selectedTransactionId || transactions[0]?.id || "";
+  const profileActivity = useMemo(() => {
+    const now = new Date();
+    const monthly = roleTransactionsForActivity(transactions, role, account.shopId).filter((item) => { const date = new Date(item.status.createdAt); return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth(); }).length;
+    const scoped = roleTransactionsForActivity(transactions, role, account.shopId);
+    return { total: scoped.length, monthly, completed: scoped.filter((item) => item.status.stage === "완료").length, favorites: role === "dealer" ? favoriteShopIds.length : 0 };
+  }, [transactions, role, account.shopId, favoriteShopIds.length]);
 
   const searchArea = async (value = query) => {
     const result = await searchLocation(value);
@@ -138,8 +148,8 @@ export default function Home() {
     {screen === "dealerMap" && <DealerMapScreen query={query} setQuery={setQuery} searchArea={searchArea} location={location} searchError={locationError} results={nearbyResults} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} favoriteShopIds={favoriteShopIds} toggleFavoriteShop={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => goToScreen("request")} />}
     {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={() => void searchArea(request.deliveryArea)} onSummary={() => goToScreen("requestSummary")} onPriceGuide={() => goToScreen("priceGuide")} />}
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
-    {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUpdate={(value) => transactionRepository.update(value)} onStageChange={changeStage} onPaymentChange={changePayment} />}
-    {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} />}
+    {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUpdate={(value) => transactionRepository.update(value)} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} />}
+    {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} activity={profileActivity} />}
     {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} />}
   </AppShell>;
 }

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Car-Master | 딜러용 전국 시공점 검색",
-  description: "리스·렌트 에이전시 딜러가 고객 차량 인도 지역 주변의 승인 시공점을 찾고 시공 요청을 보내는 B2B 자동차 플랫폼입니다.",
+  title: "Car-Master | 차량 시공 거래를 하나의 흐름으로",
+  description: "가격 확인부터 시공점 선택, 거래방, 채팅과 결제까지 연결하는 딜러용 차량 시공 업무 플랫폼입니다.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
