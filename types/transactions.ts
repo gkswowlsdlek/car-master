@@ -27,6 +27,6 @@ export type ChatRoom = { id: string; transactionId: string; messages: Transactio
 
 export type UserProfile = {
   id: string; role: "dealer" | "shop"; name: string; companyName?: string; representativeName?: string;
-  phone: string; email: string; activityArea?: string; address?: string; brands?: string; works?: string; hours?: string; introduction?: string;
+  phone: string; email: string; activityArea?: string; address?: string; brands?: string[]; works?: string[]; hours?: string; introduction?: string;
   notifications: { request: boolean; chat: boolean; schedule: boolean; marketing: boolean };
 };

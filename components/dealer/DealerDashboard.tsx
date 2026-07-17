@@ -1,13 +1,13 @@
-import type { DealerDeal, DealStatus } from "../../types/dealer";
+import type { Transaction, TransactionStage } from "../../types/transactions";
 
 export function DealerDashboard({ deals, onFilterDeals, onOpenDeal, onNewRequest, onFindShop, onPriceGuide }: {
-  deals: DealerDeal[]; onFilterDeals: (filter: DealStatus | "전체") => void; onOpenDeal: (id: string) => void;
+  deals: Transaction[]; onFilterDeals: (filter: TransactionStage | "전체") => void; onOpenDeal: (id: string) => void;
   onNewRequest: () => void; onFindShop: () => void; onPriceGuide: () => void; onOpenChat: () => void;
 }) {
-  const cards: { label: string; value: number; filter: DealStatus | "전체" }[] = [
-    { label: "확인 대기", value: deals.filter((deal) => deal.status === "시공점 확인중").length, filter: "시공점 확인중" },
-    { label: "진행 중", value: deals.filter((deal) => deal.status === "진행중").length, filter: "진행중" },
-    { label: "오늘 완료", value: deals.filter((deal) => deal.status === "작업완료").length, filter: "작업완료" },
+  const cards: { label: string; value: number; filter: TransactionStage | "전체" }[] = [
+    { label: "확인 대기", value: deals.filter((deal) => deal.status.stage === "접수").length, filter: "접수" },
+    { label: "진행 중", value: deals.filter((deal) => !["접수", "완료", "취소"].includes(deal.status.stage)).length, filter: "입고예정" },
+    { label: "오늘 완료", value: deals.filter((deal) => deal.status.stage === "완료").length, filter: "완료" },
   ];
   return (
     <section className="dealer-dashboard simplified-dashboard">
@@ -19,7 +19,7 @@ export function DealerDashboard({ deals, onFilterDeals, onOpenDeal, onNewRequest
         <button className="secondary" onClick={onFindShop}>전국 시공점 찾기</button>
       </div></section>
       <section className="today-list-card dashboard-recent-deals"><div className="section-head"><h2>최근 거래</h2><button onClick={() => onFilterDeals("전체")}>전체 보기</button></div><div>
-        {deals.slice(0, 5).map((deal) => <button key={deal.id} onClick={() => onOpenDeal(deal.id)}><span><b>{deal.model}</b><small>{deal.packageName} · {deal.shopName}</small></span><em className={`status-badge ${deal.status === "진행중" ? "working" : deal.status === "작업완료" ? "done" : "waiting"}`}>{deal.status}</em></button>)}
+        {deals.slice(0, 5).map((deal) => <button key={deal.id} onClick={() => onOpenDeal(deal.id)}><span><b>{deal.vehicle.model}</b><small>{deal.service.product ?? deal.service.workDescription} · {deal.installerName}</small></span><em className={`status-chip status-${deal.status.stage}`}>{deal.status.stage}</em></button>)}
       </div></section>
     </section>
   );

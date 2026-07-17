@@ -1,6 +1,6 @@
 {
   "name": "car-master-prototype",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -9,7 +9,7 @@
     "dev": "vinext dev",
     "build": "vinext build",
     "start": "vinext start",
-    "test": "node --test tests/fees.test.mjs",
+    "test": "node --experimental-strip-types --test tests/fees.test.mjs tests/transaction-state-service.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },
