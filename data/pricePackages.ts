@@ -1,12 +1,15 @@
 import { formatGuidePrice, installationPriceGuide } from "./installation-price-guide";
+import { vehicleClassOptions, type VehicleClass } from "./vehicle-class-options";
 
 export type PriceBrand = (typeof installationPriceGuide)[number]["name"];
 
-export type VehicleClass = "국산 승용";
+export type { VehicleClass } from "./vehicle-class-options";
+export type PriceGuideFilter = "전체" | "버텍스" | "브이쿨" | "솔라가드" | "후퍼옵틱" | "레인보우" | "레이노" | "글라스틴트" | "기타";
 
 export type PricePackage = {
   id: string;
   brand: PriceBrand;
+  brandGroup: "주요 브랜드" | "기타";
   name: string;
   product: string;
   description: string;
@@ -21,17 +24,19 @@ export type PricePackage = {
   notice: string;
 };
 
-export const vehicleClassLabels: VehicleClass[] = ["국산 승용"];
+export const vehicleClassLabels = vehicleClassOptions.map((item) => item.id);
 
 export const priceBrands: ("전체" | PriceBrand)[] = ["전체", ...installationPriceGuide.map((brand) => brand.name)];
+export const priceGuideFilters: PriceGuideFilter[] = ["전체", "버텍스", "브이쿨", "솔라가드", "후퍼옵틱", "레인보우", "레이노", "글라스틴트", "기타"];
 
 export const pricePackages: PricePackage[] = installationPriceGuide.flatMap((brand) =>
   brand.products.map((product, productIndex) => {
     const priceLabel = formatGuidePrice(product.guidePrice);
 
     return {
-      id: `${brand.id}-${productIndex}-${product.name.toLowerCase().replace(/[^a-z0-9가-힣]+/gi, "-")}`,
+      id: product.id,
       brand: brand.name,
+      brandGroup: brand.group,
       name: `${brand.name} ${product.name}`,
       product: product.name,
       description: product.note ?? "국산 승용차의 썬팅 시공 패키지를 기준으로 한 카마스터 시공 가격 가이드입니다.",
@@ -40,6 +45,9 @@ export const pricePackages: PricePackage[] = installationPriceGuide.flatMap((bra
       priceLabel,
       prices: {
         "국산 승용": priceLabel,
+        "국산 대형/SUV": "추가금 발생 가능",
+        "수입 승용": formatGuidePrice(product.guidePrice + 50000),
+        "수입 대형/SUV": "별도 견적",
       },
       includedServices: ["썬팅 시공 패키지", "기본 마감 점검"],
       optionalServices: ["선루프", "SUV", "기존 필름 제거", "PPF", "블랙박스"],

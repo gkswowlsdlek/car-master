@@ -41,6 +41,7 @@ export type InstallerShop = {
   approved: boolean;
   rating: number;
   responseTime: string;
+  recentTransactionCount: number;
 };
 
 export type SearchLocation = {
@@ -183,6 +184,7 @@ const explicitBusan: InstallerShop[] = [
     approved: true,
     rating: 4.9,
     responseTime: "평균 18분",
+    recentTransactionCount: 184,
   },
   {
     id: "SHOP-BS-002",
@@ -199,6 +201,7 @@ const explicitBusan: InstallerShop[] = [
     approved: true,
     rating: 4.8,
     responseTime: "평균 24분",
+    recentTransactionCount: 162,
   },
   {
     id: "SHOP-BS-003",
@@ -215,6 +218,7 @@ const explicitBusan: InstallerShop[] = [
     approved: true,
     rating: 4.7,
     responseTime: "평균 31분",
+    recentTransactionCount: 141,
   },
 ];
 
@@ -234,6 +238,7 @@ const explicitMetro: InstallerShop[] = [
     approved: true,
     rating: 4.9,
     responseTime: "평균 16분",
+    recentTransactionCount: 213,
   },
 ];
 
@@ -267,6 +272,7 @@ function buildRegionShops(region: RegionKey, count: number, start: number): Inst
       approved,
       rating: Number((4.5 + ((index + start) % 5) * 0.1).toFixed(1)),
       responseTime: `평균 ${18 + ((index + start) % 8) * 7}분`,
+      recentTransactionCount: 80 + ((index + start) % 19) * 7,
     };
   });
 }
@@ -288,6 +294,7 @@ export const installerShops: InstallerShop[] = ([
     approved: true,
     rating: 4.8,
     responseTime: "평균 22분",
+    recentTransactionCount: 198,
   },
   {
     id: "SHOP-SEOUL-REAL-002",
@@ -304,6 +311,7 @@ export const installerShops: InstallerShop[] = ([
     approved: true,
     rating: 4.7,
     responseTime: "평균 28분",
+    recentTransactionCount: 176,
   },
   ...explicitMetro,
   ...buildRegionShops("metro", 14, 51),
