@@ -140,7 +140,7 @@ export default function Home() {
   };
 
   if (screen === "landing") return <LandingPage onStart={() => goToScreen("login")} onPriceGuide={() => goToScreen("login")} />;
-  if (screen === "login") return <LoginScreen accounts={demoAccounts} onLogin={login} />;
+  if (screen === "login") return <LoginScreen accounts={demoAccounts} onLogin={login} onExplore={() => goToScreen("landing")} />;
 
   const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;
   return <AppShell role={role} account={account} screen={screen} onNavigate={goToScreen} onLogout={() => goToScreen("login")}>
