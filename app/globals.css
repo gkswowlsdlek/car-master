@@ -153,3 +153,13 @@ button:active:not(:disabled) { transform: translateY(0) scale(.99); }
 .marketing-hero-copy { max-width: 590px; }.marketing-hero h1 { text-wrap: balance; }.marketing-hero .page-subtitle { max-width: 570px; }.login-service-intro h1 { max-width: 620px; }.login-service-intro > p:not(.eyebrow):not(.login-trust) { max-width: 580px; }.service-steps article p { max-width: 30ch; }.marketing-footer :is(p,span) { word-break: keep-all; }
 @media (max-width:900px) { :root { --font-display: 34px; --font-heading: 23px; }.marketing-hero-copy,.marketing-hero .page-subtitle,.login-service-intro h1,.login-service-intro > p:not(.eyebrow):not(.login-trust) { max-width: 100%; } }
 @media (max-width:560px) { :root { --font-display: 30px; --font-heading: 21px; --font-body: 15px; }.marketing-hero h1,.login-service-intro h1 { line-height: 1.18; }.page-subtitle { line-height: 1.7; }.eyebrow { font-size: 10px; } }
+
+/* Global Car-Master logo visibility */
+.marketing-nav { min-height: 98px; }.marketing-brand { display: flex; align-items: center; min-width: 300px; }.marketing-brand img { width: 286px; max-width: 100%; height: auto; }
+.login-intro-brand { display: flex; align-items: center; min-height: 70px; }.login-intro-brand img { width: 292px; max-width: 100%; height: auto; margin-bottom: 32px; }
+.app-frame { grid-template-columns: 288px minmax(0,1fr); }.app-logo { width: 100%; padding: 0 4px; }.app-logo img { display: block; width: 238px; max-width: 100%; height: auto; }.app-logo small { margin-top: 10px; }
+.footer-brand img { width: 238px; max-width: 100%; height: auto; }.footer-brand { min-width: 260px; }
+@media (max-width:1180px) { .marketing-brand { min-width: 250px; }.marketing-brand img { width: 252px; }.login-intro-brand img { width: 260px; }.app-frame { grid-template-columns: 252px minmax(0,1fr); }.app-logo img { width: 210px; }.footer-brand img { width: 220px; } }
+@media (max-width:900px) { .marketing-nav { min-height: 88px; }.marketing-brand { min-width: 220px; }.marketing-brand img { width: 232px; }.login-intro-brand img { width: 270px; } }
+@media (max-width:760px) { .marketing-nav { min-height: 78px; }.marketing-brand { min-width: 190px; }.marketing-brand img { width: 206px; }.login-intro-brand img { width: 248px; margin-bottom: 24px; }.app-logo img { width: 220px; }.footer-brand { min-width: 0; }.footer-brand img { width: 220px; } }
+@media (max-width:420px) { .marketing-brand { min-width: 170px; }.marketing-brand img { width: 184px; }.login-intro-brand img,.app-logo img,.footer-brand img { width: 210px; } }
