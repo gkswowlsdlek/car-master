@@ -2,7 +2,15 @@ import type { UserProfile } from "../types/transactions";
 import { readCollection, subscribeToStorage, writeCollection } from "./storage";
 
 export const PROFILE_STORAGE_KEY = "car-master-user-profiles";
-export class LocalProfileRepository {
+export interface ProfileRepository {
+  getAll(): UserProfile[];
+  getById(id: string): UserProfile | null;
+  create(profile: UserProfile): void;
+  update(profile: UserProfile): void;
+  save(profile: UserProfile): void;
+  subscribe(listener: () => void): () => void;
+}
+export class LocalProfileRepository implements ProfileRepository {
   getAll = () => readCollection<UserProfile>(PROFILE_STORAGE_KEY).map((profile) => ({
     ...profile,
     brands: Array.isArray(profile.brands) ? profile.brands : profile.brands ? [profile.brands] : [],

@@ -26,6 +26,7 @@ import { transactionRepository } from "../repositories/transaction-repository";
 import { searchNearbyInstallers } from "../services/installer-search";
 import { createId, createTransactionNumber } from "../services/id-service";
 import { searchLocation } from "../services/location-search";
+import { authProvider } from "../services/auth";
 import { transitionPayment, transitionStage } from "../services/transaction-state-service";
 import type { DemoAccount, RequestType, Role, Screen, ServiceRequest } from "../types/dealer";
 import type { SearchLocation } from "../types/location";
@@ -84,6 +85,18 @@ export default function Home() {
     window.history[replace ? "replaceState" : "pushState"](null, "", path);
   }, []);
 
+  const authenticate = useCallback(async (email: string, password: string) => {
+    const user = await authProvider.login({ email, password });
+    const nextAccount = demoAccounts.find((item) => item.id === user.id);
+    if (!nextAccount) throw new Error("로그인 계정 정보를 찾을 수 없습니다.");
+    login(nextAccount);
+  }, [login]);
+
+  const logout = useCallback(async () => {
+    await authProvider.logout();
+    goToScreen("login");
+  }, [goToScreen]);
+
   useEffect(() => {
     const pathname = window.location.pathname;
     const routeAccount = pathname === "/dealer" ? demoAccounts[0] : pathname === "/shop" ? demoAccounts[1] : pathname === "/admin" ? demoAccounts[2] : null;
@@ -140,10 +153,10 @@ export default function Home() {
   };
 
   if (screen === "landing") return <LandingPage onStart={() => goToScreen("login")} onPriceGuide={() => goToScreen("login")} />;
-  if (screen === "login") return <LoginScreen accounts={demoAccounts} onLogin={login} onExplore={() => goToScreen("landing")} />;
+  if (screen === "login") return <LoginScreen onLogin={authenticate} onExplore={() => goToScreen("landing")} />;
 
   const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;
-  return <AppShell role={role} account={account} screen={screen} onNavigate={goToScreen} onLogout={() => goToScreen("login")}>
+  return <AppShell role={role} account={account} screen={screen} onNavigate={goToScreen} onLogout={() => void logout()}>
     {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} onFilterDeals={() => goToScreen("deals")} onOpenDeal={(id) => { setSelectedTransactionId(id); goToScreen("deals"); }} onNewRequest={() => goToScreen("request")} onFindShop={() => goToScreen("dealerMap")} onPriceGuide={() => goToScreen("priceGuide")} onOpenChat={() => goToScreen("deals")} />}
     {screen === "priceGuide" && <PriceGuideScreen packages={filteredPackages} selectedPackage={selectedPackage} selectedPackageId={selectedPackageId} setSelectedPackageId={setSelectedPackageId} brandFilter={priceFilter} setBrandFilter={setPriceFilter} search={priceSearch} setSearch={setPriceSearch} vehicleClass={vehicleClass} setVehicleClass={setVehicleClass} onRequest={applyPackage} />}
     {screen === "dealerMap" && <DealerMapScreen query={query} setQuery={setQuery} searchArea={searchArea} location={location} searchError={locationError} results={nearbyResults} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} favoriteShopIds={favoriteShopIds} toggleFavoriteShop={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => goToScreen("request")} />}
