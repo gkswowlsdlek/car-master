@@ -1,20 +1,22 @@
 /* eslint-disable @next/next/no-img-element */
+import { ArrowRight, Building2, CheckCircle2, CircleDollarSign, Clock3, FileText, MapPin, MessageCircle, ShieldCheck, Sparkles, Wrench } from "lucide-react";
 
 const workflow = ["가격 확인", "시공 요청", "시공점 선택", "거래방", "채팅", "결제", "완료"];
 const steps = [
-  { number: "01", title: "가격 확인", description: "브랜드와 차량 등급에 맞는 가이드 가격을 먼저 확인합니다." },
-  { number: "02", title: "시공점 선택", description: "거리, 평점, 응답속도를 비교해 적합한 시공점을 선택합니다." },
-  { number: "03", title: "거래방 생성", description: "요청과 동시에 거래별 작업 정보와 채팅방이 만들어집니다." },
-  { number: "04", title: "시공 완료", description: "입고부터 시공, 결제까지 하나의 흐름에서 마무리합니다." },
+  { number: "01", title: "가격 확인", description: "브랜드와 차량 등급에 맞는 가이드 가격을 먼저 확인합니다.", icon: CircleDollarSign },
+  { number: "02", title: "시공점 선택", description: "거리, 평점, 응답속도를 비교해 적합한 시공점을 선택합니다.", icon: MapPin },
+  { number: "03", title: "거래방 생성", description: "요청과 동시에 거래별 작업 정보와 채팅방이 만들어집니다.", icon: MessageCircle },
+  { number: "04", title: "시공 완료", description: "입고부터 시공, 결제까지 하나의 흐름에서 마무리합니다.", icon: CheckCircle2 },
 ];
 
 export function LandingPage({ onStart, onPriceGuide }: { onStart: () => void; onPriceGuide: () => void }) {
   return <main className="marketing-page">
     <nav className="marketing-nav"><div className="marketing-brand"><img src="/carmaster-logo-transparent.png" alt="Car-Master" /></div><div><button className="button button-ghost" onClick={onPriceGuide}>가격 가이드</button><button className="button button-primary" onClick={onStart}>로그인</button></div></nav>
-    <section className="marketing-hero"><p className="eyebrow">DEALER INSTALLATION WORKSPACE</p><h1>차량 시공 업무를<br />하나의 거래 흐름으로.</h1><p className="page-subtitle">흩어진 연락과 파일 대신, 가격 확인부터 시공 완료까지.<br />카마스터가 딜러의 시공 업무를 선명하게 정리합니다.</p><div className="marketing-cta"><button className="button button-primary button-large" onClick={onStart}>카마스터 시작하기</button><button className="button button-secondary button-large" onClick={onPriceGuide}>가격 가이드 보기</button></div></section>
+    <section className="marketing-hero"><div className="marketing-hero-copy"><div className="hero-kicker"><Sparkles size={15} /> 딜러와 시공점을 위한 업무 플랫폼</div><h1>차량 시공 업무를<br /><span>하나의 거래 흐름으로.</span></h1><p className="page-subtitle">흩어진 연락과 파일 대신, 가격 확인부터 시공 완료까지.<br />카마스터가 딜러의 시공 업무를 선명하게 정리합니다.</p><div className="marketing-cta"><button className="button button-primary button-large" onClick={onStart}>카마스터 시작하기 <ArrowRight size={18} /></button><button className="button button-secondary button-large" onClick={onPriceGuide}>가격 가이드 보기</button></div><div className="hero-assurance"><span><ShieldCheck size={16} /> 거래별 기록 관리</span><span><Clock3 size={16} /> 빠른 업무 확인</span></div></div><div className="product-preview" aria-label="카마스터 거래관리 화면 미리보기"><div className="preview-window-bar"><span /><span /><span /><b>Car-Master Workspace</b></div><div className="preview-app"><aside><div className="preview-logo-mark">CM</div>{["대시보드", "가격 가이드", "시공 요청", "거래 관리"].map((item, index) => <i className={index === 0 ? "active" : ""} key={item}>{item}</i>)}</aside><section><header><div><small>TODAY&apos;S WORKSPACE</small><strong>오늘의 시공 업무</strong></div><span>+ 새 시공 요청</span></header><div className="preview-metrics"><article><small>오늘 거래</small><b>12</b><em>+8.2%</em></article><article><small>진행 중</small><b>8</b><em>정상 진행</em></article><article><small>견적 대기</small><b>3</b><em>확인 필요</em></article></div><div className="preview-table"><div><b>최근 거래</b><span>전체 보기</span></div><p><i><Building2 size={14} /></i><span><b>BMW X5</b><small>강동 프리미엄 시공점</small></span><em>시공중</em></p><p><i><Wrench size={14} /></i><span><b>Tesla Model Y</b><small>PPF 패키지 · 오늘 입고</small></span><em className="waiting">입고예정</em></p><p><i><FileText size={14} /></i><span><b>Genesis GV80</b><small>썬팅 패키지 · 견적 확인</small></span><em className="done">완료</em></p></div></section></div></div></section>
     <section className="workflow-story"><div className="workflow-story-copy"><p className="eyebrow">ONE TRANSACTION FLOW</p><h2>카카오톡, 전화, 엑셀로<br />흩어진 업무를 한곳으로.</h2><p>요청 내용이 사라지거나 일정과 금액을 다시 확인하는 반복을 줄입니다. 모든 기록은 거래방에 남고, 다음 할 일이 분명해집니다.</p></div><ol>{workflow.map((item, index) => <li key={item}><span>{String(index + 1).padStart(2, "0")}</span><b>{item}</b></li>)}</ol></section>
-    <section className="trust-strip"><span>등록 시공점 100+</span><span>거래별 독립 작업 브리핑</span><span>행정구역 기준 거리 검색</span></section>
-    <section className="service-steps"><div className="service-steps-heading"><p className="eyebrow">HOW IT WORKS</p><h2>시공 업무, 네 단계면 충분합니다.</h2><p>처음 사용하는 딜러도 다음 행동을 바로 이해할 수 있습니다.</p></div><div>{steps.map((step) => <article className="card" key={step.number}><span>STEP {step.number}</span><h3>{step.title}</h3><p>{step.description}</p></article>)}</div></section>
+    <section className="trust-strip"><span><Building2 size={17} /> 전국 시공점 연결</span><span><MessageCircle size={17} /> 거래방 자동 생성</span><span><Clock3 size={17} /> 실시간 진행 관리</span><span><CircleDollarSign size={17} /> 가격 가이드 제공</span></section>
+    <section className="service-steps"><div className="service-steps-heading"><p className="eyebrow">HOW IT WORKS</p><h2>시공 업무, 네 단계면 충분합니다.</h2><p>처음 사용하는 딜러도 다음 행동을 바로 이해할 수 있습니다.</p></div><div>{steps.map((step) => <article className="card" key={step.number}><span className="step-icon"><step.icon size={22} /></span><small>STEP {step.number}</small><h3>{step.title}</h3><p>{step.description}</p></article>)}</div></section>
     <section className="marketing-final-cta"><p className="eyebrow">READY TO START</p><h2>첫 시공 요청부터 더 간결하게.</h2><button className="button button-primary button-large" onClick={onStart}>카마스터 시작하기</button></section>
+    <footer className="marketing-footer"><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><div><span>카마스터</span><span>문의 help@car-master.kr</span><span>v0.3.1 Beta</span><span>© 2026 Car-Master</span></div></footer>
   </main>;
 }
