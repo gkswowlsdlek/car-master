@@ -8,7 +8,8 @@ function isToday(value?: string) {
   return date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && date.getDate() === today.getDate();
 }
 
-export function DealerDashboard({ deals, onFilterDeals, onOpenDeal, onNewRequest, onFindShop, onPriceGuide }: {
+export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenDeal, onNewRequest, onFindShop, onPriceGuide }: {
+  dealerName: string;
   deals: Transaction[]; onFilterDeals: (filter: TransactionStage | "전체") => void; onOpenDeal: (id: string) => void;
   onNewRequest: () => void; onFindShop: () => void; onPriceGuide: () => void; onOpenChat: () => void;
 }) {
@@ -20,7 +21,7 @@ export function DealerDashboard({ deals, onFilterDeals, onOpenDeal, onNewRequest
     { label: "최근 완료 거래", description: "완료 처리된 전체 거래", value: deals.filter((deal) => deal.status.stage === "완료").length, filter: "완료" as const, icon: CheckCircle2, tone: "green" },
   ];
   return <section className="dealer-dashboard simplified-dashboard">
-    <header className="dealer-welcome"><div><p className="eyebrow">TODAY&apos;S WORKSPACE</p><h1>안녕하세요.<br /><span>홍길동 딜러님</span></h1><p>확인이 필요한 거래부터 빠르게 처리하세요.</p></div><button className="primary" onClick={onNewRequest}><Plus size={18} /> 새 시공 요청</button></header>
+    <header className="dealer-welcome"><div><p className="eyebrow">TODAY&apos;S WORKSPACE</p><h1>안녕하세요.<br /><span>{dealerName} 딜러님</span></h1><p>확인이 필요한 거래부터 빠르게 처리하세요.</p></div><button className="primary" onClick={onNewRequest}><Plus size={18} /> 새 시공 요청</button></header>
     <div className="metric-grid dashboard-core-metrics">{cards.map((card) => <button className={`metric-card tone-${card.tone}`} key={card.label} onClick={() => onFilterDeals(card.filter)}><i><card.icon size={20} /></i><span>{card.label}</span><b>{card.value}<small>건</small></b><em>{card.description}</em></button>)}</div>
     <section className="dashboard-quick-actions"><div className="section-head"><div><p className="eyebrow">QUICK ACTIONS</p><h2>빠른 실행</h2></div></div><div><button className="primary" onClick={onPriceGuide}><CircleDollarSign size={17} /> 시공 가격 확인</button><button className="secondary" onClick={onNewRequest}><Plus size={17} /> 새 시공 요청</button><button className="secondary" onClick={onFindShop}><MapPin size={17} /> 전국 시공점 찾기</button></div></section>
     {deals.length === 0 ? <section className="empty-state dashboard-empty"><span>+</span><h2>아직 거래가 없습니다.</h2><p>가격을 확인하고 첫 시공 요청을 만들어 보세요.</p><button className="primary" onClick={onNewRequest}>첫 시공 요청 만들기</button></section> : <div className="dashboard-activity-grid">
