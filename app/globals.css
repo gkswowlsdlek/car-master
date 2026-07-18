@@ -131,3 +131,25 @@ button:active:not(:disabled) { transform: translateY(0) scale(.99); }
 @media (max-width:900px) { .marketing-hero { grid-template-columns: 1fr; padding-top: 54px; }.hero-product-stack { width: min(700px,100%); }.hero-workflow > div b { display: block; } }
 @media (max-width:760px) { .marketing-hero { padding-top: 44px; }.hero-product-stack { gap: 0; }.hero-workflow { padding: 15px; }.hero-workflow > div { display: grid; gap: 3px; }.hero-workflow ol { grid-template-columns: repeat(4,1fr); row-gap: 12px; margin-top: 3px; }.hero-workflow ol::before { display: none; }.hero-workflow li { font-size: 9px; } }
 @media (prefers-reduced-motion:reduce) { .hero-product-stack { animation: none; } }
+
+/* V0.3.1.3 global typography and readability */
+:where(.marketing-page,.login-ad-page,.app-main,.system-state-page) { font-kerning: normal; font-variant-numeric: tabular-nums; }
+:where(.marketing-page,.login-ad-page,.app-main,.system-state-page) :is(h1,h2,h3,h4) { text-wrap: balance; word-break: keep-all; overflow-wrap: normal; }
+:where(.marketing-page,.login-ad-page,.app-main,.system-state-page) :is(p,dd,li) { text-wrap: pretty; word-break: keep-all; }
+:where(.marketing-page,.login-ad-page,.app-main,.system-state-page) h1 { font-weight: 800; letter-spacing: -.045em; }
+:where(.marketing-page,.login-ad-page,.app-main,.system-state-page) h2 { font-weight: 780; letter-spacing: -.032em; }
+:where(.marketing-page,.login-ad-page,.app-main,.system-state-page) h3 { font-weight: 750; letter-spacing: -.024em; }
+:where(.workspace-heading,.page-title,.dealer-welcome,.section-head,.section-heading,.service-steps-heading) > div > p:last-child,
+:where(.workspace-heading,.page-title,.dealer-welcome,.section-head,.section-heading,.service-steps-heading) > p:last-child { max-width: 720px; line-height: 1.72; }
+:where(.page-subtitle,.login-note,.final-cta-description,.workflow-story-copy > p:last-child) { line-height: 1.78; letter-spacing: -.008em; }
+:where(.card,.metric-card,.shop-metric-card,.today-list-card,.empty-state,[role="dialog"],dialog,.modal,.dialog) :is(h2,h3,h4,b,strong) { word-break: keep-all; text-wrap: balance; }
+:where(.card,.metric-card,.shop-metric-card,.today-list-card,.empty-state,[role="dialog"],dialog,.modal,.dialog) :is(p,small,dd) { word-break: keep-all; text-wrap: pretty; line-height: 1.68; }
+:where(.empty-state,.compact-empty,.system-state-page) p { max-width: 560px; margin-right: auto; margin-left: auto; }
+:where(.button,.primary,.secondary,.badge,.status-chip,.brand-check-badge,.admin-live-badge,.hero-kicker,.service-status) { white-space: nowrap; word-break: keep-all; line-height: 1.2; letter-spacing: -.012em; }
+:where(.app-sidebar nav button,.marketing-nav button,.dashboard-quick-actions button,.summary-actions button) { white-space: nowrap; }
+:where(.metric-card,.shop-metric-card,.admin-summary-grid .card) > span { white-space: nowrap; line-height: 1.42; }.metric-card > em,.shop-metric-card > em,.admin-summary-grid .card > em { line-height: 1.62; }
+:where(table,.transaction-payment-table,.price-table) { line-height: 1.55; }.transaction-payment-table :is(th,td),table :is(th,td) { word-break: keep-all; }.transaction-payment-table th,table th { white-space: nowrap; font-size: 13px; font-weight: 750; letter-spacing: -.012em; }.transaction-payment-table td,table td { font-size: 14px; }
+:where(input,textarea,select) { line-height: 1.5; letter-spacing: -.01em; }.login-card label,.service-request-form label,.profile-editor label { line-height: 1.45; }.eyebrow { line-height: 1.4; white-space: nowrap; }
+.marketing-hero-copy { max-width: 590px; }.marketing-hero h1 { text-wrap: balance; }.marketing-hero .page-subtitle { max-width: 570px; }.login-service-intro h1 { max-width: 620px; }.login-service-intro > p:not(.eyebrow):not(.login-trust) { max-width: 580px; }.service-steps article p { max-width: 30ch; }.marketing-footer :is(p,span) { word-break: keep-all; }
+@media (max-width:900px) { :root { --font-display: 34px; --font-heading: 23px; }.marketing-hero-copy,.marketing-hero .page-subtitle,.login-service-intro h1,.login-service-intro > p:not(.eyebrow):not(.login-trust) { max-width: 100%; } }
+@media (max-width:560px) { :root { --font-display: 30px; --font-heading: 21px; --font-body: 15px; }.marketing-hero h1,.login-service-intro h1 { line-height: 1.18; }.page-subtitle { line-height: 1.7; }.eyebrow { font-size: 10px; } }

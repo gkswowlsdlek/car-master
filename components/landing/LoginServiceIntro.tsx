@@ -8,7 +8,7 @@ export function LoginServiceIntro({ onExplore, onPriceGuide }: { onExplore: () =
         <img src="/carmaster-logo-transparent.png" alt="Car-Master" />
       </div>
       <p className="eyebrow">DEALER INSTALLATION WORKSPACE</p>
-      <h1>자동차 용품 시공,<br />카카오톡 대신 카마스터 하나로.</h1>
+      <h1>자동차 용품 시공,<br />카카오톡 대신<br /><span className="no-break">카마스터 하나로.</span></h1>
       <p>시공 가격 확인부터 시공점 선택, 거래방 생성, 작업 진행 관리까지 딜러의 시공 업무를 한곳에서 관리합니다.</p>
       <ul>
         <li><CircleDollarSign size={20} /><span><b>투명한 가격 가이드</b><small>주요 브랜드와 차량 등급별 기준가를 확인합니다.</small></span></li>
