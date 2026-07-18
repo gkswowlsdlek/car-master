@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, LockKeyhole, UserRound } from "lucide-react";
+import { ArrowRight, LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
 import type { DemoAccount } from "../../types/dealer";
 import { LoginServiceIntro } from "../landing/LoginServiceIntro";
 
@@ -27,6 +27,7 @@ export function LoginScreen({ accounts, onLogin }: { accounts: DemoAccount[]; on
           <label>비밀번호<span className="login-input-wrap"><LockKeyhole size={17} /><input autoComplete="current-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" && submit()} placeholder="비밀번호" /></span></label>
           {error && <p className="login-error">{error}</p>}
           <button className="primary full" onClick={submit}>워크스페이스 로그인 <ArrowRight size={17} /></button>
+          <div className="login-security-note"><ShieldCheck size={19} /><span><b>안전한 워크스페이스</b><small>초대받은 딜러 및 시공점만 접근할 수 있습니다.</small></span></div>
           <p className="login-support-note">계정 발급이나 로그인에 문제가 있나요? <button onClick={() => alert("베타 운영 문의: help@car-master.kr")}>운영팀 문의</button></p>
           {process.env.NODE_ENV === "development" && <small className="demo-login-hint">개발용 계정: 딜러 1/1 · 시공점 2/2 · 관리자 3/3</small>}
         </section>
