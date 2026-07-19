@@ -20,7 +20,18 @@ export type Transaction = {
 
 export type TransactionChatMessage = {
   id: string; roomId: string; senderId: string; senderRole: "dealer" | "shop" | "admin" | "system";
-  text: string; createdAt: string; readBy: string[];
+  text: string; createdAt: string; readBy: string[]; attachments?: ChatAttachment[];
+};
+
+export type ChatAttachment = {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  kind: "image" | "file";
+  persistence: "session";
+  createdAt: string;
 };
 
 export type ChatRoom = { id: string; transactionId: string; messages: TransactionChatMessage[]; createdAt: string; updatedAt: string };
@@ -28,5 +39,6 @@ export type ChatRoom = { id: string; transactionId: string; messages: Transactio
 export type UserProfile = {
   id: string; role: "dealer" | "shop"; name: string; companyName?: string; representativeName?: string;
   phone: string; email: string; activityArea?: string; address?: string; brands?: string[]; works?: string[]; hours?: string; introduction?: string;
+  closedDays?: string; emergencyAvailable?: boolean;
   notifications: { request: boolean; chat: boolean; schedule: boolean; marketing: boolean };
 };

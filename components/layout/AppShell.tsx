@@ -13,9 +13,9 @@ const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon
     { screen: "dealerProfile", label: "마이페이지", icon: UserRound },
   ],
   shop: [
-    { screen: "shopDashboard", label: "대시보드", icon: Gauge },
-    { screen: "shopRequests", label: "거래 관리", icon: Building2 },
-    { screen: "dealerProfile", label: "시공점 정보", icon: Settings2 },
+    { screen: "shopDashboard", label: "홈", icon: Gauge },
+    { screen: "shopRequests", label: "거래방", icon: Building2 },
+    { screen: "dealerProfile", label: "시공점 관리", icon: Settings2 },
   ],
   admin: [{ screen: "ops", label: "운영 현황", icon: UsersRound }],
 };
@@ -40,8 +40,8 @@ export function AppShell({ role, account, screen, onNavigate, onLogout, children
       <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{roleLabel} 계정</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
     </aside>
     <main className="app-main">
-      <header className="app-topbar"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>v0.3.2 Beta</small></div></div></div></header>
-      <div className="beta-environment-bar"><span>V0.3.2 BETA</span><p>현재 베타 운영 환경입니다. 거래 기록은 브라우저에 안전하게 저장됩니다.</p></div>
+      <header className="app-topbar"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>v0.3.3 Beta</small></div></div></div></header>
+      <div className="beta-environment-bar"><span>V0.3.3 BETA</span><p>시공점 Workspace 2.0 운영 환경입니다. 거래 기록은 브라우저에 안전하게 저장됩니다.</p></div>
       {children}
     </main>
   </div>;
