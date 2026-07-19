@@ -2,7 +2,7 @@
 
 Car-Master는 리스·렌트 에이전시 딜러와 자동차 시공점을 연결하고, 가격 확인부터 시공 완료까지의 업무를 거래 단위로 관리하는 B2B 플랫폼입니다.
 
-현재 버전은 `Car-Master V0.3.3 - 시공점 워크스페이스 개선 패치`입니다.
+현재 버전은 `Car-Master V0.3.4 - 실제 회원가입 · 로그인 · 회원 DB 구축`입니다.
 
 ## 핵심 사용자 흐름
 
@@ -48,17 +48,17 @@ pnpm dev
 ## 검증 명령
 
 ```bash
-npm test
-npm run lint
-npm run build
+pnpm test
+pnpm run lint
+pnpm run build
 ```
 
-## V0.3.3 Installer Workspace 2.0
+## V0.3.4 회원 시스템
 
-현재 거래와 프로필은 브라우저 localStorage에 저장되며 기존 데모 흐름은 그대로 유지됩니다. UI는 저장소를 직접 다루지 않고 repository 계층을 사용합니다. 인증은 `AuthProvider`, 위치 검색은 `LocationSearchProvider`, 거래방 조회는 `TransactionRoomService` 경계를 통해 이후 실제 API 구현으로 교체할 수 있습니다.
+Supabase가 설정된 운영 환경에서는 이메일 인증과 회원 프로필을 Supabase Auth/Postgres에 저장합니다. 역할은 `dealer`, `installer`, `admin`으로 관리하며 시공점은 관리자 승인 후 워크스페이스에 접근합니다.
 
 `shop`은 기존 화면과 저장 데이터 호환을 위해 유지되는 명칭이며, 새 서비스 경계에서는 표준 역할명 `installer`로 정규화합니다. 실제 API 연결 전에는 서버 인증, 권한 검증, 데이터베이스, 지도 API 키, 개인정보 처리방침과 운영 모니터링이 추가로 필요합니다.
 
-시공점은 오늘 입고, 진행 작업, 신규 요청과 일정을 업무 순서대로 확인할 수 있습니다. 딜러와 시공점의 거래방은 거래 목록, 대화, 자동 작업 브리핑이 함께 보이는 메신저형 인터페이스를 사용합니다. 첨부 Prototype은 브라우저 메모리 URL만 사용하며 대용량 파일 데이터를 localStorage에 저장하지 않습니다.
+거래, 거래방, 채팅과 결제 Prototype은 이번 버전에서 기존 localStorage를 유지합니다. 개발 환경에서 Supabase가 설정되지 않은 경우에만 기존 데모 계정을 사용할 수 있습니다.
 
-자세한 변경 사항은 `RELEASE_NOTES_V0.3.3.md`를 참고하세요.
+외부 서비스 설정은 `SUPABASE_SETUP_V0.3.4.md`, 변경 사항은 `RELEASE_NOTES_V0.3.4.md`를 참고하세요.

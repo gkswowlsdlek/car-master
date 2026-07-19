@@ -2,6 +2,7 @@ import { Activity, CheckCircle2, CircleAlert, CreditCard, TrendingUp } from "luc
 import { pricePackages } from "../../data/pricePackages";
 import type { ChatRoom, Transaction } from "../../types/transactions";
 import { AdminTransactionPanel } from "./AdminTransactionPanel";
+import { InstallerApprovalPanel } from "./InstallerApprovalPanel";
 
 export function AdminOverview({ transactions, rooms }: { transactions: Transaction[]; rooms: ChatRoom[] }) {
   const referenceTime = Math.max(0, ...transactions.map((item) => new Date(item.status.updatedAt).getTime()));
@@ -18,5 +19,6 @@ export function AdminOverview({ transactions, rooms }: { transactions: Transacti
     <div className="admin-alert-strip"><div><span>!</span><p><b>운영 확인</b> 신규 요청 {transactions.filter((item) => item.status.stage === "접수").length}건과 장기 미응답 {stalled}건을 확인해 주세요.</p></div><div><span>가격 상품</span><b>{pricePackages.length}개 운영 중</b></div></div>
     <section className="admin-insight-grid"><article className="card admin-chart-card"><header><div><p className="eyebrow">TRANSACTION VOLUME</p><h2>주간 거래량</h2></div><span><TrendingUp size={15} /> 최근 7일</span></header><div className="admin-chart" aria-label="주간 거래량 시각화">{[38, 52, 44, 68, 58, 82, 72].map((height, index) => <i key={index} style={{ height: `${height}%` }}><span>{["월", "화", "수", "목", "금", "토", "일"][index]}</span></i>)}</div></article><article className="card admin-health-card"><p className="eyebrow">SERVICE HEALTH</p><h2>운영 상태</h2><div><span><CheckCircle2 size={18} /> 서비스 운영</span><b>정상</b></div><div><span><Activity size={18} /> 활성 거래방</span><b>{rooms.length}개</b></div><div><span><CreditCard size={18} /> 가격 상품</span><b>{pricePackages.length}개</b></div></article></section>
     <AdminTransactionPanel transactions={transactions} rooms={rooms} />
+    <InstallerApprovalPanel />
   </section>;
 }

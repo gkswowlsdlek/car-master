@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminOverview } from "../components/admin/AdminOverview";
+import { AccountStatusScreen } from "../components/auth/AccountStatusScreen";
 import { LoginScreen } from "../components/auth/LoginScreen";
+import { SignUpScreen } from "../components/auth/SignUpScreen";
 import { DealerDashboard } from "../components/dealer/DealerDashboard";
 import { DealerMapScreen } from "../components/dealer/DealerMapScreen";
 import { PriceGuideScreen } from "../components/dealer/PriceGuideScreen";
@@ -26,11 +28,12 @@ import { transactionRepository } from "../repositories/transaction-repository";
 import { searchNearbyInstallers } from "../services/installer-search";
 import { createId, createTransactionNumber } from "../services/id-service";
 import { searchLocation } from "../services/location-search";
-import { authProvider } from "../services/auth";
+import { authProvider, isDemoAuthMode } from "../services/auth";
 import { transitionPayment, transitionStage } from "../services/transaction-state-service";
 import type { DemoAccount, RequestType, Role, Screen, ServiceRequest } from "../types/dealer";
 import type { SearchLocation } from "../types/location";
 import type { ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../types/transactions";
+import type { CurrentUser, SignUpInput, SignUpResult } from "../types/auth";
 
 const initialDistrict = districtCenters.find((item) => item.id === "gyeonggi-hanam") ?? districtCenters[0];
 const initialLocation: SearchLocation = { id: initialDistrict.id, city: initialDistrict.city, district: initialDistrict.district, label: initialDistrict.label, latitude: initialDistrict.latitude, longitude: initialDistrict.longitude };
@@ -38,9 +41,16 @@ const initialLocation: SearchLocation = { id: initialDistrict.id, city: initialD
 function pathForScreen(screen: Screen, role: Role) {
   if (screen === "landing") return "/";
   if (screen === "login") return "/login";
+  if (screen === "signup") return "/signup";
+  if (screen === "accountStatus") return "/account-status";
   if (role === "shop") return "/shop";
   if (role === "admin") return "/admin";
   return "/dealer";
+}
+
+function accountForUser(user: CurrentUser): DemoAccount {
+  const role: Role = user.role === "installer" ? "shop" : user.role;
+  return { id: user.id, email: user.email, password: "", name: user.name, role, entryScreen: role === "dealer" ? "dealerDashboard" : role === "shop" ? "shopDashboard" : "ops", shopId: role === "shop" ? user.id : undefined };
 }
 
 function roleTransactionsForActivity(transactions: Transaction[], role: Role, shopId?: string) {
@@ -51,6 +61,8 @@ export default function Home() {
   const [role, setRole] = useState<Role>("dealer");
   const [account, setAccount] = useState<DemoAccount>(demoAccounts[0]);
   const [screen, setScreen] = useState<Screen>("landing");
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [query, setQuery] = useState("하남시");
   const [location, setLocation] = useState<SearchLocation>(initialLocation);
   const [locationError, setLocationError] = useState("");
@@ -85,24 +97,52 @@ export default function Home() {
     window.history[replace ? "replaceState" : "pushState"](null, "", path);
   }, []);
 
+  const enterAuthenticatedUser = useCallback((user: CurrentUser, replace = false) => {
+    const nextAccount = accountForUser(user);
+    const nextScreen: Screen = user.role === "installer" && user.approvalStatus !== "approved" ? "accountStatus" : nextAccount.entryScreen;
+    setCurrentUser(user); setAccount(nextAccount); setRole(nextAccount.role); setScreen(nextScreen);
+    const path = pathForScreen(nextScreen, nextAccount.role);
+    window.history[replace ? "replaceState" : "pushState"](null, "", path);
+  }, []);
+
   const authenticate = useCallback(async (email: string, password: string) => {
     const user = await authProvider.login({ email, password });
-    const nextAccount = demoAccounts.find((item) => item.id === user.id);
-    if (!nextAccount) throw new Error("로그인 계정 정보를 찾을 수 없습니다.");
-    login(nextAccount);
-  }, [login]);
+    const demoAccount = demoAccounts.find((item) => item.id === user.id);
+    if (demoAccount && isDemoAuthMode) { login(demoAccount); return; }
+    enterAuthenticatedUser(user);
+  }, [enterAuthenticatedUser, login]);
+
+  const signUp = useCallback(async (input: SignUpInput): Promise<SignUpResult> => {
+    const result = await authProvider.signUp(input);
+    if (result.user) enterAuthenticatedUser(result.user);
+    return result;
+  }, [enterAuthenticatedUser]);
 
   const logout = useCallback(async () => {
     await authProvider.logout();
+    setCurrentUser(null);
     goToScreen("login");
   }, [goToScreen]);
 
   useEffect(() => {
     const pathname = window.location.pathname;
-    const routeAccount = pathname === "/dealer" ? demoAccounts[0] : pathname === "/shop" ? demoAccounts[1] : pathname === "/admin" ? demoAccounts[2] : null;
-    const frame = requestAnimationFrame(() => routeAccount ? login(routeAccount, true) : setScreen(pathname === "/login" ? "login" : "landing"));
+    const frame = requestAnimationFrame(() => { void (async () => {
+      try {
+        if (isDemoAuthMode) {
+          const routeAccount = pathname === "/dealer" ? demoAccounts[0] : pathname === "/shop" ? demoAccounts[1] : pathname === "/admin" ? demoAccounts[2] : null;
+          if (routeAccount) login(routeAccount, true); else setScreen(pathname === "/login" ? "login" : pathname === "/signup" ? "signup" : "landing");
+          return;
+        }
+        const user = await authProvider.initialize();
+        const protectedPath = ["/dealer", "/shop", "/admin", "/account-status"].includes(pathname);
+        if (user && (protectedPath || pathname === "/login")) enterAuthenticatedUser(user, true);
+        else if (!user && protectedPath) { setScreen("login"); window.history.replaceState(null, "", "/login"); }
+        else setScreen(pathname === "/signup" ? "signup" : pathname === "/login" ? "login" : "landing");
+      } catch { setScreen("login"); }
+      finally { setAuthReady(true); }
+    })(); });
     return () => cancelAnimationFrame(frame);
-  }, [login]);
+  }, [enterAuthenticatedUser, login]);
 
   const activeTransactionId = selectedTransactionId || transactions[0]?.id || "";
   const profileActivity = useMemo(() => {
@@ -135,7 +175,7 @@ export default function Home() {
     const now = new Date().toISOString();
     const id = createTransactionNumber(sequence);
     const chatRoomId = createId("CHAT");
-    const transaction: Transaction = { id, dealerId: demoAccounts[0].id, installerId: selectedShop.id, installerName: selectedShop.name, vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass }, service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest }, pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" }, schedule: { requestedInboundAt: request.inboundStart }, status: { stage: "접수", createdAt: now, updatedAt: now }, visibility: { hiddenByDealer: false, hiddenByInstaller: false }, chatRoomId, lastMessage: "새 시공 요청이 접수되었습니다." };
+    const transaction: Transaction = { id, dealerId: account.id, installerId: selectedShop.id, installerName: selectedShop.name, vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass }, service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest }, pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" }, schedule: { requestedInboundAt: request.inboundStart }, status: { stage: "접수", createdAt: now, updatedAt: now }, visibility: { hiddenByDealer: false, hiddenByInstaller: false }, chatRoomId, lastMessage: "새 시공 요청이 접수되었습니다." };
     const room: ChatRoom = { id: chatRoomId, transactionId: id, createdAt: now, updatedAt: now, messages: [{ id: createId("MSG"), roomId: chatRoomId, senderId: "system", senderRole: "system", text: "거래방이 생성되었습니다. 자동 작업 브리핑을 확인하세요.", createdAt: now, readBy: [account.id] }] };
     transactionRepository.create(transaction); chatRepository.create(room); setSelectedTransactionId(id); goToScreen("deals");
   };
@@ -152,8 +192,11 @@ export default function Home() {
     try { transactionRepository.update(transitionPayment(transaction, status, role === "admin" ? "admin" : role)); } catch (error) { alert(error instanceof Error ? error.message : "결제 상태를 변경할 수 없습니다."); }
   };
 
+  if (!authReady) return <main className="system-state-page" aria-busy="true"><section><div className="system-state-logo">CM</div><div className="loading-line wide" /><p>회원 세션을 확인하고 있습니다.</p></section></main>;
   if (screen === "landing") return <LandingPage onStart={() => goToScreen("login")} onPriceGuide={() => goToScreen("login")} />;
-  if (screen === "login") return <LoginScreen onLogin={authenticate} onExplore={() => goToScreen("landing")} />;
+  if (screen === "login") return <LoginScreen onLogin={authenticate} onExplore={() => goToScreen("landing")} onSignUp={() => goToScreen("signup")} />;
+  if (screen === "signup") return <SignUpScreen onBack={() => goToScreen("login")} onSignUp={signUp} />;
+  if (screen === "accountStatus" && currentUser) return <AccountStatusScreen user={currentUser} onLogout={() => void logout()} />;
 
   const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;
   return <AppShell role={role} account={account} screen={screen} onNavigate={goToScreen} onLogout={() => void logout()}>
@@ -164,7 +207,7 @@ export default function Home() {
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} onOpenTransactions={() => goToScreen("shopRequests")} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} />}
     {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUpdate={(value) => transactionRepository.update(value)} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} />}
-    {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} activity={profileActivity} />}
+    {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} userId={account.id} activity={profileActivity} />}
     {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} />}
   </AppShell>;
 }

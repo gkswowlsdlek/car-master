@@ -1,10 +1,12 @@
-import type { CurrentUser } from "../../types/auth";
+import type { CurrentUser, SignUpInput, SignUpResult } from "../../types/auth";
 
 export type AuthCredentials = { email: string; password: string };
 
 export interface AuthProvider {
   getCurrentUser(): CurrentUser | null;
+  initialize(): Promise<CurrentUser | null>;
   login(credentials: AuthCredentials): Promise<CurrentUser>;
+  signUp(input: SignUpInput): Promise<SignUpResult>;
   logout(): Promise<void>;
 }
 

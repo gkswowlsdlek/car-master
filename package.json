@@ -1,6 +1,6 @@
 {
   "name": "car-master-prototype",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -10,11 +10,13 @@
     "build": "vinext build",
     "build:vercel": "next build",
     "start": "vinext start",
-    "test": "node --experimental-strip-types --test --test-isolation=none tests/fees.test.mjs tests/transaction-state-service.test.mjs tests/auth-provider.test.mjs",
+    "test": "node --experimental-strip-types --test --test-isolation=none tests/fees.test.mjs tests/transaction-state-service.test.mjs tests/auth-provider.test.mjs tests/access-policy.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.3",
+    "@supabase/supabase-js": "^2.110.7",
     "drizzle-orm": "0.45.2",
     "image-size": "^2.0.2",
     "lucide-react": "^1.25.0",

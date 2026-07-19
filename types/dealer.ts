@@ -4,7 +4,7 @@ import type { LegacyUserRole } from "./auth";
 
 /** @deprecated UI compatibility alias. New service boundaries use UserRole (`installer`). */
 export type Role = LegacyUserRole;
-export type Screen = "landing" | "login" | "dealerDashboard" | "shopDashboard" | "priceGuide" | "dealerMap" | "request" | "requestSummary" | "deals" | "dealerProfile" | "shopRequests" | "ops";
+export type Screen = "landing" | "login" | "signup" | "accountStatus" | "dealerDashboard" | "shopDashboard" | "priceGuide" | "dealerMap" | "request" | "requestSummary" | "deals" | "dealerProfile" | "shopRequests" | "ops";
 export type RequestType = "견적 문의" | "실제 시공 요청";
 export type DemoAccount = { id: string; email: string; password: string; name: string; role: Role; entryScreen: Screen; shopId?: string };
 
