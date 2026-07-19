@@ -3,9 +3,9 @@ import { DemoAuthProvider } from "./demo-auth-provider";
 import { isSupabaseConfigured } from "../../lib/supabase/config";
 import { SupabaseAuthProvider } from "./supabase-auth-provider";
 
-// V0.3.4 beta fallback: keep the three role accounts available until
-// Supabase is configured. This also allows preview/production builds to be
-// tested without exposing a broken authentication screen.
+// Demo accounts are UI-only QA sessions. They do not create a Supabase
+// session and therefore cannot bypass database RLS or server-side membership.
+export const areDemoAccountsEnabled = true;
 export const isDemoAuthMode = !isSupabaseConfigured;
 export const authProvider = isSupabaseConfigured ? new SupabaseAuthProvider() : new DemoAuthProvider(demoAccounts);
 export type { AuthCredentials, AuthProvider } from "./auth-provider";

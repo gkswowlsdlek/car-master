@@ -4,6 +4,22 @@ import { supabasePublishableKey, supabaseUrl } from "./config";
 
 export async function updateSupabaseSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const pathname = request.nextUrl.pathname;
+  const protectedRole = pathname.startsWith("/dealer") ? "dealer" : pathname.startsWith("/shop") ? "installer" : pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/account-status") ? "installer" : null;
+  const demoRole = request.cookies.get("carmaster-demo-role")?.value;
+  const normalizedDemoRole = demoRole === "shop" ? "installer" : demoRole;
+
+  // Public demo sessions unlock only the prototype UI. Supabase RLS still
+  // receives no authenticated user and continues to protect real member data.
+  if (protectedRole && normalizedDemoRole && ["dealer", "installer", "admin"].includes(normalizedDemoRole)) {
+    response.headers.set("Cache-Control", "private, no-store");
+    if (normalizedDemoRole === protectedRole) {
+      if (pathname.startsWith("/account-status")) return NextResponse.redirect(new URL("/shop", request.url));
+      return response;
+    }
+    const demoPath = normalizedDemoRole === "dealer" ? "/dealer" : normalizedDemoRole === "admin" ? "/admin" : "/shop";
+    return NextResponse.redirect(new URL(demoPath, request.url));
+  }
   if (!supabaseUrl || !supabasePublishableKey) return response;
   const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
     cookies: {
@@ -18,8 +34,6 @@ export async function updateSupabaseSession(request: NextRequest) {
   });
   const { data } = await supabase.auth.getClaims();
   response.headers.set("Cache-Control", "private, no-store");
-  const pathname = request.nextUrl.pathname;
-  const protectedRole = pathname.startsWith("/dealer") ? "dealer" : pathname.startsWith("/shop") ? "installer" : pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/account-status") ? "installer" : null;
   if (protectedRole) {
     const userId = typeof data?.claims?.sub === "string" ? data.claims.sub : null;
     if (!userId) return copyAuthCookies(response, NextResponse.redirect(new URL("/login", request.url)));

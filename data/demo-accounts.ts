@@ -5,3 +5,7 @@ export const demoAccounts: DemoAccount[] = [
   { id: "misa-starhills-shop", email: "2", password: "2", name: "미사 스타힐스 시공점", role: "shop", entryScreen: "shopDashboard", shopId: "SHOP-MISA-001" },
   { id: "hanjaejin-admin", email: "3", password: "3", name: "관리자 한재진", role: "admin", entryScreen: "ops" },
 ];
+
+export function isDemoAccountId(value?: string) {
+  return Boolean(value && demoAccounts.some((account) => account.id === value));
+}

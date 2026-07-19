@@ -36,8 +36,8 @@ export function ShopDashboard({ transactions, onOpenTransactions, onOpenTransact
     { label: "오늘 완료", value: transactions.filter((item) => item.status.stage === "완료" && inRange(item.schedule.completedAt, "오늘")).length, description: "오늘 완료 처리한 작업", tone: "complete", icon: CheckCircle2 },
   ];
 
-  return <section className="shop-dashboard section">
-    <header className="workspace-heading installer-heading"><div><p className="eyebrow">INSTALLER WORKSPACE 2.0</p><h1>오늘 해야 할 작업을<br />한눈에 확인하세요.</h1><p>입고 일정부터 시공 상태와 거래 대화까지 하나의 워크스페이스에서 관리합니다.</p></div><button className="primary" onClick={onOpenTransactions}><MessageSquareText size={18} /> 거래방 열기</button></header>
+  return <section className="shop-dashboard section role-home role-home-shop">
+    <header className="workspace-heading installer-heading"><div><p className="eyebrow">INSTALLER WORKSPACE</p><h1>오늘 입고와<br />진행 작업을 확인하세요.</h1><p>응답 대기 요청과 작업 순서를 먼저 정리했습니다.</p></div><button className="primary" onClick={onOpenTransactions}><MessageSquareText size={18} /> 거래방 열기</button></header>
     <div className="shop-metric-grid">{metrics.map((metric) => <button key={metric.label} className={`shop-metric-card ${metric.tone}`} onClick={onOpenTransactions}><i><metric.icon size={21} /></i><span>{metric.label}</span><b>{metric.value}<small>건</small></b><em>{metric.description}</em></button>)}</div>
     {transactions.length === 0 ? <section className="empty-state shop-empty"><span>✓</span><h2>현재 접수된 거래가 없습니다.</h2><p>새 시공 요청이 도착하면 오늘의 작업과 신규 요청 목록에 바로 표시됩니다.</p></section> : <div className="installer-workspace-grid">
       <section className="card installer-today-work"><header><div><p className="eyebrow">TODAY&apos;S WORK</p><h2><Clock3 size={21} /> 오늘의 작업</h2></div><div className="schedule-range-tabs">{(["오늘", "내일", "이번 주"] as const).map((item) => <button className={range === item ? "active" : ""} key={item} onClick={() => setRange(item)}>{item}</button>)}</div></header>

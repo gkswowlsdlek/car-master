@@ -258,3 +258,46 @@ button:active:not(:disabled) { transform: translateY(0) scale(.99); }
   .login-benefits-mobile { gap: 10px; margin-top: 10px; }
   .login-benefits-mobile li { min-height: 92px; border-radius: 15px; }
 }
+
+/* V0.3.4.1 Workspace UI update 1 */
+.role-home :is(.metric-card,.shop-metric-card,.admin-summary-grid .card) > i { width: 44px; height: 44px; }
+.role-home :is(.metric-card,.shop-metric-card,.admin-summary-grid .card) > i svg { width: 22px; height: 22px; }
+.role-home :is(.dealer-welcome,.workspace-heading) > div > p:last-child { color: #64748b; word-break: keep-all; }
+@media (max-width:760px) {
+  .app-frame { display: block; }
+  .app-main { min-height: 100vh; padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+  .app-sidebar { position: fixed; z-index: 100; top: auto; right: 0; bottom: 0; left: 0; display: block; width: auto; height: auto; border-top: 1px solid rgba(203,213,225,.9); border-right: 0; background: rgba(255,255,255,.96); padding: 7px 8px calc(7px + env(safe-area-inset-bottom)); box-shadow: 0 -12px 32px rgba(15,23,42,.1); backdrop-filter: blur(18px); }
+  .app-sidebar :is(.app-logo,.sidebar-section-label,.sidebar-support,.sidebar-profile) { display: none; }
+  .app-sidebar nav { display: flex; gap: 4px; overflow-x: auto; margin: 0; padding: 0; scrollbar-width: none; }
+  .app-sidebar nav::-webkit-scrollbar { display: none; }
+  .app-sidebar nav button { display: grid; min-width: 68px; flex: 1 0 68px; grid-template-columns: 1fr; grid-template-rows: 28px auto; justify-items: center; gap: 2px; border-radius: 12px; padding: 6px 5px; color: #64748b; font-size: 10px; text-align: center; }
+  .app-sidebar nav button i { display: grid; width: 28px; height: 28px; place-items: center; }
+  .app-sidebar nav button i svg { width: 20px; height: 20px; }
+  .app-sidebar nav button span { max-width: 66px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .app-sidebar nav button.active { background: #eff6ff; color: #1d4ed8; }
+  .app-sidebar nav button em { display: none; }
+  .app-topbar { top: 0; z-index: 90; border-bottom-color: #e2e8f0; background: rgba(255,255,255,.96); backdrop-filter: blur(18px); }
+  .beta-environment-bar { min-height: 32px; }
+  .beta-environment-bar > span { font-size: 9px; }
+  .role-home { padding-top: 24px !important; padding-bottom: 36px !important; }
+  .role-home :is(.dealer-welcome,.workspace-heading) { gap: 16px; margin-bottom: 20px; }
+  .role-home :is(.dealer-welcome,.workspace-heading) h1 { margin: 5px 0 7px; font-size: 29px; line-height: 1.22; }
+  .role-home :is(.dealer-welcome,.workspace-heading) > div > p:last-child { font-size: 14px; line-height: 1.65; }
+  .role-home :is(.dealer-welcome,.workspace-heading) > button { min-height: 48px; font-size: 15px; }
+  .role-home :is(.dashboard-core-metrics,.shop-metric-grid,.admin-summary-grid) { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .role-home :is(.metric-card,.shop-metric-card,.admin-summary-grid .card) { min-height: 124px; grid-template-columns: 38px minmax(0,1fr); gap: 6px 8px; padding: 14px; border-radius: 15px; }
+  .role-home :is(.metric-card,.shop-metric-card,.admin-summary-grid .card) > i { width: 38px; height: 38px; border-radius: 11px; }
+  .role-home :is(.metric-card,.shop-metric-card,.admin-summary-grid .card) > i svg { width: 20px; height: 20px; }
+  .role-home :is(.metric-card,.shop-metric-card,.admin-summary-grid .card) > span { min-width: 0; overflow: hidden; font-size: 12px; text-overflow: ellipsis; }
+  .role-home :is(.metric-card,.shop-metric-card,.admin-summary-grid .card) > b { margin-top: 4px; font-size: 27px; }
+  .role-home :is(.metric-card,.shop-metric-card,.admin-summary-grid .card) > em { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+  .dashboard-quick-actions { margin: 14px 0; padding: 18px; }
+  .dashboard-quick-actions .section-head { display: none; }
+  .dashboard-quick-actions > div:last-child { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dashboard-quick-actions > div:last-child button:first-child { grid-column: 1/-1; }
+  .today-list-card,.installer-today-work,.installer-request-queue,.admin-chart-card,.admin-health-card,.admin-transaction-panel { border-radius: 15px; padding: 18px; }
+  .dashboard-activity-grid,.shop-workspace-grid,.admin-insight-grid { gap: 12px; margin-top: 14px; }
+  .admin-alert-strip { align-items: stretch; margin-top: 12px; padding: 14px; }
+  .admin-alert-strip > div:last-child { justify-content: space-between; }
+  .admin-chart { height: 130px; }
+}

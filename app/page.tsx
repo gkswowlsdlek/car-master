@@ -37,6 +37,26 @@ import type { CurrentUser, SignUpInput, SignUpResult } from "../types/auth";
 
 const initialDistrict = districtCenters.find((item) => item.id === "gyeonggi-hanam") ?? districtCenters[0];
 const initialLocation: SearchLocation = { id: initialDistrict.id, city: initialDistrict.city, district: initialDistrict.district, label: initialDistrict.label, latitude: initialDistrict.latitude, longitude: initialDistrict.longitude };
+const demoSessionKey = "carmaster.demo-account";
+
+function findDemoAccount(email: string, password: string) {
+  return demoAccounts.find((item) => item.email === email.trim() && item.password === password) ?? null;
+}
+
+function readDemoAccount() {
+  const accountId = window.localStorage.getItem(demoSessionKey);
+  return demoAccounts.find((item) => item.id === accountId) ?? null;
+}
+
+function writeDemoAccount(account: DemoAccount | null) {
+  if (account) {
+    window.localStorage.setItem(demoSessionKey, account.id);
+    document.cookie = `carmaster-demo-role=${account.role}; Path=/; Max-Age=86400; SameSite=Lax`;
+    return;
+  }
+  window.localStorage.removeItem(demoSessionKey);
+  document.cookie = "carmaster-demo-role=; Path=/; Max-Age=0; SameSite=Lax";
+}
 
 function pathForScreen(screen: Screen, role: Role) {
   if (screen === "landing") return "/";
@@ -106,9 +126,15 @@ export default function Home() {
   }, []);
 
   const authenticate = useCallback(async (email: string, password: string) => {
+    const demoAccount = findDemoAccount(email, password);
+    if (demoAccount) {
+      writeDemoAccount(demoAccount);
+      setCurrentUser(null);
+      login(demoAccount);
+      return;
+    }
+    writeDemoAccount(null);
     const user = await authProvider.login({ email, password });
-    const demoAccount = demoAccounts.find((item) => item.id === user.id);
-    if (demoAccount && isDemoAuthMode) { login(demoAccount); return; }
     enterAuthenticatedUser(user);
   }, [enterAuthenticatedUser, login]);
 
@@ -119,6 +145,7 @@ export default function Home() {
   }, [enterAuthenticatedUser]);
 
   const logout = useCallback(async () => {
+    writeDemoAccount(null);
     await authProvider.logout();
     setCurrentUser(null);
     goToScreen("login");
@@ -128,6 +155,11 @@ export default function Home() {
     const pathname = window.location.pathname;
     const frame = requestAnimationFrame(() => { void (async () => {
       try {
+        const persistedDemoAccount = readDemoAccount();
+        if (persistedDemoAccount) {
+          login(persistedDemoAccount, true);
+          return;
+        }
         if (isDemoAuthMode) {
           const routeAccount = pathname === "/dealer" ? demoAccounts[0] : pathname === "/shop" ? demoAccounts[1] : pathname === "/admin" ? demoAccounts[2] : null;
           if (routeAccount) login(routeAccount, true); else setScreen(pathname === "/login" ? "login" : pathname === "/signup" ? "signup" : "landing");
@@ -208,6 +240,6 @@ export default function Home() {
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} onOpenTransactions={() => goToScreen("shopRequests")} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} />}
     {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUpdate={(value) => transactionRepository.update(value)} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} />}
     {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} userId={account.id} activity={profileActivity} />}
-    {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} />}
+    {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} demoSession={demoAccounts.some((item) => item.id === account.id)} />}
   </AppShell>;
 }
