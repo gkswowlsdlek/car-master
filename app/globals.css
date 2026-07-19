@@ -229,3 +229,32 @@ button:active:not(:disabled) { transform: translateY(0) scale(.99); }
   .trust-strip span { min-height: 76px; justify-content: flex-start; gap: 9px; padding: 14px 13px; font-size: 13px; }
   .trust-strip span svg { width: 23px; height: 23px; }
 }
+
+/* V0.3.4.1 Landing UI update 3 */
+.login-intro-description { word-break: keep-all; }
+.login-workspace-benefits { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; max-width: 620px; margin: 28px 0; padding: 0; list-style: none; }
+.login-workspace-benefits li { display: grid; align-content: start; gap: 15px; min-height: 158px; border: 1px solid #dbe3ee; border-radius: 16px; background: linear-gradient(145deg,rgba(255,255,255,.96),rgba(248,250,252,.92)); padding: 20px; box-shadow: 0 10px 26px rgba(15,23,42,.055); }
+.login-workspace-benefits li > i { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 14px; background: linear-gradient(145deg,#eff6ff,#dbeafe); color: #2563eb; box-shadow: 0 8px 20px rgba(37,99,235,.12); }
+.login-workspace-benefits li span { display: grid; gap: 7px; }
+.login-workspace-benefits li b { color: #172033; font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
+.login-workspace-benefits li small { color: #64748b; font-size: 12px; line-height: 1.65; word-break: keep-all; }
+.login-benefits-mobile { display: none; }
+@media (hover:hover) {
+  .login-workspace-benefits li:hover { border-color: #93c5fd; background: #fff; box-shadow: 0 16px 36px rgba(37,99,235,.1); transform: translateY(-3px); }
+}
+@media (max-width:900px) {
+  .login-ad-layout { align-items: start; }
+  .login-service-intro { padding-bottom: 4px; }
+  .login-service-intro .login-benefits-desktop,.login-service-intro .login-trust { display: none; }
+  .login-benefits-mobile { display: grid; width: min(520px,100%); max-width: none; grid-template-columns: 1fr; justify-self: center; margin: 8px auto 24px; }
+  .login-benefits-mobile li { grid-template-columns: 52px minmax(0,1fr); align-items: center; gap: 14px; min-height: 96px; padding: 16px; }
+  .login-benefits-mobile li > i { width: 52px; height: 52px; }
+  .login-benefits-mobile li b { font-size: 16px; }
+  .login-benefits-mobile li small { font-size: 12px; }
+}
+@media (max-width:560px) {
+  .login-service-intro h1 { margin-bottom: 20px; }
+  .login-intro-description { font-size: 15px !important; line-height: 1.8 !important; }
+  .login-benefits-mobile { gap: 10px; margin-top: 10px; }
+  .login-benefits-mobile li { min-height: 92px; border-radius: 15px; }
+}

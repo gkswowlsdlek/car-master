@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { ArrowRight, LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
-import { LoginServiceIntro } from "../landing/LoginServiceIntro";
+import { LoginServiceIntro, LoginWorkspaceBenefits } from "../landing/LoginServiceIntro";
 import { isDemoAuthMode } from "../../services/auth";
 
 export function LoginScreen({ onLogin, onExplore, onSignUp }: { onLogin: (email: string, password: string) => Promise<void>; onExplore: () => void; onSignUp: () => void }) {
@@ -45,6 +45,7 @@ export function LoginScreen({ onLogin, onExplore, onSignUp }: { onLogin: (email:
           <p className="login-support-note">계정 발급이나 로그인에 문제가 있나요? <button onClick={() => alert("베타 운영 문의: help@car-master.kr")}>운영팀 문의</button></p>
           {isDemoAuthMode && <small className="demo-login-hint">베타 계정: 딜러 1/1 · 시공점 2/2 · 관리자 3/3</small>}
         </section>
+        <LoginWorkspaceBenefits className="login-benefits-mobile" />
       </div>
     </main>
   );
