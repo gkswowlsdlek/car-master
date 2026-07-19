@@ -207,3 +207,25 @@ button:active:not(:disabled) { transform: translateY(0) scale(.99); }
 .marketing-brand { align-items: flex-start; }
 .account-status-shell { width: min(900px,100%); display: grid; gap: 18px; }.account-status-shell .account-status-card { width: 100%; }.installer-registration-editor { padding: 28px; }.installer-registration-editor h2 { margin: 0 0 6px; }.installer-registration-editor > p { margin: 0 0 20px; color: #64748b; }.installer-registration-editor > div { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.installer-registration-editor label { display: grid; gap: 7px; color: #334155; font-size: 11px; font-weight: 750; }.installer-registration-editor input { height: 46px; }.installer-registration-editor .registration-message { margin: 14px 0; border-radius: 10px; background: #eff6ff; color: #1d4ed8; padding: 10px 12px; font-size: 11px; }.installer-registration-editor .primary { margin-top: 18px; }.account-status-page { align-items: start; }.account-status-shell { margin-top: 4vh; }
 @media (max-width:760px) { .installer-registration-editor { padding: 22px 18px; }.installer-registration-editor > div { grid-template-columns: 1fr; } }
+
+/* V0.3.4.1 Landing UI update 2 */
+.hero-workflow ol { grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; }
+.hero-workflow ol::before { top: 14px; }
+.hero-workflow li { gap: 7px; font-size: 11px; }
+.hero-workflow li i { width: 29px; height: 29px; font-size: 10px; }
+.trust-strip { display: grid; width: 100%; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; padding: 28px max(64px,calc((100vw - 1312px)/2)); }
+.trust-strip span { min-height: 74px; justify-content: center; border-radius: 18px; padding: 16px 18px; font-size: 15px; font-weight: 750; }
+.trust-strip span svg { flex: 0 0 auto; width: 25px; height: 25px; }
+.trust-strip .primary-benefit { border-color: #93c5fd; background: linear-gradient(145deg,#eff6ff,#fff); color: #1d4ed8; box-shadow: 0 10px 24px rgba(37,99,235,.1); }
+@media (max-width:900px) {
+  .trust-strip { grid-template-columns: repeat(2,minmax(0,1fr)); padding-inline: 28px; }
+}
+@media (max-width:760px) {
+  .hero-workflow ol { grid-template-columns: repeat(5,minmax(0,1fr)); gap: 3px; }
+  .hero-workflow ol::before { display: block; top: 13px; right: 8%; left: 8%; }
+  .hero-workflow li { gap: 6px; font-size: 10px; line-height: 1.25; text-align: center; white-space: normal; word-break: keep-all; }
+  .hero-workflow li i { width: 27px; height: 27px; }
+  .trust-strip { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; padding: 18px 20px 24px; text-align: left; }
+  .trust-strip span { min-height: 76px; justify-content: flex-start; gap: 9px; padding: 14px 13px; font-size: 13px; }
+  .trust-strip span svg { width: 23px; height: 23px; }
+}

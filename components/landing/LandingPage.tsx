@@ -1,13 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import { ArrowRight, Building2, CheckCircle2, CircleDollarSign, Clock3, FileText, MapPin, MessageCircle, ShieldCheck, Sparkles, Wrench } from "lucide-react";
+import { ArrowRight, Building2, CircleDollarSign, Clock3, FileText, MessageCircle, ShieldCheck, Sparkles, Wrench } from "lucide-react";
 
-const workflow = ["가격 확인", "시공 요청", "시공점 선택", "거래방", "채팅", "결제", "완료"];
-const steps = [
-  { number: "01", title: "가격 확인", description: "브랜드와 차량 등급에 맞는 가이드 가격을 먼저 확인합니다.", icon: CircleDollarSign },
-  { number: "02", title: "시공점 선택", description: "거리, 평점, 응답속도를 비교해 적합한 시공점을 선택합니다.", icon: MapPin },
-  { number: "03", title: "거래방 생성", description: "요청과 동시에 거래별 작업 정보와 채팅방이 만들어집니다.", icon: MessageCircle },
-  { number: "04", title: "시공 완료", description: "입고부터 시공, 결제까지 하나의 흐름에서 마무리합니다.", icon: CheckCircle2 },
-];
+const workflow = ["가격 확인", "시공점 선택", "시공 요청", "거래방·채팅", "결제 완료"];
 
 export function LandingPage({ onStart, onPriceGuide }: { onStart: () => void; onPriceGuide: () => void }) {
   return <main className="marketing-page">
@@ -19,8 +13,7 @@ export function LandingPage({ onStart, onPriceGuide }: { onStart: () => void; on
         <div className="hero-workflow" aria-label="카마스터 업무 흐름"><div><span>ONE TRANSACTION FLOW</span><b>요청부터 완료까지, 하나의 거래방에서</b></div><ol>{workflow.map((item, index) => <li key={item}><i>{index + 1}</i><span>{item}</span></li>)}</ol></div>
       </div>
     </section>
-    <section className="trust-strip"><span><Building2 size={17} /> 전국 시공점 연결</span><span><MessageCircle size={17} /> 거래방 자동 생성</span><span><Clock3 size={17} /> 실시간 진행 관리</span><span><CircleDollarSign size={17} /> 가격 가이드 제공</span></section>
-    <section className="service-steps"><div className="service-steps-heading"><p className="eyebrow">HOW IT WORKS</p><h2>시공 업무, 네 단계면 충분합니다.</h2><p>처음 사용하는 딜러도 다음 행동을 바로 이해할 수 있습니다.</p></div><div>{steps.map((step) => <article className="card" key={step.number}><span className="step-icon"><step.icon size={22} /></span><small>STEP {step.number}</small><h3>{step.title}</h3><p>{step.description}</p></article>)}</div></section>
+    <section className="trust-strip"><span className="primary-benefit"><Building2 size={24} /> 전국 시공점 연결</span><span className="primary-benefit"><CircleDollarSign size={24} /> 가격 가이드 제공</span><span><MessageCircle size={24} /> 거래방 자동 생성</span><span><Clock3 size={24} /> 실시간 진행 관리</span></section>
     <section className="marketing-final-cta"><p className="eyebrow">READY TO START</p><h2>첫 시공 요청부터 더 간결하게.</h2><p className="final-cta-description">가격 확인부터 거래 완료까지, 카마스터에서 한 번에 시작해 보세요.</p><button className="button button-primary button-large" onClick={onStart}>카마스터 시작하기 <ArrowRight size={19} /></button></section>
     <footer className="marketing-footer"><div className="footer-brand"><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><p>딜러와 시공점을 하나의 거래 흐름으로 연결합니다.</p></div><div className="footer-meta"><span><small>서비스</small>Car-Master Beta</span><span><small>문의</small>help@car-master.kr</span><span><small>버전</small>V0.3.4.1 · 실제 회원가입 시스템 기반</span><span><small>Copyright</small>© 2026 Car-Master</span></div></footer>
   </main>;
