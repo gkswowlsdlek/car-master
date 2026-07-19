@@ -1,13 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { demoAccounts } from "../../../data/demo-accounts";
+import { getDemoCredentials } from "../../../lib/demo-credentials";
 import { createDemoSession, demoSessionCookie, verifyDemoSession } from "../../../lib/demo-session";
 import type { Role } from "../../../types/dealer";
-
-const credentials = (): { role: Role; username?: string; password?: string }[] => [
-  { role: "dealer", username: process.env.CARMASTER_DEMO_DEALER_ID, password: process.env.CARMASTER_DEMO_DEALER_PASSWORD },
-  { role: "shop", username: process.env.CARMASTER_DEMO_SHOP_ID, password: process.env.CARMASTER_DEMO_SHOP_PASSWORD },
-  { role: "admin", username: process.env.CARMASTER_DEMO_ADMIN_ID, password: process.env.CARMASTER_DEMO_ADMIN_PASSWORD },
-];
 
 function publicAccount(role: Role) {
   const account = demoAccounts.find((item) => item.role === role);
@@ -16,7 +11,7 @@ function publicAccount(role: Role) {
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null) as { username?: string; password?: string } | null;
-  const matched = credentials().find((item) => item.username && item.password && item.username === body?.username?.trim() && item.password === body?.password);
+  const matched = getDemoCredentials().find((item) => item.username === body?.username?.trim() && item.password === body?.password);
   if (!matched) return NextResponse.json({ matched: false }, { status: 401 });
   const account = publicAccount(matched.role);
   if (!account) return NextResponse.json({ matched: false }, { status: 401 });

@@ -8,8 +8,7 @@ function encode(bytes: ArrayBuffer) {
 }
 
 async function signature(value: string) {
-  const secret = process.env.CARMASTER_DEMO_SESSION_SECRET;
-  if (!secret) return null;
+  const secret = process.env.CARMASTER_DEMO_SESSION_SECRET?.trim() || "carmaster-v0.3.4.1-public-demo-session-signing-key";
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey("raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return encode(await crypto.subtle.sign("HMAC", key, encoder.encode(value)));

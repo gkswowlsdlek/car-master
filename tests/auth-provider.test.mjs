@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { defaultDemoCredentials, getDemoCredentials } from "../lib/demo-credentials.ts";
 import { createDemoSession, verifyDemoSession } from "../lib/demo-session.ts";
 import { DemoAuthProvider } from "../services/auth/demo-auth-provider.ts";
 
@@ -29,4 +30,16 @@ test("server demo sessions are signed and reject tampering", async () => {
   assert.equal(await verifyDemoSession(session.token), "dealer");
   assert.equal(await verifyDemoSession(session.token.replace("dealer", "admin")), null);
   delete process.env.CARMASTER_DEMO_SESSION_SECRET;
+});
+
+test("public QA credentials resolve to the requested dealer, shop, and admin roles", () => {
+  assert.deepEqual(getDemoCredentials(), defaultDemoCredentials);
+  assert.deepEqual(
+    getDemoCredentials().map(({ role, username, password }) => ({ role, username, password })),
+    [
+      { role: "dealer", username: "1", password: "1" },
+      { role: "shop", username: "2", password: "2" },
+      { role: "admin", username: "3", password: "3" },
+    ],
+  );
 });
