@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { demoAccounts } from "../data/demo-accounts.ts";
+import { createDemoSession, verifyDemoSession } from "../lib/demo-session.ts";
 import { DemoAuthProvider } from "../services/auth/demo-auth-provider.ts";
 
 const accounts = [
@@ -23,16 +23,10 @@ test("demo auth rejects invalid credentials", async () => {
   await assert.rejects(() => provider.login({ email: "dealer", password: "wrong" }), /아이디 또는 비밀번호/);
 });
 
-test("published QA credentials open the dealer, installer, and admin roles", async () => {
-  const expected = [
-    { email: "1", password: "1", role: "dealer" },
-    { email: "2", password: "2", role: "installer" },
-    { email: "3", password: "3", role: "admin" },
-  ];
-
-  for (const account of expected) {
-    const provider = new DemoAuthProvider(demoAccounts);
-    const user = await provider.login(account);
-    assert.equal(user.role, account.role);
-  }
+test("server demo sessions are signed and reject tampering", async () => {
+  process.env.CARMASTER_DEMO_SESSION_SECRET = "test-only-session-secret";
+  const session = await createDemoSession("dealer");
+  assert.equal(await verifyDemoSession(session.token), "dealer");
+  assert.equal(await verifyDemoSession(session.token.replace("dealer", "admin")), null);
+  delete process.env.CARMASTER_DEMO_SESSION_SECRET;
 });

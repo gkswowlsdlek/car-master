@@ -1,12 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabasePublishableKey, supabaseUrl } from "./config";
+import { demoSessionCookie, verifyDemoSession } from "../demo-session";
 
 export async function updateSupabaseSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const pathname = request.nextUrl.pathname;
   const protectedRole = pathname.startsWith("/dealer") ? "dealer" : pathname.startsWith("/shop") ? "installer" : pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/account-status") ? "installer" : null;
-  const demoRole = request.cookies.get("carmaster-demo-role")?.value;
+  const demoRole = await verifyDemoSession(request.cookies.get(demoSessionCookie)?.value);
   const normalizedDemoRole = demoRole === "shop" ? "installer" : demoRole;
 
   // Public demo sessions unlock only the prototype UI. Supabase RLS still

@@ -28,7 +28,7 @@ import { transactionRepository } from "../repositories/transaction-repository";
 import { searchNearbyInstallers } from "../services/installer-search";
 import { createId, createTransactionNumber } from "../services/id-service";
 import { searchLocation } from "../services/location-search";
-import { authProvider, isDemoAuthMode } from "../services/auth";
+import { authProvider } from "../services/auth";
 import { transitionPayment, transitionStage } from "../services/transaction-state-service";
 import type { DemoAccount, RequestType, Role, Screen, ServiceRequest } from "../types/dealer";
 import type { SearchLocation } from "../types/location";
@@ -37,26 +37,6 @@ import type { CurrentUser, SignUpInput, SignUpResult } from "../types/auth";
 
 const initialDistrict = districtCenters.find((item) => item.id === "gyeonggi-hanam") ?? districtCenters[0];
 const initialLocation: SearchLocation = { id: initialDistrict.id, city: initialDistrict.city, district: initialDistrict.district, label: initialDistrict.label, latitude: initialDistrict.latitude, longitude: initialDistrict.longitude };
-const demoSessionKey = "carmaster.demo-account";
-
-function findDemoAccount(email: string, password: string) {
-  return demoAccounts.find((item) => item.email === email.trim() && item.password === password) ?? null;
-}
-
-function readDemoAccount() {
-  const accountId = window.localStorage.getItem(demoSessionKey);
-  return demoAccounts.find((item) => item.id === accountId) ?? null;
-}
-
-function writeDemoAccount(account: DemoAccount | null) {
-  if (account) {
-    window.localStorage.setItem(demoSessionKey, account.id);
-    document.cookie = `carmaster-demo-role=${account.role}; Path=/; Max-Age=86400; SameSite=Lax`;
-    return;
-  }
-  window.localStorage.removeItem(demoSessionKey);
-  document.cookie = "carmaster-demo-role=; Path=/; Max-Age=0; SameSite=Lax";
-}
 
 function pathForScreen(screen: Screen, role: Role) {
   if (screen === "landing") return "/";
@@ -126,14 +106,18 @@ export default function Home() {
   }, []);
 
   const authenticate = useCallback(async (email: string, password: string) => {
-    const demoAccount = findDemoAccount(email, password);
-    if (demoAccount) {
-      writeDemoAccount(demoAccount);
+    const demoResponse = await fetch("/api/demo-login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: email, password }) });
+    if (demoResponse.ok) {
+      const { account: demoAccount } = await demoResponse.json() as { account: DemoAccount };
       setCurrentUser(null);
       login(demoAccount);
       return;
     }
-    writeDemoAccount(null);
+    if (demoResponse.status !== 401) {
+      const result = await demoResponse.json().catch(() => null) as { error?: string } | null;
+      throw new Error(result?.error ?? "로그인 설정을 확인해 주세요.");
+    }
+    await fetch("/api/demo-login", { method: "DELETE" });
     const user = await authProvider.login({ email, password });
     enterAuthenticatedUser(user);
   }, [enterAuthenticatedUser, login]);
@@ -145,7 +129,7 @@ export default function Home() {
   }, [enterAuthenticatedUser]);
 
   const logout = useCallback(async () => {
-    writeDemoAccount(null);
+    await fetch("/api/demo-login", { method: "DELETE" });
     await authProvider.logout();
     setCurrentUser(null);
     goToScreen("login");
@@ -155,14 +139,10 @@ export default function Home() {
     const pathname = window.location.pathname;
     const frame = requestAnimationFrame(() => { void (async () => {
       try {
-        const persistedDemoAccount = readDemoAccount();
-        if (persistedDemoAccount) {
-          login(persistedDemoAccount, true);
-          return;
-        }
-        if (isDemoAuthMode) {
-          const routeAccount = pathname === "/dealer" ? demoAccounts[0] : pathname === "/shop" ? demoAccounts[1] : pathname === "/admin" ? demoAccounts[2] : null;
-          if (routeAccount) login(routeAccount, true); else setScreen(pathname === "/login" ? "login" : pathname === "/signup" ? "signup" : "landing");
+        const demoResponse = await fetch("/api/demo-login", { cache: "no-store" });
+        if (demoResponse.ok) {
+          const { account: demoAccount } = await demoResponse.json() as { account: DemoAccount };
+          login(demoAccount, true);
           return;
         }
         const user = await authProvider.initialize();
