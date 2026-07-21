@@ -14,12 +14,12 @@ export function PriceGuideScreen({ packages, selectedPackage, selectedPackageId,
   const grouped = Array.from(new Set(packages.map((item) => item.brand))).map((brand) => ({ brand, items: packages.filter((item) => item.brand === brand) }));
   const showsOther = packages.some((item) => item.brandGroup === "기타");
   return <section className="dealer-screen price-guide-screen">
-    <div className="page-title price-guide-title"><div><p className="eyebrow">INSTALLATION PRICE GUIDE</p><h1>시공 가격 가이드</h1><p className="page-subtitle">차량 등급을 선택하면 적용 가능한 가이드 금액을 확인할 수 있습니다.</p></div><div className="price-title-summary"><span>브랜드 {grouped.length}개</span><b>제품 {packages.length}개</b></div></div>
+    <div className="page-title price-guide-title"><div><p className="eyebrow">RECOMMENDED INSTALLATION PACKAGE GUIDE</p><h1>권장 시공 패키지 가이드</h1><p className="page-subtitle">차량 등급을 선택하면 브랜드별 적용 가능한 가이드 금액을 확인할 수 있습니다.</p></div><div className="price-title-summary"><span>브랜드 {grouped.length}개</span><b>제품 {packages.length}개</b></div></div>
     <div className="price-guide-toolbar"><div className="price-brand-tabs">{priceGuideFilters.map((filter) => <button key={filter} className={brandFilter === filter ? "active" : ""} onClick={() => setBrandFilter(filter)}>{filter}</button>)}</div><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="브랜드 또는 필름명을 검색하세요" /></div>
     {showsOther && <section className="other-brand-notice"><b>기타 브랜드 안내</b><p>일부 브랜드는 지역별 취급 시공점이 제한적일 수 있습니다.<br />시공 요청 전 취급 가능 여부를 확인해 주세요.</p></section>}
     <div className="price-guide-layout"><section className="price-brand-card-grid">{grouped.length === 0 ? <div className="empty-state">검색 결과가 없습니다.</div> : grouped.map((group) => <section className="price-brand-card" key={group.brand}><h2>{group.brand}</h2><div className="price-product-list">{group.items.map((item) => <PricePackageRow key={item.id} item={item} selected={item.id === selectedPackageId} onDetail={() => setSelectedPackageId(item.id)} onQuote={() => onRequest(item, vehicleClass, [], "견적 문의")} onRequest={() => onRequest(item, vehicleClass, [], "실제 시공 요청")} />)}</div></section>)}</section>
       <PricePackageDetail item={selectedPackage} vehicleClass={vehicleClass} setVehicleClass={setVehicleClass} onQuote={() => onRequest(selectedPackage, vehicleClass, [], "견적 문의")} onRequest={() => onRequest(selectedPackage, vehicleClass, [], "실제 시공 요청")} />
     </div>
-    <section className="price-guide-disclaimer"><p>※ 같은 차량 등급이라도 창문 크기, 필름 사용량 및 작업 조건에 따라 추가 비용이 발생할 수 있습니다.</p><p>※ 정확한 금액은 시공점과 거래방에서 최종 확인해주세요.</p></section>
+    <section className="price-guide-disclaimer"><p>본 가격은 전국 평균 시공 사례를 바탕으로 한 권장 시공 패키지 가이드입니다.</p><p>실제 시공 금액은 차량, 지역, 작업 범위, 시공점 정책에 따라 달라질 수 있습니다.</p></section>
   </section>;
 }

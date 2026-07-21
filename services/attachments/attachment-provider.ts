@@ -1,9 +1,17 @@
 import type { ChatAttachment } from "../../types/transactions";
 
 export interface AttachmentProvider {
-  prepare(file: File): Promise<ChatAttachment>;
+  prepare(file: File, roomId?: string): Promise<ChatAttachment>;
   release(attachment: ChatAttachment): void;
 }
+
+export const CHAT_ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024;
+export const CHAT_ATTACHMENT_TYPES = [
+  "image/jpeg", "image/png", "image/webp", "application/pdf", "text/plain", "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+] as const;
+export const CHAT_ATTACHMENT_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "pdf", "txt", "doc", "docx", "xls", "xlsx"] as const;
 
 /**
  * Prototype provider: keeps the file in a browser object URL only.

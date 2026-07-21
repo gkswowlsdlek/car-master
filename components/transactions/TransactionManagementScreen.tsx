@@ -6,8 +6,9 @@ import { TransactionChatWorkspace } from "./TransactionChatWorkspace";
 const stages: TransactionStage[] = ["접수", "입고예정", "입고", "시공중", "완료"];
 const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`;
 
-export function TransactionManagementScreen({ role, userId, transactions, rooms, selectedId, onSelect, onSend, onHide, onUpdate, onStageChange, onPaymentChange, onNewRequest }: {
+export function TransactionManagementScreen({ role, userId, transactions, rooms, selectedId, useRemoteAttachments, onSelect, onSend, onHide, onUpdate, onStageChange, onPaymentChange, onNewRequest }: {
   role: "dealer" | "shop"; userId: string; transactions: Transaction[]; rooms: ChatRoom[]; selectedId: string;
+  useRemoteAttachments: boolean;
   onSelect: (id: string) => void; onSend: (transaction: Transaction, message: TransactionChatMessage) => void;
   onHide: (id: string, role: "dealer" | "shop") => void; onUpdate: (transaction: Transaction) => void; onStageChange: (transaction: Transaction, stage: TransactionStage) => void; onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void; onNewRequest: () => void;
 }) {
@@ -21,6 +22,6 @@ export function TransactionManagementScreen({ role, userId, transactions, rooms,
     <div className="transaction-tabs"><button className={tab === "거래내역" ? "active" : ""} onClick={() => setTab("거래내역")}>거래내역</button><button className={tab === "결제 및 정산" ? "active" : ""} onClick={() => setTab("결제 및 정산")}>결제 및 정산</button></div>
     <div className="transaction-filters"><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="거래번호, 차량, 시공점 검색" /><select value={stageFilter} onChange={(event) => setStageFilter(event.target.value as TransactionStage | "전체" | "진행중")}><option value="전체">전체 상태</option><option value="진행중">진행 중</option>{[...stages, "취소" as const].map((stage) => <option key={stage} value={stage}>{stage}</option>)}</select><label><input type="checkbox" checked={showHidden} onChange={(event) => setShowHidden(event.target.checked)} /> 숨긴 거래 보기</label></div>
     {visible.length === 0 ? <section className="empty-state transaction-empty"><span>↗</span><h2>{query ? "검색 결과가 없습니다." : "아직 진행 중인 거래가 없습니다."}</h2><p>{query ? "검색어 또는 숨김 거래 설정을 확인해 주세요." : "가격 확인부터 시작해 첫 시공 요청을 만들어 보세요."}</p>{role === "dealer" && !query && <button className="primary" onClick={onNewRequest}>새 시공 요청 만들기</button>}</section> : tab === "결제 및 정산" ? <div className="transaction-payment-table">{visible.map((item) => <button key={item.id} onClick={() => onSelect(item.id)}><b>{item.id}</b><span>{won(item.pricing.finalPrice)}</span><span>{item.pricing.paymentStatus}</span><span>{item.schedule.completedAt ?? "시공일 미정"}</span></button>)}</div> : <div className="transaction-room-layout"><aside className="transaction-list">{visible.map((item) => <button className={item.id === selected?.id ? "selected" : ""} key={item.id} onClick={() => onSelect(item.id)}><b>{item.id}</b><span>{item.vehicle.maker} {item.vehicle.model}</span><small>{item.installerName} · {item.status.stage}</small><em>{item.lastMessage}</em></button>)}</aside>
-      {selected && <TransactionChatWorkspace role={role} userId={userId} transaction={selected} room={room} onSend={onSend} onHide={onHide} onUpdate={onUpdate} onStageChange={onStageChange} onPaymentChange={onPaymentChange} />}
+      {selected && <TransactionChatWorkspace role={role} userId={userId} transaction={selected} room={room} useRemoteAttachments={useRemoteAttachments} onSend={onSend} onHide={onHide} onUpdate={onUpdate} onStageChange={onStageChange} onPaymentChange={onPaymentChange} />}
     </div>}</section>;
 }

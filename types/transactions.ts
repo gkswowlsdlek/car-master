@@ -30,7 +30,8 @@ export type ChatAttachment = {
   size: number;
   url: string;
   kind: "image" | "file";
-  persistence: "session";
+  persistence: "session" | "remote";
+  storagePath?: string;
   createdAt: string;
 };
 

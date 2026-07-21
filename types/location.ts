@@ -11,6 +11,6 @@ export type SearchLocation = {
 
 export type InstallerSearchResult = {
   shop: InstallerShop;
-  distanceKm: number;
+  distanceKm: number | null;
   distanceLabel: string;
 };
