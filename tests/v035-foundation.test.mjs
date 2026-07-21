@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("v0.3.5 defines the four recommended package tiers and ranges", async () => {
+test("v0.3.5 keeps the existing brand catalog under the recommended package guide", async () => {
   const source = await readFile(new URL("../data/pricePackages.ts", import.meta.url), "utf8");
-  for (const tier of ["ENTRY", "STANDARD", "PREMIUM", "SIGNATURE"]) assert.match(source, new RegExp(`name: "${tier}"`));
-  for (const range of ["40~60만원", "60~90만원", "90~130만원", "상담 후 견적"]) assert.match(source, new RegExp(range));
+  for (const brand of ["버텍스", "브이쿨", "솔라가드", "후퍼옵틱", "글라스틴트", "기타"]) assert.match(source, new RegExp(brand));
+  assert.match(source, /installationPriceGuide\.flatMap/);
 });
 
 test("installers without coordinates remain visible with an explicit label", async () => {

@@ -87,7 +87,7 @@ export default function Home() {
   const selectedPackage = pricePackages.find((item) => item.id === selectedPackageId) ?? pricePackages[0];
   const filteredPackages = pricePackages.filter((item) => {
     const keyword = priceSearch.trim().toLowerCase();
-    const matchesFilter = priceFilter === "전체";
+    const matchesFilter = priceFilter === "전체" || priceFilter === "기타" && item.brandGroup === "기타" || priceFilter === "솔라가드" && item.brand.startsWith("솔라가드") || item.brand === priceFilter;
     return matchesFilter && (!keyword || `${item.brand} ${item.product} ${item.description}`.toLowerCase().includes(keyword));
   });
 
@@ -192,9 +192,9 @@ export default function Home() {
 
   const applyPackage = (item: PricePackage, nextClass = vehicleClass, optionalServices: string[] = [], requestType: RequestType = "실제 시공 요청") => {
     const price = calculateVehicleClassPrice(item.guidePrice, nextClass);
-    const expectedPrice = item.consultationOnly ? "상담 후 견적" : item.prices[nextClass] ?? (price.priceRequiresInquiry ? nextClass === "국산 대형/SUV" ? "추가금 발생 가능" : "별도 견적" : formatGuidePrice(price.finalGuidePrice ?? item.guidePrice));
+    const expectedPrice = price.priceRequiresInquiry ? nextClass === "국산 대형/SUV" ? "추가금 발생 가능" : "별도 견적" : formatGuidePrice(price.finalGuidePrice ?? item.guidePrice);
     setSelectedPackageId(item.id); setVehicleClass(nextClass);
-    setRequest((current) => ({ ...current, preferredBrand: item.product as Brand, works: [`${item.name} 권장 시공 패키지`], workDescription: `${item.name} 권장 시공 패키지 · ${item.product}`, memo: item.name, requestType, vehicleClass: nextClass, selectedPackageId: item.id, selectedPackageName: item.name, selectedPackageBrand: item.brand, selectedPackageProduct: item.product, expectedPrice, baseGuidePrice: item.guidePrice, surcharge: price.surcharge, finalGuidePrice: item.consultationOnly ? undefined : price.finalGuidePrice, priceRequiresInquiry: item.consultationOnly || price.priceRequiresInquiry, includedServices: item.includedServices, optionalServices }));
+    setRequest((current) => ({ ...current, preferredBrand: item.brand as Brand, works: [`${item.brand} ${item.product} 썬팅`], workDescription: `${item.brand} ${item.product} 썬팅`, memo: item.name, requestType, vehicleClass: nextClass, selectedPackageId: item.id, selectedPackageName: item.product, selectedPackageBrand: item.brand, selectedPackageProduct: item.product, expectedPrice, baseGuidePrice: item.guidePrice, surcharge: price.surcharge, finalGuidePrice: price.finalGuidePrice, priceRequiresInquiry: price.priceRequiresInquiry, includedServices: item.includedServices, optionalServices }));
     goToScreen("request");
   };
 
@@ -257,7 +257,7 @@ export default function Home() {
   return <AppShell role={role} account={account} screen={screen} onNavigate={goToScreen} onLogout={() => void logout()}>
     {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} onFilterDeals={() => goToScreen("deals")} onOpenDeal={(id) => { setSelectedTransactionId(id); goToScreen("deals"); }} onNewRequest={() => goToScreen("request")} onFindShop={() => goToScreen("dealerMap")} onPriceGuide={() => goToScreen("priceGuide")} onOpenChat={() => goToScreen("deals")} />}
     {screen === "priceGuide" && <PriceGuideScreen packages={filteredPackages} selectedPackage={selectedPackage} selectedPackageId={selectedPackageId} setSelectedPackageId={setSelectedPackageId} brandFilter={priceFilter} setBrandFilter={setPriceFilter} search={priceSearch} setSearch={setPriceSearch} vehicleClass={vehicleClass} setVehicleClass={setVehicleClass} onRequest={applyPackage} />}
-    {screen === "dealerMap" && <DealerMapScreen query={query} setQuery={setQuery} searchArea={searchArea} location={location} searchError={locationError} results={nearbyResults} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} favoriteShopIds={favoriteShopIds} toggleFavoriteShop={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageProduct} isOtherBrand={false} onRequest={() => goToScreen("request")} />}
+    {screen === "dealerMap" && <DealerMapScreen query={query} setQuery={setQuery} searchArea={searchArea} location={location} searchError={locationError} results={nearbyResults} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} favoriteShopIds={favoriteShopIds} toggleFavoriteShop={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => goToScreen("request")} />}
     {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={() => void searchArea(request.deliveryArea)} onSummary={() => goToScreen("requestSummary")} onPriceGuide={() => goToScreen("priceGuide")} />}
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} onOpenTransactions={() => goToScreen("shopRequests")} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} />}
