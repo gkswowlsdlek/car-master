@@ -169,6 +169,176 @@ button:active:not(:disabled) { transform: translateY(0) scale(.99); }
   .marketing-hero .hero-message br { display: block; }
 }
 
+/* v0.3.5.1 responsive dealer workspace */
+:root {
+  --workspace-max: 1480px;
+  --workspace-gutter: clamp(18px, 3.2vw, 56px);
+  --workspace-gap: clamp(12px, 1.5vw, 20px);
+}
+
+html, body { max-width: 100%; overflow-x: clip; }
+button, input, select, textarea { font: inherit; }
+button, [role="button"], input, select, textarea { min-height: 44px; }
+button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(37,99,235,.24);
+  outline-offset: 2px;
+}
+.app-main { min-width: 0; min-height: 100vh; min-height: 100dvh; }
+.app-main > :is(.dealer-dashboard,.dealer-screen,.transaction-management-screen,.profile-editor,.request-page,.summary-page,.section) {
+  width: min(var(--workspace-max),100%);
+  margin-inline: auto;
+  padding: 30px var(--workspace-gutter) 52px;
+}
+.page-title, .dealer-welcome { margin-bottom: 22px; }
+.page-title h1, .dealer-welcome h1 { text-wrap: balance; }
+.page-subtitle { max-width: 68ch; }
+.beta-environment-bar { min-height: 34px; padding-block: 6px; }
+
+.search-field {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+.search-field > svg {
+  position: absolute;
+  z-index: 1;
+  left: 14px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+.search-field > input { width: 100%; min-width: 0; padding-left: 43px; }
+.price-guide-toolbar > .search-field { width: min(360px,100%); }
+
+.dashboard-core-metrics { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 14px; }
+.metric-card, .shop-metric-card { min-width: 0; min-height: 144px; padding: 20px; }
+.metric-card.tone-orange {
+  border-color: #fbbf24;
+  background: linear-gradient(145deg,#fff,#fffbeb);
+  box-shadow: 0 10px 24px rgba(245,158,11,.10);
+}
+.metric-card.tone-violet {
+  border-color: #a78bfa;
+  background: linear-gradient(145deg,#fff,#f5f3ff);
+  box-shadow: 0 10px 24px rgba(124,58,237,.10);
+}
+.dashboard-activity-grid { grid-template-columns: minmax(0,1.2fr) repeat(2,minmax(260px,.8fr)); gap: 14px; }
+.dashboard-recent-deals { grid-row: auto; }
+.today-list-card { min-width: 0; padding: 20px; }
+.today-list-card > div:last-child > button { min-height: 56px; padding: 11px 4px; }
+.today-list-card button span, .today-list-card button span > * { min-width: 0; }
+.today-list-card small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.transaction-management-screen { max-width: none !important; }
+.transaction-summary-strip { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.transaction-filters { grid-template-columns: minmax(240px,1fr) 180px auto; align-items: center; }
+.transaction-room-layout {
+  grid-template-columns: minmax(280px,320px) minmax(0,1fr);
+  min-width: 0;
+  overflow: hidden;
+}
+.transaction-list { min-width: 0; }
+.messenger-workspace {
+  min-width: 0;
+  min-height: clamp(600px,calc(100dvh - 300px),760px);
+  grid-template-columns: minmax(420px,1fr) minmax(320px,360px);
+}
+.messenger-sidebar { position: relative; width: auto; transform: none; box-shadow: none; }
+.sidebar-close { display: none; }
+.messenger-messages, .messenger-center { min-width: 0; }
+
+.price-guide-toolbar { position: sticky; z-index: 12; top: 90px; gap: 12px; background: rgba(248,250,252,.96); padding-block: 10px; backdrop-filter: blur(12px); }
+.price-brand-tabs { min-width: 0; }
+.price-guide-layout { grid-template-columns: minmax(0,1fr) minmax(310px,370px); gap: var(--workspace-gap); }
+.price-package-row { min-width: 0; }
+
+.request-layout { grid-template-columns: minmax(0,1.35fr) minmax(320px,.65fr); gap: var(--workspace-gap); align-items: start; }
+.request-shop-panel { position: sticky; top: 104px; max-height: calc(100dvh - 124px); overflow-y: auto; }
+.shop-finder-layout { grid-template-columns: minmax(0,1fr) minmax(340px,410px); gap: var(--workspace-gap); }
+.favorite-star { display: grid; width: 44px; height: 44px; place-items: center; margin: -8px; }
+
+.profile-editor { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(300px,.65fr); gap: var(--workspace-gap); align-items: start; }
+.profile-editor > :is(.page-title,.profile-activity-summary,.profile-saved,.login-error) { grid-column: 1 / -1; }
+.profile-activity-summary { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; margin-bottom: 0; }
+.profile-activity-summary article { min-width: 0; padding: 17px; }
+.profile-editor-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; padding: 20px; }
+.profile-notification-settings { margin-top: 0; }
+.profile-editor-actions { grid-column: 2; margin-top: 0; }
+.profile-editor > p:last-child { grid-column: 2; margin: 0; color: #64748b; font-size: 12px; }
+
+@media (max-width: 1279px) {
+  .dashboard-activity-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .dashboard-recent-deals { grid-column: 1 / -1; }
+  .messenger-workspace { grid-template-columns: minmax(0,1fr); position: relative; }
+  .messenger-sidebar { position: absolute; z-index: 20; top: 0; right: 0; bottom: 0; width: min(360px,92%); box-shadow: -18px 0 45px rgba(15,23,42,.16); transform: translateX(105%); transition: transform .22s ease-out; }
+  .messenger-sidebar.mobile-open { transform: translateX(0); }
+  .sidebar-close { display: grid; }
+}
+
+@media (max-width: 1023px) {
+  .app-frame { grid-template-columns: 228px minmax(0,1fr); }
+  .app-logo img { width: 190px; }
+  .app-main > :is(.dealer-dashboard,.dealer-screen,.transaction-management-screen,.profile-editor,.request-page,.summary-page,.section) { padding-inline: 28px; }
+  .dashboard-core-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .transaction-room-layout { grid-template-columns: 270px minmax(0,1fr); }
+  .price-guide-layout, .request-layout, .shop-finder-layout, .profile-editor { grid-template-columns: 1fr; }
+  .price-package-detail, .request-shop-panel, .map-card { position: static; max-height: none; }
+  .profile-editor-actions, .profile-editor > p:last-child { grid-column: 1; }
+}
+
+@media (max-width: 767px) {
+  html, body { overflow-x: hidden; }
+  .app-main { padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
+  .app-topbar { min-height: 64px; padding-inline: 16px; }
+  .topbar-title small, .service-status, .topbar-icon-button, .topbar-account { display: none; }
+  .topbar-title b { font-size: 17px; }
+  .topbar-actions .primary { min-height: 44px; padding-inline: 13px; font-size: 13px; }
+  .beta-environment-bar { display: none; }
+  .app-main > :is(.dealer-dashboard,.dealer-screen,.transaction-management-screen,.profile-editor,.request-page,.summary-page,.section) { padding: 20px 16px 30px; }
+  .page-title, .dealer-welcome { align-items: stretch; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+  .page-title h1, .dealer-welcome h1 { font-size: clamp(27px,8vw,32px); }
+  .dealer-welcome h1 br { display: none; }
+  .dashboard-core-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .metric-card, .shop-metric-card { min-height: 118px; padding: 13px; }
+  .metric-card > em, .shop-metric-card > em { display: none; }
+  .dashboard-activity-grid { grid-template-columns: 1fr; }
+  .dashboard-recent-deals { grid-column: auto; }
+  .today-list-card { padding: 16px; }
+  .today-list-card > div:last-child > button { min-height: 52px; }
+  .transaction-summary-strip { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .transaction-filters { grid-template-columns: 1fr; }
+  .transaction-room-layout { grid-template-columns: minmax(0,1fr); overflow: visible; }
+  .transaction-room-layout > .transaction-list { max-height: 240px; min-height: 0; overflow-y: auto; }
+  .messenger-workspace { min-height: 620px; max-height: none; }
+  .messenger-header h2 { max-width: 50vw; }
+  .messenger-center { grid-template-rows: auto minmax(340px,1fr) auto; }
+  .messenger-composer { padding-bottom: max(12px,env(safe-area-inset-bottom)); }
+  .price-guide-toolbar { position: static; align-items: stretch; flex-direction: column; }
+  .price-guide-toolbar > .search-field { width: 100%; }
+  .price-brand-tabs { display: flex; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; scrollbar-width: thin; }
+  .price-brand-tabs button { flex: 0 0 auto; }
+  .price-brand-card-grid, .request-layout, .shop-finder-layout, .profile-editor { grid-template-columns: minmax(0,1fr); }
+  .map-search { grid-template-columns: minmax(0,1fr) auto; }
+  .map-search .primary { padding-inline: 16px; }
+  .shop-row { grid-template-columns: 42px minmax(0,1fr) 44px; }
+  .profile-activity-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .profile-editor-grid { grid-template-columns: 1fr; padding: 17px; }
+  .profile-notification-settings label { display: flex; min-height: 44px; align-items: center; margin: 0; }
+  .profile-editor-actions { display: grid; grid-template-columns: 1fr; }
+}
+
+@media (max-width: 389px) {
+  .app-main > :is(.dealer-dashboard,.dealer-screen,.transaction-management-screen,.profile-editor,.request-page,.summary-page,.section) { padding-inline: 12px; }
+  .app-sidebar nav button { min-width: 62px; flex-basis: 62px; }
+  .dashboard-core-metrics { gap: 8px; }
+  .metric-card, .shop-metric-card { padding: 11px; }
+  .metric-card > span, .shop-metric-card > span { font-size: 11px; }
+  .metric-card > b, .shop-metric-card > b { font-size: 25px; }
+  .map-search { grid-template-columns: 1fr; }
+  .map-search .primary { width: 100%; }
+  .message-content { max-width: 88%; }
+}
+
 .system-inline-error,
 .system-inline-loading {
   margin: 16px 48px 0;
@@ -340,3 +510,25 @@ button:active:not(:disabled) { transform: translateY(0) scale(.99); }
   .admin-alert-strip > div:last-child { justify-content: space-between; }
   .admin-chart { height: 130px; }
 }
+
+/* Responsive workspace cascade guard: keep these rules last. */
+.mobile-logout-button { display: none; }
+.app-main > :is(.dealer-dashboard,.dealer-screen,.transaction-management-screen,.profile-editor,.request-page,.summary-page,.section) { width: min(var(--workspace-max),100%); margin-inline: auto; padding: 30px var(--workspace-gutter) 52px; }
+.dashboard-core-metrics { grid-template-columns: repeat(4,minmax(0,1fr)); }
+.dashboard-activity-grid { grid-template-columns: minmax(0,1.2fr) repeat(2,minmax(260px,.8fr)); }
+.dashboard-recent-deals { grid-row: auto; }
+@media (max-width:1279px) { .dashboard-activity-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }.dashboard-recent-deals { grid-column: 1/-1; } }
+@media (max-width:1023px) { .dashboard-core-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }.price-guide-layout,.request-layout,.shop-finder-layout,.profile-editor { grid-template-columns: 1fr; } }
+@media (max-width:767px) {
+  .app-main { min-height: 100vh; min-height: 100dvh; padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
+  .beta-environment-bar { display: none; }
+  .mobile-logout-button { display: inline-flex; width: 44px; min-height: 44px; align-items: center; justify-content: center; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; color: #475569; }
+  .mobile-logout-button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .app-main > :is(.dealer-dashboard,.dealer-screen,.transaction-management-screen,.profile-editor,.request-page,.summary-page,.section) { padding: 20px 16px 30px; }
+  .dashboard-core-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .dashboard-activity-grid { grid-template-columns: 1fr; }.dashboard-recent-deals { grid-column: auto; }
+  .transaction-room-layout { grid-template-columns: minmax(0,1fr); overflow: visible; }
+  .price-guide-toolbar { position: static; align-items: stretch; flex-direction: column; }
+  .profile-activity-summary { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:389px) { .app-main > :is(.dealer-dashboard,.dealer-screen,.transaction-management-screen,.profile-editor,.request-page,.summary-page,.section) { padding-inline: 12px; }.map-search { grid-template-columns: 1fr; } }

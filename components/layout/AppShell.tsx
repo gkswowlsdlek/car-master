@@ -40,7 +40,7 @@ export function AppShell({ role, account, screen, onNavigate, onLogout, children
       <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{roleLabel} 계정</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
     </aside>
     <main className="app-main">
-      <header className="app-topbar"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>v0.3.5</small></div></div></div></header>
+      <header className="app-topbar"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>v0.3.5.1</small></div></div></div></header>
       <div className="beta-environment-bar"><span>WORKSPACE</span><p>회원과 거래를 안전하게 연결하는 카마스터 업무공간입니다.</p></div>
       {children}
     </main>
