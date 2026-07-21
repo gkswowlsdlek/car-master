@@ -1,4 +1,4 @@
--- Car-Master v0.3.5 foundation stabilization
+-- Car-Master v0.3.4.9 foundation stabilization
 -- Apply after 202607190001_v034_membership.sql.
 
 alter table public.installer_profiles

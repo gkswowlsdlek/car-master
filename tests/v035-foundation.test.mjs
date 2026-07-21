@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("v0.3.5 keeps the existing brand catalog under the recommended package guide", async () => {
+test("v0.3.4.9 keeps the existing brand catalog under the recommended package guide", async () => {
   const source = await readFile(new URL("../data/pricePackages.ts", import.meta.url), "utf8");
   for (const brand of ["버텍스", "브이쿨", "솔라가드", "후퍼옵틱", "글라스틴트", "기타"]) assert.match(source, new RegExp(brand));
   assert.match(source, /installationPriceGuide\.flatMap/);
@@ -15,7 +15,7 @@ test("installers without coordinates remain visible with an explicit label", asy
   assert.match(source, /a\.distanceKm == null/);
 });
 
-test("v0.3.5 migration contains participant RLS, private storage and realtime", async () => {
+test("v0.3.4.9 migration contains participant RLS, private storage and realtime", async () => {
   const source = await readFile(new URL("../supabase/migrations/202607210001_v035_foundation.sql", import.meta.url), "utf8");
   assert.match(source, /create table public\.transactions/);
   assert.match(source, /create table public\.transaction_rooms/);
