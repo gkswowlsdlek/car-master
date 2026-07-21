@@ -168,6 +168,45 @@ button:active:not(:disabled) { transform: translateY(0) scale(.99); }
   .marketing-brand > small { font-size: 9px; letter-spacing: .1em; }
   .marketing-hero .hero-message br { display: block; }
 }
+
+.system-inline-error,
+.system-inline-loading {
+  margin: 16px 48px 0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+.system-inline-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.system-inline-error button {
+  flex: 0 0 auto;
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  background: #fff;
+  padding: 8px 12px;
+  color: #991b1b;
+  font-weight: 700;
+}
+
+.system-inline-loading {
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+@media (max-width: 768px) {
+  .system-inline-error,
+  .system-inline-loading { margin-inline: 20px; }
+}
 @media (max-width:420px) {
   .marketing-brand { min-width: 182px; }
   .marketing-brand-logo,.marketing-brand > small { width: 184px; }

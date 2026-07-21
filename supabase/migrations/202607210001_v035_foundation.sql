@@ -37,8 +37,8 @@ create table public.chat_messages (
   room_id uuid not null references public.transaction_rooms(id) on delete cascade,
   sender_id uuid references public.profiles(id),
   sender_role text not null check (sender_role in ('dealer', 'shop', 'admin', 'system')),
-  text text not null default '',
-  attachments jsonb not null default '[]'::jsonb,
+  text text not null default '' check (char_length(text) <= 4000),
+  attachments jsonb not null default '[]'::jsonb check (jsonb_typeof(attachments) = 'array' and jsonb_array_length(attachments) <= 1),
   created_at timestamptz not null default now()
 );
 
@@ -178,7 +178,18 @@ create policy "chat participants select" on public.chat_messages
   for select to authenticated using (public.can_access_room(room_id));
 create policy "chat participants insert" on public.chat_messages
   for insert to authenticated with check (
-    public.can_access_room(room_id) and sender_id = auth.uid() and sender_role <> 'system'
+    public.can_access_room(room_id)
+    and sender_id = auth.uid()
+    and sender_role = (
+      select case profile.role
+        when 'installer'::public.user_role then 'shop'
+        when 'dealer'::public.user_role then 'dealer'
+        when 'admin'::public.user_role then 'admin'
+      end
+      from public.profiles profile
+      where profile.id = auth.uid()
+    )
+    and (char_length(trim(text)) > 0 or jsonb_array_length(attachments) > 0)
   );
 
 create policy "message reads participants select" on public.chat_message_reads

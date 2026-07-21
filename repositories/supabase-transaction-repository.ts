@@ -38,13 +38,14 @@ export class SupabaseTransactionRepository {
   }
 
   async update(value: Transaction) {
-    const { error } = await createSupabaseBrowserClient().from("transactions").update({
+    const { data, error } = await createSupabaseBrowserClient().from("transactions").update({
       vehicle: value.vehicle, service: value.service, pricing: value.pricing, schedule: value.schedule,
       stage: value.status.stage, hidden_by_dealer: value.visibility.hiddenByDealer,
       hidden_by_installer: value.visibility.hiddenByInstaller, last_message: value.lastMessage,
       updated_at: value.status.updatedAt,
-    }).eq("id", value.id);
+    }).eq("id", value.id).select("id").maybeSingle();
     if (error) throw error;
+    if (!data) throw new Error("거래를 찾을 수 없거나 변경 권한이 없습니다.");
   }
 
   subscribe(listener: () => void) {

@@ -17,7 +17,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
   transaction: Transaction;
   room?: ChatRoom;
   useRemoteAttachments: boolean;
-  onSend: (transaction: Transaction, message: TransactionChatMessage) => void;
+  onSend: (transaction: Transaction, message: TransactionChatMessage) => Promise<void>;
   onHide: (id: string, role: "dealer" | "shop") => void;
   onUpdate: (transaction: Transaction) => void;
   onStageChange: (transaction: Transaction, stage: TransactionStage) => void;
@@ -29,6 +29,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
   const [showDetails, setShowDetails] = useState(false);
   const [finalPrice, setFinalPrice] = useState("");
   const [attachmentError, setAttachmentError] = useState("");
+  const [isSending, setIsSending] = useState(false);
   const imageInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const messageEnd = useRef<HTMLDivElement>(null);
@@ -53,12 +54,20 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
     }
   };
   const removePending = (id: string) => setPending((current) => current.filter((item) => { if (item.id === id) attachmentProvider.release(item); return item.id !== id; }));
-  const send = () => {
+  const send = async () => {
     const text = draft.trim();
-    if ((!text && pending.length === 0) || !room) return;
+    if ((!text && pending.length === 0) || !room || isSending) return;
     const now = new Date().toISOString();
-    onSend(transaction, { id: `${room.id}-M-${now}`, roomId: room.id, senderId: userId, senderRole: role, text, attachments: pending, createdAt: now, readBy: [userId] });
-    setDraft(""); setPending([]);
+    setIsSending(true);
+    setAttachmentError("");
+    try {
+      await onSend(transaction, { id: `${room.id}-M-${now}`, roomId: room.id, senderId: userId, senderRole: role, text, attachments: pending, createdAt: now, readBy: [userId] });
+      setDraft(""); setPending([]);
+    } catch (error) {
+      setAttachmentError(error instanceof Error ? error.message : "메시지를 보내지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setIsSending(false);
+    }
   };
   const hide = () => {
     const warning = transaction.status.stage !== "완료" && role === "shop" ? "진행 중인 거래입니다. 그래도 숨기시겠습니까?\n" : "";
@@ -90,8 +99,8 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
       </div>
       <footer className="messenger-composer">
         {attachmentError && <p className="login-error">{attachmentError}</p>}
-        {pending.length > 0 && <div className="attachment-preview-strip">{pending.map((item) => <div key={item.id}>{item.kind === "image" ? <img src={item.url} alt="" /> : <FileText size={22} />}<span><b>{item.name}</b><small>{fileSize(item.size)} · 이번 세션에서만 표시</small></span><button onClick={() => removePending(item.id)} aria-label="첨부 삭제"><X size={15} /></button></div>)}</div>}
-        <div className="composer-row"><div className="composer-tools"><button onClick={() => imageInput.current?.click()} aria-label="사진 첨부"><ImagePlus size={19} /></button><button onClick={() => fileInput.current?.click()} aria-label="파일 첨부"><Paperclip size={19} /></button></div><textarea rows={1} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); } }} placeholder="메시지를 입력하세요. Shift + Enter로 줄바꿈" /><button className="composer-send" onClick={send} disabled={!room || (!draft.trim() && pending.length === 0)}><Send size={18} /><span>보내기</span></button></div>
+        {pending.length > 0 && <div className="attachment-preview-strip">{pending.map((item) => <div key={item.id}>{item.kind === "image" ? <img src={item.url} alt="" /> : <FileText size={22} />}<span><b>{item.name}</b><small>{fileSize(item.size)} · {item.persistence === "remote" ? "거래방에 안전하게 저장" : "이번 세션에서만 표시"}</small></span><button onClick={() => removePending(item.id)} aria-label="첨부 삭제"><X size={15} /></button></div>)}</div>}
+        <div className="composer-row"><div className="composer-tools"><button onClick={() => imageInput.current?.click()} aria-label="사진 첨부" disabled={isSending}><ImagePlus size={19} /></button><button onClick={() => fileInput.current?.click()} aria-label="파일 첨부" disabled={isSending}><Paperclip size={19} /></button></div><textarea rows={1} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void send(); } }} placeholder="메시지를 입력하세요. Shift + Enter로 줄바꿈" disabled={isSending} /><button className="composer-send" onClick={() => void send()} disabled={isSending || !room || (!draft.trim() && pending.length === 0)} aria-busy={isSending}><Send size={18} /><span>{isSending ? "전송 중" : "보내기"}</span></button></div>
         <input ref={imageInput} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} /><input ref={fileInput} hidden type="file" accept=".pdf,.txt,.doc,.docx,.xls,.xlsx" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} />
       </footer>
     </section>

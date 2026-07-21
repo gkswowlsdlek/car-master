@@ -1,13 +1,9 @@
 import { createSupabaseBrowserClient } from "../lib/supabase/client";
-import type { ChatAttachment, ChatRoom, TransactionChatMessage } from "../types/transactions";
+import { normalizeChatMessages, type StoredChatMessage } from "../services/chat-message-normalizer";
+import type { ChatRoom, TransactionChatMessage } from "../types/transactions";
 
-type MessageRow = { id: string; room_id: string; sender_id: string | null; sender_role: TransactionChatMessage["senderRole"]; text: string; attachments: ChatAttachment[]; created_at: string };
+type MessageRow = StoredChatMessage;
 type RoomRow = { id: string; transaction_id: string; created_at: string; updated_at: string; chat_messages: MessageRow[] };
-
-const mapMessage = (row: MessageRow): TransactionChatMessage => ({
-  id: row.id, roomId: row.room_id, senderId: row.sender_id ?? "system", senderRole: row.sender_role,
-  text: row.text, attachments: row.attachments ?? [], createdAt: row.created_at, readBy: [],
-});
 
 export class SupabaseChatRepository {
   async getAll(): Promise<ChatRoom[]> {
@@ -17,20 +13,23 @@ export class SupabaseChatRepository {
     if (error) throw error;
     const rooms = ((data ?? []) as unknown as RoomRow[]).map((room) => ({
       id: room.id, transactionId: room.transaction_id, createdAt: room.created_at, updatedAt: room.updated_at,
-      messages: (room.chat_messages ?? []).map(mapMessage),
+      messages: normalizeChatMessages(room.chat_messages ?? []),
     }));
     const attachments = rooms.flatMap((room) => room.messages.flatMap((message) => message.attachments ?? [])).filter((item) => item.storagePath);
     await Promise.all(attachments.map(async (attachment) => {
-      const { data: signed } = await createSupabaseBrowserClient().storage.from("transaction-attachments").createSignedUrl(attachment.storagePath!, 3600);
-      attachment.url = signed?.signedUrl ?? "";
+      const { data: signed, error: signedError } = await createSupabaseBrowserClient().storage.from("transaction-attachments").createSignedUrl(attachment.storagePath!, 3600);
+      attachment.url = signedError ? "" : signed?.signedUrl ?? "";
     }));
     return rooms;
   }
 
   async addMessage(roomId: string, message: TransactionChatMessage) {
+    const text = message.text.trim();
+    if (!text && !(message.attachments?.length)) throw new Error("메시지 또는 첨부파일을 입력해 주세요.");
+    if (text.length > 4000) throw new Error("메시지는 4,000자 이하로 입력해 주세요.");
     const { error } = await createSupabaseBrowserClient().from("chat_messages").insert({
       room_id: roomId, sender_id: message.senderId, sender_role: message.senderRole,
-      text: message.text, attachments: message.attachments ?? [], created_at: message.createdAt,
+      text, attachments: message.attachments ?? [],
     });
     if (error) throw error;
   }
