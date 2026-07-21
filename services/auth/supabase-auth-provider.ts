@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import type { CurrentUser, InstallerApprovalStatus, SignUpInput } from "../../types/auth";
 import { AuthenticationError, type AuthCredentials, type AuthProvider } from "./auth-provider";
@@ -65,5 +65,19 @@ export class SupabaseAuthProvider implements AuthProvider {
   async logout() {
     await createSupabaseBrowserClient().auth.signOut();
     this.currentUser = null;
+  }
+
+  subscribe(listener: (user: CurrentUser | null) => void) {
+    const { data: subscription } = createSupabaseBrowserClient().auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      if (event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") return;
+      if (event === "SIGNED_OUT" || !session?.user) {
+        this.currentUser = null;
+        listener(null);
+        return;
+      }
+      if (event !== "SIGNED_IN") return;
+      queueMicrotask(() => { void this.resolveUser(session.user).then(listener).catch(() => listener(null)); });
+    });
+    return () => subscription.subscription.unsubscribe();
   }
 }

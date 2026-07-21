@@ -8,6 +8,7 @@ export interface AuthProvider {
   login(credentials: AuthCredentials): Promise<CurrentUser>;
   signUp(input: SignUpInput): Promise<SignUpResult>;
   logout(): Promise<void>;
+  subscribe?(listener: (user: CurrentUser | null) => void): () => void;
 }
 
 export class AuthenticationError extends Error {

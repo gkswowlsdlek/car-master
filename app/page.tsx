@@ -78,8 +78,9 @@ export default function Home() {
   const [selectedPackageId, setSelectedPackageId] = useState(pricePackages[0].id);
   const [selectedTransactionId, setSelectedTransactionId] = useState("");
   const [approvedInstallerShops, setApprovedInstallerShops] = useState<InstallerShop[]>([]);
+  const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
   const useSupabaseData = Boolean(currentUser);
-  const { transactions, rooms, refresh } = useTransactionStore(useSupabaseData);
+  const { transactions, rooms, isLoading: isTransactionLoading, error: transactionLoadError, refresh } = useTransactionStore(useSupabaseData);
 
   const availableShops = useSupabaseData ? approvedInstallerShops : installerShops;
   const nearbyResults = useMemo(() => searchNearbyInstallers(location, availableShops).filter((item) => item.shop.approved && item.shop.available).slice(0, 28), [location, availableShops]);
@@ -163,6 +164,18 @@ export default function Home() {
   }, [enterAuthenticatedUser, login]);
 
   useEffect(() => {
+    if (!authProvider.subscribe) return;
+    return authProvider.subscribe((user) => {
+      if (user) enterAuthenticatedUser(user, true);
+      else {
+        setCurrentUser(null);
+        setScreen("login");
+        window.history.replaceState(null, "", "/login");
+      }
+    });
+  }, [enterAuthenticatedUser]);
+
+  useEffect(() => {
     if (currentUser?.role !== "dealer") return;
     let active = true;
     void installerDirectoryRepository.getApproved().then((shops) => {
@@ -199,6 +212,9 @@ export default function Home() {
   };
 
   const createTransaction = async () => {
+    if (isCreatingTransaction) return;
+    setIsCreatingTransaction(true);
+    try {
     if (useSupabaseData) {
       if (!approvedInstallerShops.some((shop) => shop.id === selectedShop.id)) { alert("관리자에게 승인된 시공점을 선택해 주세요."); return; }
       try {
@@ -221,6 +237,9 @@ export default function Home() {
     const transaction: Transaction = { id, dealerId: account.id, installerId: selectedShop.id, installerName: selectedShop.name, vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass }, service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest }, pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" }, schedule: { requestedInboundAt: request.inboundStart }, status: { stage: "접수", createdAt: now, updatedAt: now }, visibility: { hiddenByDealer: false, hiddenByInstaller: false }, chatRoomId, lastMessage: "새 시공 요청이 접수되었습니다." };
     const room: ChatRoom = { id: chatRoomId, transactionId: id, createdAt: now, updatedAt: now, messages: [{ id: createId("MSG"), roomId: chatRoomId, senderId: "system", senderRole: "system", text: "거래방이 생성되었습니다. 자동 작업 브리핑을 확인하세요.", createdAt: now, readBy: [account.id] }] };
     transactionRepository.create(transaction); chatRepository.create(room); setSelectedTransactionId(id); goToScreen("deals");
+    } finally {
+      setIsCreatingTransaction(false);
+    }
   };
 
   const sendMessage = async (transaction: Transaction, message: TransactionChatMessage) => {
@@ -228,7 +247,7 @@ export default function Home() {
       try {
         await supabaseChatRepository.addMessage(transaction.chatRoomId, message);
         await supabaseTransactionRepository.update({ ...transaction, lastMessage: message.text || "첨부파일", status: { ...transaction.status, updatedAt: message.createdAt } });
-      } catch (error) { alert(error instanceof Error ? error.message : "메시지를 전송하지 못했습니다."); }
+      } catch (error) { throw new Error(error instanceof Error ? error.message : "메시지를 전송하지 못했습니다."); }
       return;
     }
     chatRepository.addMessage(transaction.chatRoomId, { ...message, id: createId("MSG") });
@@ -255,11 +274,13 @@ export default function Home() {
 
   const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;
   return <AppShell role={role} account={account} screen={screen} onNavigate={goToScreen} onLogout={() => void logout()}>
+    {transactionLoadError && <div className="system-inline-error" role="alert"><span>{transactionLoadError}</span><button onClick={() => void refresh()}>다시 시도</button></div>}
+    {isTransactionLoading && useSupabaseData && <p className="system-inline-loading" role="status">거래 정보를 불러오는 중입니다.</p>}
     {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} onFilterDeals={() => goToScreen("deals")} onOpenDeal={(id) => { setSelectedTransactionId(id); goToScreen("deals"); }} onNewRequest={() => goToScreen("request")} onFindShop={() => goToScreen("dealerMap")} onPriceGuide={() => goToScreen("priceGuide")} onOpenChat={() => goToScreen("deals")} />}
     {screen === "priceGuide" && <PriceGuideScreen packages={filteredPackages} selectedPackage={selectedPackage} selectedPackageId={selectedPackageId} setSelectedPackageId={setSelectedPackageId} brandFilter={priceFilter} setBrandFilter={setPriceFilter} search={priceSearch} setSearch={setPriceSearch} vehicleClass={vehicleClass} setVehicleClass={setVehicleClass} onRequest={applyPackage} />}
     {screen === "dealerMap" && <DealerMapScreen query={query} setQuery={setQuery} searchArea={searchArea} location={location} searchError={locationError} results={nearbyResults} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} favoriteShopIds={favoriteShopIds} toggleFavoriteShop={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => goToScreen("request")} />}
     {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={() => void searchArea(request.deliveryArea)} onSummary={() => goToScreen("requestSummary")} onPriceGuide={() => goToScreen("priceGuide")} />}
-    {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
+    {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} submitting={isCreatingTransaction} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} onOpenTransactions={() => goToScreen("shopRequests")} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} />}
     {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUpdate={(value) => void updateTransaction(value)} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} />}
     {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} userId={account.id} activity={profileActivity} />}

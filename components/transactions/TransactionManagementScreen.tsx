@@ -9,7 +9,7 @@ const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleS
 export function TransactionManagementScreen({ role, userId, transactions, rooms, selectedId, useRemoteAttachments, onSelect, onSend, onHide, onUpdate, onStageChange, onPaymentChange, onNewRequest }: {
   role: "dealer" | "shop"; userId: string; transactions: Transaction[]; rooms: ChatRoom[]; selectedId: string;
   useRemoteAttachments: boolean;
-  onSelect: (id: string) => void; onSend: (transaction: Transaction, message: TransactionChatMessage) => void;
+  onSelect: (id: string) => void; onSend: (transaction: Transaction, message: TransactionChatMessage) => Promise<void>;
   onHide: (id: string, role: "dealer" | "shop") => void; onUpdate: (transaction: Transaction) => void; onStageChange: (transaction: Transaction, stage: TransactionStage) => void; onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void; onNewRequest: () => void;
 }) {
   const [tab, setTab] = useState<"거래내역" | "결제 및 정산">("거래내역");
