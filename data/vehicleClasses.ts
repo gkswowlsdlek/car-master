@@ -9,7 +9,7 @@ export type VehicleClassGuide = {
 export const vehicleClassGuides: VehicleClassGuide[] = [
   {
     className: "국산 승용",
-    description: "국산 승용차의 썬팅 시공 패키지를 기준으로 한 카마스터 시공 가격 가이드",
+    description: "차량과 작업 범위에 맞춘 카마스터 권장 시공 패키지 가이드",
     examples: ["G80", "그랜저", "K8", "쏘나타", "아반떼"],
   },
   { className: "국산 대형/SUV", description: "차량 및 유리 면적에 따라 추가금 발생 가능", examples: ["GV80", "카니발", "팰리세이드", "EV9"] },

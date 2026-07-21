@@ -6,7 +6,7 @@ import type { DemoAccount, Role, Screen } from "../../types/dealer";
 const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon }[]> = {
   dealer: [
     { screen: "dealerDashboard", label: "대시보드", icon: Gauge },
-    { screen: "priceGuide", label: "가격 가이드", icon: CircleDollarSign },
+    { screen: "priceGuide", label: "권장 시공 패키지", icon: CircleDollarSign },
     { screen: "request", label: "시공 요청", icon: Plus },
     { screen: "dealerMap", label: "시공점 찾기", icon: MapPin },
     { screen: "deals", label: "거래 관리", icon: Building2 },
@@ -21,7 +21,7 @@ const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon
 };
 
 const screenTitles: Partial<Record<Screen, string>> = {
-  dealerDashboard: "대시보드", shopDashboard: "시공점 대시보드", priceGuide: "시공 가격 가이드", request: "새 시공 요청",
+  dealerDashboard: "대시보드", shopDashboard: "시공점 대시보드", priceGuide: "권장 시공 패키지 가이드", request: "새 시공 요청",
   requestSummary: "요청 최종 확인", dealerMap: "시공점 찾기", deals: "거래 관리", shopRequests: "거래 관리", dealerProfile: "마이페이지", ops: "운영 현황",
 };
 

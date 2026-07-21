@@ -32,8 +32,8 @@ export type InstallerShop = {
   address: string;
   district: string;
   region: RegionKey;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
   brands: Brand[];
   works: WorkType[];
   hours: string;

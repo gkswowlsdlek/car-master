@@ -16,9 +16,12 @@ const responseMinutes = (value: string) => Number(value.match(/\d+/)?.[0] ?? Num
 
 export function searchNearbyInstallers(location: SearchLocation, shops: InstallerShop[]): InstallerSearchResult[] {
   return shops.map((shop) => {
+    if (shop.lat == null || shop.lng == null) return { shop, distanceKm: null, distanceLabel: "거리 정보 없음" };
     const distanceKm = calculateDistanceKm(location, { latitude: shop.lat, longitude: shop.lng });
     return { shop, distanceKm, distanceLabel: formatDistanceKm(distanceKm) };
   }).sort((a, b) => {
+    if (a.distanceKm == null) return b.distanceKm == null ? 0 : 1;
+    if (b.distanceKm == null) return -1;
     const distanceDifference = a.distanceKm - b.distanceKm;
     if (Math.abs(distanceDifference) > 0.01) return distanceDifference;
     return responseMinutes(a.shop.responseTime) - responseMinutes(b.shop.responseTime)

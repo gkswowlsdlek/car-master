@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Bell, FileText, ImagePlus, Info, MoreHorizontal, Paperclip, Send, X } from "lucide-react";
-import { attachmentProvider } from "../../services/attachments";
+import { attachmentProvider, supabaseAttachmentProvider } from "../../services/attachments";
 import { canTransitionStage } from "../../services/transaction-state-service";
 import type { ChatAttachment, ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
 
@@ -11,11 +11,12 @@ const stages: TransactionStage[] = ["접수", "입고예정", "입고", "시공�
 const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`;
 const fileSize = (value: number) => value < 1024 * 1024 ? `${Math.max(1, Math.round(value / 1024))}KB` : `${(value / 1024 / 1024).toFixed(1)}MB`;
 
-export function TransactionChatWorkspace({ role, userId, transaction, room, onSend, onHide, onUpdate, onStageChange, onPaymentChange }: {
+export function TransactionChatWorkspace({ role, userId, transaction, room, useRemoteAttachments, onSend, onHide, onUpdate, onStageChange, onPaymentChange }: {
   role: "dealer" | "shop";
   userId: string;
   transaction: Transaction;
   room?: ChatRoom;
+  useRemoteAttachments: boolean;
   onSend: (transaction: Transaction, message: TransactionChatMessage) => void;
   onHide: (id: string, role: "dealer" | "shop") => void;
   onUpdate: (transaction: Transaction) => void;
@@ -27,6 +28,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, onSe
   const [preview, setPreview] = useState<ChatAttachment | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [finalPrice, setFinalPrice] = useState("");
+  const [attachmentError, setAttachmentError] = useState("");
   const imageInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const messageEnd = useRef<HTMLDivElement>(null);
@@ -39,10 +41,16 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, onSe
   useEffect(() => () => pendingRef.current.forEach((item) => attachmentProvider.release(item)), []);
 
   const selectFiles = async (files: FileList | null) => {
-    if (!files) return;
-    const valid = [...files].filter((file) => file.size <= 10 * 1024 * 1024);
-    const prepared = await Promise.all(valid.map((file) => attachmentProvider.prepare(file)));
-    setPending((current) => [...current, ...prepared]);
+    const file = files?.[0];
+    if (!file) return;
+    setAttachmentError("");
+    try {
+      const provider = useRemoteAttachments ? supabaseAttachmentProvider : attachmentProvider;
+      const prepared = await provider.prepare(file, room?.id);
+      setPending((current) => { current.forEach((item) => attachmentProvider.release(item)); return [prepared]; });
+    } catch (error) {
+      setAttachmentError(error instanceof Error ? error.message : "파일을 업로드하지 못했습니다.");
+    }
   };
   const removePending = (id: string) => setPending((current) => current.filter((item) => { if (item.id === id) attachmentProvider.release(item); return item.id !== id; }));
   const send = () => {
@@ -81,9 +89,10 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, onSe
         <div ref={messageEnd} />
       </div>
       <footer className="messenger-composer">
+        {attachmentError && <p className="login-error">{attachmentError}</p>}
         {pending.length > 0 && <div className="attachment-preview-strip">{pending.map((item) => <div key={item.id}>{item.kind === "image" ? <img src={item.url} alt="" /> : <FileText size={22} />}<span><b>{item.name}</b><small>{fileSize(item.size)} · 이번 세션에서만 표시</small></span><button onClick={() => removePending(item.id)} aria-label="첨부 삭제"><X size={15} /></button></div>)}</div>}
         <div className="composer-row"><div className="composer-tools"><button onClick={() => imageInput.current?.click()} aria-label="사진 첨부"><ImagePlus size={19} /></button><button onClick={() => fileInput.current?.click()} aria-label="파일 첨부"><Paperclip size={19} /></button></div><textarea rows={1} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); } }} placeholder="메시지를 입력하세요. Shift + Enter로 줄바꿈" /><button className="composer-send" onClick={send} disabled={!room || (!draft.trim() && pending.length === 0)}><Send size={18} /><span>보내기</span></button></div>
-        <input ref={imageInput} hidden type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} /><input ref={fileInput} hidden type="file" multiple onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} />
+        <input ref={imageInput} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} /><input ref={fileInput} hidden type="file" accept=".pdf,.txt,.doc,.docx,.xls,.xlsx" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} />
       </footer>
     </section>
     <aside className={`messenger-sidebar ${showDetails ? "mobile-open" : ""}`}><button className="sidebar-close" onClick={() => setShowDetails(false)}><X size={18} /></button><div className="briefing-title"><span>AI WORK BRIEFING</span><h3>자동 작업 브리핑</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div><dl className="briefing-data"><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model}</dd></div><div><dt>차량 등급</dt><dd>{transaction.vehicle.class || "미분류"}</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>추가 요청</dt><dd>{transaction.service.extraRequest || "없음"}</dd></div><div><dt>입고 예정</dt><dd>{transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt ?? "미정"}</dd></div><div><dt>시공점</dt><dd>{transaction.installerName}</dd></div><div><dt>가이드 가격</dt><dd>{won(transaction.pricing.baseGuidePrice)}</dd></div></dl>
