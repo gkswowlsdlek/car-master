@@ -15,6 +15,6 @@ export function LandingPage({ onStart, onPriceGuide }: { onStart: () => void; on
     </section>
     <section className="trust-strip"><span className="primary-benefit"><Building2 size={24} /> 전국 시공점 연결</span><span className="primary-benefit"><CircleDollarSign size={24} /> 권장 패키지 제공</span><span><MessageCircle size={24} /> 거래방 자동 생성</span><span><Clock3 size={24} /> 실시간 진행 관리</span></section>
     <section className="marketing-final-cta"><p className="eyebrow">READY TO START</p><h2>첫 시공 요청부터 더 간결하게.</h2><p className="final-cta-description">가격 확인부터 거래 완료까지, 카마스터에서 한 번에 시작해 보세요.</p><button className="button button-primary button-large" onClick={onStart}>카마스터 시작하기 <ArrowRight size={19} /></button></section>
-    <footer className="marketing-footer"><div className="footer-brand"><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><p>딜러와 시공점을 하나의 거래 흐름으로 연결합니다.</p></div><div className="footer-meta"><span><small>서비스</small>Car-Master Beta</span><span><small>문의</small>help@car-master.kr</span><span><small>버전</small>V0.3.5 · 종합 안정화</span><span><small>Copyright</small>© 2026 Car-Master</span></div></footer>
+    <footer className="marketing-footer"><div className="footer-brand"><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><p>딜러와 시공점을 하나의 거래 흐름으로 연결합니다.</p></div><div className="footer-meta"><span><small>서비스</small>Car-Master Beta</span><span><small>문의</small>help@car-master.kr</span><span><small>버전</small>V0.3.5.2 · 시공점 UI/UX 개선</span><span><small>Copyright</small>© 2026 Car-Master</span></div></footer>
   </main>;
 }
