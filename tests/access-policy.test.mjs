@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { canAccessWorkspacePath, workspacePathForUser } from "../services/auth/access-policy.ts";
+import { canAccessWorkspacePath, isProtectedPath, isPublicPath, publicScreenForPath, workspacePathForUser } from "../services/auth/access-policy.ts";
 
 const dealer = { id: "d", email: "d@example.com", name: "딜러", role: "dealer" };
 const admin = { id: "a", email: "a@example.com", name: "관리자", role: "admin" };
@@ -21,4 +21,12 @@ test("protected workspace paths reject anonymous and cross-role access", () => {
   assert.equal(canAccessWorkspacePath(pending, "/shop"), false);
   assert.equal(canAccessWorkspacePath(suspended, "/shop"), false);
   assert.equal(canAccessWorkspacePath(approved, "/shop"), true);
+});
+
+test("public and protected routes are classified without rebuilding the router", () => {
+  for (const path of ["/", "/login", "/signup", "/auth/callback"]) assert.equal(isPublicPath(path), true);
+  for (const path of ["/dealer", "/shop", "/admin", "/account-status"]) assert.equal(isProtectedPath(path), true);
+  assert.equal(publicScreenForPath("/"), "landing");
+  assert.equal(publicScreenForPath("/login"), "login");
+  assert.equal(publicScreenForPath("/signup"), "signup");
 });

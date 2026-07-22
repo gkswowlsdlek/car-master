@@ -10,7 +10,7 @@
     "build": "vinext build",
     "build:vercel": "next build",
     "start": "vinext start",
-    "test": "node --experimental-strip-types --test --test-isolation=none tests/fees.test.mjs tests/transaction-state-service.test.mjs tests/auth-provider.test.mjs tests/access-policy.test.mjs tests/v035-foundation.test.mjs tests/v035-stability.test.mjs",
+    "test": "node --experimental-strip-types --test --test-isolation=none tests/fees.test.mjs tests/transaction-state-service.test.mjs tests/auth-provider.test.mjs tests/access-policy.test.mjs tests/auth-initialization.test.mjs tests/v035-foundation.test.mjs tests/v035-stability.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },

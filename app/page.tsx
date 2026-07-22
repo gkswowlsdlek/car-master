@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { AdminOverview } from "../components/admin/AdminOverview";
 import { AccountStatusScreen } from "../components/auth/AccountStatusScreen";
 import { LoginScreen } from "../components/auth/LoginScreen";
@@ -31,7 +32,8 @@ import { transactionRepository } from "../repositories/transaction-repository";
 import { searchNearbyInstallers } from "../services/installer-search";
 import { createId, createTransactionNumber } from "../services/id-service";
 import { searchLocation } from "../services/location-search";
-import { authProvider } from "../services/auth";
+import { authProvider, initializeAuth, routeAfterAuthInitialization } from "../services/auth";
+import { isProtectedPath, publicScreenForPath } from "../services/auth/access-policy";
 import { transitionPayment, transitionStage } from "../services/transaction-state-service";
 import type { DemoAccount, RequestType, Role, Screen, ServiceRequest } from "../types/dealer";
 import type { SearchLocation } from "../types/location";
@@ -61,9 +63,10 @@ function roleTransactionsForActivity(transactions: Transaction[], role: Role, sh
 }
 
 export default function Home() {
+  const pathname = usePathname();
   const [role, setRole] = useState<Role>("dealer");
   const [account, setAccount] = useState<DemoAccount>(demoAccounts[0]);
-  const [screen, setScreen] = useState<Screen>("landing");
+  const [screen, setScreen] = useState<Screen>(() => publicScreenForPath(pathname));
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [query, setQuery] = useState("하남시");
@@ -143,25 +146,35 @@ export default function Home() {
   }, [goToScreen]);
 
   useEffect(() => {
-    const pathname = window.location.pathname;
+    let active = true;
+    const protectedPath = isProtectedPath(pathname);
     const frame = requestAnimationFrame(() => { void (async () => {
       try {
         const demoResponse = await fetch("/api/demo-login", { cache: "no-store" });
+        if (!active) return;
         if (demoResponse.ok) {
           const { account: demoAccount } = await demoResponse.json() as { account: DemoAccount };
+          if (!active) return;
           login(demoAccount, true);
           return;
         }
-        const user = await authProvider.initialize();
-        const protectedPath = ["/dealer", "/shop", "/admin", "/account-status"].includes(pathname);
-        if (user && (protectedPath || pathname === "/login")) enterAuthenticatedUser(user, true);
-        else if (!user && protectedPath) { setScreen("login"); window.history.replaceState(null, "", "/login"); }
-        else setScreen(pathname === "/signup" ? "signup" : pathname === "/login" ? "login" : "landing");
-      } catch { setScreen("login"); }
-      finally { setAuthReady(true); }
+        const result = await initializeAuth(authProvider);
+        if (!active) return;
+        if (result.status === "error") console.error("[auth] Session initialization failed", result.error);
+        if (result.status === "timeout") console.warn("[auth] Session initialization timed out");
+        const route = routeAfterAuthInitialization(pathname, result.user);
+        if (route.destination === "workspace") enterAuthenticatedUser(route.user, true);
+        else if (route.destination === "login") { setScreen("login"); window.history.replaceState(null, "", "/login"); }
+        else setScreen(route.screen);
+      } catch (error) {
+        console.error("[auth] Session bootstrap failed", error);
+        if (active && protectedPath) { setScreen("login"); window.history.replaceState(null, "", "/login"); }
+      } finally {
+        if (active) setAuthReady(true);
+      }
     })(); });
-    return () => cancelAnimationFrame(frame);
-  }, [enterAuthenticatedUser, login]);
+    return () => { active = false; cancelAnimationFrame(frame); };
+  }, [enterAuthenticatedUser, login, pathname]);
 
   useEffect(() => {
     if (!authProvider.subscribe) return;
@@ -266,7 +279,7 @@ export default function Home() {
     try { void updateTransaction(transitionPayment(transaction, status, role === "admin" ? "admin" : role)); } catch (error) { alert(error instanceof Error ? error.message : "결제 상태를 변경할 수 없습니다."); }
   };
 
-  if (!authReady) return <main className="system-state-page" aria-busy="true"><section><div className="system-state-logo">CM</div><div className="loading-line wide" /><p>회원 세션을 확인하고 있습니다.</p></section></main>;
+  if (isProtectedPath(pathname) && !authReady) return <main className="system-state-page" aria-busy="true"><section><div className="system-state-logo">CM</div><div className="loading-line wide" /><p>회원 세션을 확인하고 있습니다.</p></section></main>;
   if (screen === "landing") return <LandingPage onStart={() => goToScreen("login")} onPriceGuide={() => goToScreen("login")} />;
   if (screen === "login") return <LoginScreen onLogin={authenticate} onExplore={() => goToScreen("landing")} onSignUp={() => goToScreen("signup")} />;
   if (screen === "signup") return <SignUpScreen onBack={() => goToScreen("login")} onSignUp={signUp} />;

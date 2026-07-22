@@ -36,7 +36,8 @@ export class SupabaseAuthProvider implements AuthProvider {
   }
 
   async initialize() {
-    const { data: { user } } = await createSupabaseBrowserClient().auth.getUser();
+    const { data: { user }, error } = await createSupabaseBrowserClient().auth.getUser();
+    if (error) throw error;
     if (!user) { this.currentUser = null; return null; }
     return this.resolveUser(user);
   }
