@@ -1,5 +1,5 @@
 import { createSupabaseBrowserClient } from "../lib/supabase/client";
-import type { Transaction } from "../types/transactions";
+import type { PaymentStatus, Transaction } from "../types/transactions";
 
 type TransactionRow = {
   id: string; dealer_id: string; installer_id: string; installer_name: string;
@@ -37,15 +37,36 @@ export class SupabaseTransactionRepository {
     return data as { transactionId: string; roomId: string; messageId: string };
   }
 
-  async update(value: Transaction) {
-    const { data, error } = await createSupabaseBrowserClient().from("transactions").update({
-      vehicle: value.vehicle, service: value.service, pricing: value.pricing, schedule: value.schedule,
-      stage: value.status.stage, hidden_by_dealer: value.visibility.hiddenByDealer,
-      hidden_by_installer: value.visibility.hiddenByInstaller, last_message: value.lastMessage,
-      updated_at: value.status.updatedAt,
-    }).eq("id", value.id).select("id").maybeSingle();
+  async setVisibility(transactionId: string, hidden: boolean) {
+    const { error } = await createSupabaseBrowserClient().rpc("set_transaction_visibility", {
+      p_transaction_id: transactionId,
+      p_hidden: hidden,
+    });
     if (error) throw error;
-    if (!data) throw new Error("거래를 찾을 수 없거나 변경 권한이 없습니다.");
+  }
+
+  async setFinalPrice(transactionId: string, finalPrice: number) {
+    const { error } = await createSupabaseBrowserClient().rpc("set_transaction_final_price", {
+      p_transaction_id: transactionId,
+      p_final_price: finalPrice,
+    });
+    if (error) throw error;
+  }
+
+  async transitionPayment(transactionId: string, nextStatus: PaymentStatus) {
+    const { error } = await createSupabaseBrowserClient().rpc("transition_transaction_payment", {
+      p_transaction_id: transactionId,
+      p_next_status: nextStatus,
+    });
+    if (error) throw error;
+  }
+
+  async transitionStage(transactionId: string, nextStage: Transaction["status"]["stage"]) {
+    const { error } = await createSupabaseBrowserClient().rpc("transition_transaction_stage", {
+      p_transaction_id: transactionId,
+      p_next_stage: nextStage,
+    });
+    if (error) throw error;
   }
 
   subscribe(listener: () => void) {

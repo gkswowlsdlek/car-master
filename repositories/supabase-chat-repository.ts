@@ -27,10 +27,10 @@ export class SupabaseChatRepository {
     const text = message.text.trim();
     if (!text && !(message.attachments?.length)) throw new Error("메시지 또는 첨부파일을 입력해 주세요.");
     if (text.length > 4000) throw new Error("메시지는 4,000자 이하로 입력해 주세요.");
-    const { error } = await createSupabaseBrowserClient().from("chat_messages").insert({
+    const { error } = await createSupabaseBrowserClient().from("chat_messages").upsert({
       room_id: roomId, sender_id: message.senderId, sender_role: message.senderRole,
-      text, attachments: message.attachments ?? [],
-    });
+      text, attachments: message.attachments ?? [], client_message_id: message.id,
+    }, { onConflict: "room_id,client_message_id", ignoreDuplicates: true });
     if (error) throw error;
   }
 

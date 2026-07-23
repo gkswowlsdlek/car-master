@@ -21,4 +21,9 @@ export class SupabaseAttachmentProvider implements AttachmentProvider {
     return { id, name: file.name, type: file.type, size: file.size, url: data?.signedUrl ?? "", storagePath, kind: file.type.startsWith("image/") ? "image" : "file", persistence: "remote", createdAt: new Date().toISOString() };
   }
   release() { /* Remote files remain attached to the transaction. */ }
+  async discard(attachment: ChatAttachment) {
+    if (!attachment.storagePath) return;
+    const { error } = await createSupabaseBrowserClient().storage.from("transaction-attachments").remove([attachment.storagePath]);
+    if (error) console.warn("[attachments] Failed to remove an unlinked upload", error.message);
+  }
 }

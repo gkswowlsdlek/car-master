@@ -259,24 +259,37 @@ export default function Home() {
     if (useSupabaseData) {
       try {
         await supabaseChatRepository.addMessage(transaction.chatRoomId, message);
-        await supabaseTransactionRepository.update({ ...transaction, lastMessage: message.text || "첨부파일", status: { ...transaction.status, updatedAt: message.createdAt } });
+        await refresh();
       } catch (error) { throw new Error(error instanceof Error ? error.message : "메시지를 전송하지 못했습니다."); }
       return;
     }
     chatRepository.addMessage(transaction.chatRoomId, { ...message, id: createId("MSG") });
     transactionRepository.update({ ...transaction, lastMessage: message.text, status: { ...transaction.status, updatedAt: message.createdAt } });
   };
-  const updateTransaction = async (value: Transaction) => useSupabaseData ? supabaseTransactionRepository.update(value) : transactionRepository.update(value);
-  const hideTransaction = (id: string, targetRole: "dealer" | "shop") => {
+  const hideTransaction = async (id: string, targetRole: "dealer" | "shop") => {
     if (!useSupabaseData) { if (targetRole === "dealer") transactionRepository.hideForDealer(id); else transactionRepository.hideForInstaller(id); return; }
-    const item = transactions.find((value) => value.id === id);
-    if (item) void updateTransaction({ ...item, visibility: { ...item.visibility, [targetRole === "dealer" ? "hiddenByDealer" : "hiddenByInstaller"]: true } });
+    try { await supabaseTransactionRepository.setVisibility(id, true); await refresh(); }
+    catch (error) { alert(error instanceof Error ? error.message : "거래를 숨길 수 없습니다."); }
   };
-  const changeStage = (transaction: Transaction, stage: TransactionStage) => {
-    try { void updateTransaction(transitionStage(transaction, stage, role === "shop" ? "shop" : "dealer")); } catch (error) { alert(error instanceof Error ? error.message : "상태를 변경할 수 없습니다."); }
+  const changeStage = async (transaction: Transaction, stage: TransactionStage) => {
+    try {
+      const next = transitionStage(transaction, stage, role === "shop" ? "shop" : "dealer");
+      if (useSupabaseData) { await supabaseTransactionRepository.transitionStage(transaction.id, stage); await refresh(); }
+      else transactionRepository.update(next);
+    } catch (error) { alert(error instanceof Error ? error.message : "상태를 변경할 수 없습니다."); }
   };
-  const changePayment = (transaction: Transaction, status: PaymentStatus) => {
-    try { void updateTransaction(transitionPayment(transaction, status, role === "admin" ? "admin" : role)); } catch (error) { alert(error instanceof Error ? error.message : "결제 상태를 변경할 수 없습니다."); }
+  const changeFinalPrice = async (transaction: Transaction, finalPrice: number) => {
+    try {
+      if (useSupabaseData) { await supabaseTransactionRepository.setFinalPrice(transaction.id, finalPrice); await refresh(); }
+      else transactionRepository.update({ ...transaction, pricing: { ...transaction.pricing, finalPrice }, status: { ...transaction.status, updatedAt: new Date().toISOString() } });
+    } catch (error) { alert(error instanceof Error ? error.message : "최종 금액을 저장할 수 없습니다."); }
+  };
+  const changePayment = async (transaction: Transaction, status: PaymentStatus) => {
+    try {
+      const next = transitionPayment(transaction, status, role === "admin" ? "admin" : role);
+      if (useSupabaseData) { await supabaseTransactionRepository.transitionPayment(transaction.id, status); await refresh(); }
+      else transactionRepository.update(next);
+    } catch (error) { alert(error instanceof Error ? error.message : "결제 상태를 변경할 수 없습니다."); }
   };
 
   if (isProtectedPath(pathname) && !authReady) return <main className="system-state-page" aria-busy="true"><section><div className="system-state-logo">CM</div><div className="loading-line wide" /><p>회원 세션을 확인하고 있습니다.</p></section></main>;
@@ -295,7 +308,7 @@ export default function Home() {
     {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={() => void searchArea(request.deliveryArea)} onSummary={() => goToScreen("requestSummary")} onPriceGuide={() => goToScreen("priceGuide")} />}
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} submitting={isCreatingTransaction} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} onOpenTransactions={() => goToScreen("shopRequests")} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} />}
-    {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUpdate={(value) => void updateTransaction(value)} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} />}
+    {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} />}
     {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} userId={account.id} activity={profileActivity} />}
     {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} demoSession={demoAccounts.some((item) => item.id === account.id)} />}
   </AppShell>;

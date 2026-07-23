@@ -3,6 +3,7 @@ import type { ChatAttachment } from "../../types/transactions";
 export interface AttachmentProvider {
   prepare(file: File, roomId?: string): Promise<ChatAttachment>;
   release(attachment: ChatAttachment): void;
+  discard?(attachment: ChatAttachment): Promise<void>;
 }
 
 export const CHAT_ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024;
@@ -46,4 +47,6 @@ export class LocalAttachmentProvider implements AttachmentProvider {
   release(attachment: ChatAttachment) {
     if (attachment.persistence === "session") URL.revokeObjectURL(attachment.url);
   }
+
+  async discard(attachment: ChatAttachment) { this.release(attachment); }
 }
