@@ -10,8 +10,9 @@ import type { ChatAttachment, ChatRoom, PaymentStatus, Transaction, TransactionC
 const stages: TransactionStage[] = ["접수", "입고예정", "입고", "시공중", "완료"];
 const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`;
 const fileSize = (value: number) => value < 1024 * 1024 ? `${Math.max(1, Math.round(value / 1024))}KB` : `${(value / 1024 / 1024).toFixed(1)}MB`;
+const stageActionTestId = (stage?: TransactionStage) => stage === "입고예정" ? "accept-transaction-button" : stage === "시공중" ? "start-work-button" : stage === "완료" ? "complete-work-button" : undefined;
 
-export function TransactionChatWorkspace({ role, userId, transaction, room, useRemoteAttachments, onSend, onHide, onUpdate, onStageChange, onPaymentChange }: {
+export function TransactionChatWorkspace({ role, userId, transaction, room, useRemoteAttachments, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange }: {
   role: "dealer" | "shop";
   userId: string;
   transaction: Transaction;
@@ -19,7 +20,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
   useRemoteAttachments: boolean;
   onSend: (transaction: Transaction, message: TransactionChatMessage) => Promise<void>;
   onHide: (id: string, role: "dealer" | "shop") => void;
-  onUpdate: (transaction: Transaction) => void;
+  onFinalPriceChange: (transaction: Transaction, finalPrice: number) => void;
   onStageChange: (transaction: Transaction, stage: TransactionStage) => void;
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
 }) {
@@ -39,7 +40,10 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
 
   useEffect(() => { messageEnd.current?.scrollIntoView({ block: "end" }); }, [room?.messages.length]);
   useEffect(() => { pendingRef.current = pending; }, [pending]);
-  useEffect(() => () => pendingRef.current.forEach((item) => attachmentProvider.release(item)), []);
+  useEffect(() => () => {
+    const provider = useRemoteAttachments ? supabaseAttachmentProvider : attachmentProvider;
+    pendingRef.current.forEach((item) => { if (provider.discard) void provider.discard(item); else provider.release(item); });
+  }, [useRemoteAttachments]);
 
   const selectFiles = async (files: FileList | null) => {
     const file = files?.[0];
@@ -48,12 +52,25 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
     try {
       const provider = useRemoteAttachments ? supabaseAttachmentProvider : attachmentProvider;
       const prepared = await provider.prepare(file, room?.id);
-      setPending((current) => { current.forEach((item) => attachmentProvider.release(item)); return [prepared]; });
+      const previous = pendingRef.current;
+      await Promise.allSettled(previous.map((item) => provider.discard ? provider.discard(item) : Promise.resolve(provider.release(item))));
+      pendingRef.current = [prepared];
+      setPending([prepared]);
     } catch (error) {
       setAttachmentError(error instanceof Error ? error.message : "파일을 업로드하지 못했습니다.");
     }
   };
-  const removePending = (id: string) => setPending((current) => current.filter((item) => { if (item.id === id) attachmentProvider.release(item); return item.id !== id; }));
+  const removePending = (id: string) => setPending((current) => {
+    const next = current.filter((item) => {
+    if (item.id === id) {
+      const provider = useRemoteAttachments ? supabaseAttachmentProvider : attachmentProvider;
+      if (provider.discard) void provider.discard(item); else provider.release(item);
+    }
+      return item.id !== id;
+    });
+    pendingRef.current = next;
+    return next;
+  });
   const send = async () => {
     const text = draft.trim();
     if ((!text && pending.length === 0) || !room || isSending) return;
@@ -62,8 +79,13 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
     setAttachmentError("");
     try {
       await onSend(transaction, { id: `${room.id}-M-${now}`, roomId: room.id, senderId: userId, senderRole: role, text, attachments: pending, createdAt: now, readBy: [userId] });
+      pendingRef.current = [];
       setDraft(""); setPending([]);
     } catch (error) {
+      const provider = useRemoteAttachments ? supabaseAttachmentProvider : attachmentProvider;
+      await Promise.allSettled(pending.map((item) => provider.discard?.(item)));
+      pendingRef.current = [];
+      setPending([]);
       setAttachmentError(error instanceof Error ? error.message : "메시지를 보내지 못했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setIsSending(false);
@@ -76,14 +98,14 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
   const savePrice = () => {
     const value = Number(finalPrice.replace(/\D/g, ""));
     if (value <= 0) return;
-    onUpdate({ ...transaction, pricing: { ...transaction.pricing, finalPrice: value }, status: { ...transaction.status, updatedAt: new Date().toISOString() } });
+    onFinalPriceChange(transaction, value);
     setFinalPrice("");
   };
 
-  return <article className="messenger-workspace">
+  return <article className="messenger-workspace" data-testid={`transaction-detail-${transaction.id}`}>
     <section className="messenger-center">
       <header className="messenger-header"><div><span className="messenger-avatar">{transaction.vehicle.maker.slice(0, 1)}</span><div><h2>{transaction.vehicle.maker} {transaction.vehicle.model} · {transaction.service.product ?? transaction.service.workDescription}</h2><p>{role === "dealer" ? transaction.installerName : `딜러 ${transaction.dealerId}`} <i /> <b>{transaction.status.stage}</b></p></div></div><nav><button aria-label="알림 설정"><Bell size={18} /></button><button aria-label="거래 정보" onClick={() => setShowDetails((value) => !value)}><Info size={18} /></button><button aria-label="더보기"><MoreHorizontal size={19} /></button></nav></header>
-      {role === "shop" && <section className="shop-stage-overview"><div>{[...stages, "출고"].map((stage, index) => <span className={index < stageIndex || transaction.status.stage === "완료" && index <= stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage === "입고예정" ? "일정 확정" : stage === "시공중" ? "작업 중" : stage}</small></span>)}</div>{nextStage && canTransitionStage(transaction.status.stage, nextStage, role) && <button className="primary" onClick={() => onStageChange(transaction, nextStage)}>{nextStage === "입고예정" ? "일정 확정" : nextStage === "시공중" ? "작업 시작" : nextStage === "완료" ? "완료 처리" : `${nextStage} 확인`}</button>}</section>}
+      {role === "shop" && <section className="shop-stage-overview"><div>{[...stages, "출고"].map((stage, index) => <span className={index < stageIndex || transaction.status.stage === "완료" && index <= stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage === "입고예정" ? "일정 확정" : stage === "시공중" ? "작업 중" : stage}</small></span>)}</div>{nextStage && canTransitionStage(transaction.status.stage, nextStage, role) && <button data-testid={stageActionTestId(nextStage)} className="primary" onClick={() => onStageChange(transaction, nextStage)}>{nextStage === "입고예정" ? "일정 확정" : nextStage === "시공중" ? "작업 시작" : nextStage === "완료" ? "완료 처리" : `${nextStage} 확인`}</button>}</section>}
       <div className="messenger-messages">
         <div className="message-date-divider"><span>거래방 생성 · {new Date(transaction.status.createdAt).toLocaleDateString("ko-KR")}</span></div>
         {room?.messages.map((message, index) => {
@@ -101,8 +123,8 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
       <footer className="messenger-composer">
         {attachmentError && <p className="login-error">{attachmentError}</p>}
         {pending.length > 0 && <div className="attachment-preview-strip">{pending.map((item) => <div key={item.id}>{item.kind === "image" ? <img src={item.url} alt="" /> : <FileText size={22} />}<span><b>{item.name}</b><small>{fileSize(item.size)} · {item.persistence === "remote" ? "거래방에 안전하게 저장" : "이번 세션에서만 표시"}</small></span><button onClick={() => removePending(item.id)} aria-label="첨부 삭제"><X size={15} /></button></div>)}</div>}
-        <div className="composer-row"><div className="composer-tools"><button onClick={() => imageInput.current?.click()} aria-label="사진 첨부" disabled={isSending}><ImagePlus size={19} /></button><button onClick={() => fileInput.current?.click()} aria-label="파일 첨부" disabled={isSending}><Paperclip size={19} /></button></div><textarea rows={1} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void send(); } }} placeholder="메시지를 입력하세요. Shift + Enter로 줄바꿈" disabled={isSending} /><button className="composer-send" onClick={() => void send()} disabled={isSending || !room || (!draft.trim() && pending.length === 0)} aria-busy={isSending}><Send size={18} /><span>{isSending ? "전송 중" : "보내기"}</span></button></div>
-        <input ref={imageInput} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} /><input ref={fileInput} hidden type="file" accept=".pdf,.txt,.doc,.docx,.xls,.xlsx" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} />
+        <div className="composer-row"><div className="composer-tools"><button onClick={() => imageInput.current?.click()} aria-label="사진 첨부" disabled={isSending}><ImagePlus size={19} /></button><button onClick={() => fileInput.current?.click()} aria-label="파일 첨부" disabled={isSending}><Paperclip size={19} /></button></div><textarea data-testid="chat-input" rows={1} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void send(); } }} placeholder="메시지를 입력하세요. Shift + Enter로 줄바꿈" disabled={isSending} /><button data-testid="chat-send-button" className="composer-send" onClick={() => void send()} disabled={isSending || !room || (!draft.trim() && pending.length === 0)} aria-busy={isSending}><Send size={18} /><span>{isSending ? "전송 중" : "보내기"}</span></button></div>
+        <input data-testid="file-upload-input" ref={imageInput} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} /><input ref={fileInput} hidden type="file" accept=".pdf,.txt,.doc,.docx,.xls,.xlsx" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} />
       </footer>
     </section>
     <aside className={`messenger-sidebar ${showDetails ? "mobile-open" : ""}`}><button className="sidebar-close" onClick={() => setShowDetails(false)}><X size={18} /></button><div className="briefing-title"><span>AI WORK BRIEFING</span><h3>자동 작업 브리핑</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div><dl className="briefing-data"><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model}</dd></div><div><dt>차량 등급</dt><dd>{transaction.vehicle.class || "미분류"}</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>추가 요청</dt><dd>{transaction.service.extraRequest || "없음"}</dd></div><div><dt>입고 예정</dt><dd>{transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt ?? "미정"}</dd></div><div><dt>시공점</dt><dd>{transaction.installerName}</dd></div><div><dt>가이드 가격</dt><dd>{won(transaction.pricing.baseGuidePrice)}</dd></div></dl>
