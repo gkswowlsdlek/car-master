@@ -9,22 +9,22 @@ function scheduleDate(item: Transaction) { return item.schedule.confirmedInbound
 function dayDifference(value?: string) { if (!value) return null; const date = new Date(value); const today = new Date(); return Math.floor((new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() - new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()) / 86400000); }
 function inRange(value: string | undefined, range: ScheduleRange) { const difference = dayDifference(value); return difference !== null && (range === "오늘" ? difference === 0 : range === "내일" ? difference === 1 : difference >= 0 && difference <= 7); }
 function timeLabel(value?: string) { if (!value) return "미정"; const date = new Date(value); return value.includes("T") && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "미정"; }
-function nextAction(stage: Transaction["status"]["stage"]) { return stage === "접수" ? "요청 확인" : stage === "입고예정" ? "입고 확인" : stage === "입고" ? "작업 시작" : stage === "시공중" ? "완료 처리" : "거래 보기"; }
+function nextAction(stage: Transaction["status"]["stage"]) { return stage === "견적" ? "요청 확인" : stage === "시공예약" ? "입고 확인" : stage === "입고" ? "작업완료 처리" : "거래 보기"; }
 
 export function ShopDashboard({ transactions, onOpenTransactions, onOpenTransaction }: { transactions: Transaction[]; onOpenTransactions: () => void; onOpenTransaction: (id: string) => void }) {
   const [range, setRange] = useState<ScheduleRange>("오늘");
-  const active = useMemo(() => transactions.filter((item) => !["완료", "취소"].includes(item.status.stage)).sort((a, b) => (scheduleDate(a) ?? a.status.createdAt).localeCompare(scheduleDate(b) ?? b.status.createdAt)), [transactions]);
-  const priority = active.filter((item) => item.status.stage === "접수" || (dayDifference(scheduleDate(item)) ?? 0) < 0);
+  const active = useMemo(() => transactions.filter((item) => !["작업완료", "취소"].includes(item.status.stage)).sort((a, b) => (scheduleDate(a) ?? a.status.createdAt).localeCompare(scheduleDate(b) ?? b.status.createdAt)), [transactions]);
+  const priority = active.filter((item) => item.status.stage === "견적" || (dayDifference(scheduleDate(item)) ?? 0) < 0);
   const scheduled = active.filter((item) => inRange(scheduleDate(item), range));
   const workItems = scheduled.length ? scheduled : range === "오늘" ? active.slice(0, 5) : [];
   const metrics = [
-    { label: "응답 대기", value: transactions.filter((item) => item.status.stage === "접수").length, description: "지금 확인할 신규 요청", tone: "urgent", icon: MessageSquareText },
+    { label: "응답 대기", value: transactions.filter((item) => item.status.stage === "견적").length, description: "지금 확인할 신규 요청", tone: "urgent", icon: MessageSquareText },
     { label: "오늘 입고", value: transactions.filter((item) => inRange(scheduleDate(item), "오늘")).length, description: "오늘 예정된 차량", tone: "today", icon: CalendarDays },
-    { label: "진행 중", value: transactions.filter((item) => ["입고", "시공중"].includes(item.status.stage)).length, description: "현재 작업 중인 차량", tone: "active", icon: Wrench },
-    { label: "완료 예정", value: transactions.filter((item) => item.status.stage === "시공중").length, description: "완료 확인이 필요한 작업", tone: "complete", icon: PackageCheck },
-    { label: "미정산", value: transactions.filter((item) => item.status.stage === "완료" && item.pricing.paymentStatus !== "정산완료").length, description: "결제·정산 확인 필요", tone: "waiting", icon: WalletCards },
+    { label: "진행 중", value: transactions.filter((item) => ["시공예약", "입고"].includes(item.status.stage)).length, description: "현재 작업 중인 차량", tone: "active", icon: Wrench },
+    { label: "완료 예정", value: transactions.filter((item) => item.status.stage === "입고").length, description: "작업완료 확인이 필요한 작업", tone: "complete", icon: PackageCheck },
+    { label: "미정산", value: transactions.filter((item) => item.status.stage === "작업완료" && item.pricing.paymentStatus !== "정산완료").length, description: "결제·정산 확인 필요", tone: "waiting", icon: WalletCards },
   ];
-  const quickActions = [{ label: "요청 확인", icon: MessageSquareText }, { label: "작업 시작", icon: PlayCircle }, { label: "사진 등록", icon: Camera }, { label: "완료 처리", icon: CheckCircle2 }];
+  const quickActions = [{ label: "요청 확인", icon: MessageSquareText }, { label: "입고 처리", icon: PlayCircle }, { label: "사진 등록", icon: Camera }, { label: "작업완료 처리", icon: CheckCircle2 }];
 
   return <section className="shop-dashboard section role-home role-home-shop">
     <header className="workspace-heading installer-heading"><div><p className="eyebrow">오늘의 시공 업무</p><h1>지금 처리할 작업부터 <br />빠르게 확인하세요.</h1><p>응답 대기, 입고 일정과 지연 작업을 우선순위로 정리했습니다.</p></div><button className="primary" onClick={onOpenTransactions}><MessageSquareText size={18} /> 거래 관리 열기</button></header>
@@ -32,7 +32,7 @@ export function ShopDashboard({ transactions, onOpenTransactions, onOpenTransact
     {priority.length > 0 && <section className="shop-priority-banner">
       <header><h2><AlertTriangle size={17} /> 지금 확인해야 할 작업</h2><b>{priority.length}건</b></header>
       <div className="shop-priority-list">{priority.slice(0, 4).map((item) => <button key={item.id} onClick={() => onOpenTransaction(item.id)}>
-        <span><b>{item.vehicle.maker} {item.vehicle.model}</b><small>{item.status.stage === "접수" ? "응답 대기 요청" : "예정일 경과"} · {item.service.workDescription}</small></span>
+        <span><b>{item.vehicle.maker} {item.vehicle.model}</b><small>{item.status.stage === "견적" ? "응답 대기 요청" : "예정일 경과"} · {item.service.workDescription}</small></span>
         <em>{nextAction(item.status.stage)} <ArrowRight size={13} /></em>
       </button>)}</div>
     </section>}

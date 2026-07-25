@@ -14,16 +14,16 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenDeal, 
   onNewRequest: () => void; onFindShop: () => void; onPriceGuide: () => void; onOpenChat: () => void;
 }) {
   const sorted = [...deals].sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt));
-  const waitingCount = deals.filter((deal) => deal.status.stage === "접수").length;
+  const waitingCount = deals.filter((deal) => deal.status.stage === "견적").length;
   const cards = [
-    { label: "오늘 입고 예정", description: "오늘 확인할 입고 일정", value: deals.filter((deal) => isToday(deal.schedule.confirmedInboundAt ?? deal.schedule.requestedInboundAt)).length, filter: "입고예정" as const, icon: CalendarClock, tone: "blue" },
-    { label: "확인 대기 거래", description: "응답이 필요한 신규 요청", value: waitingCount, filter: "접수" as const, icon: Clock3, tone: "orange" },
-    { label: "진행 중 거래", description: "현재 시공 흐름에 있는 거래", value: deals.filter((deal) => ["입고예정", "입고", "시공중"].includes(deal.status.stage)).length, filter: "전체" as const, icon: Wrench, tone: "violet" },
-    { label: "최근 완료 거래", description: "완료 처리된 전체 거래", value: deals.filter((deal) => deal.status.stage === "완료").length, filter: "완료" as const, icon: CheckCircle2, tone: "green" },
+    { label: "오늘 입고 예정", description: "오늘 확인할 입고 일정", value: deals.filter((deal) => isToday(deal.schedule.confirmedInboundAt ?? deal.schedule.requestedInboundAt)).length, filter: "시공예약" as const, icon: CalendarClock, tone: "blue" },
+    { label: "확인 대기 거래", description: "응답이 필요한 신규 요청", value: waitingCount, filter: "견적" as const, icon: Clock3, tone: "orange" },
+    { label: "진행 중 거래", description: "현재 시공 흐름에 있는 거래", value: deals.filter((deal) => ["시공예약", "입고"].includes(deal.status.stage)).length, filter: "전체" as const, icon: Wrench, tone: "violet" },
+    { label: "최근 완료 거래", description: "완료 처리된 전체 거래", value: deals.filter((deal) => deal.status.stage === "작업완료").length, filter: "작업완료" as const, icon: CheckCircle2, tone: "green" },
   ];
   return <section className="dealer-dashboard simplified-dashboard role-home role-home-dealer">
     <header className="dealer-welcome"><div><p className="eyebrow">DEALER WORKSPACE</p><h1>{dealerName} 딜러님, <br /><span>오늘 업무를 시작하세요.</span></h1><p>확인 대기 거래와 오늘 입고 일정을 먼저 정리했습니다.</p></div><button className="primary" onClick={onNewRequest}><Plus size={18} /> 새 시공 요청</button></header>
-    {waitingCount > 0 && <button className="dealer-focus-banner" onClick={() => onFilterDeals("접수")}>
+    {waitingCount > 0 && <button className="dealer-focus-banner" onClick={() => onFilterDeals("견적")}>
       <div><p className="eyebrow">NEEDS YOUR ATTENTION</p><h2>지금 확인이 필요해요 — {waitingCount}건</h2><p className="dealer-focus-desc">응답 대기 중인 시공 요청이 있어요. 지금 확인해 보세요.</p></div>
       <span className="dealer-focus-cta">확인하기 <ArrowRight size={16} /></span>
     </button>}
