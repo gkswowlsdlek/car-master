@@ -7,7 +7,7 @@ import { AccountStatusScreen } from "../components/auth/AccountStatusScreen";
 import { LoginScreen } from "../components/auth/LoginScreen";
 import { SignUpScreen } from "../components/auth/SignUpScreen";
 import { DealerDashboard } from "../components/dealer/DealerDashboard";
-import { DealerMapScreen } from "../components/dealer/DealerMapScreen";
+import { InstallerDirectoryScreen } from "../components/dealer/InstallerDirectoryScreen";
 import { PriceGuideScreen } from "../components/dealer/PriceGuideScreen";
 import { RequestSummary } from "../components/dealer/RequestSummary";
 import { ServiceRequestScreen } from "../components/dealer/ServiceRequestScreen";
@@ -19,11 +19,12 @@ import { TransactionManagementScreen } from "../components/transactions/Transact
 import { defaultRequest } from "../data/default-request";
 import { demoAccounts } from "../data/demo-accounts";
 import { districtCenters } from "../data/district-centers";
+import { demoInstallerListings } from "../data/installer-directory-demo";
 import { formatGuidePrice } from "../data/installation-price-guide";
 import { pricePackages, type PriceGuideFilter, type PricePackage, type VehicleClass } from "../data/pricePackages";
 import { calculateVehicleClassPrice } from "../data/vehicle-class-options";
 import { useTransactionStore } from "../hooks/use-transaction-store";
-import { installerShops, type Brand, type InstallerShop } from "../lib/dealer-flow-data";
+import type { Brand } from "../lib/dealer-flow-data";
 import { chatRepository } from "../repositories/chat-repository";
 import { installerDirectoryRepository } from "../repositories/installer-directory-repository";
 import { supabaseChatRepository } from "../repositories/supabase-chat-repository";
@@ -36,6 +37,7 @@ import { authProvider, initializeAuth, routeAfterAuthInitialization } from "../s
 import { isProtectedPath, publicScreenForPath } from "../services/auth/access-policy";
 import { transitionPayment, transitionStage } from "../services/transaction-state-service";
 import type { DemoAccount, RequestType, Role, Screen, ServiceRequest } from "../types/dealer";
+import type { InstallerListing } from "../types/installer";
 import type { SearchLocation } from "../types/location";
 import type { ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../types/transactions";
 import type { CurrentUser, SignUpInput, SignUpResult } from "../types/auth";
@@ -80,14 +82,19 @@ export default function Home() {
   const [vehicleClass, setVehicleClass] = useState<VehicleClass>("국산 승용");
   const [selectedPackageId, setSelectedPackageId] = useState(pricePackages[0].id);
   const [selectedTransactionId, setSelectedTransactionId] = useState("");
-  const [approvedInstallerShops, setApprovedInstallerShops] = useState<InstallerShop[]>([]);
+  const [approvedInstallerShops, setApprovedInstallerShops] = useState<InstallerListing[]>([]);
+  const [installerDirectoryLoading, setInstallerDirectoryLoading] = useState(false);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
   const useSupabaseData = Boolean(currentUser);
   const { transactions, rooms, isLoading: isTransactionLoading, error: transactionLoadError, refresh } = useTransactionStore(useSupabaseData);
 
-  const availableShops = useSupabaseData ? approvedInstallerShops : installerShops;
+  // Unified Installer View Model: demo fixtures always show (nationwide sample
+  // network); approved Supabase installers are layered in once authenticated.
+  // Real-transaction creation is still gated to `approvedInstallerShops` only
+  // (see createTransaction), so a demo listing can never become a real order.
+  const availableShops: InstallerListing[] = useMemo(() => useSupabaseData ? [...approvedInstallerShops, ...demoInstallerListings] : demoInstallerListings, [useSupabaseData, approvedInstallerShops]);
   const nearbyResults = useMemo(() => searchNearbyInstallers(location, availableShops).filter((item) => item.shop.approved && item.shop.available).slice(0, 28), [location, availableShops]);
-  const selectedShop = availableShops.find((shop) => shop.id === selectedShopId) ?? nearbyResults[0]?.shop ?? installerShops[0];
+  const selectedShop = availableShops.find((shop) => shop.id === selectedShopId) ?? nearbyResults[0]?.shop ?? demoInstallerListings[0];
   const selectedPackage = pricePackages.find((item) => item.id === selectedPackageId) ?? pricePackages[0];
   const filteredPackages = pricePackages.filter((item) => {
     const keyword = priceSearch.trim().toLowerCase();
@@ -191,11 +198,14 @@ export default function Home() {
   useEffect(() => {
     if (currentUser?.role !== "dealer") return;
     let active = true;
-    void installerDirectoryRepository.getApproved().then((shops) => {
-      if (!active) return;
-      setApprovedInstallerShops(shops);
-      if (shops.length > 0) setSelectedShopId((value) => shops.some((shop) => shop.id === value) ? value : shops[0].id);
-    }).catch(() => { if (active) setApprovedInstallerShops([]); });
+    const load = () => {
+      setInstallerDirectoryLoading(true);
+      void installerDirectoryRepository.getApproved().then((shops) => {
+        if (!active) return;
+        setApprovedInstallerShops(shops);
+      }).catch(() => { if (active) setApprovedInstallerShops([]); }).finally(() => { if (active) setInstallerDirectoryLoading(false); });
+    };
+    load();
     return () => { active = false; };
   }, [currentUser]);
 
@@ -304,7 +314,8 @@ export default function Home() {
     {isTransactionLoading && useSupabaseData && <p className="system-inline-loading" role="status">거래 정보를 불러오는 중입니다.</p>}
     {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} onFilterDeals={() => goToScreen("deals")} onOpenDeal={(id) => { setSelectedTransactionId(id); goToScreen("deals"); }} onNewRequest={() => goToScreen("request")} onFindShop={() => goToScreen("dealerMap")} onPriceGuide={() => goToScreen("priceGuide")} onOpenChat={() => goToScreen("deals")} />}
     {screen === "priceGuide" && <PriceGuideScreen packages={filteredPackages} selectedPackage={selectedPackage} selectedPackageId={selectedPackageId} setSelectedPackageId={setSelectedPackageId} brandFilter={priceFilter} setBrandFilter={setPriceFilter} search={priceSearch} setSearch={setPriceSearch} vehicleClass={vehicleClass} setVehicleClass={setVehicleClass} onRequest={applyPackage} />}
-    {screen === "dealerMap" && <DealerMapScreen query={query} setQuery={setQuery} searchArea={searchArea} location={location} searchError={locationError} results={nearbyResults} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} favoriteShopIds={favoriteShopIds} toggleFavoriteShop={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => goToScreen("request")} />}
+    {screen === "dealerMap" && <InstallerDirectoryScreen installers={availableShops} loading={useSupabaseData && installerDirectoryLoading} selectedId={selectedShopId} setSelectedId={setSelectedShopId} favoriteIds={favoriteShopIds} toggleFavorite={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => goToScreen("request")} />}
+    {screen === "request" && locationError && <div className="location-search-error"><b>{locationError}</b></div>}
     {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={() => void searchArea(request.deliveryArea)} onSummary={() => goToScreen("requestSummary")} onPriceGuide={() => goToScreen("priceGuide")} />}
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} submitting={isCreatingTransaction} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} onOpenTransactions={() => goToScreen("shopRequests")} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} />}
