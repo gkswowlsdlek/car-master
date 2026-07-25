@@ -1,4 +1,4 @@
-import { CalendarClock, CheckCircle2, CircleDollarSign, Clock3, MapPin, MessageCircle, Plus, Wrench } from "lucide-react";
+import { ArrowRight, CalendarClock, CheckCircle2, CircleDollarSign, Clock3, MapPin, MessageCircle, Plus, Wrench } from "lucide-react";
 import type { Transaction, TransactionStage } from "../../types/transactions";
 
 function isToday(value?: string) {
@@ -14,14 +14,19 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenDeal, 
   onNewRequest: () => void; onFindShop: () => void; onPriceGuide: () => void; onOpenChat: () => void;
 }) {
   const sorted = [...deals].sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt));
+  const waitingCount = deals.filter((deal) => deal.status.stage === "접수").length;
   const cards = [
     { label: "오늘 입고 예정", description: "오늘 확인할 입고 일정", value: deals.filter((deal) => isToday(deal.schedule.confirmedInboundAt ?? deal.schedule.requestedInboundAt)).length, filter: "입고예정" as const, icon: CalendarClock, tone: "blue" },
-    { label: "확인 대기 거래", description: "응답이 필요한 신규 요청", value: deals.filter((deal) => deal.status.stage === "접수").length, filter: "접수" as const, icon: Clock3, tone: "orange" },
+    { label: "확인 대기 거래", description: "응답이 필요한 신규 요청", value: waitingCount, filter: "접수" as const, icon: Clock3, tone: "orange" },
     { label: "진행 중 거래", description: "현재 시공 흐름에 있는 거래", value: deals.filter((deal) => ["입고예정", "입고", "시공중"].includes(deal.status.stage)).length, filter: "전체" as const, icon: Wrench, tone: "violet" },
     { label: "최근 완료 거래", description: "완료 처리된 전체 거래", value: deals.filter((deal) => deal.status.stage === "완료").length, filter: "완료" as const, icon: CheckCircle2, tone: "green" },
   ];
   return <section className="dealer-dashboard simplified-dashboard role-home role-home-dealer">
-    <header className="dealer-welcome"><div><p className="eyebrow">DEALER WORKSPACE</p><h1>{dealerName} 딜러님,<br /><span>오늘 업무를 시작하세요.</span></h1><p>확인 대기 거래와 오늘 입고 일정을 먼저 정리했습니다.</p></div><button className="primary" onClick={onNewRequest}><Plus size={18} /> 새 시공 요청</button></header>
+    <header className="dealer-welcome"><div><p className="eyebrow">DEALER WORKSPACE</p><h1>{dealerName} 딜러님, <br /><span>오늘 업무를 시작하세요.</span></h1><p>확인 대기 거래와 오늘 입고 일정을 먼저 정리했습니다.</p></div><button className="primary" onClick={onNewRequest}><Plus size={18} /> 새 시공 요청</button></header>
+    {waitingCount > 0 && <button className="dealer-focus-banner" onClick={() => onFilterDeals("접수")}>
+      <div><p className="eyebrow">NEEDS YOUR ATTENTION</p><h2>지금 확인이 필요해요 — {waitingCount}건</h2><p className="dealer-focus-desc">응답 대기 중인 시공 요청이 있어요. 지금 확인해 보세요.</p></div>
+      <span className="dealer-focus-cta">확인하기 <ArrowRight size={16} /></span>
+    </button>}
     <div className="metric-grid dashboard-core-metrics">{cards.map((card) => <button className={`metric-card tone-${card.tone}`} key={card.label} onClick={() => onFilterDeals(card.filter)}><i><card.icon size={20} /></i><span>{card.label}</span><b>{card.value}<small>건</small></b><em>{card.description}</em></button>)}</div>
     <section className="dashboard-quick-actions"><div className="section-head"><div><p className="eyebrow">QUICK ACTIONS</p><h2>빠른 실행</h2></div></div><div><button className="primary" onClick={onPriceGuide}><CircleDollarSign size={17} /> 권장 패키지 확인</button><button className="secondary" onClick={onNewRequest}><Plus size={17} /> 새 시공 요청</button><button className="secondary" onClick={onFindShop}><MapPin size={17} /> 전국 시공점 찾기</button></div></section>
     {deals.length === 0 ? <section className="empty-state dashboard-empty"><span>+</span><h2>아직 거래가 없습니다.</h2><p>가격을 확인하고 첫 시공 요청을 만들어 보세요.</p><button className="primary" onClick={onNewRequest}>첫 시공 요청 만들기</button></section> : <div className="dashboard-activity-grid">
