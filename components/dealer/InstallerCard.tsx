@@ -16,7 +16,7 @@ export function InstallerCard({ installer, distanceLabel, selected, favorite, on
       <div className="installer-card-top">
         <div className="installer-card-heading">
           <b>{installer.name}</b>
-          {installer.isDemo ? <span className="demo-badge">데모 시공점</span> : <span className="verified-badge">카마스터 등록 시공점</span>}
+          {installer.isDemo ? <><span className="demo-badge">데모 시공점</span><span className="demo-location-badge">✓ 위치</span></> : <span className="verified-badge">카마스터 등록 시공점</span>}
         </div>
         <span className={`installer-availability ${installer.available ? "open" : "closed"}`}>{installer.available ? "요청 가능" : "마감"}</span>
       </div>

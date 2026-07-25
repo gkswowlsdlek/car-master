@@ -20,13 +20,13 @@ export function InstallerDetailPanel({ installer, distanceLabel, selectedBrand, 
     {onClose && <button className="installer-detail-close" onClick={onClose} aria-label="상세 정보 닫기">닫기</button>}
     <div className="installer-detail-head">
       <div>
-        {installer.isDemo ? <span className="demo-badge">데모 시공점</span> : <span className="verified-badge">카마스터 등록 시공점</span>}
+        {installer.isDemo ? <><span className="demo-badge">데모 시공점</span><span className="demo-location-badge">✓ 위치</span></> : <span className="verified-badge">카마스터 등록 시공점</span>}
         <h2>{installer.name}</h2>
         <p>{installer.address}</p>
       </div>
       <b>{distanceLabel}</b>
     </div>
-    <div className="installer-detail-map"><NaverMapView installers={[installer]} selectedId={installer.id} onSelect={() => {}} instanceLabel="mini" /></div>
+    <div className="installer-detail-map"><NaverMapView installers={[installer]} selectedId={installer.id} onSelect={() => {}} /></div>
     <div className="installer-brand-badges">
       {isOtherBrand ? <span className="brand-check-badge inquiry">해당 브랜드 취급 여부 확인 필요</span> : <span className={`brand-check-badge ${brandSupported ? "supported" : "inquiry"}`}>{brandSupported ? `${selectedBrand ?? "선택 브랜드"} 취급 가능` : "해당 브랜드 취급 여부 확인 필요"}</span>}
     </div>

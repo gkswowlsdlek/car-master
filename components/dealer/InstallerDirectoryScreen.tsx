@@ -140,8 +140,11 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
         </div>}
       </div>
       <div className={`installer-map-pane ${mobileView === "list" ? "mobile-hidden" : ""}`}>
-        <NaverMapView installers={sorted.map((item) => item.installer)} selectedId={selectedId} onSelect={(id) => selectAndOpenDetail(id)} userLocation={userLocation ? { lat: userLocation.latitude, lng: userLocation.longitude } : null} onBoundsChanged={setVisibleBoundsIds} instanceLabel="main" />
-        <label className="installer-bounds-toggle"><input type="checkbox" checked={boundsOnly} onChange={(event) => setBoundsOnly(event.target.checked)} /> 현재 지도 영역만 보기</label>
+        <NaverMapView installers={sorted.map((item) => item.installer)} selectedId={selectedId} onSelect={(id) => selectAndOpenDetail(id)} userLocation={userLocation ? { lat: userLocation.latitude, lng: userLocation.longitude } : null} onBoundsChanged={setVisibleBoundsIds} />
+        <div className="installer-map-footer">
+          <label className="installer-bounds-toggle"><input type="checkbox" checked={boundsOnly} onChange={(event) => setBoundsOnly(event.target.checked)} /> 현재 지도 영역만 보기</label>
+          <span className="installer-map-legend"><i className="installer-map-legend-swatch" aria-hidden="true"><b>✓</b></i> 위치 등록 데모 시공점</span>
+        </div>
       </div>
       {selected && <div className="installer-detail-pane">
         <InstallerDetailPanel installer={selected} distanceLabel={selectedDistanceLabel} selectedBrand={selectedBrand} isOtherBrand={isOtherBrand} onRequest={() => { setSelectedId(selected.id); onRequest(); }} />
