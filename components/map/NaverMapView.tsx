@@ -54,6 +54,20 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">(clientId ? "loading" : "unavailable");
   const [errorMessage, setErrorMessage] = useState(clientId ? "" : "NAVER 지도 API 키가 설정되지 않았습니다.");
 
+  // installers/selectedId at the moment loadNaverMaps() resolves — not at
+  // the moment this effect was created. The SDK load is async (500ms+), and
+  // during that gap the directory screen's data/selection can arrive or
+  // change. Reading through refs (updated every render below) means the
+  // map's very first center is seeded from whatever is actually selected by
+  // the time construction happens, instead of racing a panTo() against the
+  // map's own post-construction settle.
+  const installersRef = useRef(installers);
+  const selectedIdRef = useRef(selectedId);
+  useEffect(() => {
+    installersRef.current = installers;
+    selectedIdRef.current = selectedId;
+  });
+
   useEffect(() => {
     if (!clientId || !containerRef.current) return;
     let cancelled = false;
@@ -61,9 +75,13 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
     loadNaverMaps(clientId).then((ns) => {
       if (cancelled || !containerRef.current) return;
       nsRef.current = ns;
+      const selectedTarget = installersRef.current.find((item) => item.id === selectedIdRef.current);
+      const initialCenter = selectedTarget?.lat != null && selectedTarget?.lng != null
+        ? { lat: selectedTarget.lat, lng: selectedTarget.lng }
+        : userLocation;
       const map = new ns.Map(containerRef.current, {
-        center: new ns.LatLng(userLocation?.lat ?? SEOUL_CENTER.lat, userLocation?.lng ?? SEOUL_CENTER.lng),
-        zoom: userLocation ? FOCUS_ZOOM : 10,
+        center: new ns.LatLng(initialCenter?.lat ?? SEOUL_CENTER.lat, initialCenter?.lng ?? SEOUL_CENTER.lng),
+        zoom: initialCenter ? FOCUS_ZOOM : 10,
         minZoom: 6,
         maxZoom: 19,
         zoomControl: true,
