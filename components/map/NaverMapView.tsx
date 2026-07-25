@@ -24,6 +24,15 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<naver.maps.Map | null>(null);
+  // Captured once, right after loadNaverMaps resolves with a verified-usable
+  // SDK. Every later effect reads this ref instead of `window.naver.maps`
+  // directly — re-reading the mutable global was the actual bug: on an auth
+  // failure NAVER can leave `window.naver.maps` null/incomplete some time
+  // after the initial (successful) resolution, and any effect that re-read
+  // the global at that point would crash on `ns.LatLng` with "Cannot read
+  // properties of null". Holding our own validated reference sidesteps that
+  // entirely regardless of what the global does afterward.
+  const nsRef = useRef<typeof naver.maps | null>(null);
   const markersRef = useRef<Map<string, naver.maps.Marker>>(new Map());
   const userMarkerRef = useRef<naver.maps.Marker | null>(null);
   const clientId = process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID;
@@ -36,6 +45,7 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
 
     loadNaverMaps(clientId).then((ns) => {
       if (cancelled || !containerRef.current) return;
+      nsRef.current = ns;
       const map = new ns.Map(containerRef.current, {
         center: new ns.LatLng(userLocation?.lat ?? SEOUL_CENTER.lat, userLocation?.lng ?? SEOUL_CENTER.lng),
         zoom: userLocation ? 12 : 7,
@@ -69,8 +79,8 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || status !== "ready" || !window.naver) return;
-    const ns = window.naver.maps;
+    const ns = nsRef.current;
+    if (!map || !ns || status !== "ready") return;
     const markers = markersRef.current;
 
     for (const [id, marker] of markers) {
@@ -94,8 +104,8 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || status !== "ready" || !window.naver) return;
-    const ns = window.naver.maps;
+    const ns = nsRef.current;
+    if (!map || !ns || status !== "ready") return;
     if (!userLocation) { userMarkerRef.current?.setMap(null); userMarkerRef.current = null; return; }
     const position = new ns.LatLng(userLocation.lat, userLocation.lng);
     if (userMarkerRef.current) userMarkerRef.current.setPosition(position);
@@ -104,10 +114,10 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || status !== "ready" || !selectedId || !window.naver) return;
+    const ns = nsRef.current;
+    if (!map || !ns || status !== "ready" || !selectedId) return;
     const target = installers.find((item) => item.id === selectedId);
     if (!target || target.lat == null || target.lng == null) return;
-    const ns = window.naver.maps;
     map.panTo(new ns.LatLng(target.lat, target.lng), { duration: 300 });
     if (map.getZoom() < 12) map.setZoom(13);
     // eslint-disable-next-line react-hooks/exhaustive-deps
