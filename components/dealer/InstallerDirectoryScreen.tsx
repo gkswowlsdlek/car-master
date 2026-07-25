@@ -143,7 +143,7 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
         <NaverMapView installers={sorted.map((item) => item.installer)} selectedId={selectedId} onSelect={(id) => selectAndOpenDetail(id)} userLocation={userLocation ? { lat: userLocation.latitude, lng: userLocation.longitude } : null} onBoundsChanged={setVisibleBoundsIds} />
         <div className="installer-map-footer">
           <label className="installer-bounds-toggle"><input type="checkbox" checked={boundsOnly} onChange={(event) => setBoundsOnly(event.target.checked)} /> 현재 지도 영역만 보기</label>
-          <span className="installer-map-legend"><i className="installer-map-legend-swatch" aria-hidden="true"><b>✓</b></i> 위치 등록 데모 시공점</span>
+          <span className="installer-map-legend"><i className="installer-map-legend-star" aria-hidden="true">★</i> 위치 등록 데모 시공점</span>
         </div>
       </div>
       {selected && <div className="installer-detail-pane">

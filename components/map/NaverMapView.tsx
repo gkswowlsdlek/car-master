@@ -5,12 +5,26 @@ import { loadNaverMaps } from "../../lib/naver-maps-loader";
 import type { InstallerListing } from "../../types/installer";
 
 const SEOUL_CENTER = { lat: 37.5665, lng: 126.978 };
+// "지하철역 정도가 보이는" neighborhood/street-level zoom for focusing a
+// selected installer — NAVER's zoom scale, not a percentage.
+const FOCUS_ZOOM = 16;
+
+const STAR_PATH = "M12 2.5l2.97 6.02 6.64.97-4.8 4.68 1.13 6.6L12 17.77l-5.94 3 1.13-6.6-4.8-4.68 6.64-.97L12 2.5z";
 
 function markerIcon(selected: boolean, isDemo: boolean, ns: typeof naver.maps): naver.maps.HtmlIcon {
-  const size = selected ? 26 : 18;
-  const classes = ["naver-marker-pin", selected && "selected", isDemo && "demo"].filter(Boolean).join(" ");
+  if (!isDemo) {
+    const size = selected ? 26 : 18;
+    return {
+      content: `<div class="naver-marker-pin${selected ? " selected" : ""}"></div>`,
+      size: new ns.Size(size, size),
+      anchor: new ns.Point(size / 2, size / 2),
+    };
+  }
+  // Demo (위치 등록) installers get a bold star pin instead of a plain
+  // teardrop, matching the "✓ 위치" badge's blue "저장됨" visual language.
+  const size = selected ? 34 : 24;
   return {
-    content: `<div class="${classes}">${isDemo ? '<i class="naver-marker-check">✓</i>' : ""}</div>`,
+    content: `<div class="naver-marker-star${selected ? " selected" : ""}"><svg viewBox="0 0 24 24" width="${size}" height="${size}"><path d="${STAR_PATH}" /></svg></div>`,
     size: new ns.Size(size, size),
     anchor: new ns.Point(size / 2, size / 2),
   };
@@ -49,7 +63,7 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
       nsRef.current = ns;
       const map = new ns.Map(containerRef.current, {
         center: new ns.LatLng(userLocation?.lat ?? SEOUL_CENTER.lat, userLocation?.lng ?? SEOUL_CENTER.lng),
-        zoom: userLocation ? 12 : 7,
+        zoom: userLocation ? FOCUS_ZOOM : 10,
         minZoom: 6,
         maxZoom: 19,
         zoomControl: true,
@@ -116,13 +130,19 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
   useEffect(() => {
     const map = mapRef.current;
     const ns = nsRef.current;
+    // `status` must be a dependency here, not just `selectedId` — selectedId
+    // is usually already set on mount (a default installer is pre-selected),
+    // so this effect's first real run happens before the map finishes async
+    // loading and used to bail out silently, leaving the map at its default
+    // wide view forever even though something was "selected". Re-running
+    // once status flips to "ready" is what actually focuses the map.
     if (!map || !ns || status !== "ready" || !selectedId) return;
     const target = installers.find((item) => item.id === selectedId);
     if (!target || target.lat == null || target.lng == null) return;
     map.panTo(new ns.LatLng(target.lat, target.lng), { duration: 300 });
-    if (map.getZoom() < 12) map.setZoom(13);
+    if (map.getZoom() < FOCUS_ZOOM) map.setZoom(FOCUS_ZOOM);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId]);
+  }, [selectedId, status]);
 
   if (status === "unavailable") {
     return <div className="naver-map-fallback">
