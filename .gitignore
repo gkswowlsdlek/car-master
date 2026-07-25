@@ -36,6 +36,9 @@ package-lock.json
 # vercel
 .vercel
 
+# claude code local overrides
+.claude/settings.local.json
+
 # typescript
 next-env.d.ts
 /dist/
