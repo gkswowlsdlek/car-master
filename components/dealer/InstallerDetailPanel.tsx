@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import type { InstallerListing } from "../../types/installer";
 import { NaverMapView } from "../map/NaverMapView";
 
@@ -20,7 +21,7 @@ export function InstallerDetailPanel({ installer, distanceLabel, selectedBrand, 
     {onClose && <button className="installer-detail-close" onClick={onClose} aria-label="상세 정보 닫기">닫기</button>}
     <div className="installer-detail-head">
       <div>
-        {installer.isDemo ? <><span className="demo-badge">데모 시공점</span><span className="demo-location-badge">✓ 위치</span></> : <span className="verified-badge">카마스터 등록 시공점</span>}
+        {installer.isDemo ? <><span className="demo-badge">데모 시공점</span><span className="demo-location-badge"><Check size={15} strokeWidth={3.2} /> 위치</span></> : <span className="verified-badge">카마스터 등록 시공점</span>}
         <h2>{installer.name}</h2>
         <p>{installer.address}</p>
       </div>
