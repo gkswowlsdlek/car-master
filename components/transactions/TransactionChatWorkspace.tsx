@@ -2,15 +2,17 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
-import { Bell, FileText, ImagePlus, Info, MoreHorizontal, Paperclip, Send, X } from "lucide-react";
+import { CheckCheck, FileText, ImagePlus, Info, Paperclip, Send, X } from "lucide-react";
 import { attachmentProvider, supabaseAttachmentProvider } from "../../services/attachments";
 import { canTransitionStage } from "../../services/transaction-state-service";
 import type { ChatAttachment, ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
 
 const stages: TransactionStage[] = ["접수", "입고예정", "입고", "시공중", "완료"];
+const stageLabel: Record<TransactionStage | "취소", string> = { 접수: "접수", 입고예정: "예약", 입고: "입고", 시공중: "시공", 완료: "완료", 취소: "취소" };
 const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`;
 const fileSize = (value: number) => value < 1024 * 1024 ? `${Math.max(1, Math.round(value / 1024))}KB` : `${(value / 1024 / 1024).toFixed(1)}MB`;
 const stageActionTestId = (stage?: TransactionStage) => stage === "입고예정" ? "accept-transaction-button" : stage === "시공중" ? "start-work-button" : stage === "완료" ? "complete-work-button" : undefined;
+const stageActionLabel = (stage?: TransactionStage) => stage === "입고예정" ? "예약 확정" : stage === "입고" ? "입고 확인" : stage === "시공중" ? "작업 시작" : stage === "완료" ? "완료 처리" : `${stage} 확인`;
 
 export function TransactionChatWorkspace({ role, userId, transaction, room, useRemoteAttachments, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange }: {
   role: "dealer" | "shop";
@@ -102,35 +104,80 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
     setFinalPrice("");
   };
 
-  return <article className="messenger-workspace" data-testid={`transaction-detail-${transaction.id}`}>
-    <section className="messenger-center">
-      <header className="messenger-header"><div><span className="messenger-avatar">{transaction.vehicle.maker.slice(0, 1)}</span><div><h2>{transaction.vehicle.maker} {transaction.vehicle.model} · {transaction.service.product ?? transaction.service.workDescription}</h2><p>{role === "dealer" ? transaction.installerName : `딜러 ${transaction.dealerId}`} <i /> <b>{transaction.status.stage}</b></p></div></div><nav><button aria-label="알림 설정"><Bell size={18} /></button><button aria-label="거래 정보" onClick={() => setShowDetails((value) => !value)}><Info size={18} /></button><button aria-label="더보기"><MoreHorizontal size={19} /></button></nav></header>
-      {role === "shop" && <section className="shop-stage-overview"><div>{[...stages, "출고"].map((stage, index) => <span className={index < stageIndex || transaction.status.stage === "완료" && index <= stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage === "입고예정" ? "일정 확정" : stage === "시공중" ? "작업 중" : stage}</small></span>)}</div>{nextStage && canTransitionStage(transaction.status.stage, nextStage, role) && <button data-testid={stageActionTestId(nextStage)} className="primary" onClick={() => onStageChange(transaction, nextStage)}>{nextStage === "입고예정" ? "일정 확정" : nextStage === "시공중" ? "작업 시작" : nextStage === "완료" ? "완료 처리" : `${nextStage} 확인`}</button>}</section>}
-      <div className="messenger-messages">
-        <div className="message-date-divider"><span>거래방 생성 · {new Date(transaction.status.createdAt).toLocaleDateString("ko-KR")}</span></div>
+  return <article className="thread" data-testid={`transaction-detail-${transaction.id}`}>
+    <section className="thread-main">
+      <header className="thread-head">
+        <div className="thread-head-id"><span>{transaction.vehicle.maker} {transaction.vehicle.model}</span><em>{transaction.service.product ?? transaction.service.workDescription}</em></div>
+        <p>{role === "dealer" ? transaction.installerName : `딜러 ${transaction.dealerId}`}</p>
+        <button className="thread-info-toggle" aria-label="거래 정보" onClick={() => setShowDetails((value) => !value)}><Info size={17} /></button>
+      </header>
+
+      <ol className="thread-stage-rail">
+        {stages.map((stage, index) => <li key={stage} className={index < stageIndex ? "done" : index === stageIndex ? "now" : ""}>
+          <i>{index < stageIndex ? "✓" : index + 1}</i><span>{stageLabel[stage]}</span>
+        </li>)}
+      </ol>
+      {role === "shop" && nextStage && canTransitionStage(transaction.status.stage, nextStage, role) && <div className="thread-stage-action">
+        <button data-testid={stageActionTestId(nextStage)} className="primary" onClick={() => onStageChange(transaction, nextStage)}>{stageActionLabel(nextStage)}</button>
+      </div>}
+
+      <div className="thread-messages">
+        <div className="thread-date-divider"><span>거래방 생성 · {new Date(transaction.status.createdAt).toLocaleDateString("ko-KR")}</span></div>
         {room?.messages.map((message, index) => {
           const mine = message.senderId === userId;
           const previousDate = index > 0 ? new Date(room.messages[index - 1].createdAt).toDateString() : "";
           const currentDate = new Date(message.createdAt).toDateString();
-          return <div key={message.id}>{index > 0 && previousDate !== currentDate && <div className="message-date-divider"><span>{new Date(message.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}</span></div>}<div className={`message-row ${mine ? "mine" : "theirs"}`}>
-            {!mine && <span className="message-avatar">{message.senderRole === "system" ? "CM" : message.senderRole === "shop" ? "시" : "딜"}</span>}
-            <div className="message-content"><small>{message.senderRole === "system" ? "Car-Master" : mine ? "나" : message.senderRole === "shop" ? "시공점" : "딜러"}</small>{message.text && <p>{message.text}</p>}{message.attachments?.map((attachment) => attachment.kind === "image" ? <button className="image-message" key={attachment.id} onClick={() => setPreview(attachment)}><img src={attachment.url} alt={attachment.name} /><span>{attachment.name}</span></button> : <a className="file-message" key={attachment.id} href={attachment.url} download={attachment.name}><FileText size={22} /><span><b>{attachment.name}</b><small>{fileSize(attachment.size)}</small></span></a>)}<time>{new Date(message.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</time></div>
-          </div></div>;
+          const read = mine && message.readBy.length > 1;
+          return <div key={message.id}>
+            {index > 0 && previousDate !== currentDate && <div className="thread-date-divider"><span>{new Date(message.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}</span></div>}
+            <div className={`thread-row ${mine ? "mine" : "theirs"}`}>
+              {!mine && <span className="thread-avatar">{message.senderRole === "system" ? "CM" : message.senderRole === "shop" ? "시" : "딜"}</span>}
+              <div className="thread-bubble-col">
+                {!mine && <small className="thread-sender">{message.senderRole === "system" ? "Car-Master" : message.senderRole === "shop" ? "시공점" : "딜러"}</small>}
+                {message.text && <p className="thread-bubble">{message.text}</p>}
+                {message.attachments?.map((attachment) => attachment.kind === "image" ? <button className="thread-image" key={attachment.id} onClick={() => setPreview(attachment)}><img src={attachment.url} alt={attachment.name} /></button> : <a className="thread-file" key={attachment.id} href={attachment.url} download={attachment.name}><FileText size={20} /><span><b>{attachment.name}</b><small>{fileSize(attachment.size)}</small></span></a>)}
+                <div className="thread-meta"><time>{new Date(message.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</time>{read && <span className="thread-read"><CheckCheck size={12} /> 읽음</span>}</div>
+              </div>
+            </div>
+          </div>;
         })}
-        {!room && <div className="messenger-empty"><b>거래방을 준비하고 있습니다.</b><span>거래방 생성 후 메시지를 보낼 수 있습니다.</span></div>}
+        {!room && <div className="thread-empty"><b>거래방을 준비하고 있어요.</b><span>거래방 생성 후 메시지를 보낼 수 있습니다.</span></div>}
         <div ref={messageEnd} />
       </div>
-      <footer className="messenger-composer">
-        {attachmentError && <p className="login-error">{attachmentError}</p>}
-        {pending.length > 0 && <div className="attachment-preview-strip">{pending.map((item) => <div key={item.id}>{item.kind === "image" ? <img src={item.url} alt="" /> : <FileText size={22} />}<span><b>{item.name}</b><small>{fileSize(item.size)} · {item.persistence === "remote" ? "거래방에 안전하게 저장" : "이번 세션에서만 표시"}</small></span><button onClick={() => removePending(item.id)} aria-label="첨부 삭제"><X size={15} /></button></div>)}</div>}
-        <div className="composer-row"><div className="composer-tools"><button onClick={() => imageInput.current?.click()} aria-label="사진 첨부" disabled={isSending}><ImagePlus size={19} /></button><button onClick={() => fileInput.current?.click()} aria-label="파일 첨부" disabled={isSending}><Paperclip size={19} /></button></div><textarea data-testid="chat-input" rows={1} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void send(); } }} placeholder="메시지를 입력하세요. Shift + Enter로 줄바꿈" disabled={isSending} /><button data-testid="chat-send-button" className="composer-send" onClick={() => void send()} disabled={isSending || !room || (!draft.trim() && pending.length === 0)} aria-busy={isSending}><Send size={18} /><span>{isSending ? "전송 중" : "보내기"}</span></button></div>
-        <input data-testid="file-upload-input" ref={imageInput} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} /><input ref={fileInput} hidden type="file" accept=".pdf,.txt,.doc,.docx,.xls,.xlsx" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} />
+
+      <footer className="thread-composer">
+        {attachmentError && <p className="field-error">{attachmentError}</p>}
+        {pending.length > 0 && <div className="attachment-preview-strip">{pending.map((item) => <div key={item.id}>{item.kind === "image" ? <img src={item.url} alt="" /> : <FileText size={20} />}<span><b>{item.name}</b><small>{fileSize(item.size)} · {item.persistence === "remote" ? "거래방에 안전하게 저장" : "이번 세션에서만 표시"}</small></span><button onClick={() => removePending(item.id)} aria-label="첨부 삭제"><X size={14} /></button></div>)}</div>}
+        <div className="thread-input-row">
+          <div className="thread-tools"><button onClick={() => imageInput.current?.click()} aria-label="사진 첨부" disabled={isSending}><ImagePlus size={18} /></button><button onClick={() => fileInput.current?.click()} aria-label="파일 첨부" disabled={isSending}><Paperclip size={18} /></button></div>
+          <textarea data-testid="chat-input" rows={1} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); void send(); } }} placeholder="메시지를 입력하세요" disabled={isSending} />
+          <button data-testid="chat-send-button" className="thread-send" onClick={() => void send()} disabled={isSending || !room || (!draft.trim() && pending.length === 0)} aria-busy={isSending}><Send size={17} /></button>
+        </div>
+        <input data-testid="file-upload-input" ref={imageInput} hidden type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} />
+        <input ref={fileInput} hidden type="file" accept=".pdf,.txt,.doc,.docx,.xls,.xlsx" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} />
       </footer>
     </section>
-    <aside className={`messenger-sidebar ${showDetails ? "mobile-open" : ""}`}><button className="sidebar-close" onClick={() => setShowDetails(false)}><X size={18} /></button><div className="briefing-title"><span>AI WORK BRIEFING</span><h3>자동 작업 브리핑</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div><dl className="briefing-data"><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model}</dd></div><div><dt>차량 등급</dt><dd>{transaction.vehicle.class || "미분류"}</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>추가 요청</dt><dd>{transaction.service.extraRequest || "없음"}</dd></div><div><dt>입고 예정</dt><dd>{transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt ?? "미정"}</dd></div><div><dt>시공점</dt><dd>{transaction.installerName}</dd></div><div><dt>가이드 가격</dt><dd>{won(transaction.pricing.baseGuidePrice)}</dd></div></dl>
-      <div className="sidebar-stage"><span>현재 상태</span><b>{transaction.status.stage}</b><div>{stages.map((stage, index) => <i key={stage} className={index <= stageIndex ? "done" : ""} title={stage} />)}</div>{role === "shop" && nextStage && canTransitionStage(transaction.status.stage, nextStage, role) && <button className="primary" onClick={() => onStageChange(transaction, nextStage)}>{nextStage} 단계로 진행</button>}</div>
-      <div className="sidebar-settlement"><h4>결제 및 정산</h4><p>확정 금액 <b>{won(transaction.pricing.finalPrice)}</b></p><p>결제 상태 <b>{transaction.pricing.paymentStatus}</b></p>{role === "shop" && <div><input value={finalPrice} onChange={(event) => setFinalPrice(event.target.value)} placeholder="최종 시공금액" /><button onClick={savePrice}>저장</button></div>}{role === "dealer" && transaction.pricing.finalPrice && transaction.pricing.paymentStatus === "미결제" && <button onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>}</div><button className="transaction-hide-button" onClick={hide}>이 거래방 숨기기</button>
+
+    <aside className={`thread-side ${showDetails ? "open" : ""}`}>
+      <button className="thread-side-close" onClick={() => setShowDetails(false)} aria-label="닫기"><X size={16} /></button>
+      <p className="eyebrow">거래 정보</p>
+      <dl className="thread-facts">
+        <div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model}{transaction.vehicle.class && ` · ${transaction.vehicle.class}`}</dd></div>
+        <div><dt>작업</dt><dd>{transaction.service.workDescription}{transaction.service.extraRequest && <small> · {transaction.service.extraRequest}</small>}</dd></div>
+        <div><dt>시공점</dt><dd>{transaction.installerName}</dd></div>
+        <div><dt>일정</dt><dd>{transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt ?? "미정"}</dd></div>
+        <div><dt>가격</dt><dd>{won(transaction.pricing.baseGuidePrice)} <small>(가이드)</small></dd></div>
+      </dl>
+      <div className="thread-side-payment">
+        <p className="eyebrow">결제 · 정산</p>
+        <div className="thread-side-payment-row"><span>확정 금액</span><b>{won(transaction.pricing.finalPrice)}</b></div>
+        <div className="thread-side-payment-row"><span>결제 상태</span><b>{transaction.pricing.paymentStatus}</b></div>
+        {role === "shop" && <div className="thread-side-payment-form"><input value={finalPrice} onChange={(event) => setFinalPrice(event.target.value)} placeholder="최종 시공금액" /><button className="secondary" onClick={savePrice}>저장</button></div>}
+        {role === "dealer" && transaction.pricing.finalPrice && transaction.pricing.paymentStatus === "미결제" && <button className="secondary" onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>}
+      </div>
+      <button className="thread-hide-button" onClick={hide}>이 거래방 숨기기</button>
     </aside>
+
     {preview && <div className="attachment-lightbox" role="dialog" aria-modal="true" onClick={() => setPreview(null)}><button aria-label="닫기"><X size={22} /></button><figure onClick={(event) => event.stopPropagation()}><img src={preview.url} alt={preview.name} /><figcaption>{preview.name}</figcaption></figure></div>}
   </article>;
 }

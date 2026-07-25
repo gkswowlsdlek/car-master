@@ -18,11 +18,39 @@ export function TransactionManagementScreen({ role, userId, transactions, rooms,
   const visible = useMemo(() => transactions.filter((item) => showHidden || !(role === "dealer" ? item.visibility.hiddenByDealer : item.visibility.hiddenByInstaller)).filter((item) => stageFilter === "전체" || stageFilter === "진행중" && ["입고예정", "입고", "시공중"].includes(item.status.stage) || item.status.stage === stageFilter).filter((item) => `${item.id} ${item.vehicle.maker} ${item.vehicle.model} ${item.installerName} ${item.status.stage}`.toLowerCase().includes(query.toLowerCase())), [transactions, showHidden, role, query, stageFilter]);
   const selected = visible.find((item) => item.id === selectedId) ?? visible[0]; const room = rooms.find((item) => item.transactionId === selected?.id);
   const activeCount = transactions.filter((item) => ["입고예정", "입고", "시공중"].includes(item.status.stage)).length;
-  return <section className="transaction-management-screen"><div className="page-title transaction-page-title"><div><p className="eyebrow">TRANSACTION WORKSPACE</p><h1>{role === "dealer" ? "거래 관리" : "시공 거래 관리"}</h1><p className="page-subtitle">작업 정보, 일정, 채팅과 결제 기록을 거래별로 관리합니다.</p></div>{role === "dealer" && <button className="primary" onClick={onNewRequest}>+ 새 시공 요청</button>}</div>
-    <div className="transaction-summary-strip"><button className={stageFilter === "전체" ? "active" : ""} onClick={() => setStageFilter("전체")}><span>전체 거래</span><b>{transactions.length}</b></button><button className={stageFilter === "접수" ? "active" : ""} onClick={() => setStageFilter("접수")}><span>확인 대기</span><b>{transactions.filter((item) => item.status.stage === "접수").length}</b></button><button className={stageFilter === "진행중" ? "active" : ""} onClick={() => setStageFilter("진행중")}><span>진행 중</span><b>{activeCount}</b></button><button className={stageFilter === "완료" ? "active" : ""} onClick={() => setStageFilter("완료")}><span>완료</span><b>{transactions.filter((item) => item.status.stage === "완료").length}</b></button></div>
-    <div className="transaction-tabs"><button className={tab === "거래내역" ? "active" : ""} onClick={() => setTab("거래내역")}>거래내역</button><button className={tab === "결제 및 정산" ? "active" : ""} onClick={() => setTab("결제 및 정산")}>결제 및 정산</button></div>
-    <div className="transaction-filters"><label className="search-field"><Search size={18} aria-hidden="true" /><input aria-label="거래 검색" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="거래번호, 차량, 시공점 검색" /></label><select value={stageFilter} onChange={(event) => setStageFilter(event.target.value as TransactionStage | "전체" | "진행중")}><option value="전체">전체 상태</option><option value="진행중">진행 중</option>{[...stages, "취소" as const].map((stage) => <option key={stage} value={stage}>{stage}</option>)}</select><label><input type="checkbox" checked={showHidden} onChange={(event) => setShowHidden(event.target.checked)} /> 숨긴 거래 보기</label></div>
-    {visible.length === 0 ? <section className="empty-state transaction-empty"><span>↗</span><h2>{query ? "검색 결과가 없습니다." : "아직 진행 중인 거래가 없습니다."}</h2><p>{query ? "검색어 또는 숨김 거래 설정을 확인해 주세요." : "가격 확인부터 시작해 첫 시공 요청을 만들어 보세요."}</p>{role === "dealer" && !query && <button className="primary" onClick={onNewRequest}>새 시공 요청 만들기</button>}</section> : tab === "결제 및 정산" ? <div className="transaction-payment-table">{visible.map((item) => <button data-testid={`transaction-card-${item.id}`} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} key={item.id} onClick={() => onSelect(item.id)}><b>{item.id}</b><span>{won(item.pricing.finalPrice)}</span><span>{item.pricing.paymentStatus}</span><span>{item.schedule.completedAt ?? "시공일 미정"}</span></button>)}</div> : <div className="transaction-room-layout"><aside className="transaction-list">{visible.map((item) => <button data-testid={`transaction-card-${item.id}`} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} className={item.id === selected?.id ? "selected" : ""} key={item.id} onClick={() => onSelect(item.id)}><b>{item.id}</b><span>{item.vehicle.maker} {item.vehicle.model}</span><small>{item.installerName} · {item.status.stage}</small><em>{item.lastMessage}</em></button>)}</aside>
+
+  return <section className="deal">
+    <header className="deal-head">
+      <div><p className="eyebrow">TRANSACTION WORKSPACE</p><h1>{role === "dealer" ? "거래 관리" : "시공 거래 관리"}</h1></div>
+    </header>
+
+    <div className="deal-toolbar">
+      <div className="deal-filter-chips">
+        <button className={stageFilter === "전체" ? "active" : ""} onClick={() => setStageFilter("전체")}>전체 <b>{transactions.length}</b></button>
+        <button className={stageFilter === "접수" ? "active" : ""} onClick={() => setStageFilter("접수")}>확인 대기 <b>{transactions.filter((item) => item.status.stage === "접수").length}</b></button>
+        <button className={stageFilter === "진행중" ? "active" : ""} onClick={() => setStageFilter("진행중")}>진행 중 <b>{activeCount}</b></button>
+        <button className={stageFilter === "완료" ? "active" : ""} onClick={() => setStageFilter("완료")}>완료 <b>{transactions.filter((item) => item.status.stage === "완료").length}</b></button>
+      </div>
+      <div className="deal-tabs"><button className={tab === "거래내역" ? "active" : ""} onClick={() => setTab("거래내역")}>거래내역</button><button className={tab === "결제 및 정산" ? "active" : ""} onClick={() => setTab("결제 및 정산")}>결제 및 정산</button></div>
+    </div>
+    <div className="deal-search-row">
+      <label className="deal-search"><Search size={16} aria-hidden="true" /><input aria-label="거래 검색" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="거래번호, 차량, 시공점 검색" /></label>
+      <select value={stageFilter} onChange={(event) => setStageFilter(event.target.value as TransactionStage | "전체" | "진행중")}><option value="전체">전체 상태</option><option value="진행중">진행 중</option>{[...stages, "취소" as const].map((stage) => <option key={stage} value={stage}>{stage}</option>)}</select>
+      <label className="deal-hidden-toggle"><input type="checkbox" checked={showHidden} onChange={(event) => setShowHidden(event.target.checked)} /> 숨긴 거래 보기</label>
+    </div>
+
+    {visible.length === 0 ? <section className="deal-empty">
+      <h2>{query ? "검색 결과가 없어요" : "아직 진행 중인 거래가 없어요"}</h2>
+      <p>{query ? "검색어 또는 숨김 거래 설정을 확인해 주세요." : "가격 확인부터 시작해 첫 시공 요청을 만들어 보세요."}</p>
+      {role === "dealer" && !query && <button className="primary" onClick={onNewRequest}>새 시공 요청 만들기</button>}
+    </section> : tab === "결제 및 정산" ? <div className="deal-payment-table">{visible.map((item) => <button data-testid={`transaction-card-${item.id}`} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} key={item.id} onClick={() => onSelect(item.id)}>
+      <b>{item.id}</b><span>{won(item.pricing.finalPrice)}</span><span>{item.pricing.paymentStatus}</span><span>{item.schedule.completedAt ?? "시공일 미정"}</span>
+    </button>)}</div> : <div className="deal-layout">
+      <aside className="deal-list">{visible.map((item) => <button data-testid={`transaction-card-${item.id}`} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} className={item.id === selected?.id ? "selected" : ""} key={item.id} onClick={() => onSelect(item.id)}>
+        <span className={`deal-list-dot status-${item.status.stage}`} aria-hidden="true" />
+        <span className="deal-list-main"><b>{item.vehicle.maker} {item.vehicle.model}</b><small>{item.installerName} · {item.status.stage}</small><em>{item.lastMessage}</em></span>
+      </button>)}</aside>
       {selected && <TransactionChatWorkspace role={role} userId={userId} transaction={selected} room={room} useRemoteAttachments={useRemoteAttachments} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} />}
-    </div>}</section>;
+    </div>}
+  </section>;
 }

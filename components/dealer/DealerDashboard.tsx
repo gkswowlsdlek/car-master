@@ -1,4 +1,4 @@
-import { CalendarClock, CheckCircle2, CircleDollarSign, Clock3, MapPin, MessageCircle, Plus, Wrench } from "lucide-react";
+import { ArrowRight, MapPin, Sparkles } from "lucide-react";
 import type { Transaction, TransactionStage } from "../../types/transactions";
 
 function isToday(value?: string) {
@@ -14,20 +14,63 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenDeal, 
   onNewRequest: () => void; onFindShop: () => void; onPriceGuide: () => void; onOpenChat: () => void;
 }) {
   const sorted = [...deals].sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt));
-  const cards = [
-    { label: "오늘 입고 예정", description: "오늘 확인할 입고 일정", value: deals.filter((deal) => isToday(deal.schedule.confirmedInboundAt ?? deal.schedule.requestedInboundAt)).length, filter: "입고예정" as const, icon: CalendarClock, tone: "blue" },
-    { label: "확인 대기 거래", description: "응답이 필요한 신규 요청", value: deals.filter((deal) => deal.status.stage === "접수").length, filter: "접수" as const, icon: Clock3, tone: "orange" },
-    { label: "진행 중 거래", description: "현재 시공 흐름에 있는 거래", value: deals.filter((deal) => ["입고예정", "입고", "시공중"].includes(deal.status.stage)).length, filter: "전체" as const, icon: Wrench, tone: "violet" },
-    { label: "최근 완료 거래", description: "완료 처리된 전체 거래", value: deals.filter((deal) => deal.status.stage === "완료").length, filter: "완료" as const, icon: CheckCircle2, tone: "green" },
-  ];
-  return <section className="dealer-dashboard simplified-dashboard role-home role-home-dealer">
-    <header className="dealer-welcome"><div><p className="eyebrow">DEALER WORKSPACE</p><h1>{dealerName} 딜러님,<br /><span>오늘 업무를 시작하세요.</span></h1><p>확인 대기 거래와 오늘 입고 일정을 먼저 정리했습니다.</p></div><button className="primary" onClick={onNewRequest}><Plus size={18} /> 새 시공 요청</button></header>
-    <div className="metric-grid dashboard-core-metrics">{cards.map((card) => <button className={`metric-card tone-${card.tone}`} key={card.label} onClick={() => onFilterDeals(card.filter)}><i><card.icon size={20} /></i><span>{card.label}</span><b>{card.value}<small>건</small></b><em>{card.description}</em></button>)}</div>
-    <section className="dashboard-quick-actions"><div className="section-head"><div><p className="eyebrow">QUICK ACTIONS</p><h2>빠른 실행</h2></div></div><div><button className="primary" onClick={onPriceGuide}><CircleDollarSign size={17} /> 권장 패키지 확인</button><button className="secondary" onClick={onNewRequest}><Plus size={17} /> 새 시공 요청</button><button className="secondary" onClick={onFindShop}><MapPin size={17} /> 전국 시공점 찾기</button></div></section>
-    {deals.length === 0 ? <section className="empty-state dashboard-empty"><span>+</span><h2>아직 거래가 없습니다.</h2><p>가격을 확인하고 첫 시공 요청을 만들어 보세요.</p><button className="primary" onClick={onNewRequest}>첫 시공 요청 만들기</button></section> : <div className="dashboard-activity-grid">
-      <section className="today-list-card dashboard-recent-deals"><div className="section-head"><div><p className="eyebrow">RECENT TRANSACTIONS</p><h2>최근 거래</h2></div><button onClick={() => onFilterDeals("전체")}>전체 보기</button></div><div>{sorted.slice(0, 5).map((deal) => <button key={deal.id} onClick={() => onOpenDeal(deal.id)}><span><b>{deal.vehicle.maker} {deal.vehicle.model}</b><small>{deal.service.product ?? deal.service.workDescription} · {deal.installerName}</small></span><em className={`status-chip status-${deal.status.stage}`}>{deal.status.stage}</em></button>)}</div></section>
-      <section className="today-list-card dashboard-recent-chat"><div className="section-head"><div><p className="eyebrow">LATEST MESSAGES</p><h2><MessageCircle size={18} /> 최근 채팅</h2></div></div><div>{sorted.slice(0, 4).map((deal) => <button key={deal.id} onClick={() => onOpenDeal(deal.id)}><span><b>{deal.installerName}</b><small>{deal.lastMessage || "새 거래방이 생성되었습니다."}</small></span><time>{new Date(deal.status.updatedAt).toLocaleDateString("ko-KR", { month: "numeric", day: "numeric" })}</time></button>)}</div></section>
-      <section className="today-list-card dashboard-recent-requests"><div className="section-head"><div><p className="eyebrow">RECENT REQUESTS</p><h2>최근 시공 요청</h2></div></div><div>{[...deals].sort((a, b) => b.status.createdAt.localeCompare(a.status.createdAt)).slice(0, 4).map((deal) => <button key={deal.id} onClick={() => onOpenDeal(deal.id)}><span><b>{deal.service.workDescription}</b><small>{deal.vehicle.model} · {deal.installerName}</small></span><em>{new Date(deal.status.createdAt).toLocaleDateString("ko-KR")}</em></button>)}</div></section>
+  const waiting = deals.filter((deal) => deal.status.stage === "접수");
+  const inboundToday = deals.filter((deal) => isToday(deal.schedule.confirmedInboundAt ?? deal.schedule.requestedInboundAt)).length;
+  const inProgress = deals.filter((deal) => ["입고예정", "입고", "시공중"].includes(deal.status.stage)).length;
+  const completed = deals.filter((deal) => deal.status.stage === "완료").length;
+
+  return <section className="home role-home role-home-dealer">
+    <header className="home-head">
+      <div><p className="eyebrow">DEALER WORKSPACE</p><h1>{dealerName}님, 안녕하세요.</h1></div>
+    </header>
+
+    <section className="home-focus">
+      {waiting.length > 0 ? <button className="home-focus-card urgent" onClick={() => onFilterDeals("접수")}>
+        <span className="home-focus-label"><Sparkles size={13} /> 지금 확인이 필요해요</span>
+        <b>{waiting.length}<small>건</small></b>
+        <p>응답 대기 중인 요청이 있어요. 지금 확인해 보세요.</p>
+        <em>요청 확인하기 <ArrowRight size={15} /></em>
+      </button> : <div className="home-focus-card calm">
+        <span className="home-focus-label">확인할 요청이 없어요</span>
+        <b>0<small>건</small></b>
+        <p>가격을 확인하고 새 시공 요청을 만들어 보세요.</p>
+        <button className="secondary" onClick={onPriceGuide}>권장 패키지 확인 <ArrowRight size={15} /></button>
+      </div>}
+      <div className="home-stat-row">
+        <button onClick={() => onFilterDeals("입고예정")}><b>{inboundToday}</b><span>오늘 입고 예정</span></button>
+        <button onClick={() => onFilterDeals("전체")}><b>{inProgress}</b><span>진행 중</span></button>
+        <button onClick={() => onFilterDeals("완료")}><b>{completed}</b><span>완료</span></button>
+      </div>
+    </section>
+
+    {deals.length === 0 ? <section className="home-empty">
+      <h2>아직 거래가 없어요</h2>
+      <p>가격을 확인하고 첫 시공 요청을 만들어 보세요.</p>
+      <button className="primary" onClick={onNewRequest}>첫 시공 요청 만들기</button>
+    </section> : <div className="home-columns">
+      <section className="home-list">
+        <div className="home-list-head"><h2>최근 거래</h2><button onClick={() => onFilterDeals("전체")}>전체보기 <ArrowRight size={13} /></button></div>
+        {sorted.slice(0, 6).map((deal) => <button className="home-row" key={deal.id} onClick={() => onOpenDeal(deal.id)}>
+          <span className={`home-row-dot status-${deal.status.stage}`} aria-hidden="true" />
+          <span className="home-row-main"><b>{deal.vehicle.maker} {deal.vehicle.model}</b><small>{deal.service.product ?? deal.service.workDescription} · {deal.installerName}</small></span>
+          <em>{deal.status.stage}</em>
+        </button>)}
+      </section>
+      <aside className="home-side">
+        <section className="home-quick">
+          <h2>빠른 실행</h2>
+          <button className="secondary" onClick={onPriceGuide}>권장 패키지 확인</button>
+          <button className="secondary" onClick={onFindShop}><MapPin size={15} /> 전국 시공점 찾기</button>
+        </section>
+        <section className="home-recent-chat">
+          <h2>최근 대화</h2>
+          {sorted.slice(0, 3).map((deal) => <button key={deal.id} onClick={() => onOpenDeal(deal.id)}>
+            <b>{deal.installerName}</b>
+            <small>{deal.lastMessage || "새 거래방이 생성되었습니다."}</small>
+          </button>)}
+          {sorted.length === 0 && <p className="home-side-empty">아직 대화가 없어요.</p>}
+        </section>
+      </aside>
     </div>}
   </section>;
 }

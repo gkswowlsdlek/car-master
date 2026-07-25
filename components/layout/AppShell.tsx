@@ -1,12 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 import type { ReactNode } from "react";
-import { Bell, Building2, CircleDollarSign, Gauge, HelpCircle, LogOut, MapPin, Plus, Settings2, UserRound, UsersRound, type LucideIcon } from "lucide-react";
+import { Bell, Building2, CircleDollarSign, Gauge, LogOut, MapPin, Plus, Settings2, UserRound, UsersRound, type LucideIcon } from "lucide-react";
 import type { DemoAccount, Role, Screen } from "../../types/dealer";
 
 const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon }[]> = {
   dealer: [
-    { screen: "dealerDashboard", label: "대시보드", icon: Gauge },
-    { screen: "priceGuide", label: "권장 시공 패키지", icon: CircleDollarSign },
+    { screen: "dealerDashboard", label: "홈", icon: Gauge },
+    { screen: "priceGuide", label: "권장 패키지", icon: CircleDollarSign },
     { screen: "request", label: "시공 요청", icon: Plus },
     { screen: "dealerMap", label: "시공점 찾기", icon: MapPin },
     { screen: "deals", label: "거래 관리", icon: Building2 },
@@ -21,7 +21,7 @@ const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon
 };
 
 const screenTitles: Partial<Record<Screen, string>> = {
-  dealerDashboard: "대시보드", shopDashboard: "시공점 대시보드", priceGuide: "권장 시공 패키지 가이드", request: "새 시공 요청",
+  dealerDashboard: "홈", shopDashboard: "홈", priceGuide: "권장 시공 패키지", request: "새 시공 요청",
   requestSummary: "요청 최종 확인", dealerMap: "시공점 찾기", deals: "거래 관리", shopRequests: "거래 관리", dealerProfile: "마이페이지", ops: "운영 현황",
 };
 
@@ -31,18 +31,37 @@ function isActive(screen: Screen, target: Screen) {
 
 export function AppShell({ role, account, screen, onNavigate, onLogout, children }: { role: Role; account: DemoAccount; screen: Screen; onNavigate: (screen: Screen) => void; onLogout: () => void; children: ReactNode }) {
   const roleLabel = role === "dealer" ? "딜러" : role === "shop" ? "시공점" : "관리자";
-  return <div className="app-frame">
-    <aside className="app-sidebar">
-      <button className="app-logo" onClick={() => onNavigate(navigation[role][0].screen)}><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><small>{roleLabel} 워크스페이스</small></button>
-      <div className="sidebar-section-label">업무 메뉴</div>
-      <nav>{navigation[role].map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "request" && <em>빠른 실행</em>}</button>)}</nav>
-      <div className="sidebar-support"><HelpCircle size={19} /><b>도움이 필요하신가요?</b><span>베타 운영팀이 도와드립니다.</span><button onClick={() => alert("카마스터 베타 운영 문의: help@car-master.kr")}>운영팀 문의</button></div>
-      <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{roleLabel} 계정</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
+  return <div className="hub">
+    <aside className="hub-rail">
+      <button className="hub-mark" onClick={() => onNavigate(navigation[role][0].screen)} aria-label="홈으로">
+        <img src="/carmaster-logo-transparent.png" alt="Car-Master" />
+      </button>
+      <nav className="hub-nav">{navigation[role].map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}>
+        <item.icon size={18} strokeWidth={1.9} aria-hidden="true" />
+        <span>{item.label}</span>
+      </button>)}</nav>
+      <div className="hub-rail-foot">
+        <button className="hub-person" onClick={() => onNavigate("dealerProfile")}>
+          <span>{account.name.slice(0, 1)}</span>
+          <em><b>{account.name}</b><small>{roleLabel}</small></em>
+        </button>
+        <button className="hub-logout" onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button>
+      </div>
     </aside>
-    <main className="app-main">
-      <header className="app-topbar"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>v0.3.5</small></div></div></div></header>
-      <div className="beta-environment-bar"><span>WORKSPACE</span><p>회원과 거래를 안전하게 연결하는 카마스터 업무공간입니다.</p></div>
-      {children}
-    </main>
+    <nav className="hub-tabbar" aria-label="주요 메뉴">{navigation[role].map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}>
+      <item.icon size={20} strokeWidth={1.9} aria-hidden="true" />
+      <span>{item.label}</span>
+    </button>)}</nav>
+    <div className="hub-body">
+      <header className="hub-topline">
+        <b>{screenTitles[screen] ?? "워크스페이스"}</b>
+        <div className="hub-topline-actions">
+          <span className="hub-live"><i aria-hidden="true" /> 서비스 정상</span>
+          <button className="hub-icon-button" aria-label="알림"><Bell size={17} /></button>
+          {role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={16} /> 새 시공 요청</button>}
+        </div>
+      </header>
+      <main className="hub-main">{children}</main>
+    </div>
   </div>;
 }
