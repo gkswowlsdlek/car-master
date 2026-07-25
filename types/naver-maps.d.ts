@@ -97,4 +97,5 @@ declare namespace naver.maps {
 
 interface Window {
   naver?: { maps: typeof naver.maps };
+  navermap_authFailure?: () => void;
 }

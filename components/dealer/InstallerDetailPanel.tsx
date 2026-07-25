@@ -26,7 +26,7 @@ export function InstallerDetailPanel({ installer, distanceLabel, selectedBrand, 
       </div>
       <b>{distanceLabel}</b>
     </div>
-    <div className="installer-detail-map"><NaverMapView installers={[installer]} selectedId={installer.id} onSelect={() => {}} /></div>
+    <div className="installer-detail-map"><NaverMapView installers={[installer]} selectedId={installer.id} onSelect={() => {}} instanceLabel="mini" /></div>
     <div className="installer-brand-badges">
       {isOtherBrand ? <span className="brand-check-badge inquiry">해당 브랜드 취급 여부 확인 필요</span> : <span className={`brand-check-badge ${brandSupported ? "supported" : "inquiry"}`}>{brandSupported ? `${selectedBrand ?? "선택 브랜드"} 취급 가능` : "해당 브랜드 취급 여부 확인 필요"}</span>}
     </div>

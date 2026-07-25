@@ -140,7 +140,7 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
         </div>}
       </div>
       <div className={`installer-map-pane ${mobileView === "list" ? "mobile-hidden" : ""}`}>
-        <NaverMapView installers={sorted.map((item) => item.installer)} selectedId={selectedId} onSelect={(id) => selectAndOpenDetail(id)} userLocation={userLocation ? { lat: userLocation.latitude, lng: userLocation.longitude } : null} onBoundsChanged={setVisibleBoundsIds} />
+        <NaverMapView installers={sorted.map((item) => item.installer)} selectedId={selectedId} onSelect={(id) => selectAndOpenDetail(id)} userLocation={userLocation ? { lat: userLocation.latitude, lng: userLocation.longitude } : null} onBoundsChanged={setVisibleBoundsIds} instanceLabel="main" />
         <label className="installer-bounds-toggle"><input type="checkbox" checked={boundsOnly} onChange={(event) => setBoundsOnly(event.target.checked)} /> 현재 지도 영역만 보기</label>
       </div>
       {selected && <div className="installer-detail-pane">
