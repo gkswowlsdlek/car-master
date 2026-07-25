@@ -21,12 +21,16 @@ function markerIcon(selected: boolean, isDemo: boolean, ns: typeof naver.maps): 
     };
   }
   // Demo (위치 등록) installers get a bold star pin instead of a plain
-  // teardrop, matching the "✓ 위치" badge's blue "저장됨" visual language.
-  const size = selected ? 34 : 24;
+  // teardrop, matching the "✓ 위치" badge's "저장됨" visual language. A
+  // plain colored star got lost against the busy NAVER basemap, so it now
+  // sits on a white halo disc for contrast, sized well above the other
+  // (small dot/POI) icons on the map.
+  const size = selected ? 44 : 32;
+  const wrap = size + 14;
   return {
-    content: `<div class="naver-marker-star${selected ? " selected" : ""}"><svg viewBox="0 0 24 24" width="${size}" height="${size}"><path d="${STAR_PATH}" /></svg></div>`,
-    size: new ns.Size(size, size),
-    anchor: new ns.Point(size / 2, size / 2),
+    content: `<div class="naver-marker-star${selected ? " selected" : ""}"><span class="naver-marker-star-halo"></span><svg viewBox="0 0 24 24" width="${size}" height="${size}"><path d="${STAR_PATH}" /></svg></div>`,
+    size: new ns.Size(wrap, wrap),
+    anchor: new ns.Point(wrap / 2, wrap / 2),
   };
 }
 
