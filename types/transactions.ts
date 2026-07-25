@@ -1,7 +1,17 @@
 import type { VehicleClass } from "../data/vehicle-class-options";
 
-export type TransactionStage = "접수" | "입고예정" | "입고" | "시공중" | "완료" | "취소";
+export type TransactionStage = "견적" | "시공예약" | "입고" | "작업완료" | "취소";
 export type PaymentStatus = "미결제" | "결제대기" | "결제완료" | "정산대기" | "정산완료";
+
+/** One row of the 거래 로그: every forward advance and every one-step revert. */
+export type TransactionStageEvent = {
+  id: string;
+  fromStage: TransactionStage | null;
+  toStage: TransactionStage;
+  actorRole: "dealer" | "shop" | "admin";
+  direction: "forward" | "backward";
+  createdAt: string;
+};
 
 export type Transaction = {
   id: string;
@@ -16,6 +26,7 @@ export type Transaction = {
   visibility: { hiddenByDealer: boolean; hiddenByInstaller: boolean };
   chatRoomId: string;
   lastMessage: string;
+  stageLog: TransactionStageEvent[];
 };
 
 export type TransactionChatMessage = {

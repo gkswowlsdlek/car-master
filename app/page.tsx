@@ -214,7 +214,7 @@ export default function Home() {
     const now = new Date();
     const monthly = roleTransactionsForActivity(transactions, role, account.shopId).filter((item) => { const date = new Date(item.status.createdAt); return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth(); }).length;
     const scoped = roleTransactionsForActivity(transactions, role, account.shopId);
-    return { total: scoped.length, monthly, completed: scoped.filter((item) => item.status.stage === "완료").length, favorites: role === "dealer" ? favoriteShopIds.length : 0 };
+    return { total: scoped.length, monthly, completed: scoped.filter((item) => item.status.stage === "작업완료").length, favorites: role === "dealer" ? favoriteShopIds.length : 0 };
   }, [transactions, role, account.shopId, favoriteShopIds.length]);
 
   const searchArea = async (value = query) => {
@@ -257,7 +257,7 @@ export default function Home() {
     const now = new Date().toISOString();
     const id = createTransactionNumber(sequence);
     const chatRoomId = createId("CHAT");
-    const transaction: Transaction = { id, dealerId: account.id, installerId: selectedShop.id, installerName: selectedShop.name, vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass }, service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest }, pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" }, schedule: { requestedInboundAt: request.inboundStart }, status: { stage: "접수", createdAt: now, updatedAt: now }, visibility: { hiddenByDealer: false, hiddenByInstaller: false }, chatRoomId, lastMessage: "새 시공 요청이 접수되었습니다." };
+    const transaction: Transaction = { id, dealerId: account.id, installerId: selectedShop.id, installerName: selectedShop.name, vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass }, service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest }, pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" }, schedule: { requestedInboundAt: request.inboundStart }, status: { stage: "견적", createdAt: now, updatedAt: now }, visibility: { hiddenByDealer: false, hiddenByInstaller: false }, chatRoomId, lastMessage: "새 시공 요청이 접수되었습니다.", stageLog: [{ id: createId("EVT"), fromStage: null, toStage: "견적", actorRole: "dealer", direction: "forward", createdAt: now }] };
     const room: ChatRoom = { id: chatRoomId, transactionId: id, createdAt: now, updatedAt: now, messages: [{ id: createId("MSG"), roomId: chatRoomId, senderId: "system", senderRole: "system", text: "거래방이 생성되었습니다. 자동 작업 브리핑을 확인하세요.", createdAt: now, readBy: [account.id] }] };
     transactionRepository.create(transaction); chatRepository.create(room); setSelectedTransactionId(id); goToScreen("deals");
     } finally {
@@ -282,11 +282,9 @@ export default function Home() {
     catch (error) { alert(error instanceof Error ? error.message : "거래를 숨길 수 없습니다."); }
   };
   const changeStage = async (transaction: Transaction, stage: TransactionStage) => {
-    try {
-      const next = transitionStage(transaction, stage, role === "shop" ? "shop" : "dealer");
-      if (useSupabaseData) { await supabaseTransactionRepository.transitionStage(transaction.id, stage); await refresh(); }
-      else transactionRepository.update(next);
-    } catch (error) { alert(error instanceof Error ? error.message : "상태를 변경할 수 없습니다."); }
+    const next = transitionStage(transaction, stage, role === "shop" ? "shop" : "dealer");
+    if (useSupabaseData) { await supabaseTransactionRepository.transitionStage(transaction.id, stage); await refresh(); }
+    else transactionRepository.update(next);
   };
   const changeFinalPrice = async (transaction: Transaction, finalPrice: number) => {
     try {

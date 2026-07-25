@@ -4,13 +4,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell, FileText, ImagePlus, Info, MoreHorizontal, Paperclip, Send, X } from "lucide-react";
 import { attachmentProvider, supabaseAttachmentProvider } from "../../services/attachments";
-import { canTransitionStage } from "../../services/transaction-state-service";
+import { canTransitionStage, nextForwardStage, revertStage, stageLogLabel, stageOrder, STAGE_ACTION_LABEL, STAGE_REVERT_LABEL } from "../../services/transaction-state-service";
 import type { ChatAttachment, ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
 
-const stages: TransactionStage[] = ["접수", "입고예정", "입고", "시공중", "완료"];
 const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`;
 const fileSize = (value: number) => value < 1024 * 1024 ? `${Math.max(1, Math.round(value / 1024))}KB` : `${(value / 1024 / 1024).toFixed(1)}MB`;
-const stageActionTestId = (stage?: TransactionStage) => stage === "입고예정" ? "accept-transaction-button" : stage === "시공중" ? "start-work-button" : stage === "완료" ? "complete-work-button" : undefined;
+// 시공예약 확정 → accept, 입고 처리 → start-work(작업의 시작), 작업완료 → complete-work.
+// start-work-button / complete-work-button 문자열은 tests/v036-production-connection.test.mjs가 그대로 검증한다.
+const stageActionTestId = (stage?: TransactionStage) => stage === "시공예약" ? "accept-transaction-button" : stage === "입고" ? "start-work-button" : stage === "작업완료" ? "complete-work-button" : undefined;
 
 export function TransactionChatWorkspace({ role, userId, transaction, room, useRemoteAttachments, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange }: {
   role: "dealer" | "shop";
@@ -21,7 +22,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
   onSend: (transaction: Transaction, message: TransactionChatMessage) => Promise<void>;
   onHide: (id: string, role: "dealer" | "shop") => void;
   onFinalPriceChange: (transaction: Transaction, finalPrice: number) => void;
-  onStageChange: (transaction: Transaction, stage: TransactionStage) => void;
+  onStageChange: (transaction: Transaction, stage: TransactionStage) => Promise<void>;
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
 }) {
   const [draft, setDraft] = useState("");
@@ -31,12 +32,37 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
   const [finalPrice, setFinalPrice] = useState("");
   const [attachmentError, setAttachmentError] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [stagePending, setStagePending] = useState(false);
+  const [stageError, setStageError] = useState("");
+  const [confirmCompleteOpen, setConfirmCompleteOpen] = useState(false);
   const imageInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const messageEnd = useRef<HTMLDivElement>(null);
   const pendingRef = useRef<ChatAttachment[]>([]);
-  const stageIndex = stages.indexOf(transaction.status.stage);
-  const nextStage = stageIndex >= 0 ? stages[stageIndex + 1] : undefined;
+  const stageIndex = stageOrder.indexOf(transaction.status.stage);
+  const forwardStage = nextForwardStage(transaction.status.stage);
+  const backStage = revertStage(transaction.status.stage);
+  const canAdvance = Boolean(forwardStage) && canTransitionStage(transaction.status.stage, forwardStage!, role);
+  const canRevert = Boolean(backStage) && canTransitionStage(transaction.status.stage, backStage!, role);
+
+  const runStageChange = async (next: TransactionStage) => {
+    if (stagePending) return;
+    setStagePending(true);
+    setStageError("");
+    try {
+      await onStageChange(transaction, next);
+    } catch (error) {
+      setStageError(error instanceof Error ? error.message : "상태를 변경하지 못했습니다. 다시 시도해 주세요.");
+    } finally {
+      setStagePending(false);
+    }
+  };
+  const handleAdvanceClick = () => {
+    if (!forwardStage || stagePending) return;
+    if (forwardStage === "작업완료") { setConfirmCompleteOpen(true); return; }
+    void runStageChange(forwardStage);
+  };
+  const confirmComplete = () => { setConfirmCompleteOpen(false); void runStageChange("작업완료"); };
 
   useEffect(() => { messageEnd.current?.scrollIntoView({ block: "end" }); }, [room?.messages.length]);
   useEffect(() => { pendingRef.current = pending; }, [pending]);
@@ -92,7 +118,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
     }
   };
   const hide = () => {
-    const warning = transaction.status.stage !== "완료" && role === "shop" ? "진행 중인 거래입니다. 그래도 숨기시겠습니까?\n" : "";
+    const warning = transaction.status.stage !== "작업완료" && role === "shop" ? "진행 중인 거래입니다. 그래도 숨기시겠습니까?\n" : "";
     if (confirm(`${warning}이 거래방은 목록에서 숨겨집니다. 거래 기록은 카마스터에 보관됩니다.`)) onHide(transaction.id, role);
   };
   const savePrice = () => {
@@ -105,7 +131,22 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
   return <article className="messenger-workspace" data-testid={`transaction-detail-${transaction.id}`}>
     <section className="messenger-center">
       <header className="messenger-header"><div><span className="messenger-avatar">{transaction.vehicle.maker.slice(0, 1)}</span><div><h2>{transaction.vehicle.maker} {transaction.vehicle.model} · {transaction.service.product ?? transaction.service.workDescription}</h2><p>{role === "dealer" ? transaction.installerName : `딜러 ${transaction.dealerId}`} <i /> <b>{transaction.status.stage}</b></p></div></div><nav><button aria-label="알림 설정"><Bell size={18} /></button><button aria-label="거래 정보" onClick={() => setShowDetails((value) => !value)}><Info size={18} /></button><button aria-label="더보기"><MoreHorizontal size={19} /></button></nav></header>
-      <section className="shop-stage-overview"><div>{[...stages, "출고"].map((stage, index) => <span className={index < stageIndex || transaction.status.stage === "완료" && index <= stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage === "입고예정" ? "일정 확정" : stage === "시공중" ? "작업 중" : stage}</small></span>)}</div>{nextStage && canTransitionStage(transaction.status.stage, nextStage, role) && <button data-testid={stageActionTestId(nextStage)} className="primary" onClick={() => onStageChange(transaction, nextStage)}>{nextStage === "입고예정" ? "일정 확정" : nextStage === "시공중" ? "작업 시작" : nextStage === "완료" ? "완료 처리" : `${nextStage} 확인`}</button>}</section>
+      <section className="shop-stage-overview">
+        <div className="stage-progress-rail">{stageOrder.map((stage, index) => <span className={index < stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage}</small></span>)}</div>
+        {stageError && <p className="stage-error" role="alert">{stageError}</p>}
+        <div className="stage-actions">
+          {canAdvance && <button data-testid={stageActionTestId(forwardStage)} className="primary stage-cta" onClick={handleAdvanceClick} disabled={stagePending} aria-busy={stagePending}>{stagePending ? "처리 중…" : STAGE_ACTION_LABEL[forwardStage!]}</button>}
+          {canRevert && <button type="button" className="stage-revert-link" onClick={() => void runStageChange(backStage!)} disabled={stagePending}>↩ {STAGE_REVERT_LABEL[backStage!]}</button>}
+        </div>
+        {confirmCompleteOpen && <div className="stage-confirm-overlay" role="dialog" aria-modal="true">
+          <div className="stage-confirm-backdrop" onClick={() => setConfirmCompleteOpen(false)} />
+          <div className="stage-confirm-card">
+            <h3>작업완료 처리할까요?</h3>
+            <p>작업완료로 표시하면 이 거래는 완료 상태가 됩니다. 실수였다면 이후에도 입고 상태로 되돌릴 수 있어요.</p>
+            <div className="stage-confirm-buttons"><button type="button" className="button button-secondary" onClick={() => setConfirmCompleteOpen(false)}>취소</button><button type="button" className="button button-primary" onClick={confirmComplete}>작업완료 처리</button></div>
+          </div>
+        </div>}
+      </section>
       <div className="messenger-messages">
         <div className="message-date-divider"><span>거래방 생성 · {new Date(transaction.status.createdAt).toLocaleDateString("ko-KR")}</span></div>
         {room?.messages.map((message, index) => {
@@ -129,7 +170,8 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
       </footer>
     </section>
     <aside className={`messenger-sidebar ${showDetails ? "mobile-open" : ""}`}><button className="sidebar-close" onClick={() => setShowDetails(false)}><X size={18} /></button><div className="briefing-title"><span>TRANSACTION INFO</span><h3>거래 정보</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div><dl className="briefing-data"><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model}</dd></div><div><dt>차량 등급</dt><dd>{transaction.vehicle.class || "미분류"}</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>추가 요청</dt><dd>{transaction.service.extraRequest || "없음"}</dd></div><div><dt>입고 예정</dt><dd>{transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt ?? "미정"}</dd></div><div><dt>시공점</dt><dd>{transaction.installerName}</dd></div><div><dt>가이드 가격</dt><dd>{won(transaction.pricing.baseGuidePrice)}</dd></div></dl>
-      <div className="sidebar-stage"><span>현재 상태</span><b>{transaction.status.stage}</b><div>{stages.map((stage, index) => <i key={stage} className={index <= stageIndex ? "done" : ""} title={stage} />)}</div>{role === "shop" && nextStage && canTransitionStage(transaction.status.stage, nextStage, role) && <button className="primary" onClick={() => onStageChange(transaction, nextStage)}>{nextStage} 단계로 진행</button>}</div>
+      <div className="sidebar-stage"><span>현재 상태</span><b>{transaction.status.stage}</b><div>{stageOrder.map((stage, index) => <i key={stage} className={index <= stageIndex ? "done" : ""} title={stage} />)}</div></div>
+      <div className="sidebar-stage-log"><span>거래 로그</span>{transaction.stageLog.length === 0 ? <p className="stage-log-empty">아직 기록이 없습니다.</p> : <ul>{[...transaction.stageLog].reverse().map((event) => <li key={event.id}><time>{new Date(event.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</time><span>{stageLogLabel(event)}</span></li>)}</ul>}</div>
       <div className="sidebar-settlement"><h4>결제 및 정산</h4><p>확정 금액 <b>{won(transaction.pricing.finalPrice)}</b></p><p>결제 상태 <b>{transaction.pricing.paymentStatus}</b></p>{role === "shop" && <div><input value={finalPrice} onChange={(event) => setFinalPrice(event.target.value)} placeholder="최종 시공금액" /><button onClick={savePrice}>저장</button></div>}{role === "dealer" && transaction.pricing.finalPrice && transaction.pricing.paymentStatus === "미결제" && <button onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>}</div><button className="transaction-hide-button" onClick={hide}>이 거래방 숨기기</button>
     </aside>
     {preview && <div className="attachment-lightbox" role="dialog" aria-modal="true" onClick={() => setPreview(null)}><button aria-label="닫기"><X size={22} /></button><figure onClick={(event) => event.stopPropagation()}><img src={preview.url} alt={preview.name} /><figcaption>{preview.name}</figcaption></figure></div>}
