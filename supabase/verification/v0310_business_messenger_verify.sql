@@ -74,10 +74,18 @@ with checks as (
             where routine_schema='public' and routine_name='get_transaction_contact' and grantee in ('anon','public'))
 
   union all
+  -- Postgres can serialize an empty search_path in proconfig as either
+  -- "search_path=" or "search_path=\"\"" depending on version/formatting; the
+  -- original check only matched the first exact literal and false-negatived
+  -- on a genuinely-correct function. Parse key/value instead of string-matching whole.
   select 10, 'get_transaction_contact', 'search_path가 빈 문자열로 설정되어 있다(기존 컨벤션과 일치)',
     exists (select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
             where n.nspname='public' and p.proname='get_transaction_contact'
-              and exists (select 1 from unnest(coalesce(p.proconfig,'{}')) cfg where cfg = 'search_path='))
+              and exists (
+                select 1 from unnest(coalesce(p.proconfig,'{}')) cfg
+                where split_part(cfg, '=', 1) = 'search_path'
+                  and trim(both '"' from split_part(cfg, '=', 2)) = ''
+              ))
 
   union all
   select 11, '기존 불변식', 'transactions 테이블에 authenticated UPDATE grant가 없다',

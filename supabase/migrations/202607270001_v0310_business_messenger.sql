@@ -98,7 +98,13 @@ create policy "room reads self update" on public.room_reads
   using (user_id = auth.uid() and public.can_access_room(room_id, auth.uid()))
   with check (user_id = auth.uid() and public.can_access_room(room_id, auth.uid()));
 
-revoke all on public.room_reads from public, anon;
+-- REVIEW FIX #6 (found in Production verification): Supabase's project-level
+-- default privileges grant ALL (select/insert/update/delete/references/
+-- trigger/truncate) on newly created public-schema tables directly to
+-- `authenticated`, not merely through the PUBLIC pseudo-role — so revoking
+-- from "public, anon" alone left authenticated over-privileged. Revoke from
+-- authenticated too before re-granting exactly the three privileges needed.
+revoke all on public.room_reads from public, anon, authenticated;
 grant select, insert, update on public.room_reads to authenticated;
 
 -- ---------------------------------------------------------------------------
@@ -248,5 +254,7 @@ begin
 end;
 $$;
 
-revoke all on function public.get_transaction_contact(text) from public;
+-- Same default-privilege gotcha as REVIEW FIX #6, but for functions: new
+-- functions get EXECUTE granted directly to `anon` too, not just via PUBLIC.
+revoke all on function public.get_transaction_contact(text) from public, anon;
 grant execute on function public.get_transaction_contact(text) to authenticated;
