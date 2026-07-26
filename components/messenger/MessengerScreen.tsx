@@ -84,7 +84,7 @@ export function MessengerScreen({ role, userId, transactions, rooms, selectedId,
           : filtered.length === 0 ? <div className="inbox-state inbox-empty">{query ? <><b>검색 결과가 없습니다.</b><span>다른 검색어로 다시 시도해 보세요.</span></> : <><b>아직 대화가 없습니다.</b><span>거래가 시작되면 여기에서 대화를 확인할 수 있어요.</span></>}</div>
           : <ul className="inbox-list">
             {filtered.map(({ transaction, room }) => {
-              const counterpart = role === "dealer" ? transaction.installerName : `딜러 ${transaction.dealerId}`;
+              const counterpart = role === "dealer" ? transaction.installerName : "담당 딜러";
               const unread = room?.unreadCount ?? 0;
               return <li key={transaction.id}>
                 <button className={transaction.id === selected?.transaction.id ? "selected" : ""} onClick={() => openRoom(transaction.id)} data-testid={`inbox-row-${transaction.id}`}>
