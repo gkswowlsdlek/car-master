@@ -44,9 +44,13 @@ test("Supabase transaction writes use role-aware RPCs instead of direct table up
   assert.doesNotMatch(repository, /from\("transactions"\)\.update/);
 });
 
-test("remote pending attachments are discarded when replaced, removed or send fails", async () => {
+test("remote pending attachments are discarded when removed or send fails", async () => {
+  // v0.3.10 switched attachments from single-replace to multi-select (up to
+  // MAX_ATTACHMENTS), so there's no longer a "replace the previous pending
+  // attachment" step to discard — instead each individual removal discards
+  // its own item, and a failed send discards the whole pending batch.
   const chat = await readFile(new URL("../components/transactions/TransactionChatWorkspace.tsx", import.meta.url), "utf8");
-  assert.match(chat, /Promise\.allSettled\(previous\.map/);
+  assert.match(chat, /Promise\.allSettled\(pending\.map/);
   assert.match(chat, /provider\.discard\?\.\(item\)/);
   assert.match(chat, /pendingRef\.current = \[\]/);
 });

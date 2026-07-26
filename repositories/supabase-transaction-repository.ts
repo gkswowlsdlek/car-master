@@ -83,6 +83,14 @@ export class SupabaseTransactionRepository {
     const channel = client.channel("car-master-transactions").on("postgres_changes", { event: "*", schema: "public", table: "transactions" }, listener).subscribe();
     return () => { void client.removeChannel(channel); };
   }
+
+  /** Returns null when the counterpart has no phone on file — never fabricate one. */
+  async getContact(transactionId: string): Promise<{ name: string; phone: string } | null> {
+    const { data, error } = await createSupabaseBrowserClient().rpc("get_transaction_contact", { p_transaction_id: transactionId });
+    if (error) throw error;
+    const row = (data as { contact_name: string; contact_phone: string }[] | null)?.[0];
+    return row?.contact_phone ? { name: row.contact_name, phone: row.contact_phone } : null;
+  }
 }
 
 export const supabaseTransactionRepository = new SupabaseTransactionRepository();
