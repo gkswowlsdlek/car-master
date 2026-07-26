@@ -74,16 +74,15 @@ with checks as (
             where routine_schema='public' and routine_name='get_transaction_contact' and grantee in ('anon','public'))
 
   union all
-  -- Postgres serializes an empty search_path in proconfig as either
-  -- "search_path=" or "search_path=\"\"" depending on version/formatting —
-  -- confirmed directly against Production's own pg_proc row. Accept both
-  -- literal forms explicitly instead of a stricter single-form match.
+  -- Confirmed directly against Production's own pg_proc row via a raw
+  -- unnest(proconfig) dump: the stored entry is the 14-character literal
+  -- search_path="" (quotes included). Match that exact string.
   select 10, 'get_transaction_contact', 'search_path가 빈 문자열로 설정되어 있다(기존 컨벤션과 일치)',
     exists (select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
             where n.nspname='public' and p.proname='get_transaction_contact'
               and exists (
                 select 1 from unnest(coalesce(p.proconfig,'{}')) cfg
-                where cfg in ('search_path=', 'search_path=""')
+                where cfg = 'search_path=""'
               ))
 
   union all
