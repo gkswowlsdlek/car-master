@@ -793,7 +793,11 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
   .messenger-screen { padding: 20px 14px; }
   .messenger-layout { grid-template-columns: 1fr; }
   .inbox-pane { max-height: 300px; overflow-y: auto; }
-  .messenger-workspace { min-height: 650px; max-height: none; }
+  /* A bounded height (not just min-height) is required so .messenger-messages'
+     own overflow-y:auto actually clips and scrolls internally — otherwise the
+     workspace grows with message count and pushes the composer arbitrarily
+     far below the viewport as a conversation gets longer. */
+  .messenger-workspace { height: min(560px, calc(100vh - 300px)); min-height: 420px; max-height: none; }
   .jump-to-latest { bottom: 108px; }
   .contact-sheet-overlay { align-items: flex-end; }
   .contact-sheet-card { width: 100%; border-radius: 20px 20px 0 0; padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
