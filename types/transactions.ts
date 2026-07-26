@@ -46,7 +46,7 @@ export type ChatAttachment = {
   createdAt: string;
 };
 
-export type ChatRoom = { id: string; transactionId: string; messages: TransactionChatMessage[]; createdAt: string; updatedAt: string };
+export type ChatRoom = { id: string; transactionId: string; messages: TransactionChatMessage[]; createdAt: string; updatedAt: string; unreadCount: number };
 
 export type UserProfile = {
   id: string; role: "dealer" | "shop"; name: string; companyName?: string; representativeName?: string;
