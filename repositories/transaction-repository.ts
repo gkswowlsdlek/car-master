@@ -27,7 +27,13 @@ function normalizeTransaction(value: Transaction): Transaction {
 // across two separate browsers out of the box. Any real mutation (stage
 // change, price, etc.) still lands in this browser's own localStorage via the
 // normal update() path the moment it's touched, same as any other transaction.
-const DEMO_SEED_CREATED_AT = "2026-07-27T01:00:00.000Z";
+// Deliberately far in the past (not "today") — any real message sent during
+// actual use must sort after these seed rows. The original value was set to
+// the day this feature shipped, which briefly put it in the FUTURE relative
+// to real testing still happening that same day, so genuinely-new demo
+// messages sorted before it and never showed up as the Inbox's "last
+// message" preview (confirmed via Production smoke test).
+const DEMO_SEED_CREATED_AT = "2026-01-01T00:00:00.000Z";
 const DEMO_SEED_TRANSACTIONS: Transaction[] = [{
   id: "CM-DEMO-0001", dealerId: "hanjaejin-dealer", installerId: "SHOP-MISA-001", installerName: "미사 스타힐스 시공점",
   vehicle: { maker: "BMW", model: "X5", class: "수입 대형/SUV" },
