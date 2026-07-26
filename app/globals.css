@@ -802,7 +802,7 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
      TransactionManagementScreen's mobile layout sets elsewhere, regardless
      of file order — that rule is left untouched since 거래 관리's own mobile
      layout (small, capped transaction-list above it) still needs it. */
-  .messenger-layout .messenger-workspace { height: min(560px, calc(100vh - 300px)); min-height: 420px; max-height: min(560px, calc(100vh - 300px)); overflow: hidden; }
+  .messenger-layout .messenger-workspace { height: min(560px, calc(100vh - 430px)); min-height: 380px; max-height: min(560px, calc(100vh - 430px)); overflow: hidden; }
   /* Grid items default to min-height:auto (sized to content), which ignores
      the parent's fixed height and lets the messages row grow past it
      regardless of overflow:hidden above. min-height:0 here — and
