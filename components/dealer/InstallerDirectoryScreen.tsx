@@ -10,6 +10,7 @@ import type { InstallerListing } from "../../types/installer";
 import { NaverMapView } from "../map/NaverMapView";
 import { InstallerCard } from "./InstallerCard";
 import { InstallerDetailPanel } from "./InstallerDetailPanel";
+import { administrativeRegionNames, administrativeRegions, normalizeAdministrativeRegion, type AdministrativeRegion } from "../../data/administrative-regions";
 
 type SortKey = "distance" | "rating" | "response" | "recent";
 const SORT_LABELS: Record<SortKey, string> = { distance: "가까운 순", rating: "평점 높은 순", response: "응답 빠른 순", recent: "최근 작업 많은 순" };
@@ -46,6 +47,7 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [focusedInstallerId, setFocusedInstallerId] = useState("");
   const [userLocation, setUserLocation] = useState<GeoPosition | null>(null);
   const [locationStatus, setLocationStatus] = useState<"pending" | "granted" | "unavailable">("pending");
   const [boundsOnly, setBoundsOnly] = useState(false);
@@ -62,8 +64,8 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
     return () => { active = false; };
   }, []);
 
-  const provinceOptions = useMemo(() => ["전체", ...Array.from(new Set(installers.map((item) => item.province))).sort()], [installers]);
-  const cityOptions = useMemo(() => ["전체", ...Array.from(new Set(installers.filter((item) => province === "전체" || item.province === province).map((item) => item.city))).sort()], [installers, province]);
+  const provinceOptions = ["전체", ...administrativeRegionNames];
+  const cityOptions = province === "전체" ? ["전체"] : ["전체", ...administrativeRegions[province as AdministrativeRegion]];
 
   const withDistance = useMemo(() => installers.map((installer) => {
     const km = userLocation && installer.lat != null && installer.lng != null ? distanceKm(userLocation, { lat: installer.lat, lng: installer.lng }) : null;
@@ -71,7 +73,7 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
   }), [installers, userLocation]);
 
   const filtered = useMemo(() => withDistance.filter(({ installer }) => {
-    if (province !== "전체" && installer.province !== province) return false;
+    if (province !== "전체" && normalizeAdministrativeRegion(installer.province) !== province) return false;
     if (city !== "전체" && installer.city !== city) return false;
     if (workFilter !== "전체" && !installer.works.includes(workFilter)) return false;
     if (brandFilter !== "전체" && !installer.brands.includes(brandFilter)) return false;
@@ -94,7 +96,7 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
     return a.distanceKm - b.distanceKm;
   }), [filtered, sortKey]);
 
-  const selected = installers.find((item) => item.id === selectedId) ?? sorted[0]?.installer ?? installers[0];
+  const selected = installers.find((item) => item.id === focusedInstallerId);
   const selectedDistanceLabel = withDistance.find((item) => item.installer.id === selected?.id)?.distanceLabel ?? "거리 정보 없음";
 
   useEffect(() => {
@@ -102,7 +104,8 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
     document.getElementById(`installer-card-${selectedId}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [selectedId]);
 
-  function selectAndOpenDetail(id: string) { setSelectedId(id); setDetailOpen(true); }
+  function selectInstaller(id: string) { setFocusedInstallerId(id); setSelectedId(id); }
+  function selectAndOpenDetail(id: string) { selectInstaller(id); setDetailOpen(true); }
   function resetFilters() { setProvince("전체"); setCity("전체"); setWorkFilter("전체"); setBrandFilter("전체"); setOnlyAvailable(false); setSearch(""); }
 
   const filterControls = <div className="installer-filter-controls">
@@ -136,11 +139,11 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
       <div className={`installer-list-pane ${mobileView === "map" ? "mobile-hidden" : ""}`}>
         <div className="installer-list-head"><b>{sorted.length}곳</b><span>{SORT_LABELS[sortKey]}</span></div>
         {sorted.length === 0 ? <div className="installer-empty-state"><span>🔍</span><h2>조건에 맞는 시공점이 없습니다.</h2><p>검색어나 필터를 조정해 보세요.</p><button className="button button-secondary" onClick={resetFilters}>필터 초기화</button></div> : <div className="installer-list" ref={listRef}>
-          {sorted.map(({ installer, distanceLabel }) => <InstallerCard key={installer.id} installer={installer} distanceLabel={distanceLabel} selected={installer.id === selectedId} favorite={favoriteIds.includes(installer.id)} onToggleFavorite={() => toggleFavorite(installer.id)} onSelect={() => setSelectedId(installer.id)} onOpenDetail={() => selectAndOpenDetail(installer.id)} onRequest={() => { setSelectedId(installer.id); onRequest(); }} />)}
+          {sorted.map(({ installer, distanceLabel }) => <InstallerCard key={installer.id} installer={installer} distanceLabel={distanceLabel} selected={installer.id === focusedInstallerId} favorite={favoriteIds.includes(installer.id)} onToggleFavorite={() => toggleFavorite(installer.id)} onSelect={() => selectInstaller(installer.id)} onOpenDetail={() => selectAndOpenDetail(installer.id)} onRequest={() => { selectInstaller(installer.id); onRequest(); }} />)}
         </div>}
       </div>
       <div className={`installer-map-pane ${mobileView === "list" ? "mobile-hidden" : ""}`}>
-        <NaverMapView installers={sorted.map((item) => item.installer)} selectedId={selectedId} onSelect={(id) => selectAndOpenDetail(id)} userLocation={userLocation ? { lat: userLocation.latitude, lng: userLocation.longitude } : null} onBoundsChanged={setVisibleBoundsIds} />
+        <NaverMapView installers={sorted.map((item) => item.installer)} selectedId={focusedInstallerId} onSelect={(id) => selectAndOpenDetail(id)} userLocation={userLocation ? { lat: userLocation.latitude, lng: userLocation.longitude } : null} onBoundsChanged={setVisibleBoundsIds} />
         <div className="installer-map-footer">
           <label className="installer-bounds-toggle"><input type="checkbox" checked={boundsOnly} onChange={(event) => setBoundsOnly(event.target.checked)} /> 현재 지도 영역만 보기</label>
           <span className="installer-map-legend"><i className="installer-map-legend-star" aria-hidden="true">★</i> 위치 등록 데모 시공점</span>

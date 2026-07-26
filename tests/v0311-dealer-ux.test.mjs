@@ -24,11 +24,15 @@ test("Messenger header controls are connected to real local actions", async () =
 
 test("service request uses structured regions and a constrained native date input", async () => {
   const source = await read("components/dealer/ServiceRequestForm.tsx");
+  const regions = await read("data/administrative-regions.ts");
   assert.match(source, /시도 선택/);
   assert.match(source, /시군구 선택/);
   assert.match(source, /type="date"/);
   assert.match(source, /min=\{today\}/);
   assert.match(source, /onFindShops\(area\)/);
+  assert.match(source, /administrativeRegions/);
+  assert.equal((regions.match(/"[^"]+구"/g) ?? []).filter((item) => ["강남구", "강동구", "강북구", "강서구", "관악구", "광진구", "구로구", "금천구", "노원구", "도봉구", "동대문구", "동작구", "마포구", "서대문구", "서초구", "성동구", "성북구", "송파구", "양천구", "영등포구", "용산구", "은평구", "종로구", "중구", "중랑구"].includes(item.slice(1, -1))).length >= 25, true);
+  for (const region of ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"]) assert.match(regions, new RegExp(`${region}:`));
 });
 
 test("dealer profile formats phone, validates email, and uses compact toggles", async () => {
@@ -53,6 +57,8 @@ test("responsive rules cover requested desktop and mobile workspace behavior", a
   assert.match(css, /@media \(min-width: 1024px\)/);
   assert.match(css, /height: calc\(100dvh - 126px\)/);
   assert.match(css, /grid-template-columns: clamp\(220px,20vw,270px\) minmax\(0,1fr\)/);
+  assert.match(css, /\.messenger-chat-pane > \.messenger-workspace[^}]+grid-template-columns: minmax\(0,1fr\)/s);
+  assert.match(css, /\.messenger-chat-pane \.messenger-sidebar\.mobile-open/);
   assert.match(css, /\.app-frame\.mobile-chat-fullscreen \.messenger-workspace/);
   assert.match(css, /@media \(max-width: 390px\)/);
 });
