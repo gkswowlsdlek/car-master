@@ -37,9 +37,9 @@ with checks as (
 
   union all
   select 5, 'grants', 'room_reads: authenticated는 select/insert/update만 보유(delete 없음)',
-    (select array_agg(distinct privilege_type order by privilege_type) from information_schema.role_table_grants
+    (select array_agg(distinct privilege_type::text order by privilege_type::text) from information_schema.role_table_grants
      where table_schema='public' and table_name='room_reads' and grantee='authenticated')
-      = array['INSERT','SELECT','UPDATE']
+      = array['INSERT','SELECT','UPDATE']::text[]
 
   union all
   select 6, 'grants', 'demo_chat_* 테이블에 authenticated/public 권한이 없다',
