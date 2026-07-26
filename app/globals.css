@@ -796,8 +796,13 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
   /* A bounded height (not just min-height) is required so .messenger-messages'
      own overflow-y:auto actually clips and scrolls internally — otherwise the
      workspace grows with message count and pushes the composer arbitrarily
-     far below the viewport as a conversation gets longer. */
-  .messenger-workspace { height: min(560px, calc(100vh - 300px)); min-height: 420px; max-height: none; }
+     far below the viewport as a conversation gets longer. Scoped under
+     .messenger-layout (only present on this screen) with a compound
+     selector so it reliably beats the plain .messenger-workspace rule that
+     TransactionManagementScreen's mobile layout sets elsewhere, regardless
+     of file order — that rule is left untouched since 거래 관리's own mobile
+     layout (small, capped transaction-list above it) still needs it. */
+  .messenger-layout .messenger-workspace { height: min(560px, calc(100vh - 300px)); min-height: 420px; max-height: min(560px, calc(100vh - 300px)); }
   .jump-to-latest { bottom: 108px; }
   .contact-sheet-overlay { align-items: flex-end; }
   .contact-sheet-card { width: 100%; border-radius: 20px 20px 0 0; padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
