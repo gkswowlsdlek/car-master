@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import type { ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
 import { TransactionChatWorkspace } from "../transactions/TransactionChatWorkspace";
@@ -27,15 +27,24 @@ function relativeRoomTime(room?: ChatRoom) {
   return new Date(at).toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
 }
 
-export function MessengerScreen({ role, userId, transactions, rooms, selectedId, useRemoteAttachments, isLoading, loadError, onSelect, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact }: {
+export function MessengerScreen({ role, userId, transactions, rooms, selectedId, useRemoteAttachments, isLoading, loadError, onSelect, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onMobileChatOpenChange }: {
   role: "dealer" | "shop"; userId: string; transactions: Transaction[]; rooms: ChatRoom[]; selectedId: string;
   useRemoteAttachments: boolean; isLoading: boolean; loadError: string;
   onSelect: (id: string) => void; onSend: (transaction: Transaction, message: TransactionChatMessage) => Promise<void>;
   onHide: (id: string, role: "dealer" | "shop") => void; onFinalPriceChange: (transaction: Transaction, finalPrice: number) => void;
   onStageChange: (transaction: Transaction, stage: TransactionStage) => Promise<void>; onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
   onMarkRead: (roomId: string) => void; onLoadContact?: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
+  onMobileChatOpenChange?: (open: boolean) => void;
 }) {
   const [query, setQuery] = useState("");
+  // Mobile-only drill-down: Inbox and chat never share the screen on a phone
+  // width — entering a room switches to a dedicated full-height chat view
+  // (nav/topbar hidden by the parent via onMobileChatOpenChange) with its own
+  // back action, instead of trying to fit both panes in a shrunk viewport.
+  // Irrelevant on desktop, where CSS shows both panes regardless of this.
+  const [mobileView, setMobileView] = useState<"list" | "chat">("list");
+  useEffect(() => () => onMobileChatOpenChange?.(false), [onMobileChatOpenChange]);
+
   const visible = useMemo(() => transactions.filter((item) => !(role === "dealer" ? item.visibility.hiddenByDealer : item.visibility.hiddenByInstaller)), [transactions, role]);
   const rows = useMemo(() => visible
     .map((transaction) => ({ transaction, room: rooms.find((item) => item.transactionId === transaction.id) }))
@@ -55,10 +64,20 @@ export function MessengerScreen({ role, userId, transactions, rooms, selectedId,
   const selected = filtered.find((item) => item.transaction.id === selectedId) ?? filtered[0];
   const selectedRoom = rooms.find((item) => item.transactionId === selected?.transaction.id);
 
+  const openRoom = (id: string) => {
+    onSelect(id);
+    setMobileView("chat");
+    onMobileChatOpenChange?.(true);
+  };
+  const backToList = () => {
+    setMobileView("list");
+    onMobileChatOpenChange?.(false);
+  };
+
   return <section className="messenger-screen">
     <div className="page-title"><div><p className="eyebrow">MESSENGER</p><h1>메시지</h1><p className="page-subtitle">모든 거래방의 대화를 한곳에서 확인하세요.</p></div></div>
     <div className="messenger-layout">
-      <aside className="inbox-pane">
+      <aside className={`inbox-pane${mobileView === "chat" ? " mobile-hidden" : ""}`}>
         <label className="search-field inbox-search"><Search size={17} aria-hidden="true" /><input aria-label="메시지 검색" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="업체, 차량, 대화 내용 검색" /></label>
         {isLoading ? <div className="inbox-state" role="status">대화 목록을 불러오는 중입니다…</div>
           : loadError ? <div className="inbox-state inbox-state-error" role="alert">{loadError}</div>
@@ -68,7 +87,7 @@ export function MessengerScreen({ role, userId, transactions, rooms, selectedId,
               const counterpart = role === "dealer" ? transaction.installerName : `딜러 ${transaction.dealerId}`;
               const unread = room?.unreadCount ?? 0;
               return <li key={transaction.id}>
-                <button className={transaction.id === selected?.transaction.id ? "selected" : ""} onClick={() => onSelect(transaction.id)} data-testid={`inbox-row-${transaction.id}`}>
+                <button className={transaction.id === selected?.transaction.id ? "selected" : ""} onClick={() => openRoom(transaction.id)} data-testid={`inbox-row-${transaction.id}`}>
                   <span className="inbox-row-avatar">{transaction.vehicle.maker.slice(0, 1)}</span>
                   <span className="inbox-row-body">
                     <span className="inbox-row-top"><b>{counterpart}</b><time>{relativeRoomTime(room)}</time></span>
@@ -80,8 +99,10 @@ export function MessengerScreen({ role, userId, transactions, rooms, selectedId,
             })}
           </ul>}
       </aside>
-      {selected ? <TransactionChatWorkspace role={role} userId={userId} transaction={selected.transaction} room={selectedRoom} useRemoteAttachments={useRemoteAttachments} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onMarkRead={onMarkRead} onLoadContact={onLoadContact} />
-        : <div className="messenger-no-selection"><b>대화를 선택하세요.</b><span>왼쪽 목록에서 거래방을 선택하면 대화가 여기에 표시됩니다.</span></div>}
+      <div className={`messenger-chat-pane${mobileView === "list" ? " mobile-hidden" : ""}`}>
+        {selected ? <TransactionChatWorkspace role={role} userId={userId} transaction={selected.transaction} room={selectedRoom} useRemoteAttachments={useRemoteAttachments} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onBack={backToList} />
+          : <div className="messenger-no-selection"><b>대화를 선택하세요.</b><span>왼쪽 목록에서 거래방을 선택하면 대화가 여기에 표시됩니다.</span></div>}
+      </div>
     </div>
   </section>;
 }

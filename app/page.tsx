@@ -86,6 +86,7 @@ export default function Home() {
   const [vehicleClass, setVehicleClass] = useState<VehicleClass>("국산 승용");
   const [selectedPackageId, setSelectedPackageId] = useState(pricePackages[0].id);
   const [selectedTransactionId, setSelectedTransactionId] = useState("");
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [approvedInstallerShops, setApprovedInstallerShops] = useState<InstallerListing[]>([]);
   const [installerDirectoryLoading, setInstallerDirectoryLoading] = useState(false);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
@@ -335,7 +336,7 @@ export default function Home() {
 
   const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;
   const unreadMessageCount = rooms.filter((room) => roleTransactions.some((item) => item.chatRoomId === room.id)).reduce((sum, room) => sum + room.unreadCount, 0);
-  return <AppShell role={role} account={account} screen={screen} unreadMessageCount={unreadMessageCount} onNavigate={goToScreen} onLogout={() => void logout()}>
+  return <AppShell role={role} account={account} screen={screen} unreadMessageCount={unreadMessageCount} mobileFullscreen={screen === "messages" && mobileChatOpen} onNavigate={goToScreen} onLogout={() => void logout()}>
     {transactionLoadError && <div className="system-inline-error" role="alert"><span>{transactionLoadError}</span><button onClick={() => void refresh()}>다시 시도</button></div>}
     {isTransactionLoading && useSupabaseData && <p className="system-inline-loading" role="status">거래 정보를 불러오는 중입니다.</p>}
     {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} onFilterDeals={() => goToScreen("deals")} onOpenDeal={(id) => { setSelectedTransactionId(id); goToScreen("deals"); }} onNewRequest={() => goToScreen("request")} onFindShop={() => goToScreen("dealerMap")} onPriceGuide={() => goToScreen("priceGuide")} onOpenChat={() => goToScreen("deals")} />}
@@ -346,7 +347,7 @@ export default function Home() {
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} submitting={isCreatingTransaction} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} onOpenTransactions={() => goToScreen("shopRequests")} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} />}
     {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} onMarkRead={markRoomRead} onLoadContact={loadContact} />}
-    {screen === "messages" && <MessengerScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} isLoading={isTransactionLoading} loadError={transactionLoadError} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} />}
+    {screen === "messages" && <MessengerScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} isLoading={isTransactionLoading} loadError={transactionLoadError} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} onMobileChatOpenChange={setMobileChatOpen} />}
     {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} userId={account.id} activity={profileActivity} />}
     {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} demoSession={demoAccounts.some((item) => item.id === account.id)} />}
   </AppShell>;

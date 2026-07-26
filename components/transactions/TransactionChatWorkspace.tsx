@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, Bell, Copy, FileText, ImagePlus, Info, MoreHorizontal, Paperclip, Phone, Send, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, Bell, Copy, FileText, ImagePlus, Info, MoreHorizontal, Paperclip, Phone, Send, X } from "lucide-react";
 import { attachmentProvider, supabaseAttachmentProvider } from "../../services/attachments";
 import { canTransitionStage, nextForwardStage, revertStage, stageLogLabel, stageOrder, STAGE_ACTION_LABEL, STAGE_REVERT_LABEL } from "../../services/transaction-state-service";
 import type { ChatAttachment, ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
@@ -26,7 +26,7 @@ function dayLabel(iso: string) {
 
 function draftKey(roomId?: string) { return roomId ? `car-master-chat-draft:${roomId}` : ""; }
 
-export function TransactionChatWorkspace({ role, userId, transaction, room, useRemoteAttachments, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact }: {
+export function TransactionChatWorkspace({ role, userId, transaction, room, useRemoteAttachments, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onBack }: {
   role: "dealer" | "shop";
   userId: string;
   transaction: Transaction;
@@ -39,6 +39,8 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
   onMarkRead?: (roomId: string) => void;
   onLoadContact?: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
+  /** Only passed by MessengerScreen — renders a mobile-only back-to-Inbox button. TransactionManagementScreen never passes this, so its header is unchanged. */
+  onBack?: () => void;
 }) {
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState<ChatAttachment[]>([]);
@@ -246,7 +248,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
 
   return <article className="messenger-workspace" data-testid={`transaction-detail-${transaction.id}`}>
     <section className="messenger-center">
-      <header className="messenger-header"><div><span className="messenger-avatar">{transaction.vehicle.maker.slice(0, 1)}</span><div><h2>{transaction.vehicle.maker} {transaction.vehicle.model} · {transaction.service.product ?? transaction.service.workDescription}</h2><p>{role === "dealer" ? transaction.installerName : `딜러 ${transaction.dealerId}`} <i /> <b>{transaction.status.stage}</b></p></div></div><nav><button aria-label="알림 설정"><Bell size={18} /></button><button aria-label="전화하기" className="messenger-call-button" onClick={() => void openContact()}><Phone size={18} /></button><button aria-label="거래 정보" onClick={() => setShowDetails((value) => !value)}><Info size={18} /></button><button aria-label="더보기"><MoreHorizontal size={19} /></button></nav></header>
+      <header className="messenger-header">{onBack && <button className="chat-back-button" onClick={onBack} aria-label="목록으로 돌아가기"><ArrowLeft size={20} /></button>}<div><span className="messenger-avatar">{transaction.vehicle.maker.slice(0, 1)}</span><div><h2>{transaction.vehicle.maker} {transaction.vehicle.model} · {transaction.service.product ?? transaction.service.workDescription}</h2><p>{role === "dealer" ? transaction.installerName : `딜러 ${transaction.dealerId}`} <i /> <b>{transaction.status.stage}</b></p></div></div><nav><button aria-label="알림 설정"><Bell size={18} /></button><button aria-label="전화하기" className="messenger-call-button" onClick={() => void openContact()}><Phone size={18} /></button><button aria-label="거래 정보" onClick={() => setShowDetails((value) => !value)}><Info size={18} /></button><button aria-label="더보기"><MoreHorizontal size={19} /></button></nav></header>
       <section className="shop-stage-overview">
         {stageError && <p className="stage-error" role="alert">{stageError}</p>}
         <div className="stage-actions">

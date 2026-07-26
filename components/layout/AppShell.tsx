@@ -35,7 +35,7 @@ function isActive(screen: Screen, target: Screen) {
   return screen === target || target === "request" && screen === "requestSummary";
 }
 
-export function AppShell({ role, account, screen, unreadMessageCount = 0, onNavigate, onLogout, children }: { role: Role; account: DemoAccount; screen: Screen; unreadMessageCount?: number; onNavigate: (screen: Screen) => void; onLogout: () => void; children: ReactNode }) {
+export function AppShell({ role, account, screen, unreadMessageCount = 0, mobileFullscreen = false, onNavigate, onLogout, children }: { role: Role; account: DemoAccount; screen: Screen; unreadMessageCount?: number; mobileFullscreen?: boolean; onNavigate: (screen: Screen) => void; onLogout: () => void; children: ReactNode }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const roleLabel = role === "dealer" ? "딜러" : role === "shop" ? "시공점" : "관리자";
   const items = navigation[role];
@@ -55,7 +55,7 @@ export function AppShell({ role, account, screen, unreadMessageCount = 0, onNavi
   const overflowActive = overflow.some((item) => isActive(screen, item.screen));
   const go = (target: Screen) => { setMoreOpen(false); onNavigate(target); };
 
-  return <div className="app-frame">
+  return <div className={`app-frame${mobileFullscreen ? " mobile-chat-fullscreen" : ""}`}>
     <aside className="app-sidebar">
       <button className="app-logo" onClick={() => onNavigate(navigation[role][0].screen)}><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><small>{roleLabel} 워크스페이스</small></button>
       <div className="sidebar-section-label">업무 메뉴</div>

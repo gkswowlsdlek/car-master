@@ -789,28 +789,40 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .contact-sheet-close { width: 100%; margin-top: 14px; background: transparent; color: var(--color-muted); font-size: 13px; }
 
 @media (max-width: 1100px) { .messenger-layout { grid-template-columns: 260px minmax(0,1fr); } }
+
+/* Mobile Messenger: Inbox and chat are two separate full-height screens, not
+   two panes squeezed into one viewport. Entering a room hides the Inbox and
+   gives .messenger-chat-pane the whole screen; AppShell's
+   .mobile-chat-fullscreen class (driven by MessengerScreen's
+   onMobileChatOpenChange) hides the app topbar/beta-bar/bottom-nav for the
+   same reason a native app hides its tab bar inside a conversation — no
+   pixel budget to guess, because there's no shared chrome left to budget
+   around. dvh (not vh) is what keeps the composer above the keyboard: it
+   tracks the browser's actual visible viewport, which shrinks when the
+   on-screen keyboard opens, where vh would stay pinned to the layout
+   viewport and let the keyboard cover the input. */
+.messenger-chat-pane { display: contents; }
 @media (max-width: 760px) {
   .messenger-screen { padding: 20px 14px; }
   .messenger-layout { grid-template-columns: 1fr; }
   .inbox-pane { max-height: 300px; overflow-y: auto; }
-  /* A bounded height (not just min-height) is required so .messenger-messages'
-     own overflow-y:auto actually clips and scrolls internally — otherwise the
-     workspace grows with message count and pushes the composer arbitrarily
-     far below the viewport as a conversation gets longer. Scoped under
-     .messenger-layout (only present on this screen) with a compound
-     selector so it reliably beats the plain .messenger-workspace rule that
-     TransactionManagementScreen's mobile layout sets elsewhere, regardless
-     of file order — that rule is left untouched since 거래 관리's own mobile
-     layout (small, capped transaction-list above it) still needs it. */
-  .messenger-layout .messenger-workspace { height: min(560px, calc(100vh - 430px)); min-height: 380px; max-height: min(560px, calc(100vh - 430px)); overflow: hidden; }
-  /* Grid items default to min-height:auto (sized to content), which ignores
-     the parent's fixed height and lets the messages row grow past it
-     regardless of overflow:hidden above. min-height:0 here — and
-     minmax(0,1fr) instead of minmax(380px,1fr) on the messages row — let
-     both actually shrink to the space available, so .messenger-messages'
-     own overflow-y:auto is what ends up doing the scrolling. */
-  .messenger-layout .messenger-center { min-height: 0; grid-template-rows: auto minmax(0,1fr) auto; }
+  .inbox-pane.mobile-hidden { display: none; }
+  .messenger-chat-pane { display: block; }
+  .messenger-chat-pane.mobile-hidden { display: none; }
+  .chat-back-button { display: inline-grid; place-items: center; width: 34px; height: 34px; margin-right: 2px; border-radius: 10px; background: transparent; color: var(--color-text-soft); }
   .jump-to-latest { bottom: 108px; }
   .contact-sheet-overlay { align-items: flex-end; }
   .contact-sheet-card { width: 100%; border-radius: 20px 20px 0 0; padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
+
+  .app-frame.mobile-chat-fullscreen .app-topbar,
+  .app-frame.mobile-chat-fullscreen .beta-environment-bar,
+  .app-frame.mobile-chat-fullscreen .app-mobile-nav { display: none; }
+  .app-frame.mobile-chat-fullscreen .app-main { padding-bottom: 0; }
+  .app-frame.mobile-chat-fullscreen .messenger-screen { height: 100dvh; padding: 0; display: flex; flex-direction: column; }
+  .app-frame.mobile-chat-fullscreen .messenger-screen > .page-title { display: none; }
+  .app-frame.mobile-chat-fullscreen .messenger-layout { flex: 1; min-height: 0; }
+  .app-frame.mobile-chat-fullscreen .messenger-chat-pane { height: 100%; }
+  .app-frame.mobile-chat-fullscreen .messenger-workspace { height: 100%; min-height: 0; max-height: none; border-radius: 0; overflow: hidden; }
+  .app-frame.mobile-chat-fullscreen .messenger-center { min-height: 0; grid-template-rows: auto minmax(0,1fr) auto; }
 }
+@media (min-width: 761px) { .chat-back-button { display: none; } }
