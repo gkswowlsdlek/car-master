@@ -16,7 +16,14 @@
 --    Supabase user) can share state across browsers via Realtime without
 --    ever touching real participant data. Physical table separation is the
 --    isolation boundary: it is structurally impossible for a demo row to
---    reference, leak into, or be mistaken for a real row.
+--    reference, leak into, or be mistaken for a real row. Demo is a 1/1<->2/2
+--    test fixture, not a hardened multi-tenant surface — anon keeps broad
+--    read/write within this isolated demo namespace by design; the fix pass
+--    below only removes a grant the app never uses, not scoped it down.
+--
+-- Revision note (pre-Production review pass): fixes 5 issues found in code
+-- review before this migration is applied anywhere — see inline comments
+-- marked "REVIEW FIX" at each change site.
 
 -- ---------------------------------------------------------------------------
 -- 0. Allow up to 4 attachments per message (was 1) — messenger multi-photo
@@ -28,6 +35,37 @@
 alter table public.chat_messages drop constraint if exists chat_messages_attachments_check;
 alter table public.chat_messages add constraint chat_messages_attachments_check
   check (jsonb_typeof(attachments) = 'array' and jsonb_array_length(attachments) <= 4);
+
+-- REVIEW FIX #1: the v0.3.6 `chat_attachments_match_room` hardcoded a >1
+-- rejection, so real (RLS-gated) inserts of 2-4 attachments failed even
+-- though the CHECK constraint above allows them. Raise the same limit here;
+-- every per-item validation (room ownership, uuid-shaped path segment,
+-- non-empty filename) is untouched, so attachments still can't be pointed at
+-- another room.
+create or replace function public.chat_attachments_match_room(check_room_id uuid, items jsonb)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  select case
+    when jsonb_typeof(items) <> 'array' then false
+    when jsonb_array_length(items) > 4 then false
+    else not exists (
+      select 1
+      from jsonb_array_elements(items) attachment
+      where jsonb_typeof(attachment) <> 'object'
+         or coalesce(attachment ->> 'storagePath', '') = ''
+         or split_part(attachment ->> 'storagePath', '/', 1) <> check_room_id::text
+         or array_length(string_to_array(attachment ->> 'storagePath', '/'), 1) <> 3
+         or split_part(attachment ->> 'storagePath', '/', 2) !~* '^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+         or split_part(attachment ->> 'storagePath', '/', 3) = ''
+    )
+  end;
+$$;
+
+revoke all on function public.chat_attachments_match_room(uuid, jsonb) from public;
+grant execute on function public.chat_attachments_match_room(uuid, jsonb) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 1. Real chat read cursor
@@ -52,16 +90,16 @@ create policy "room reads self insert" on public.room_reads
   for insert to authenticated
   with check (user_id = auth.uid() and public.can_access_room(room_id, auth.uid()));
 
+-- REVIEW FIX #4: USING and WITH CHECK now both confirm room membership, not
+-- just row ownership, matching the insert policy's standard.
 drop policy if exists "room reads self update" on public.room_reads;
 create policy "room reads self update" on public.room_reads
   for update to authenticated
-  using (user_id = auth.uid())
-  with check (user_id = auth.uid());
+  using (user_id = auth.uid() and public.can_access_room(room_id, auth.uid()))
+  with check (user_id = auth.uid() and public.can_access_room(room_id, auth.uid()));
 
 revoke all on public.room_reads from public, anon;
 grant select, insert, update on public.room_reads to authenticated;
-
-alter publication supabase_realtime add table public.room_reads;
 
 -- ---------------------------------------------------------------------------
 -- 2. Demo messenger backend (anon-only, isolated from all real tables)
@@ -120,7 +158,9 @@ alter table public.demo_chat_reads enable row level security;
 -- every demo request reaches Postgres as `anon`. There is no real user
 -- identity to scope by — the isolation guarantee comes entirely from these
 -- tables being physically separate from every real table, not from RLS
--- narrowing within them. Contents are non-sensitive fixture/demo data.
+-- narrowing within them. Contents are non-sensitive fixture/demo data for a
+-- 1/1<->2/2 test conversation, not a surface that needs defending against
+-- arbitrary internet traffic.
 drop policy if exists "demo rooms anon access" on public.demo_chat_rooms;
 create policy "demo rooms anon access" on public.demo_chat_rooms for all to anon using (true) with check (true);
 drop policy if exists "demo messages anon access" on public.demo_chat_messages;
@@ -131,13 +171,36 @@ create policy "demo reads anon access" on public.demo_chat_reads for all to anon
 revoke all on public.demo_chat_rooms from public, authenticated;
 revoke all on public.demo_chat_messages from public, authenticated;
 revoke all on public.demo_chat_reads from public, authenticated;
-grant select, insert, update on public.demo_chat_rooms to anon;
+-- REVIEW FIX #2: the app seeds/creates demo_chat_rooms rows only from this
+-- migration's own INSERTs (run with elevated privileges, unaffected by
+-- table grants). repositories/demo-chat-repository.ts's ensureRoom() is no
+-- longer called anywhere in app code, so anon never needs table-level
+-- INSERT on demo_chat_rooms — dropped from the grant below (was: select,
+-- insert, update).
+grant select, update on public.demo_chat_rooms to anon;
 grant select, insert on public.demo_chat_messages to anon;
 grant select, insert, update on public.demo_chat_reads to anon;
 
-alter publication supabase_realtime add table public.demo_chat_rooms;
-alter publication supabase_realtime add table public.demo_chat_messages;
-alter publication supabase_realtime add table public.demo_chat_reads;
+-- REVIEW FIX #5: plain `alter publication ... add table` errors on a second
+-- run once the table is already a member ("already member of publication").
+-- Check membership first so this migration can be re-run safely.
+do $$
+declare
+  target text;
+begin
+  foreach target in array array['room_reads', 'demo_chat_rooms', 'demo_chat_messages', 'demo_chat_reads']
+  loop
+    if not exists (
+      select 1
+      from pg_publication_rel pr
+      join pg_publication p on p.oid = pr.prpubid
+      join pg_class c on c.oid = pr.prrelid
+      where p.pubname = 'supabase_realtime' and c.relname = target and c.relnamespace = 'public'::regnamespace
+    ) then
+      execute format('alter publication supabase_realtime add table public.%I', target);
+    end if;
+  end loop;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- 3. Counterpart contact lookup for the messenger's "전화하기" feature.
@@ -147,11 +210,16 @@ alter publication supabase_realtime add table public.demo_chat_reads;
 --    phone numbers out of any broad SELECT grant; the RPC is the only path.
 -- ---------------------------------------------------------------------------
 
+-- REVIEW FIX #3: search_path tightened from 'public' to '' (empty) to match
+-- every other SECURITY DEFINER function in this schema. The body already
+-- schema-qualifies every reference (public.transactions, public.profiles,
+-- public.dealer_profiles, public.installer_profiles, public.user_role), so
+-- this is a hardening-only change with no behavior difference.
 create or replace function public.get_transaction_contact(p_transaction_id text)
 returns table(contact_name text, contact_phone text)
 language plpgsql
 security definer
-set search_path = public
+set search_path = ''
 as $$
 declare
   txn record;
