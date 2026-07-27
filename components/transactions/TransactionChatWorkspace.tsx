@@ -26,6 +26,15 @@ function dayLabel(iso: string) {
 
 function draftKey(roomId?: string) { return roomId ? `car-master-chat-draft:${roomId}` : ""; }
 
+// Schedule fields can be a plain date ("2026-07-29") or a full ISO timestamp
+// depending on how they were set — never show either raw to the user.
+function scheduleLabel(value?: string) {
+  if (!value) return "미정";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
+}
+
 export function TransactionChatWorkspace({ role, userId, transaction, room, useRemoteAttachments, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onBack }: {
   role: "dealer" | "shop";
   userId: string;
@@ -53,6 +62,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
   const [stageError, setStageError] = useState("");
   const [confirmCompleteOpen, setConfirmCompleteOpen] = useState(false);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
+  const [showStageLog, setShowStageLog] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
   const [contactState, setContactState] = useState<"idle" | "loading" | "loaded" | "error">("idle");
   const [contact, setContact] = useState<{ name: string; phone: string } | null>(null);
@@ -303,8 +313,13 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
     </section>
     <aside className={`messenger-sidebar ${showDetails ? "mobile-open" : ""}`}><button className="sidebar-close" onClick={() => setShowDetails(false)}><X size={18} /></button><div className="briefing-title"><span>TRANSACTION INFO</span><h3>거래 정보</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div>
       <div className="sidebar-stage"><span>현재 상태</span><b>{transaction.status.stage}</b><div className="stage-progress-rail sidebar-stage-rail">{stageOrder.map((stage, index) => <span className={index < stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage}</small></span>)}</div></div>
-      <dl className="briefing-data"><div><dt>다음 일정</dt><dd>{transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt ?? "미정"}</dd></div><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model} ({transaction.vehicle.class || "미분류"})</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>상대 업체</dt><dd>{role === "dealer" ? transaction.installerName : "담당 딜러"}</dd></div></dl>
-      <div className="sidebar-settlement"><h4>결제 및 정산</h4><p>확정 금액 <b>{won(transaction.pricing.finalPrice)}</b></p><p>결제 상태 <b>{transaction.pricing.paymentStatus}</b></p>{role === "shop" && <div><input value={finalPrice} onChange={(event) => setFinalPrice(event.target.value)} placeholder="최종 시공금액" /><button onClick={savePrice}>저장</button></div>}{role === "dealer" && transaction.pricing.finalPrice && transaction.pricing.paymentStatus === "미결제" && <button onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>}</div><button className="transaction-hide-button" onClick={hide}>이 거래방 숨기기</button>
+      <dl className="briefing-data"><div><dt>다음 일정</dt><dd>{scheduleLabel(transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt)}</dd></div><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model} ({transaction.vehicle.class || "미분류"})</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>상대 업체</dt><dd>{role === "dealer" ? transaction.installerName : "담당 딜러"}</dd></div></dl>
+      <div className="sidebar-settlement"><h4>결제 및 정산</h4><p>확정 금액 <b>{won(transaction.pricing.finalPrice)}</b></p><p>결제 상태 <b>{transaction.pricing.paymentStatus}</b></p>{role === "shop" && <div><input value={finalPrice} onChange={(event) => setFinalPrice(event.target.value)} placeholder="최종 시공금액" /><button onClick={savePrice}>저장</button></div>}{role === "dealer" && transaction.pricing.finalPrice && transaction.pricing.paymentStatus === "미결제" && <button onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>}</div>
+      <div className="sidebar-stage-log">
+        <button type="button" className="sidebar-stage-log-toggle" onClick={() => setShowStageLog((value) => !value)} aria-expanded={showStageLog}><span>전체 기록 보기</span>{showStageLog ? "▲" : "▼"}</button>
+        {showStageLog && (transaction.stageLog.length === 0 ? <p className="stage-log-empty">아직 기록이 없습니다.</p> : <ul>{[...transaction.stageLog].reverse().map((event) => <li key={event.id}><time>{new Date(event.createdAt).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</time><span>{stageLogLabel(event)}</span></li>)}</ul>)}
+      </div>
+      <button className="transaction-hide-button" onClick={hide}>이 거래방 숨기기</button>
     </aside>
     {preview && <div className="attachment-lightbox" role="dialog" aria-modal="true" onClick={() => setPreview(null)}><button aria-label="닫기" onClick={() => setPreview(null)}><X size={22} /></button><figure onClick={(event) => event.stopPropagation()}><img src={preview.url} alt={preview.name} /><figcaption>{preview.name}</figcaption></figure></div>}
     {contactOpen && <div className="contact-sheet-overlay" role="dialog" aria-modal="true" aria-label="연락처 확인">
