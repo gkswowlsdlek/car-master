@@ -33,7 +33,7 @@ export function LoginScreen({ onLogin, onExplore, onSignUp }: { onLogin: (email:
       <div className="login-ad-layout">
         <LoginServiceIntro onExplore={onExplore} onPriceGuide={focusLogin} />
         <section className="login-card compact-login-card" ref={loginCardRef}>
-          <div className="login-card-icon"><LockKeyhole size={21} /></div><p className="eyebrow">WELCOME BACK</p><h2>로그인</h2>
+          <div className="login-card-icon"><LockKeyhole size={21} /></div><h2>로그인</h2>
           <p className="login-note">이메일 회원 계정 또는 발급받은 아이디로 워크스페이스를 시작하세요.</p>
           <label>이메일 또는 아이디<span className="login-input-wrap"><UserRound size={17} /><input ref={emailInputRef} id="login-email" type="text" inputMode="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="이메일 또는 발급받은 아이디" /></span></label>
           <label>비밀번호<span className="login-input-wrap"><LockKeyhole size={17} /><input autoComplete="current-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void submit()} placeholder="비밀번호" /></span></label>
