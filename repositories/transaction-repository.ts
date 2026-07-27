@@ -52,7 +52,7 @@ const DEMO_SEED_TRANSACTIONS: Transaction[] = [{
 /** Chat room ids whose messages live in the shared, anon-open demo_chat_* backend (see demo-chat-repository.ts) instead of this browser's own localStorage — currently just the fixed seed room above. */
 export const SHARED_DEMO_ROOM_IDS = new Set(DEMO_SEED_TRANSACTIONS.map((item) => item.chatRoomId));
 
-export interface TransactionRepository { getAll(): Transaction[]; getById(id: string): Transaction | null; create(value: Transaction): void; update(value: Transaction): void; upsert(value: Transaction): void; hideForDealer(id: string): void; hideForInstaller(id: string): void; subscribe(listener: () => void): () => void }
+export interface TransactionRepository { getAll(): Transaction[]; getById(id: string): Transaction | null; create(value: Transaction): void; update(value: Transaction): void; upsert(value: Transaction): void; hideForDealer(id: string): void; hideForInstaller(id: string): void; unhideForDealer(id: string): void; unhideForInstaller(id: string): void; subscribe(listener: () => void): () => void }
 export class LocalTransactionRepository implements TransactionRepository {
   getAll = () => {
     const stored = readCollection<Transaction>(TRANSACTION_STORAGE_KEY).map(normalizeTransaction);
@@ -65,6 +65,8 @@ export class LocalTransactionRepository implements TransactionRepository {
   upsert(value: Transaction) { if (this.getById(value.id)) this.update(value); else this.create(value); }
   hideForDealer(id: string) { const item = this.getById(id); if (item) this.update({ ...item, visibility: { ...item.visibility, hiddenByDealer: true } }); }
   hideForInstaller(id: string) { const item = this.getById(id); if (item) this.update({ ...item, visibility: { ...item.visibility, hiddenByInstaller: true } }); }
+  unhideForDealer(id: string) { const item = this.getById(id); if (item) this.update({ ...item, visibility: { ...item.visibility, hiddenByDealer: false } }); }
+  unhideForInstaller(id: string) { const item = this.getById(id); if (item) this.update({ ...item, visibility: { ...item.visibility, hiddenByInstaller: false } }); }
   subscribe(listener: () => void) { return subscribeToStorage(TRANSACTION_STORAGE_KEY, listener); }
 }
 export const transactionRepository = new LocalTransactionRepository();

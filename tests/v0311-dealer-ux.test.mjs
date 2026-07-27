@@ -17,9 +17,11 @@ test("Messenger header controls are connected to real local actions", async () =
   const source = await read("components/transactions/TransactionChatWorkspace.tsx");
   assert.match(source, /setNotificationsMuted/);
   assert.match(source, /openContact/);
-  assert.match(source, /setShowDetails/);
+  assert.match(source, /setDetailPanel/);
   assert.match(source, /messenger-more-menu/);
   assert.match(source, /이 거래방 숨기기/);
+  assert.match(source, /거래 상세 보기/);
+  assert.match(source, /시공점 정보 보기/);
 });
 
 test("service request uses structured regions and a constrained native date input", async () => {

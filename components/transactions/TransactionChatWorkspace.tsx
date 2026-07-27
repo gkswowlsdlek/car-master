@@ -6,6 +6,7 @@ import { ArrowDown, ArrowLeft, Bell, BellOff, Copy, FileText, ImagePlus, Info, M
 import { attachmentProvider, supabaseAttachmentProvider } from "../../services/attachments";
 import { canTransitionStage, nextForwardStage, revertStage, stageLogLabel, stageOrder, STAGE_ACTION_LABEL, STAGE_REVERT_LABEL } from "../../services/transaction-state-service";
 import type { ChatAttachment, ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
+import type { InstallerListing } from "../../types/installer";
 
 const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`;
 const fileSize = (value: number) => value < 1024 * 1024 ? `${Math.max(1, Math.round(value / 1024))}KB` : `${(value / 1024 / 1024).toFixed(1)}MB`;
@@ -35,11 +36,13 @@ function scheduleLabel(value?: string) {
   return date.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
 }
 
-export function TransactionChatWorkspace({ role, userId, transaction, room, useRemoteAttachments, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onBack }: {
+export function TransactionChatWorkspace({ role, userId, transaction, room, installer, useRemoteAttachments, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onBack }: {
   role: "dealer" | "shop";
   userId: string;
   transaction: Transaction;
   room?: ChatRoom;
+  /** Only meaningful for role === "dealer" — the installer's own directory listing, used by "시공점 정보 보기". */
+  installer?: InstallerListing;
   useRemoteAttachments: boolean;
   onSend: (transaction: Transaction, message: TransactionChatMessage) => Promise<void>;
   onHide: (id: string, role: "dealer" | "shop") => void;
@@ -54,7 +57,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState<ChatAttachment[]>([]);
   const [preview, setPreview] = useState<ChatAttachment | null>(null);
-  const [showDetails, setShowDetails] = useState(false);
+  const [detailPanel, setDetailPanel] = useState<"none" | "transaction" | "installer">("none");
   const [finalPrice, setFinalPrice] = useState("");
   const [attachmentError, setAttachmentError] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -260,7 +263,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
 
   return <article className="messenger-workspace" data-testid={`transaction-detail-${transaction.id}`}>
     <section className="messenger-center">
-      <header className="messenger-header">{onBack && <button className="chat-back-button" onClick={onBack} aria-label="목록으로 돌아가기"><ArrowLeft size={20} /></button>}<div><span className="messenger-avatar">{transaction.vehicle.maker.slice(0, 1)}</span><div><h2>{transaction.vehicle.maker} {transaction.vehicle.model} · {transaction.service.product ?? transaction.service.workDescription}</h2><p>{role === "dealer" ? transaction.installerName : "담당 딜러"} <i /> <b>{transaction.status.stage}</b></p></div></div><nav><button aria-label={notificationsMuted ? "대화 알림 켜기" : "대화 알림 끄기"} title={notificationsMuted ? "알림 켜기" : "알림 끄기"} className={notificationsMuted ? "active" : ""} onClick={() => setNotificationsMuted((value) => !value)}>{notificationsMuted ? <BellOff size={18} /> : <Bell size={18} />}</button><button aria-label="전화하기" title={contactState === "loaded" && !contact ? "등록된 연락처가 없습니다." : "연락처 확인"} className="messenger-call-button" disabled={contactState === "loaded" && !contact} onClick={() => void openContact()}><Phone size={18} /></button><button aria-label="거래 정보" className={showDetails ? "active" : ""} onClick={() => setShowDetails((value) => !value)}><Info size={18} /></button><span className="messenger-more-wrap"><button aria-label="더보기" aria-expanded={moreMenuOpen} onClick={() => setMoreMenuOpen((value) => !value)}><MoreHorizontal size={19} /></button>{moreMenuOpen && <div className="messenger-more-menu"><button onClick={() => { setNotificationsMuted((value) => !value); setMoreMenuOpen(false); }}>{notificationsMuted ? "알림 켜기" : "알림 끄기"}</button><button onClick={() => { setShowDetails(true); setMoreMenuOpen(false); }}>거래 상세 보기</button>{role === "dealer" && <button onClick={() => { setShowDetails(true); setMoreMenuOpen(false); }}>시공점 정보 보기</button>}<button onClick={() => { setMoreMenuOpen(false); hide(); }}>이 거래방 숨기기</button></div>}</span></nav></header>
+      <header className="messenger-header">{onBack && <button className="chat-back-button" onClick={onBack} aria-label="목록으로 돌아가기"><ArrowLeft size={20} /></button>}<div><span className="messenger-avatar">{transaction.vehicle.maker.slice(0, 1)}</span><div><h2>{transaction.vehicle.maker} {transaction.vehicle.model} · {transaction.service.product ?? transaction.service.workDescription}</h2><p>{role === "dealer" ? transaction.installerName : "담당 딜러"} <i /> <b>{transaction.status.stage}</b></p></div></div><nav><button aria-label={notificationsMuted ? "대화 알림 켜기" : "대화 알림 끄기"} title={notificationsMuted ? "알림 켜기" : "알림 끄기"} className={notificationsMuted ? "active" : ""} onClick={() => setNotificationsMuted((value) => !value)}>{notificationsMuted ? <BellOff size={18} /> : <Bell size={18} />}</button><button aria-label="전화하기" title={contactState === "loaded" && !contact ? "등록된 연락처가 없습니다." : "연락처 확인"} className="messenger-call-button" disabled={contactState === "loaded" && !contact} onClick={() => void openContact()}><Phone size={18} /></button><button aria-label="거래 정보" className={detailPanel === "transaction" ? "active" : ""} onClick={() => setDetailPanel((value) => value === "transaction" ? "none" : "transaction")}><Info size={18} /></button><span className="messenger-more-wrap"><button aria-label="더보기" aria-expanded={moreMenuOpen} onClick={() => setMoreMenuOpen((value) => !value)}><MoreHorizontal size={19} /></button>{moreMenuOpen && <div className="messenger-more-menu"><button onClick={() => { setNotificationsMuted((value) => !value); setMoreMenuOpen(false); }}>{notificationsMuted ? "알림 켜기" : "알림 끄기"}</button><button onClick={() => { setDetailPanel("transaction"); setMoreMenuOpen(false); }}>거래 상세 보기</button>{role === "dealer" && <button onClick={() => { setDetailPanel("installer"); setMoreMenuOpen(false); }}>시공점 정보 보기</button>}<button onClick={() => { setMoreMenuOpen(false); hide(); }}>이 거래방 숨기기</button></div>}</span></nav></header>
       <section className="shop-stage-overview">
         {stageError && <p className="stage-error" role="alert">{stageError}</p>}
         <div className="stage-actions">
@@ -311,15 +314,27 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, useR
         <input data-testid="file-upload-input" ref={imageInput} hidden type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} /><input ref={fileInput} hidden type="file" multiple accept=".pdf,.txt,.doc,.docx,.xls,.xlsx" onChange={(event) => { void selectFiles(event.target.files); event.target.value = ""; }} />
       </footer>
     </section>
-    <aside className={`messenger-sidebar ${showDetails ? "mobile-open" : ""}`}><button className="sidebar-close" onClick={() => setShowDetails(false)}><X size={18} /></button><div className="briefing-title"><span>TRANSACTION INFO</span><h3>거래 정보</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div>
-      <div className="sidebar-stage"><span>현재 상태</span><b>{transaction.status.stage}</b><div className="stage-progress-rail sidebar-stage-rail">{stageOrder.map((stage, index) => <span className={index < stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage}</small></span>)}</div></div>
-      <dl className="briefing-data"><div><dt>다음 일정</dt><dd>{scheduleLabel(transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt)}</dd></div><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model} ({transaction.vehicle.class || "미분류"})</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>상대 업체</dt><dd>{role === "dealer" ? transaction.installerName : "담당 딜러"}</dd></div></dl>
-      <div className="sidebar-settlement"><h4>결제 및 정산</h4><p>확정 금액 <b>{won(transaction.pricing.finalPrice)}</b></p><p>결제 상태 <b>{transaction.pricing.paymentStatus}</b></p>{role === "shop" && <div><input value={finalPrice} onChange={(event) => setFinalPrice(event.target.value)} placeholder="최종 시공금액" /><button onClick={savePrice}>저장</button></div>}{role === "dealer" && transaction.pricing.finalPrice && transaction.pricing.paymentStatus === "미결제" && <button onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>}</div>
-      <div className="sidebar-stage-log">
-        <button type="button" className="sidebar-stage-log-toggle" onClick={() => setShowStageLog((value) => !value)} aria-expanded={showStageLog}><span>전체 기록 보기</span>{showStageLog ? "▲" : "▼"}</button>
-        {showStageLog && (transaction.stageLog.length === 0 ? <p className="stage-log-empty">아직 기록이 없습니다.</p> : <ul>{[...transaction.stageLog].reverse().map((event) => <li key={event.id}><time>{new Date(event.createdAt).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</time><span>{stageLogLabel(event)}</span></li>)}</ul>)}
-      </div>
-      <button className="transaction-hide-button" onClick={hide}>이 거래방 숨기기</button>
+    <aside className={`messenger-sidebar ${detailPanel !== "none" ? "mobile-open" : ""}`}><button className="sidebar-close" onClick={() => setDetailPanel("none")}><X size={18} /></button>
+      {detailPanel === "installer" ? <>
+        <div className="briefing-title"><span>INSTALLER INFO</span><h3>시공점 정보</h3><p>연락 전에 위치와 영업 정보를 먼저 확인하세요.</p></div>
+        <dl className="briefing-data">
+          <div><dt>시공점</dt><dd>{transaction.installerName}</dd></div>
+          <div><dt>위치</dt><dd>{installer?.address ?? "등록된 주소가 없습니다."}</dd></div>
+          <div><dt>영업시간</dt><dd>{installer?.hours ?? "등록된 영업시간이 없습니다."}</dd></div>
+          <div><dt>시공 가능 필름</dt><dd>{installer?.brands.length ? installer.brands.join(", ") : "등록된 정보가 없습니다."}</dd></div>
+        </dl>
+        <div className="sidebar-settlement"><h4>연락처</h4><button className="button button-secondary" onClick={() => void openContact()}>연락처 확인</button></div>
+      </> : <>
+        <div className="briefing-title"><span>TRANSACTION INFO</span><h3>거래 정보</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div>
+        <div className="sidebar-stage"><span>현재 상태</span><b>{transaction.status.stage}</b><div className="stage-progress-rail sidebar-stage-rail">{stageOrder.map((stage, index) => <span className={index < stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage}</small></span>)}</div></div>
+        <dl className="briefing-data"><div><dt>다음 일정</dt><dd>{scheduleLabel(transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt)}</dd></div><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model} ({transaction.vehicle.class || "미분류"})</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>상대 업체</dt><dd>{role === "dealer" ? transaction.installerName : "담당 딜러"}</dd></div></dl>
+        <div className="sidebar-settlement"><h4>결제 및 정산</h4><p>확정 금액 <b>{won(transaction.pricing.finalPrice)}</b></p><p>결제 상태 <b>{transaction.pricing.paymentStatus}</b></p>{role === "shop" && <div><input value={finalPrice} onChange={(event) => setFinalPrice(event.target.value)} placeholder="최종 시공금액" /><button onClick={savePrice}>저장</button></div>}{role === "dealer" && transaction.pricing.finalPrice && transaction.pricing.paymentStatus === "미결제" && <button onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>}</div>
+        <div className="sidebar-stage-log">
+          <button type="button" className="sidebar-stage-log-toggle" onClick={() => setShowStageLog((value) => !value)} aria-expanded={showStageLog}><span>전체 기록 보기</span>{showStageLog ? "▲" : "▼"}</button>
+          {showStageLog && (transaction.stageLog.length === 0 ? <p className="stage-log-empty">아직 기록이 없습니다.</p> : <ul>{[...transaction.stageLog].reverse().map((event) => <li key={event.id}><time>{new Date(event.createdAt).toLocaleString("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</time><span>{stageLogLabel(event)}</span></li>)}</ul>)}
+        </div>
+        <button className="transaction-hide-button" onClick={hide}>이 거래방 숨기기</button>
+      </>}
     </aside>
     {preview && <div className="attachment-lightbox" role="dialog" aria-modal="true" onClick={() => setPreview(null)}><button aria-label="닫기" onClick={() => setPreview(null)}><X size={22} /></button><figure onClick={(event) => event.stopPropagation()}><img src={preview.url} alt={preview.name} /><figcaption>{preview.name}</figcaption></figure></div>}
     {contactOpen && <div className="contact-sheet-overlay" role="dialog" aria-modal="true" aria-label="연락처 확인">
