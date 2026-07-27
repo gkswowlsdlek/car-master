@@ -113,7 +113,6 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
     <label>시/군/구<select value={city} onChange={(event) => setCity(event.target.value)}>{cityOptions.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
     <label>시공 종류<select value={workFilter} onChange={(event) => setWorkFilter(event.target.value as WorkType | "전체")}><option value="전체">전체</option>{workTypes.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
     <label>취급 브랜드<select value={brandFilter} onChange={(event) => setBrandFilter(event.target.value as Brand | "전체")}><option value="전체">전체</option>{brands.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
-    <label className="installer-filter-toggle"><input type="checkbox" checked={onlyAvailable} onChange={(event) => setOnlyAvailable(event.target.checked)} /> 요청 가능한 시공점만</label>
     <button className="button button-ghost" onClick={resetFilters}>필터 초기화</button>
   </div>;
 
@@ -122,10 +121,10 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
 
     <div className="installer-toolbar">
       <label className="search-field"><Search size={18} aria-hidden="true" /><input aria-label="시공점 검색" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="시공점, 지역, 브랜드, 작업 종류로 검색" /></label>
+      <label className="installer-filter-toggle"><input type="checkbox" checked={onlyAvailable} onChange={(event) => setOnlyAvailable(event.target.checked)} /> 요청 가능한 시공점만</label>
       <button className="button button-secondary installer-filter-open" onClick={() => setFilterSheetOpen(true)}><ListFilter size={16} /> 필터</button>
       <label className="installer-sort-select">정렬<select value={sortKey} onChange={(event) => setSortKey(event.target.value as SortKey)}>{(Object.keys(SORT_LABELS) as SortKey[]).map((key) => <option key={key} value={key}>{SORT_LABELS[key]}</option>)}</select></label>
     </div>
-    <div className="installer-filter-bar">{filterControls}</div>
     {locationStatus === "unavailable" && sortKey === "distance" && <p className="installer-location-note">현재 위치를 사용할 수 없어 정확한 거리 대신 기본 지역 기준으로 표시됩니다.</p>}
 
     <div className="installer-mobile-tabs">
