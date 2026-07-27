@@ -14,11 +14,11 @@ import { ServiceRequestScreen } from "../components/dealer/ServiceRequestScreen"
 import { LandingPage } from "../components/landing/LandingPage";
 import { AppShell } from "../components/layout/AppShell";
 import { MessengerScreen } from "../components/messenger/MessengerScreen";
-import { ProfileEditor } from "../components/profile/ProfileEditor";
+import { ProfileEditor, defaultDealerCompanyName } from "../components/profile/ProfileEditor";
 import { ShopDashboard } from "../components/shop/ShopDashboard";
 import { TransactionManagementScreen } from "../components/transactions/TransactionManagementScreen";
 import { defaultRequest } from "../data/default-request";
-import { demoAccounts } from "../data/demo-accounts";
+import { demoAccounts, isDemoAccountId } from "../data/demo-accounts";
 import { districtCenters } from "../data/district-centers";
 import { demoInstallerListings } from "../data/installer-directory-demo";
 import { formatGuidePrice } from "../data/installation-price-guide";
@@ -27,6 +27,7 @@ import { calculateVehicleClassPrice } from "../data/vehicle-class-options";
 import { useTransactionStore } from "../hooks/use-transaction-store";
 import type { Brand } from "../lib/dealer-flow-data";
 import { chatRepository } from "../repositories/chat-repository";
+import { profileRepository } from "../repositories/profile-repository";
 import { demoChatRepository } from "../repositories/demo-chat-repository";
 import { installerDirectoryRepository } from "../repositories/installer-directory-repository";
 import { supabaseChatRepository } from "../repositories/supabase-chat-repository";
@@ -233,6 +234,18 @@ export default function Home() {
     return () => { active = false; };
   }, [currentUser]);
 
+  const [sidebarCompanyName, setSidebarCompanyName] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    const refresh = () => {
+      if (role !== "dealer") { setSidebarCompanyName(undefined); return; }
+      const fallback = isDemoAccountId(account.id) ? defaultDealerCompanyName : undefined;
+      setSidebarCompanyName(profileRepository.getById(account.id)?.companyName ?? fallback);
+    };
+    refresh();
+    if (role !== "dealer") return;
+    return profileRepository.subscribe(refresh);
+  }, [role, account.id]);
+
   const activeTransactionId = selectedTransactionId || transactions[0]?.id || "";
   const profileActivity = useMemo(() => {
     const now = new Date();
@@ -361,7 +374,7 @@ export default function Home() {
 
   const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;
   const unreadMessageCount = rooms.filter((room) => roleTransactions.some((item) => item.chatRoomId === room.id)).reduce((sum, room) => sum + room.unreadCount, 0);
-  return <AppShell role={role} account={account} screen={screen} unreadMessageCount={unreadMessageCount} mobileFullscreen={screen === "messages" && mobileChatOpen} onNavigate={goToScreen} onLogout={() => void logout()}>
+  return <AppShell role={role} account={account} company={sidebarCompanyName} screen={screen} unreadMessageCount={unreadMessageCount} mobileFullscreen={screen === "messages" && mobileChatOpen} onNavigate={goToScreen} onLogout={() => void logout()}>
     {transactionLoadError && <div className="system-inline-error" role="alert"><span>{transactionLoadError}</span><button onClick={() => void refresh()}>다시 시도</button></div>}
     {isTransactionLoading && useSupabaseData && <p className="system-inline-loading" role="status">거래 정보를 불러오는 중입니다.</p>}
     {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} unreadMessageCount={unreadMessageCount} onFilterDeals={() => goToScreen("deals")} onOpenDeal={(id) => { setSelectedTransactionId(id); goToScreen("deals"); }} onNewRequest={() => goToScreen("request")} onFindShop={() => goToScreen("dealerMap")} onPriceGuide={() => goToScreen("priceGuide")} onOpenChat={() => goToScreen("messages")} />}

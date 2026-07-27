@@ -8,8 +8,10 @@ import { isSupabaseConfigured } from "../../lib/supabase/config";
 import { isDemoAccountId } from "../../data/demo-accounts";
 import type { UserProfile } from "../../types/transactions";
 
+export const defaultDealerCompanyName = "카마스터";
+
 const defaults: Record<"dealer" | "shop", UserProfile> = {
-  dealer: { id: "hanjaejin-dealer", role: "dealer", name: "한재진", companyName: "카마스터 딜러", phone: "010-1234-5678", email: "dealer@car-master.kr", activityArea: "서울·경기", notifications: { request: true, chat: true, schedule: true, marketing: false } },
+  dealer: { id: "hanjaejin-dealer", role: "dealer", name: "한재진", companyName: defaultDealerCompanyName, phone: "010-1234-5678", email: "dealer@car-master.kr", activityArea: "서울·경기", notifications: { request: true, chat: true, schedule: true, marketing: false } },
   shop: { id: "misa-starhills-shop", role: "shop", name: "미사 스타힐스 시공점", representativeName: "홍길동", phone: "031-000-0000", email: "shop@car-master.kr", address: "경기 하남시 미사강변중앙로 180", brands: ["버텍스", "솔라가드", "후퍼옵틱", "브이쿨"], works: ["썬팅", "신차검수", "PPF", "블랙박스"], hours: "평일 09:00-19:00", closedDays: "매주 일요일", emergencyAvailable: true, introduction: "신차 패키지 전문 시공점", notifications: { request: true, chat: true, schedule: true, marketing: false } },
 };
 

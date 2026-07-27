@@ -9,8 +9,8 @@ const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon
   dealer: [
     { screen: "dealerDashboard", label: "대시보드", icon: Gauge },
     { screen: "priceGuide", label: "권장 시공 패키지", icon: CircleDollarSign },
-    { screen: "request", label: "시공 요청", icon: Plus },
     { screen: "dealerMap", label: "시공점 찾기", icon: MapPin },
+    { screen: "request", label: "시공 요청", icon: Plus },
     { screen: "deals", label: "거래 관리", icon: Building2 },
     { screen: "messages", label: "메시지", icon: MessageCircle },
     { screen: "dealerProfile", label: "마이페이지", icon: UserRound },
@@ -35,22 +35,25 @@ function isActive(screen: Screen, target: Screen) {
   return screen === target || target === "request" && screen === "requestSummary";
 }
 
-export function AppShell({ role, account, screen, unreadMessageCount = 0, mobileFullscreen = false, onNavigate, onLogout, children }: { role: Role; account: DemoAccount; screen: Screen; unreadMessageCount?: number; mobileFullscreen?: boolean; onNavigate: (screen: Screen) => void; onLogout: () => void; children: ReactNode }) {
+export function AppShell({ role, account, company, screen, unreadMessageCount = 0, mobileFullscreen = false, onNavigate, onLogout, children }: { role: Role; account: DemoAccount; company?: string; screen: Screen; unreadMessageCount?: number; mobileFullscreen?: boolean; onNavigate: (screen: Screen) => void; onLogout: () => void; children: ReactNode }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const roleLabel = role === "dealer" ? "딜러" : role === "shop" ? "시공점" : "관리자";
   const items = navigation[role];
   let overflow = items.length > MOBILE_PRIMARY_COUNT ? items.slice(MOBILE_PRIMARY_COUNT) : [];
   let primary = overflow.length > 0 ? items.slice(0, MOBILE_PRIMARY_COUNT) : items;
-  // "메시지" must stay on the mobile bottom nav, never inside 더보기 — bump
-  // whatever would otherwise fall last in the primary row into overflow
-  // instead of hiding messages.
-  if (overflow.length > 0 && !primary.some((item) => item.screen === "messages")) {
-    const messagesItem = items.find((item) => item.screen === "messages");
-    if (messagesItem) {
-      const bumped = primary[primary.length - 1];
-      primary = [...primary.slice(0, -1), messagesItem];
-      overflow = [bumped, ...overflow.filter((item) => item.screen !== "messages")];
-    }
+  // "메시지"와 "시공 요청"(빠른 실행)은 사이드바 순서와 무관하게 모바일 하단
+  // 네비에 항상 남아야 하므로, 더보기로 밀려날 primary 항목이 있으면 그것부터
+  // 대신 넘긴다.
+  const pinnedScreens: Screen[] = ["messages", "request"];
+  for (const pinned of pinnedScreens) {
+    if (overflow.length === 0 || primary.some((item) => item.screen === pinned)) continue;
+    const pinnedItem = items.find((item) => item.screen === pinned);
+    if (!pinnedItem) continue;
+    let bumpIndex = primary.length - 1;
+    while (bumpIndex > 0 && pinnedScreens.includes(primary[bumpIndex].screen)) bumpIndex--;
+    const bumped = primary[bumpIndex];
+    primary = [...primary.slice(0, bumpIndex), pinnedItem, ...primary.slice(bumpIndex + 1)];
+    overflow = [bumped, ...overflow.filter((item) => item.screen !== pinned)];
   }
   const overflowActive = overflow.some((item) => isActive(screen, item.screen));
   const go = (target: Screen) => { setMoreOpen(false); onNavigate(target); };
@@ -61,7 +64,7 @@ export function AppShell({ role, account, screen, unreadMessageCount = 0, mobile
       <div className="sidebar-section-label">업무 메뉴</div>
       <nav>{items.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "request" && <em>빠른 실행</em>}{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
       <div className="sidebar-support"><HelpCircle size={19} /><b>도움이 필요하신가요?</b><span>베타 운영팀이 도와드립니다.</span><button onClick={() => alert("카마스터 베타 운영 문의: help@car-master.kr")}>운영팀 문의</button></div>
-      <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{roleLabel} 계정</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
+      <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
     </aside>
     <main className="app-main">
       <header className="app-topbar"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>v0.3.11</small></div></div></div></header>
