@@ -128,6 +128,12 @@ const HOURS_SET = ["평일 09:00-19:00, 토요일 09:00-17:00", "평일 09:30-19
 const NEXT_AVAILABLE_SET = ["오늘 가능", "내일 가능", "7/27(월) 가능", "7/28(화) 가능", "7/29(수) 가능", "7/30(목) 가능", "이번 주 마감, 다음주 가능"];
 
 export const demoInstallerListings: InstallerListing[] = RAW_POINTS.map((point, index) => {
+  // RAW_POINTS는 지역 기준점일 뿐 실제 사업장 좌표가 아닙니다. 지도에서는
+  // 행정청 표식과 겹치지 않도록 같은 생활권 안에서 결정론적으로 분산합니다.
+  const angle = (index * 137.508 * Math.PI) / 180;
+  const radius = 0.006 + (index % 5) * 0.0024;
+  const demoLat = point.lat + Math.sin(angle) * radius;
+  const demoLng = point.lng + Math.cos(angle) * radius / Math.max(0.7, Math.cos(point.lat * Math.PI / 180));
   return {
     id: point.id,
     name: point.name,
@@ -136,8 +142,8 @@ export const demoInstallerListings: InstallerListing[] = RAW_POINTS.map((point, 
     province: point.province,
     city: point.city,
     region: point.region,
-    lat: point.lat,
-    lng: point.lng,
+    lat: Number(demoLat.toFixed(5)),
+    lng: Number(demoLng.toFixed(5)),
     brands: BRAND_SETS[index % BRAND_SETS.length],
     works: WORK_SETS[index % WORK_SETS.length],
     hours: HOURS_SET[index % HOURS_SET.length],

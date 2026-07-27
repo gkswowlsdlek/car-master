@@ -166,7 +166,7 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
   if (status === "unavailable") {
     return <div className="naver-map-fallback">
       <p className="naver-map-fallback-title">지도를 불러올 수 없습니다.</p>
-      <p className="naver-map-fallback-body">{errorMessage || "NAVER 지도를 사용할 수 없어 목록으로만 시공점을 확인할 수 있습니다."}</p>
+      <p className="naver-map-fallback-body">{errorMessage || "NAVER 지도를 사용할 수 없습니다."}<br />시공점 목록에서 계속 비교하고 선택할 수 있습니다.</p>
     </div>;
   }
 

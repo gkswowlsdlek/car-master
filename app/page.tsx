@@ -14,11 +14,11 @@ import { ServiceRequestScreen } from "../components/dealer/ServiceRequestScreen"
 import { LandingPage } from "../components/landing/LandingPage";
 import { AppShell } from "../components/layout/AppShell";
 import { MessengerScreen } from "../components/messenger/MessengerScreen";
-import { ProfileEditor } from "../components/profile/ProfileEditor";
+import { ProfileEditor, defaultDealerCompanyName } from "../components/profile/ProfileEditor";
 import { ShopDashboard } from "../components/shop/ShopDashboard";
 import { TransactionManagementScreen } from "../components/transactions/TransactionManagementScreen";
 import { defaultRequest } from "../data/default-request";
-import { demoAccounts } from "../data/demo-accounts";
+import { demoAccounts, isDemoAccountId } from "../data/demo-accounts";
 import { districtCenters } from "../data/district-centers";
 import { demoInstallerListings } from "../data/installer-directory-demo";
 import { formatGuidePrice } from "../data/installation-price-guide";
@@ -27,6 +27,7 @@ import { calculateVehicleClassPrice } from "../data/vehicle-class-options";
 import { useTransactionStore } from "../hooks/use-transaction-store";
 import type { Brand } from "../lib/dealer-flow-data";
 import { chatRepository } from "../repositories/chat-repository";
+import { profileRepository } from "../repositories/profile-repository";
 import { demoChatRepository } from "../repositories/demo-chat-repository";
 import { installerDirectoryRepository } from "../repositories/installer-directory-repository";
 import { supabaseChatRepository } from "../repositories/supabase-chat-repository";
@@ -48,6 +49,17 @@ import type { CurrentUser, SignUpInput, SignUpResult } from "../types/auth";
 
 const initialDistrict = districtCenters.find((item) => item.id === "gyeonggi-hanam") ?? districtCenters[0];
 const initialLocation: SearchLocation = { id: initialDistrict.id, city: initialDistrict.city, district: initialDistrict.district, label: initialDistrict.label, latitude: initialDistrict.latitude, longitude: initialDistrict.longitude };
+const SERVICE_REQUEST_DRAFT_KEY = "car-master-service-request-draft";
+
+function initialServiceRequest() {
+  if (typeof window === "undefined") return defaultRequest;
+  try {
+    const stored = window.sessionStorage.getItem(SERVICE_REQUEST_DRAFT_KEY);
+    return stored ? { ...defaultRequest, ...JSON.parse(stored) as ServiceRequest } : defaultRequest;
+  } catch {
+    return defaultRequest;
+  }
+}
 
 function pathForScreen(screen: Screen, role: Role) {
   if (screen === "landing") return "/";
@@ -80,12 +92,13 @@ export default function Home() {
   const [locationError, setLocationError] = useState("");
   const [selectedShopId, setSelectedShopId] = useState("SHOP-MISA-001");
   const [favoriteShopIds, setFavoriteShopIds] = useState<string[]>(["SHOP-MISA-001"]);
-  const [request, setRequest] = useState<ServiceRequest>(defaultRequest);
+  const [request, setRequest] = useState<ServiceRequest>(initialServiceRequest);
   const [priceFilter, setPriceFilter] = useState<PriceGuideFilter>("전체");
   const [priceSearch, setPriceSearch] = useState("");
   const [vehicleClass, setVehicleClass] = useState<VehicleClass>("국산 승용");
   const [selectedPackageId, setSelectedPackageId] = useState(pricePackages[0].id);
   const [selectedTransactionId, setSelectedTransactionId] = useState("");
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [approvedInstallerShops, setApprovedInstallerShops] = useState<InstallerListing[]>([]);
   const [installerDirectoryLoading, setInstallerDirectoryLoading] = useState(false);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
@@ -105,6 +118,14 @@ export default function Home() {
     const matchesFilter = priceFilter === "전체" || priceFilter === "기타" && item.brandGroup === "기타" || priceFilter === "솔라가드" && item.brand.startsWith("솔라가드") || item.brand === priceFilter;
     return matchesFilter && (!keyword || `${item.brand} ${item.product} ${item.description}`.toLowerCase().includes(keyword));
   });
+
+  useEffect(() => {
+    if (JSON.stringify(request) === JSON.stringify(defaultRequest)) {
+      window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
+      return;
+    }
+    window.sessionStorage.setItem(SERVICE_REQUEST_DRAFT_KEY, JSON.stringify(request));
+  }, [request]);
 
   const goToScreen = useCallback((next: Screen, nextRole = role) => {
     setScreen(next);
@@ -213,6 +234,18 @@ export default function Home() {
     return () => { active = false; };
   }, [currentUser]);
 
+  const [sidebarCompanyName, setSidebarCompanyName] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    const refresh = () => {
+      if (role !== "dealer") { setSidebarCompanyName(undefined); return; }
+      const fallback = isDemoAccountId(account.id) ? defaultDealerCompanyName : undefined;
+      setSidebarCompanyName(profileRepository.getById(account.id)?.companyName ?? fallback);
+    };
+    refresh();
+    if (role !== "dealer") return;
+    return profileRepository.subscribe(refresh);
+  }, [role, account.id]);
+
   const activeTransactionId = selectedTransactionId || transactions[0]?.id || "";
   const profileActivity = useMemo(() => {
     const now = new Date();
@@ -252,7 +285,10 @@ export default function Home() {
           pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" },
           schedule: { requestedInboundAt: request.inboundStart },
         });
-        await refresh(); setSelectedTransactionId(created.transactionId); goToScreen("deals");
+        await refresh();
+        window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
+        setRequest(defaultRequest);
+        setSelectedTransactionId(created.transactionId); goToScreen("deals");
         void notificationService.notify({ type: "new_service_request", transactionId: created.transactionId, installerId: selectedShop.id });
       } catch (error) { alert(error instanceof Error ? error.message : "거래를 생성하지 못했습니다."); }
       return;
@@ -264,7 +300,10 @@ export default function Home() {
     const chatRoomId = createId("CHAT");
     const transaction: Transaction = { id, dealerId: account.id, installerId: selectedShop.id, installerName: selectedShop.name, vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass }, service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest }, pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" }, schedule: { requestedInboundAt: request.inboundStart }, status: { stage: "견적", createdAt: now, updatedAt: now }, visibility: { hiddenByDealer: false, hiddenByInstaller: false }, chatRoomId, lastMessage: "새 시공 요청이 접수되었습니다.", stageLog: [{ id: createId("EVT"), fromStage: null, toStage: "견적", actorRole: "dealer", direction: "forward", createdAt: now }] };
     const room: ChatRoom = { id: chatRoomId, transactionId: id, createdAt: now, updatedAt: now, unreadCount: 0, messages: [{ id: createId("MSG"), roomId: chatRoomId, senderId: "system", senderRole: "system", text: "거래방이 생성되었습니다. 자동 작업 브리핑을 확인하세요.", createdAt: now, readBy: [account.id] }] };
-    transactionRepository.create(transaction); chatRepository.create(room); setSelectedTransactionId(id); goToScreen("deals");
+    transactionRepository.create(transaction); chatRepository.create(room);
+    window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
+    setRequest(defaultRequest);
+    setSelectedTransactionId(id); goToScreen("deals");
     void notificationService.notify({ type: "new_service_request", transactionId: id, installerId: selectedShop.id });
     } finally {
       setIsCreatingTransaction(false);
@@ -307,6 +346,11 @@ export default function Home() {
     try { await supabaseTransactionRepository.setVisibility(id, true); await refresh(); }
     catch (error) { alert(error instanceof Error ? error.message : "거래를 숨길 수 없습니다."); }
   };
+  const unhideTransaction = async (id: string, targetRole: "dealer" | "shop") => {
+    if (!useSupabaseData) { if (targetRole === "dealer") transactionRepository.unhideForDealer(id); else transactionRepository.unhideForInstaller(id); return; }
+    try { await supabaseTransactionRepository.setVisibility(id, false); await refresh(); }
+    catch (error) { alert(error instanceof Error ? error.message : "숨김을 해제할 수 없습니다."); }
+  };
   const changeStage = async (transaction: Transaction, stage: TransactionStage) => {
     const next = transitionStage(transaction, stage, role === "shop" ? "shop" : "dealer");
     if (useSupabaseData) { await supabaseTransactionRepository.transitionStage(transaction.id, stage); await refresh(); }
@@ -335,18 +379,18 @@ export default function Home() {
 
   const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;
   const unreadMessageCount = rooms.filter((room) => roleTransactions.some((item) => item.chatRoomId === room.id)).reduce((sum, room) => sum + room.unreadCount, 0);
-  return <AppShell role={role} account={account} screen={screen} unreadMessageCount={unreadMessageCount} onNavigate={goToScreen} onLogout={() => void logout()}>
+  return <AppShell role={role} account={account} company={sidebarCompanyName} screen={screen} unreadMessageCount={unreadMessageCount} mobileFullscreen={screen === "messages" && mobileChatOpen} onNavigate={goToScreen} onLogout={() => void logout()}>
     {transactionLoadError && <div className="system-inline-error" role="alert"><span>{transactionLoadError}</span><button onClick={() => void refresh()}>다시 시도</button></div>}
     {isTransactionLoading && useSupabaseData && <p className="system-inline-loading" role="status">거래 정보를 불러오는 중입니다.</p>}
-    {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} onFilterDeals={() => goToScreen("deals")} onOpenDeal={(id) => { setSelectedTransactionId(id); goToScreen("deals"); }} onNewRequest={() => goToScreen("request")} onFindShop={() => goToScreen("dealerMap")} onPriceGuide={() => goToScreen("priceGuide")} onOpenChat={() => goToScreen("deals")} />}
+    {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} unreadMessageCount={unreadMessageCount} onFilterDeals={() => goToScreen("deals")} onOpenDeal={(id) => { setSelectedTransactionId(id); goToScreen("deals"); }} onNewRequest={() => goToScreen("request")} onFindShop={() => goToScreen("dealerMap")} onPriceGuide={() => goToScreen("priceGuide")} onOpenChat={() => goToScreen("messages")} />}
     {screen === "priceGuide" && <PriceGuideScreen packages={filteredPackages} selectedPackage={selectedPackage} selectedPackageId={selectedPackageId} setSelectedPackageId={setSelectedPackageId} brandFilter={priceFilter} setBrandFilter={setPriceFilter} search={priceSearch} setSearch={setPriceSearch} vehicleClass={vehicleClass} setVehicleClass={setVehicleClass} onRequest={applyPackage} />}
     {screen === "dealerMap" && <InstallerDirectoryScreen installers={availableShops} loading={useSupabaseData && installerDirectoryLoading} selectedId={selectedShopId} setSelectedId={setSelectedShopId} favoriteIds={favoriteShopIds} toggleFavorite={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => goToScreen("request")} />}
     {screen === "request" && locationError && <div className="location-search-error"><b>{locationError}</b></div>}
-    {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={() => void searchArea(request.deliveryArea)} onSummary={() => goToScreen("requestSummary")} onPriceGuide={() => goToScreen("priceGuide")} />}
+    {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={(area) => void searchArea(area ?? request.deliveryArea)} onSummary={() => goToScreen("requestSummary")} onPriceGuide={() => goToScreen("priceGuide")} />}
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} submitting={isCreatingTransaction} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} onOpenTransactions={() => goToScreen("shopRequests")} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} />}
-    {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} onMarkRead={markRoomRead} onLoadContact={loadContact} />}
-    {screen === "messages" && <MessengerScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} isLoading={isTransactionLoading} loadError={transactionLoadError} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} />}
+    {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUnhide={unhideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} onMarkRead={markRoomRead} onLoadContact={loadContact} onOpenMessages={(id) => { setSelectedTransactionId(id); goToScreen("messages"); }} />}
+    {screen === "messages" && <MessengerScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} isLoading={isTransactionLoading} loadError={transactionLoadError} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} onMobileChatOpenChange={setMobileChatOpen} />}
     {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} userId={account.id} activity={profileActivity} />}
     {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} demoSession={demoAccounts.some((item) => item.id === account.id)} />}
   </AppShell>;
