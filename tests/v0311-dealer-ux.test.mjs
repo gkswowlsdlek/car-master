@@ -56,7 +56,8 @@ test("responsive rules cover requested desktop and mobile workspace behavior", a
   const css = await read("app/globals.css");
   assert.match(css, /@media \(min-width: 1024px\)/);
   assert.match(css, /height: calc\(100dvh - 126px\)/);
-  assert.match(css, /grid-template-columns: clamp\(220px,20vw,270px\) minmax\(0,1fr\)/);
+  assert.match(css, /\.messenger-layout \{[^}]*grid-template-columns: 60px minmax\(0,1fr\)/s);
+  assert.match(css, /\.messenger-layout\.list-open \{[^}]*grid-template-columns: 60px clamp\(230px,20vw,280px\) minmax\(0,1fr\)/s);
   assert.match(css, /\.messenger-chat-pane > \.messenger-workspace[^}]+grid-template-columns: minmax\(0,1fr\)/s);
   assert.match(css, /\.messenger-chat-pane \.messenger-sidebar\.mobile-open/);
   assert.match(css, /\.app-frame\.mobile-chat-fullscreen \.messenger-workspace/);
