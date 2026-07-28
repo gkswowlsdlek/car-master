@@ -834,10 +834,19 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
   .contact-sheet-overlay { align-items: flex-end; }
   .contact-sheet-card { width: 100%; border-radius: 20px 20px 0 0; padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
 
+  /* .app-frame's own base rule carries min-height:100vh (not dvh), which
+     never shrinks when the keyboard opens. With that floor left in place,
+     .app-frame stays taller than the now-shrunk dvh viewport the instant the
+     keyboard shows, so html/body become scrollable and iOS's native
+     scroll-focused-input-into-view drags the whole page (header included)
+     up into that phantom gap. Capping .app-frame itself to the shrinking
+     dvh removes the gap so there is nothing left for the browser to scroll
+     into. */
+  .app-frame.mobile-chat-fullscreen { min-height: 0; height: 100dvh; overflow: hidden; }
   .app-frame.mobile-chat-fullscreen .app-topbar,
   .app-frame.mobile-chat-fullscreen .beta-environment-bar,
   .app-frame.mobile-chat-fullscreen .app-mobile-nav { display: none; }
-  .app-frame.mobile-chat-fullscreen .app-main { padding-bottom: 0; }
+  .app-frame.mobile-chat-fullscreen .app-main { padding-bottom: 0; min-height: 0; height: 100%; overflow: hidden; }
   .app-frame.mobile-chat-fullscreen .messenger-screen { height: 100dvh; padding: 0; display: flex; flex-direction: column; }
   .app-frame.mobile-chat-fullscreen .messenger-screen > .page-title { display: none; }
   .app-frame.mobile-chat-fullscreen .messenger-layout { flex: 1; min-height: 0; }
