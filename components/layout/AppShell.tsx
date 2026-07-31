@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { Bell, Building2, CircleDollarSign, Gauge, HelpCircle, LogOut, MapPin, MessageCircle, MoreHorizontal, Plus, Settings2, UserRound, UsersRound, X, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Bell, Building2, CircleDollarSign, Gauge, HelpCircle, LogOut, MapPin, MessageCircle, MoreHorizontal, Plus, Settings2, UserRound, UsersRound, X, type LucideIcon } from "lucide-react";
 import type { DemoAccount, Role, Screen } from "../../types/dealer";
 
 const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon }[]> = {
@@ -57,17 +57,30 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
   }
   const overflowActive = overflow.some((item) => isActive(screen, item.screen));
   const go = (target: Screen) => { setMoreOpen(false); onNavigate(target); };
+  // Desktop Messenger reads as its own focused workspace, not a page inside
+  // the general Dealer/Shop chrome, so the sidebar and workspace topbar step
+  // aside for a minimal "back to Car-Master" bar. Mobile is untouched here —
+  // it already has its own dedicated Inbox/fullscreen-chat handling via
+  // mobileFullscreen, driven separately by MessengerScreen's mobile view state.
+  const messengerFocus = screen === "messages";
+  const homeScreen = navigation[role][0].screen;
 
-  return <div className={`app-frame${mobileFullscreen ? " mobile-chat-fullscreen" : ""}`}>
+  return <div className={`app-frame${mobileFullscreen ? " mobile-chat-fullscreen" : ""}${messengerFocus ? " messenger-focus" : ""}`}>
     <aside className="app-sidebar">
-      <button className="app-logo" onClick={() => onNavigate(navigation[role][0].screen)}><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><small>{roleLabel} 워크스페이스</small></button>
+      <button className="app-logo" onClick={() => onNavigate(homeScreen)}><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><small>{roleLabel} 워크스페이스</small></button>
       <div className="sidebar-section-label">업무 메뉴</div>
       <nav>{items.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "request" && <em>빠른 실행</em>}{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
       <div className="sidebar-support"><HelpCircle size={19} /><b>도움이 필요하신가요?</b><span>베타 운영팀이 도와드립니다.</span><button onClick={() => alert("카마스터 베타 운영 문의: help@car-master.kr")}>운영팀 문의</button></div>
       <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
     </aside>
     <main className="app-main">
-      <header className="app-topbar"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>v0.3.11</small></div></div></div></header>
+      {/* Both headers stay mounted; CSS (desktop-only, .messenger-focus scoped)
+          picks which one shows. Mobile always keeps app-topbar-default — the
+          messenger-focus-topbar's base rule is display:none, only overridden
+          at desktop widths, so the existing mobile Inbox/chat header flow is
+          untouched. */}
+      <header className="app-topbar app-topbar-default"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>v0.3.11</small></div></div></div></header>
+      <header className="app-topbar messenger-focus-topbar"><button type="button" className="messenger-back-to-workspace" onClick={() => onNavigate(homeScreen)}><ArrowLeft size={17} aria-hidden="true" /> Car-Master</button><b>메시지</b><button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button></header>
       <div className="beta-environment-bar"><span>WORKSPACE</span><p>회원과 거래를 안전하게 연결하는 카마스터 업무공간입니다.</p></div>
       {children}
     </main>
