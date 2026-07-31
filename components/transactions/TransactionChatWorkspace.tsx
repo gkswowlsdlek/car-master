@@ -301,8 +301,8 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
             <div className="message-content"><small>{mine ? "나" : message.senderRole === "shop" ? "시공점" : "딜러"}</small>{message.text && <p>{message.text}</p>}{message.attachments?.map((attachment) => attachment.kind === "image" ? <button className="image-message" key={attachment.id} onClick={() => setPreview(attachment)}><img src={attachment.url} alt={attachment.name} /><span>{attachment.name}</span></button> : <a className="file-message" key={attachment.id} href={attachment.url} download={attachment.name}><FileText size={22} /><span><b>{attachment.name}</b><small>{fileSize(attachment.size)}</small></span></a>)}<span><time>{new Date(message.createdAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}</time>{read && <em className="message-status read">읽음</em>}</span></div>
           </div></div>;
         })}
-        {!room && <div className="messenger-empty"><b>거래방을 준비하고 있습니다.</b><span>거래방 생성 후 메시지를 보낼 수 있습니다.</span></div>}
-        {room && timeline.length === 0 && <div className="messenger-empty"><b>아직 대화가 없습니다.</b><span>거래에 필요한 내용을 여기서 이야기해보세요.</span></div>}
+        {!room && <div className="messenger-empty" role="status"><b>거래방을 연결하고 있어요.</b><span>잠시만 기다려 주세요.</span></div>}
+        {room && timeline.length === 0 && <div className="messenger-empty"><b>아직 나눈 대화가 없어요.</b><span>시공 일정이나 차량 정보를 먼저 전달해 보세요.</span></div>}
         <div ref={messageEnd} />
       </div>
       {showJumpToLatest && <button className="jump-to-latest" onClick={jumpToLatest}><ArrowDown size={15} /> 새 메시지</button>}
@@ -316,7 +316,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
     </section>
     <aside className={`messenger-sidebar ${detailPanel !== "none" ? "mobile-open" : ""}`}><button className="sidebar-close" onClick={() => setDetailPanel("none")}><X size={18} /></button>
       {detailPanel === "installer" ? <>
-        <div className="briefing-title"><span>INSTALLER INFO</span><h3>시공점 정보</h3><p>연락 전에 위치와 영업 정보를 먼저 확인하세요.</p></div>
+        <div className="briefing-title"><span>연락처 정보</span><h3>시공점 정보</h3><p>연락 전에 위치와 영업 정보를 먼저 확인하세요.</p></div>
         <dl className="briefing-data">
           <div><dt>시공점</dt><dd>{transaction.installerName}</dd></div>
           <div><dt>위치</dt><dd>{installer?.address ?? "등록된 주소가 없습니다."}</dd></div>
@@ -325,7 +325,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
         </dl>
         <div className="sidebar-settlement"><h4>연락처</h4><button className="button button-secondary" onClick={() => void openContact()}>연락처 확인</button></div>
       </> : <>
-        <div className="briefing-title"><span>TRANSACTION INFO</span><h3>거래 정보</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div>
+        <div className="briefing-title"><span>거래 요약</span><h3>거래 정보</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div>
         <div className="sidebar-stage"><span>현재 상태</span><b>{transaction.status.stage}</b><div className="stage-progress-rail sidebar-stage-rail">{stageOrder.map((stage, index) => <span className={index < stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage}</small></span>)}</div></div>
         <dl className="briefing-data"><div><dt>다음 일정</dt><dd>{scheduleLabel(transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt)}</dd></div><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model} ({transaction.vehicle.class || "미분류"})</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>상대 업체</dt><dd>{role === "dealer" ? transaction.installerName : "담당 딜러"}</dd></div></dl>
         <div className="sidebar-settlement"><h4>결제 및 정산</h4><p>확정 금액 <b>{won(transaction.pricing.finalPrice)}</b></p><p>결제 상태 <b>{transaction.pricing.paymentStatus}</b></p>{role === "shop" && <div><input value={finalPrice} onChange={(event) => setFinalPrice(event.target.value)} placeholder="최종 시공금액" /><button onClick={savePrice}>저장</button></div>}{role === "dealer" && transaction.pricing.finalPrice && transaction.pricing.paymentStatus === "미결제" && <button onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>}</div>
