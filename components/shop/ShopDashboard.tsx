@@ -1,49 +1,125 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, ArrowRight, CalendarDays, Camera, CarFront, CheckCircle2, Clock3, MessageSquareText, PackageCheck, PlayCircle, WalletCards, Wrench } from "lucide-react";
-import type { Transaction } from "../../types/transactions";
+import { AlertTriangle, CalendarDays, CarFront, CheckCircle2, Clock3, MessageCircle, Wrench } from "lucide-react";
+import type { ChatRoom, Transaction, TransactionStage } from "../../types/transactions";
+import { nextForwardStage, STAGE_ACTION_LABEL } from "../../services/transaction-state-service";
 
-type ScheduleRange = "오늘" | "내일" | "이번 주";
 function scheduleDate(item: Transaction) { return item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt; }
-function dayDifference(value?: string) { if (!value) return null; const date = new Date(value); const today = new Date(); return Math.floor((new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() - new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime()) / 86400000); }
-function inRange(value: string | undefined, range: ScheduleRange) { const difference = dayDifference(value); return difference !== null && (range === "오늘" ? difference === 0 : range === "내일" ? difference === 1 : difference >= 0 && difference <= 7); }
-function timeLabel(value?: string) { if (!value) return "미정"; const date = new Date(value); return value.includes("T") && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "미정"; }
-function nextAction(stage: Transaction["status"]["stage"]) { return stage === "견적" ? "요청 확인" : stage === "시공예약" ? "입고 확인" : stage === "입고" ? "작업완료 처리" : "거래 보기"; }
+function isToday(value?: string) {
+  if (!value) return false;
+  const date = new Date(value);
+  const today = new Date();
+  return date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && date.getDate() === today.getDate();
+}
+function timeLabel(value?: string) { if (!value) return "시간 미정"; const date = new Date(value); return value.includes("T") && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }) : "시간 미정"; }
+function serviceLabel(item: Transaction) { return item.service.brand ? `${item.service.brand} · ${item.service.workDescription}` : item.service.workDescription || "시공 품목 미정"; }
+const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`;
 
-export function ShopDashboard({ transactions, onOpenTransactions, onOpenTransaction }: { transactions: Transaction[]; onOpenTransactions: () => void; onOpenTransaction: (id: string) => void }) {
-  const [range, setRange] = useState<ScheduleRange>("오늘");
-  const active = useMemo(() => transactions.filter((item) => !["작업완료", "취소"].includes(item.status.stage)).sort((a, b) => (scheduleDate(a) ?? a.status.createdAt).localeCompare(scheduleDate(b) ?? b.status.createdAt)), [transactions]);
-  const priority = active.filter((item) => item.status.stage === "견적" || (dayDifference(scheduleDate(item)) ?? 0) < 0);
-  const scheduled = active.filter((item) => inRange(scheduleDate(item), range));
-  const workItems = scheduled.length ? scheduled : range === "오늘" ? active.slice(0, 5) : [];
-  const metrics = [
-    { label: "응답 대기", value: transactions.filter((item) => item.status.stage === "견적").length, description: "지금 확인할 신규 요청", tone: "urgent", icon: MessageSquareText },
-    { label: "오늘 입고", value: transactions.filter((item) => inRange(scheduleDate(item), "오늘")).length, description: "오늘 예정된 차량", tone: "today", icon: CalendarDays },
-    { label: "진행 중", value: transactions.filter((item) => ["시공예약", "입고"].includes(item.status.stage)).length, description: "현재 작업 중인 차량", tone: "active", icon: Wrench },
-    { label: "완료 예정", value: transactions.filter((item) => item.status.stage === "입고").length, description: "작업완료 확인이 필요한 작업", tone: "complete", icon: PackageCheck },
-    { label: "미정산", value: transactions.filter((item) => item.status.stage === "작업완료" && item.pricing.paymentStatus !== "정산완료").length, description: "결제·정산 확인 필요", tone: "waiting", icon: WalletCards },
+export function ShopDashboard({ transactions, rooms, onOpenTransaction, onOpenMessage, onStageChange }: {
+  transactions: Transaction[];
+  rooms: ChatRoom[];
+  onOpenTransaction: (id: string) => void;
+  /** Jumps straight to this transaction's Messenger room — the Dashboard's only Messenger entry point, not a chat surface of its own. */
+  onOpenMessage: (id: string) => void;
+  onStageChange: (transaction: Transaction, stage: TransactionStage) => Promise<void>;
+}) {
+  const [advancingId, setAdvancingId] = useState("");
+
+  const visible = useMemo(() => transactions.filter((item) => !item.visibility.hiddenByInstaller), [transactions]);
+  const inboundToday = useMemo(() => visible.filter((item) => item.status.stage === "시공예약" && isToday(scheduleDate(item)))
+    .sort((a, b) => (scheduleDate(a) ?? "").localeCompare(scheduleDate(b) ?? "")), [visible]);
+  const inProgress = useMemo(() => visible.filter((item) => item.status.stage === "입고")
+    .sort((a, b) => (scheduleDate(a) ?? "").localeCompare(scheduleDate(b) ?? "")), [visible]);
+  const pendingReview = useMemo(() => visible.filter((item) => item.status.stage === "견적"), [visible]);
+  // Transaction data has no explicit "acknowledged" flag, so 새 요청 vs 응답
+  // 대기 is inferred from whether this shop has sent any message in the
+  // room yet — a request the shop has already replied to but not yet
+  // advanced to 시공예약 reads as 응답 대기, not 새 요청.
+  const newRequests = useMemo(() => pendingReview.filter((item) => !rooms.find((room) => room.id === item.chatRoomId)?.messages.some((message) => message.senderRole === "shop")), [pendingReview, rooms]);
+  const awaitingResponse = useMemo(() => pendingReview.filter((item) => !newRequests.some((request) => request.id === item.id)), [pendingReview, newRequests]);
+  const completedToday = useMemo(() => visible.filter((item) => item.status.stage === "작업완료" && isToday(item.schedule.completedAt))
+    .sort((a, b) => (b.schedule.completedAt ?? "").localeCompare(a.schedule.completedAt ?? "")), [visible]);
+
+  const summary = [
+    { label: "오늘 입고", value: inboundToday.length, icon: CalendarDays, tone: "today" },
+    { label: "작업 중", value: inProgress.length, icon: Wrench, tone: "active" },
+    { label: "새 요청", value: newRequests.length, icon: AlertTriangle, tone: "urgent" },
+    { label: "응답 대기", value: awaitingResponse.length, icon: Clock3, tone: "waiting" },
+    { label: "오늘 완료", value: completedToday.length, icon: CheckCircle2, tone: "complete" },
   ];
-  const quickActions = [{ label: "요청 확인", icon: MessageSquareText }, { label: "입고 처리", icon: PlayCircle }, { label: "사진 등록", icon: Camera }, { label: "작업완료 처리", icon: CheckCircle2 }];
+  const nothingToDo = summary.every((item) => item.value === 0);
 
-  return <section className="shop-dashboard section role-home role-home-shop">
-    <header className="workspace-heading installer-heading"><div><p className="eyebrow">오늘의 시공 업무</p><h1>지금 처리할 작업부터 <br />빠르게 확인하세요.</h1><p>응답 대기, 입고 일정과 지연 작업을 우선순위로 정리했습니다.</p></div><button className="primary" onClick={onOpenTransactions}><MessageSquareText size={18} /> 거래 관리 열기</button></header>
+  const advance = async (transaction: Transaction) => {
+    const next = nextForwardStage(transaction.status.stage);
+    if (!next || advancingId) return;
+    setAdvancingId(transaction.id);
+    try { await onStageChange(transaction, next); } finally { setAdvancingId(""); }
+  };
 
-    {priority.length > 0 && <section className="shop-priority-banner">
-      <header><h2><AlertTriangle size={17} /> 지금 확인해야 할 작업</h2><b>{priority.length}건</b></header>
-      <div className="shop-priority-list">{priority.slice(0, 4).map((item) => <button key={item.id} onClick={() => onOpenTransaction(item.id)}>
-        <span><b>{item.vehicle.maker} {item.vehicle.model}</b><small>{item.status.stage === "견적" ? "응답 대기 요청" : "예정일 경과"} · {item.service.workDescription}</small></span>
-        <em>{nextAction(item.status.stage)} <ArrowRight size={13} /></em>
+  return <section className="installer-dashboard section role-home role-home-shop">
+    <header className="workspace-heading installer-heading">
+      <div><p className="eyebrow">오늘의 시공 업무</p><h1>오늘 뭐 해야 하는지 <br />바로 확인하세요.</h1><p>입고 예정, 작업 중인 차량, 새 요청을 우선순위로 정리했습니다.</p></div>
+    </header>
+
+    <div className="installer-priority-strip">{summary.map((item) => <div key={item.label} className={`installer-priority-item tone-${item.tone}`}><i><item.icon size={18} /></i><span>{item.label}</span><b>{item.value}</b></div>)}</div>
+
+    {nothingToDo && <section className="empty-state shop-empty"><span>✓</span><h2>현재 처리할 작업이 없습니다.</h2><p>새 시공 요청이 들어오면 여기에 표시됩니다.</p></section>}
+
+    {inboundToday.length > 0 && <section className="today-list-card installer-inbound-card">
+      <div className="section-head"><div><p className="eyebrow">오늘 입고</p><h2><CalendarDays size={20} /> 오늘 입고 {inboundToday.length}대</h2></div></div>
+      <div className="installer-card-list">{inboundToday.map((item) => <article key={item.id} className="installer-vehicle-card">
+        <button className="installer-vehicle-main" onClick={() => onOpenTransaction(item.id)}>
+          <time>{timeLabel(scheduleDate(item))}</time>
+          <b><CarFront size={16} /> {item.vehicle.maker} {item.vehicle.model}</b>
+          <small>딜러: 담당 딜러 · {serviceLabel(item)}</small>
+          <em className={`status-chip status-${item.status.stage}`}>{item.status.stage}</em>
+        </button>
+        <div className="installer-vehicle-actions">
+          <button className="secondary" onClick={() => onOpenMessage(item.id)} aria-label="메시지 열기"><MessageCircle size={16} /></button>
+          <button className="primary" disabled={advancingId === item.id} aria-busy={advancingId === item.id} onClick={() => void advance(item)}>{STAGE_ACTION_LABEL["입고"]}</button>
+        </div>
+      </article>)}</div>
+    </section>}
+
+    {inProgress.length > 0 && <section className="today-list-card installer-progress-card">
+      <div className="section-head"><div><p className="eyebrow">작업 중</p><h2><Wrench size={20} /> 작업 중 {inProgress.length}대</h2></div></div>
+      <div className="installer-card-list">{inProgress.map((item) => <article key={item.id} className="installer-vehicle-card">
+        <button className="installer-vehicle-main" onClick={() => onOpenTransaction(item.id)}>
+          <time>{timeLabel(scheduleDate(item))} 입고</time>
+          <b><CarFront size={16} /> {item.vehicle.maker} {item.vehicle.model}</b>
+          <small>딜러: 담당 딜러 · {serviceLabel(item)}</small>
+          <em className={`status-chip status-${item.status.stage}`}>{item.status.stage}</em>
+        </button>
+        <div className="installer-vehicle-actions">
+          <button className="secondary" onClick={() => onOpenMessage(item.id)} aria-label="메시지 열기"><MessageCircle size={16} /></button>
+          <button className="primary" disabled={advancingId === item.id} aria-busy={advancingId === item.id} onClick={() => void advance(item)}>{STAGE_ACTION_LABEL["작업완료"]}</button>
+        </div>
+      </article>)}</div>
+    </section>}
+
+    {newRequests.length > 0 && <section className="today-list-card">
+      <div className="section-head"><div><p className="eyebrow">새 요청</p><h2><AlertTriangle size={20} /> 새 요청 {newRequests.length}건</h2></div></div>
+      <div>{newRequests.map((item) => <button key={item.id} onClick={() => onOpenMessage(item.id)}>
+        <span><b>{item.vehicle.maker} {item.vehicle.model}</b><small>{serviceLabel(item)}</small></span>
+        <em>확인하기 →</em>
       </button>)}</div>
     </section>}
 
-    <div className="shop-metric-grid shop-operations-metrics">{metrics.map((metric) => <button key={metric.label} className={`shop-metric-card ${metric.tone}`} onClick={onOpenTransactions}><i><metric.icon size={21} /></i><span>{metric.label}</span><b>{metric.value}<small>건</small></b><em>{metric.description}</em></button>)}</div>
-    <section className="shop-quick-work card"><div><div><p className="eyebrow">빠른 작업</p><h2>자주 하는 업무</h2></div><span>거래를 선택한 뒤 해당 작업을 처리할 수 있습니다.</span></div><nav>{quickActions.map((action, index) => <button className={index === 0 ? "primary" : "secondary"} key={action.label} onClick={onOpenTransactions}><action.icon size={17} />{action.label}</button>)}</nav></section>
-    {transactions.length === 0 ? <section className="empty-state shop-empty"><span>✓</span><h2>현재 접수된 거래가 없습니다.</h2><p>새 시공 요청이 도착하면 업무 우선순위와 오늘 일정에 표시됩니다.</p></section> : <div className="installer-workspace-grid">
-      <section className="card installer-today-work"><header><div><p className="eyebrow">작업 일정</p><h2><Clock3 size={21} /> 오늘 일정</h2></div><div className="schedule-range-tabs">{(["오늘", "내일", "이번 주"] as const).map((item) => <button className={range === item ? "active" : ""} key={item} onClick={() => setRange(item)}>{item}</button>)}</div></header>
-        {workItems.length === 0 ? <div className="compact-empty"><b>{range} 예정 작업이 없습니다.</b><span>일정이 확정되면 작업 목록에 표시됩니다.</span></div> : <div className="installer-work-list">{workItems.map((item) => { const delayed = (dayDifference(scheduleDate(item)) ?? 0) < 0; return <button className={delayed ? "delayed" : ""} key={item.id} onClick={() => onOpenTransaction(item.id)}><time>{timeLabel(scheduleDate(item))}</time><i><CarFront size={20} /></i><span><b>{item.vehicle.maker} {item.vehicle.model}</b><small>{item.service.brand && `${item.service.brand} · `}{item.service.workDescription}</small><em>{item.pricing.paymentStatus} · 담당 딜러</em></span><strong>{delayed && <mark className="delay-chip">지연</mark>}<mark className={`status-chip status-${item.status.stage}`}>{item.status.stage}</mark><small>{nextAction(item.status.stage)} →</small></strong></button>; })}</div>}
-      </section>
-      <aside className="installer-side-stack"><section className="installer-notice"><CalendarDays size={20} /><div><b>작업 순서는 일정과 상태를 기준으로 정렬됩니다.</b><p>거래방에서 현재 단계와 다음 처리 작업을 확인하세요.</p></div></section></aside>
-    </div>}
+    {awaitingResponse.length > 0 && <section className="today-list-card">
+      <div className="section-head"><div><p className="eyebrow">응답 대기</p><h2><Clock3 size={20} /> 응답 대기 {awaitingResponse.length}건</h2></div></div>
+      <div>{awaitingResponse.map((item) => <button key={item.id} onClick={() => onOpenTransaction(item.id)}>
+        <span><b>{item.vehicle.maker} {item.vehicle.model}</b><small>{serviceLabel(item)} · 시공예약 확정이 필요해요</small></span>
+        <em>{STAGE_ACTION_LABEL["시공예약"]} →</em>
+      </button>)}</div>
+    </section>}
+
+    {completedToday.length > 0 && <section className="today-list-card">
+      <div className="section-head"><div><p className="eyebrow">오늘 완료</p><h2><CheckCircle2 size={20} /> 오늘 완료 {completedToday.length}대</h2></div></div>
+      <div>{completedToday.map((item) => <button key={item.id} onClick={() => onOpenTransaction(item.id)}>
+        <span><b>{item.vehicle.maker} {item.vehicle.model}</b><small>{serviceLabel(item)}</small></span>
+        <em>{item.pricing.finalPrice ? won(item.pricing.finalPrice) : "최종 금액 입력 필요"}</em>
+      </button>)}</div>
+    </section>}
   </section>;
 }
