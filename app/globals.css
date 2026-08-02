@@ -1022,6 +1022,11 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .transaction-core-info > div:nth-last-child(-n+2) { border-bottom: 0; }
 .transaction-core-info dt { color: var(--color-muted); font-size: 11px; }
 .transaction-core-info dd { margin: 0; font-weight: 750; line-height: 1.5; }
+.transaction-price-editor { display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 1px solid var(--color-primary-border); border-radius: 14px; background: var(--color-primary-soft); padding: 14px 16px; }
+.transaction-price-editor > span { color: var(--color-text-soft); font-size: 13px; font-weight: 700; }
+.transaction-price-editor > div { display: flex; gap: 8px; }
+.transaction-price-editor input { width: 160px; min-height: 44px; }
+.transaction-price-editor button { min-height: 44px; }
 .transaction-operations-detail > footer { display: flex; justify-content: flex-end; gap: 10px; }
 .compact-control { justify-content: flex-end; }
 .compact-control input { appearance: none; width: 36px !important; height: 20px; border: 0; border-radius: 999px; background: var(--color-line-strong); padding: 2px; transition: background .2s ease-out; }

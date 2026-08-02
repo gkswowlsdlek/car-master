@@ -4,6 +4,16 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, CalendarDays, CarFront, CheckCircle2, Clock3, MessageCircle, Wrench } from "lucide-react";
 import type { ChatRoom, Transaction, TransactionStage } from "../../types/transactions";
 import { nextForwardStage, STAGE_ACTION_LABEL } from "../../services/transaction-state-service";
+import { defaultDealerCompanyName } from "../profile/ProfileEditor";
+
+// The Demo dealer's company name is safe to show eagerly — it's a fixed,
+// non-sensitive fixture value already used elsewhere (sidebar company name),
+// not a lookup against real profile data. There is no equivalent safe path
+// for Real dealers yet: the only RPC that resolves a counterpart's name
+// (get_transaction_contact) is deliberately gated behind an explicit "연락처
+// 확인" action, not meant to be called eagerly for every visible card, so
+// Real transactions keep the generic "담당 딜러" label — see v0.3.13 TODO.
+function dealerLabel(dealerId: string) { return dealerId === "hanjaejin-dealer" ? defaultDealerCompanyName : "담당 딜러"; }
 
 function scheduleDate(item: Transaction) { return item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt; }
 function isToday(value?: string) {
@@ -45,7 +55,7 @@ export function ShopDashboard({ transactions, rooms, onOpenTransaction, onOpenMe
     { label: "오늘 입고", value: inboundToday.length, icon: CalendarDays, tone: "today" },
     { label: "작업 중", value: inProgress.length, icon: Wrench, tone: "active" },
     { label: "새 요청", value: newRequests.length, icon: AlertTriangle, tone: "urgent" },
-    { label: "응답 대기", value: awaitingResponse.length, icon: Clock3, tone: "waiting" },
+    { label: "확인 필요", value: awaitingResponse.length, icon: Clock3, tone: "waiting" },
     { label: "오늘 완료", value: completedToday.length, icon: CheckCircle2, tone: "complete" },
   ];
   const nothingToDo = summary.every((item) => item.value === 0);
@@ -72,7 +82,7 @@ export function ShopDashboard({ transactions, rooms, onOpenTransaction, onOpenMe
         <button className="installer-vehicle-main" onClick={() => onOpenTransaction(item.id)}>
           <time>{timeLabel(scheduleDate(item))}</time>
           <b><CarFront size={16} /> {item.vehicle.maker} {item.vehicle.model}</b>
-          <small>딜러: 담당 딜러 · {serviceLabel(item)}</small>
+          <small>딜러: {dealerLabel(item.dealerId)} · {serviceLabel(item)}</small>
           <em className={`status-chip status-${item.status.stage}`}>{item.status.stage}</em>
         </button>
         <div className="installer-vehicle-actions">
@@ -88,7 +98,7 @@ export function ShopDashboard({ transactions, rooms, onOpenTransaction, onOpenMe
         <button className="installer-vehicle-main" onClick={() => onOpenTransaction(item.id)}>
           <time>{timeLabel(scheduleDate(item))} 입고</time>
           <b><CarFront size={16} /> {item.vehicle.maker} {item.vehicle.model}</b>
-          <small>딜러: 담당 딜러 · {serviceLabel(item)}</small>
+          <small>딜러: {dealerLabel(item.dealerId)} · {serviceLabel(item)}</small>
           <em className={`status-chip status-${item.status.stage}`}>{item.status.stage}</em>
         </button>
         <div className="installer-vehicle-actions">
@@ -107,7 +117,7 @@ export function ShopDashboard({ transactions, rooms, onOpenTransaction, onOpenMe
     </section>}
 
     {awaitingResponse.length > 0 && <section className="today-list-card">
-      <div className="section-head"><div><p className="eyebrow">응답 대기</p><h2><Clock3 size={20} /> 응답 대기 {awaitingResponse.length}건</h2></div></div>
+      <div className="section-head"><div><p className="eyebrow">확인 필요</p><h2><Clock3 size={20} /> 확인 필요 {awaitingResponse.length}건</h2></div></div>
       <div>{awaitingResponse.map((item) => <button key={item.id} onClick={() => onOpenTransaction(item.id)}>
         <span><b>{item.vehicle.maker} {item.vehicle.model}</b><small>{serviceLabel(item)} · 시공예약 확정이 필요해요</small></span>
         <em>{STAGE_ACTION_LABEL["시공예약"]} →</em>
