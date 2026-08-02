@@ -337,6 +337,20 @@ end $$;
 -- going forward, plus a small, clearly-fictional set of additional fixtures
 -- per the "few natural transactions, not a flood of fake data" guidance —
 -- one new request, one today-inbound, one in-progress, one completed.
+--
+-- demo_chat_rooms for the new fixtures must be seeded BEFORE
+-- demo_transactions below, since demo_transactions.chat_room_id is a
+-- not-null FK into demo_chat_rooms(id) — on a fresh database the original
+-- ordering here (transactions first) failed that FK outright. CHAT-DEMO-0001
+-- itself isn't seeded here since it already exists from the v0.3.10 migration.
+insert into public.demo_chat_rooms (id, transaction_id, created_at, updated_at)
+values
+  ('CHAT-DEMO-0002', 'CM-DEMO-0002', '2026-01-01T01:00:00.000Z', '2026-01-01T01:00:00.000Z'),
+  ('CHAT-DEMO-0003', 'CM-DEMO-0003', '2026-01-01T02:00:00.000Z', '2026-01-01T02:00:05.000Z'),
+  ('CHAT-DEMO-0004', 'CM-DEMO-0004', '2026-01-01T03:00:00.000Z', '2026-01-01T03:00:05.000Z'),
+  ('CHAT-DEMO-0005', 'CM-DEMO-0005', '2026-01-01T04:00:00.000Z', '2026-01-01T04:30:00.000Z')
+on conflict (id) do nothing;
+
 insert into public.demo_transactions (id, dealer_id, installer_id, installer_name, vehicle, service, pricing, schedule, stage, hidden_by_dealer, hidden_by_installer, last_message, chat_room_id, created_at, updated_at)
 values
   ('CM-DEMO-0001', 'hanjaejin-dealer', 'SHOP-MISA-001', '미사 스타힐스 시공점',
@@ -374,14 +388,6 @@ values
    '{"requestedInboundAt":"2026-07-28","confirmedInboundAt":"2026-07-28T09:00:00.000Z","completedAt":"2026-07-28T15:00:00.000Z"}'::jsonb,
    '작업완료', false, false, '작업이 완료되었습니다.', 'CHAT-DEMO-0005',
    '2026-01-01T04:00:00.000Z', '2026-01-01T04:30:00.000Z')
-on conflict (id) do nothing;
-
-insert into public.demo_chat_rooms (id, transaction_id, created_at, updated_at)
-values
-  ('CHAT-DEMO-0002', 'CM-DEMO-0002', '2026-01-01T01:00:00.000Z', '2026-01-01T01:00:00.000Z'),
-  ('CHAT-DEMO-0003', 'CM-DEMO-0003', '2026-01-01T02:00:00.000Z', '2026-01-01T02:00:05.000Z'),
-  ('CHAT-DEMO-0004', 'CM-DEMO-0004', '2026-01-01T03:00:00.000Z', '2026-01-01T03:00:05.000Z'),
-  ('CHAT-DEMO-0005', 'CM-DEMO-0005', '2026-01-01T04:00:00.000Z', '2026-01-01T04:30:00.000Z')
 on conflict (id) do nothing;
 
 insert into public.demo_chat_messages (room_id, sender_id, sender_role, text, client_message_id, created_at)

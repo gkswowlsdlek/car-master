@@ -159,6 +159,13 @@ export default function Home() {
     const demoResponse = await fetch("/api/demo-login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: email, password }) });
     if (demoResponse.ok) {
       const { account: demoAccount } = await demoResponse.json() as { account: DemoAccount };
+      // A real Supabase session left over from earlier in this browser (a
+      // different tab, a prior real-account test) must not survive into a
+      // Demo session — otherwise its own auth-state-change listener can
+      // reassert `currentUser` after this and silently flip useSupabaseData
+      // back to true, routing Demo traffic into the real-only approved-
+      // installer gate. Best-effort: never let a sign-out failure block demo login.
+      await authProvider.logout().catch(() => {});
       setCurrentUser(null);
       login(demoAccount);
       return;
@@ -194,6 +201,11 @@ export default function Home() {
         if (!active) return;
         if (demoResponse.ok) {
           const { account: demoAccount } = await demoResponse.json() as { account: DemoAccount };
+          if (!active) return;
+          // Same isolation as authenticate()'s demo branch: a leftover real
+          // Supabase session must not be able to flip currentUser back on
+          // (e.g. after a refresh) while a demo cookie is active.
+          await authProvider.logout().catch(() => {});
           if (!active) return;
           login(demoAccount, true);
           return;
