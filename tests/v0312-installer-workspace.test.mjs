@@ -4,9 +4,9 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("Installer Dashboard follows the 오늘 입고 -> 작업 중 -> 새 요청 -> 응답 대기 -> 오늘 완료 priority order and does not embed Messenger", async () => {
+test("Installer Dashboard follows the 오늘 입고 -> 작업 중 -> 새 요청 -> 확인 필요 -> 오늘 완료 priority order and does not embed Messenger", async () => {
   const source = await read("components/shop/ShopDashboard.tsx");
-  const order = ["오늘 입고", "작업 중", "새 요청", "응답 대기", "오늘 완료"];
+  const order = ["오늘 입고", "작업 중", "새 요청", "확인 필요", "오늘 완료"];
   const positions = order.map((label) => source.indexOf(`<p className="eyebrow">${label}</p>`));
   for (const position of positions) assert.ok(position >= 0, "expected each priority section to be present");
   for (let i = 1; i < positions.length; i++) assert.ok(positions[i] > positions[i - 1], `${order[i]} should render after ${order[i - 1]}`);
