@@ -13,6 +13,7 @@
 ### Fixed
 - Demo Admin 3/3에서 시공점 가입 심사 패널이 아무 동작도 하지 않던 빈 placeholder 문제를 해결했습니다. (Admin Workspace에서 Dealer 1/1, Installer 2/2와 달리 유일하게 Demo/Real parity가 없던 부분)
 - `pnpm test`가 Node 22.13+ 환경에서 `--test-isolation` 플래그 이름 오류로 아예 실행되지 않던 문제를 `--experimental-test-isolation`으로 수정했습니다.
+- 관리자 운영 현황의 `주간 거래량` 차트가 실제 거래 데이터와 무관한 하드코딩된 고정 수치(`[38, 52, 44, 68, 58, 82, 72]`)를 보여주던 문제를 고쳐, 이번 주(월~일) 실제 거래 생성 건수를 기준으로 표시하도록 변경했습니다.
 
 ### Not included / Pending
 - **`202608030001_v0313_demo_installer_membership.sql` 마이그레이션은 아직 Production Supabase에 적용되지 않았습니다.** 이번 라운드는 구현과 로컬 검증(단위 테스트, TypeScript, ESLint, Production build)까지만 완료했습니다.
