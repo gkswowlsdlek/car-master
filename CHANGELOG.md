@@ -1,5 +1,25 @@
 ﻿# Changelog
 
+## v0.3.13 Demo Admin installer-membership approval parity - 2026-08-03
+
+### Added
+- Demo Admin(3/3)이 실제 관리자와 동일하게 시공점 가입 승인 화면을 직접 조작할 수 있는 격리된 데모 백엔드(`demo_installer_applications`, `demo_review_installer_application` RPC)를 추가했습니다.
+- 실제 회원 테이블(`installer_profiles`, `installer_approvals`, `profiles`, `auth.users`)과 FK로 연결되지 않는 물리적 분리 구조를 유지했습니다.
+- 데모 확인용으로 승인 대기·승인·반려 상태를 각각 하나씩 포함한 가상 시공점 신청 3건을 시드했습니다.
+
+### Changed
+- `InstallerApprovalPanel`이 Demo 세션에서는 마이그레이션 적용 여부(`isSchemaReady()`)를 먼저 확인한 뒤에만 데모 백엔드를 사용하고, 적용 전에는 기존 안내 문구로 자연스럽게 대체됩니다.
+
+### Fixed
+- Demo Admin 3/3에서 시공점 가입 심사 패널이 아무 동작도 하지 않던 빈 placeholder 문제를 해결했습니다. (Admin Workspace에서 Dealer 1/1, Installer 2/2와 달리 유일하게 Demo/Real parity가 없던 부분)
+- `pnpm test`가 Node 22.13+ 환경에서 `--test-isolation` 플래그 이름 오류로 아예 실행되지 않던 문제를 `--experimental-test-isolation`으로 수정했습니다.
+
+### Not included / Pending
+- **`202608030001_v0313_demo_installer_membership.sql` 마이그레이션은 아직 Production Supabase에 적용되지 않았습니다.** 이번 라운드는 구현과 로컬 검증(단위 테스트, TypeScript, ESLint, Production build)까지만 완료했습니다.
+- 마이그레이션 미적용 상태이므로 Demo Admin 승인 패널의 실제 인터랙티브 동작은 Production에서 아직 눈으로 확인되지 않았습니다.
+- 실제(Real) 관리자 승인 경로는 코드상 로직이 변경 전과 동일함을 확인했으나, Production 라이브 재검증은 남아 있습니다.
+- 새로운 결제·정산 기능, 다른 워크스페이스 재설계는 포함하지 않습니다.
+
 ## v0.3.11 Dealer Experience / Meeting Ready - 2026-07-26
 
 ### UX Revision Batch
