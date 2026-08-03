@@ -15,15 +15,15 @@ function isWithinLastDays(value: string, days: number) {
   return date.getTime() >= cutoff;
 }
 
-export function DealerDashboard({ dealerName, deals, unreadMessageCount, onFilterDeals, onOpenDeal, onNewRequest, onFindShop, onPriceGuide, onOpenChat }: {
+export function DealerDashboard({ dealerName, deals, unreadMessageCount, onFilterDeals, onNewRequest, onFindShop, onPriceGuide, onOpenChat }: {
   dealerName: string;
   unreadMessageCount: number;
-  deals: Transaction[]; onFilterDeals: (filter: TransactionStage | "전체") => void; onOpenDeal: (id: string) => void;
+  deals: Transaction[]; onFilterDeals: (filter: TransactionStage | "전체") => void;
   onNewRequest: () => void; onFindShop: () => void; onPriceGuide: () => void; onOpenChat: () => void;
 }) {
   const waitingCount = deals.filter((deal) => deal.status.stage === "견적").length;
   const cards = [
-    { label: "오늘 입고 예정", description: "오늘 확인할 입고 일정", value: deals.filter((deal) => isToday(deal.schedule.confirmedInboundAt ?? deal.schedule.requestedInboundAt)).length, filter: "시공예약" as const, icon: CalendarClock, tone: "blue" },
+    { label: "오늘 입고 예정", description: "오늘 확인할 입고 일정", value: deals.filter((deal) => deal.status.stage === "시공예약" && isToday(deal.schedule.confirmedInboundAt ?? deal.schedule.requestedInboundAt)).length, filter: "시공예약" as const, icon: CalendarClock, tone: "blue" },
     { label: "확인 대기 거래", description: "확인이 필요한 요청", value: waitingCount, filter: "견적" as const, icon: Clock3, tone: "orange" },
     { label: "진행 중 거래", description: "현재 작업 중인 차량", value: deals.filter((deal) => ["시공예약", "입고"].includes(deal.status.stage)).length, filter: "전체" as const, icon: Wrench, tone: "violet" },
     { label: "최근 완료 거래", description: "최근 30일 내 완료된 거래", value: deals.filter((deal) => deal.status.stage === "작업완료" && isWithinLastDays(deal.schedule.completedAt ?? deal.status.updatedAt, 30)).length, filter: "작업완료" as const, icon: CheckCircle2, tone: "green" },

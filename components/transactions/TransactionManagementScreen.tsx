@@ -8,12 +8,14 @@ import { canTransitionStage, nextForwardStage, stageOrder, STAGE_ACTION_LABEL } 
 const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`;
 const scheduleDate = (value?: string) => value ? new Date(value).toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric", weekday: "short" }) : "미정";
 
-export function TransactionManagementScreen({ role, transactions, selectedId, onSelect, onUnhide, onFinalPriceChange, onStageChange, onPaymentChange, onNewRequest, onOpenMessages }: {
+export function TransactionManagementScreen({ role, transactions, selectedId, initialStageFilter, onSelect, onHide, onUnhide, onFinalPriceChange, onStageChange, onPaymentChange, onNewRequest, onOpenMessages }: {
   role: "dealer" | "shop";
   userId: string;
   transactions: Transaction[];
   rooms: ChatRoom[];
   selectedId: string;
+  /** One-shot initial filter (e.g. a Dashboard quick-action for "확인 대기 거래") — only read on mount, not kept in sync afterwards. */
+  initialStageFilter?: TransactionStage | "전체" | "진행중";
   useRemoteAttachments: boolean;
   onSelect: (id: string) => void;
   onSend: (transaction: Transaction, message: TransactionChatMessage) => Promise<void>;
@@ -29,7 +31,7 @@ export function TransactionManagementScreen({ role, transactions, selectedId, on
 }) {
   const [tab, setTab] = useState<"거래내역" | "결제 및 정산">("거래내역");
   const [query, setQuery] = useState("");
-  const [stageFilter, setStageFilter] = useState<TransactionStage | "전체" | "진행중">("전체");
+  const [stageFilter, setStageFilter] = useState<TransactionStage | "전체" | "진행중">(initialStageFilter ?? "전체");
   const [showHidden, setShowHidden] = useState(false);
   const [stagePending, setStagePending] = useState(false);
   const [finalPriceDraft, setFinalPriceDraft] = useState("");
@@ -60,6 +62,11 @@ export function TransactionManagementScreen({ role, transactions, selectedId, on
     onFinalPriceChange(selected, value);
     setFinalPriceDraft("");
   };
+  const hideSelected = () => {
+    if (!selected) return;
+    const warning = selected.status.stage !== "작업완료" && role === "shop" ? "진행 중인 거래입니다. 그래도 숨기시겠습니까?\n" : "";
+    if (confirm(`${warning}이 거래방은 목록에서 숨겨집니다. 거래 기록은 카마스터에 보관됩니다.`)) onHide(selected.id, role);
+  };
 
   return <section className="transaction-management-screen">
     <div className="page-title transaction-page-title"><div><p className="eyebrow">TRANSACTION WORKSPACE</p><h1>{role === "dealer" ? "거래 관리" : "시공 거래 관리"}</h1><p className="page-subtitle">거래 상태, 일정과 다음 업무를 거래별로 관리합니다.</p></div>{role === "dealer" && <button className="primary" onClick={onNewRequest}>+ 새 시공 요청</button>}</div>
@@ -75,7 +82,7 @@ export function TransactionManagementScreen({ role, transactions, selectedId, on
             <dl className="transaction-core-info"><div><dt>시공 품목</dt><dd>{selected.service.workDescription}</dd></div><div><dt>다음 일정</dt><dd>{scheduleDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt)}</dd></div><div><dt>확정 금액</dt><dd>{won(selected.pricing.finalPrice)}</dd></div><div><dt>결제 상태</dt><dd>{selected.pricing.paymentStatus}</dd></div></dl>
             {role === "shop" && !["작업완료", "취소"].includes(selected.status.stage) && <div className="transaction-price-editor"><span>최종 시공금액 입력</span><div><input value={finalPriceDraft} onChange={(event) => setFinalPriceDraft(event.target.value)} placeholder="예: 450000" inputMode="numeric" /><button className="secondary" onClick={saveFinalPrice} disabled={!finalPriceDraft}>저장</button></div></div>}
             {role === "dealer" && selected.pricing.finalPrice != null && selected.pricing.paymentStatus === "미결제" && <div className="transaction-price-editor"><span>시공점이 확정한 금액이에요</span><button className="primary" onClick={() => onPaymentChange(selected, "결제대기")}>금액 확인</button></div>}
-            <footer><button className="secondary" onClick={() => onOpenMessages(selected.id)}><MessageCircle size={17} /> 메시지 열기</button>{(role === "dealer" ? selected.visibility.hiddenByDealer : selected.visibility.hiddenByInstaller) && <button className="secondary" onClick={() => onUnhide(selected.id, role)}>숨김 해제</button>}{canAdvance && <button className="primary" onClick={() => void advance()} disabled={stagePending}>{stagePending ? "처리 중…" : STAGE_ACTION_LABEL[nextStage!] } <ArrowRight size={17} /></button>}</footer>
+            <footer><button className="secondary" onClick={() => onOpenMessages(selected.id)}><MessageCircle size={17} /> 메시지 열기</button>{(role === "dealer" ? selected.visibility.hiddenByDealer : selected.visibility.hiddenByInstaller) ? <button className="secondary" onClick={() => onUnhide(selected.id, role)}>숨김 해제</button> : <button className="secondary" onClick={hideSelected}>거래 숨기기</button>}{canAdvance && <button className="primary" onClick={() => void advance()} disabled={stagePending}>{stagePending ? "처리 중…" : STAGE_ACTION_LABEL[nextStage!] } <ArrowRight size={17} /></button>}</footer>
           </article>}
         </div>}
   </section>;
