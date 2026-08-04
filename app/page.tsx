@@ -6,6 +6,9 @@ import { AdminOverview } from "../components/admin/AdminOverview";
 import { AccountStatusScreen } from "../components/auth/AccountStatusScreen";
 import { LoginScreen } from "../components/auth/LoginScreen";
 import { SignUpScreen } from "../components/auth/SignUpScreen";
+import { ForgotPasswordScreen } from "../components/auth/ForgotPasswordScreen";
+import { UpdatePasswordScreen } from "../components/auth/UpdatePasswordScreen";
+import { AdminAccountScreen } from "../components/admin/AdminAccountScreen";
 import { DealerDashboard } from "../components/dealer/DealerDashboard";
 import { InstallerDirectoryScreen } from "../components/dealer/InstallerDirectoryScreen";
 import { PriceGuideScreen } from "../components/dealer/PriceGuideScreen";
@@ -67,6 +70,8 @@ function pathForScreen(screen: Screen, role: Role) {
   if (screen === "landing") return "/";
   if (screen === "login") return "/login";
   if (screen === "signup") return "/signup";
+  if (screen === "forgotPassword") return "/forgot-password";
+  if (screen === "updatePassword") return "/update-password";
   if (screen === "accountStatus") return "/account-status";
   if (role === "shop") return "/shop";
   if (role === "admin") return "/admin";
@@ -205,6 +210,18 @@ export default function Home() {
     setCurrentUser(null);
     goToScreen("login");
   }, [goToScreen]);
+
+  const requestPasswordReset = useCallback((email: string) => authProvider.requestPasswordReset(email), []);
+  const exchangeRecoveryCode = useCallback((code: string) => authProvider.exchangeRecoveryCode(code), []);
+  // Recovery sessions are single-purpose: sign out right after the new
+  // password is set so the user proves they know it by logging in fresh,
+  // rather than silently landing in their dashboard on a session that
+  // originated from an email link.
+  const updatePasswordFromRecovery = useCallback(async (newPassword: string) => {
+    await authProvider.updatePassword(newPassword);
+    await authProvider.logout().catch(() => {});
+  }, []);
+  const changePassword = useCallback((currentPassword: string, newPassword: string) => authProvider.updatePassword(newPassword, currentPassword), []);
 
   useEffect(() => {
     let active = true;
@@ -449,8 +466,10 @@ export default function Home() {
 
   if (isProtectedPath(pathname) && !authReady) return <main className="system-state-page" aria-busy="true"><section><div className="system-state-logo">CM</div><div className="loading-line wide" /><p>회원 세션을 확인하고 있습니다.</p></section></main>;
   if (screen === "landing") return <LandingPage onStart={() => goToScreen("login")} onPriceGuide={() => goToScreen("login")} />;
-  if (screen === "login") return <LoginScreen onLogin={authenticate} onExplore={() => goToScreen("landing")} onSignUp={() => goToScreen("signup")} />;
+  if (screen === "login") return <LoginScreen onLogin={authenticate} onExplore={() => goToScreen("landing")} onSignUp={() => goToScreen("signup")} onForgotPassword={() => goToScreen("forgotPassword")} />;
   if (screen === "signup") return <SignUpScreen onBack={() => goToScreen("login")} onSignUp={signUp} />;
+  if (screen === "forgotPassword") return <ForgotPasswordScreen onRequestReset={requestPasswordReset} onBack={() => goToScreen("login")} />;
+  if (screen === "updatePassword") return <UpdatePasswordScreen onExchangeCode={exchangeRecoveryCode} onUpdatePassword={updatePasswordFromRecovery} onGoToLogin={() => goToScreen("login")} onGoToForgotPassword={() => goToScreen("forgotPassword")} />;
   if (screen === "accountStatus" && currentUser) return <AccountStatusScreen user={currentUser} onLogout={() => void logout()} />;
 
   const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;
@@ -467,7 +486,8 @@ export default function Home() {
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} rooms={rooms} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} onOpenMessage={(id) => { setSelectedTransactionId(id); goToScreen("messages"); }} onStageChange={changeStage} />}
     {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} initialStageFilter={role === "dealer" ? dealFilter : undefined} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUnhide={unhideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} onMarkRead={markRoomRead} onLoadContact={loadContact} onOpenMessages={(id) => { setSelectedTransactionId(id); goToScreen("messages"); }} />}
     {screen === "messages" && <MessengerScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={!useSupabaseData && demoAttachmentsReady ? demoAttachmentProvider : undefined} isLoading={isTransactionLoading} loadError={transactionLoadError} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} onMobileChatOpenChange={setMobileChatOpen} />}
-    {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} userId={account.id} activity={profileActivity} />}
+    {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} userId={account.id} activity={profileActivity} onChangePassword={changePassword} />}
     {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} demoSession={demoAccounts.some((item) => item.id === account.id)} />}
+    {screen === "adminAccount" && <AdminAccountScreen demoSession={demoAccounts.some((item) => item.id === account.id)} onChangePassword={changePassword} />}
   </AppShell>;
 }

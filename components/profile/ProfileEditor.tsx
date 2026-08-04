@@ -7,6 +7,7 @@ import { supabaseProfileRepository } from "../../repositories/supabase-profile-r
 import { isSupabaseConfigured } from "../../lib/supabase/config";
 import { isDemoAccountId } from "../../data/demo-accounts";
 import type { UserProfile } from "../../types/transactions";
+import { PasswordChangeForm } from "../auth/PasswordChangeForm";
 
 export const defaultDealerCompanyName = "카마스터";
 
@@ -30,7 +31,7 @@ function formatPhone(value: string) {
   return `${digits.slice(0, 3)}-${digits.slice(3, digits.length === 10 ? 6 : 7)}-${digits.slice(digits.length === 10 ? 6 : 7)}`;
 }
 
-export function ProfileEditor({ role, userId, activity }: { role: "dealer" | "shop"; userId?: string; activity: { total: number; monthly: number; completed: number; favorites: number } }) {
+export function ProfileEditor({ role, userId, activity, onChangePassword }: { role: "dealer" | "shop"; userId?: string; activity: { total: number; monthly: number; completed: number; favorites: number }; onChangePassword: (currentPassword: string, newPassword: string) => Promise<void> }) {
   const profileId = userId ?? defaults[role].id;
   const useMemberDatabase = isSupabaseConfigured && !isDemoAccountId(profileId);
   const [profile, setProfile] = useState(() => profileRepository.getById(profileId) ?? { ...defaults[role], id: profileId });
@@ -61,5 +62,6 @@ export function ProfileEditor({ role, userId, activity }: { role: "dealer" | "sh
       <section className="shop-management-card management-placeholder"><header><ImageIcon size={19} /><div><h2>포트폴리오</h2><small>시공 사례 관리</small></div></header><p>거래방에 등록한 작업 사진을 기반으로 제공할 예정입니다.</p></section>
     </div>}
     {notifications}<div className="profile-editor-actions"><button className="primary" onClick={() => void save()} disabled={saving}>{saving ? "저장 중…" : "변경사항 저장"}</button></div><p>{useMemberDatabase ? "회원 정보는 안전한 회원 DB에 저장됩니다. 이메일 변경 시 새 주소로 전송된 인증이 필요할 수 있습니다." : "시험 계정의 설정은 현재 브라우저에 저장됩니다."}</p>
+    {useMemberDatabase ? <PasswordChangeForm onChangePassword={onChangePassword} /> : <section className="profile-password-card shop-management-card"><header><div><h2>비밀번호 변경</h2></div></header><p className="profile-demo-password-note">Demo 계정에서는 비밀번호를 변경하지 않아요.</p></section>}
   </section>;
 }

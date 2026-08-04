@@ -10,4 +10,7 @@ export class UnconfiguredAuthProvider implements AuthProvider {
   async login(_credentials: AuthCredentials): Promise<CurrentUser> { void _credentials; throw configurationError(); }
   async signUp(_input: SignUpInput): Promise<SignUpResult> { void _input; throw configurationError(); }
   async logout() { /* no active session */ }
+  async requestPasswordReset(_email: string): Promise<void> { void _email; throw configurationError(); }
+  async exchangeRecoveryCode(_code: string): Promise<boolean> { void _code; return false; }
+  async updatePassword(_newPassword: string, _currentPassword?: string): Promise<void> { void _newPassword; void _currentPassword; throw configurationError(); }
 }
