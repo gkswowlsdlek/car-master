@@ -25,6 +25,7 @@ import { formatGuidePrice } from "../data/installation-price-guide";
 import { pricePackages, type PriceGuideFilter, type PricePackage, type VehicleClass } from "../data/pricePackages";
 import { calculateVehicleClassPrice } from "../data/vehicle-class-options";
 import { useTransactionStore } from "../hooks/use-transaction-store";
+import { demoAttachmentProvider } from "../services/attachments";
 import type { Brand } from "../lib/dealer-flow-data";
 import { chatRepository } from "../repositories/chat-repository";
 import { profileRepository } from "../repositories/profile-repository";
@@ -113,6 +114,18 @@ export default function Home() {
   const useDemoSharedBackend = !useSupabaseData && demoSchemaReady === true;
   const isSharedDemoTransaction = (transaction: Transaction) => sharedRoomIds.has(transaction.chatRoomId);
   const demoActorRole: "dealer" | "shop" | "admin" = role === "shop" ? "shop" : role === "admin" ? "admin" : "dealer";
+
+  // Demo Messenger attachment persistence (SUPABASE_SERVICE_ROLE_KEY +
+  // demo-transaction-attachments bucket). Same graceful-degrade shape as
+  // demoSchemaReady above: stays false (falling back to the session-only
+  // LocalAttachmentProvider) until the one-time server setup is confirmed.
+  const [demoAttachmentsReady, setDemoAttachmentsReady] = useState(false);
+  useEffect(() => {
+    if (useSupabaseData || !isDemoAccountId(account.id) || role === "admin") return;
+    let active = true;
+    void demoAttachmentProvider.isReady().then((ready) => { if (active) setDemoAttachmentsReady(ready); });
+    return () => { active = false; };
+  }, [useSupabaseData, account.id, role]);
 
   // Unified Installer View Model: demo fixtures always show (nationwide sample
   // network); approved Supabase installers are layered in once authenticated.
@@ -453,7 +466,7 @@ export default function Home() {
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} submitting={isCreatingTransaction} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} rooms={rooms} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} onOpenMessage={(id) => { setSelectedTransactionId(id); goToScreen("messages"); }} onStageChange={changeStage} />}
     {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} initialStageFilter={role === "dealer" ? dealFilter : undefined} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUnhide={unhideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} onMarkRead={markRoomRead} onLoadContact={loadContact} onOpenMessages={(id) => { setSelectedTransactionId(id); goToScreen("messages"); }} />}
-    {screen === "messages" && <MessengerScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} isLoading={isTransactionLoading} loadError={transactionLoadError} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} onMobileChatOpenChange={setMobileChatOpen} />}
+    {screen === "messages" && <MessengerScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={!useSupabaseData && demoAttachmentsReady ? demoAttachmentProvider : undefined} isLoading={isTransactionLoading} loadError={transactionLoadError} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} onMobileChatOpenChange={setMobileChatOpen} />}
     {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} userId={account.id} activity={profileActivity} />}
     {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} demoSession={demoAccounts.some((item) => item.id === account.id)} />}
   </AppShell>;

@@ -4,6 +4,7 @@ import { MessageCircle, Search, X } from "lucide-react";
 import type { ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
 import type { InstallerListing } from "../../types/installer";
 import { TransactionChatWorkspace } from "../transactions/TransactionChatWorkspace";
+import type { AttachmentProvider } from "../../services/attachments";
 
 const INBOX_OPEN_STORAGE_KEY = "car-master-messenger-inbox-open";
 
@@ -30,9 +31,9 @@ function relativeRoomTime(room?: ChatRoom) {
   return new Date(at).toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
 }
 
-export function MessengerScreen({ role, userId, transactions, rooms, installers, selectedId, useRemoteAttachments, isLoading, loadError, onSelect, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onMobileChatOpenChange }: {
+export function MessengerScreen({ role, userId, transactions, rooms, installers, selectedId, useRemoteAttachments, demoAttachmentProvider, isLoading, loadError, onSelect, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onMobileChatOpenChange }: {
   role: "dealer" | "shop"; userId: string; transactions: Transaction[]; rooms: ChatRoom[]; installers?: InstallerListing[]; selectedId: string;
-  useRemoteAttachments: boolean; isLoading: boolean; loadError: string;
+  useRemoteAttachments: boolean; demoAttachmentProvider?: AttachmentProvider; isLoading: boolean; loadError: string;
   onSelect: (id: string) => void; onSend: (transaction: Transaction, message: TransactionChatMessage) => Promise<void>;
   onHide: (id: string, role: "dealer" | "shop") => void; onFinalPriceChange: (transaction: Transaction, finalPrice: number) => void;
   onStageChange: (transaction: Transaction, stage: TransactionStage) => Promise<void>; onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
@@ -119,7 +120,7 @@ export function MessengerScreen({ role, userId, transactions, rooms, installers,
           </ul>}
       </aside>
       <div className={`messenger-chat-pane${mobileView === "list" ? " mobile-hidden" : ""}`}>
-        {selected ? <TransactionChatWorkspace role={role} userId={userId} transaction={selected.transaction} room={selectedRoom} installer={selectedInstaller} useRemoteAttachments={useRemoteAttachments} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onBack={backToList} />
+        {selected ? <TransactionChatWorkspace role={role} userId={userId} transaction={selected.transaction} room={selectedRoom} installer={selectedInstaller} useRemoteAttachments={useRemoteAttachments} demoAttachmentProvider={demoAttachmentProvider} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onBack={backToList} />
           : <div className="messenger-no-selection"><b>대화를 선택하세요.</b><span>왼쪽 목록에서 거래방을 선택하면 대화가 여기에 표시됩니다.</span></div>}
       </div>
     </div>
