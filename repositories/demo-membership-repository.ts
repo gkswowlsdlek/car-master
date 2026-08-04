@@ -1,7 +1,9 @@
 import { createSupabaseBrowserClient } from "../lib/supabase/client";
 import { isSupabaseConfigured } from "../lib/supabase/config";
+import { demoAccounts } from "../data/demo-accounts";
+import { defaultDealerCompanyName } from "../components/profile/ProfileEditor";
 import type { InstallerApprovalStatus } from "../types/auth";
-import type { InstallerApplication } from "./membership-repository";
+import type { AdminMember, InstallerApplication } from "./membership-repository";
 
 // Demo-mode installer-membership backend — gives Demo Admin 3/3 an actual
 // 시공점 가입 승인 workflow to exercise instead of a static placeholder.
@@ -65,6 +67,29 @@ export class DemoMembershipRepository {
       p_application_id: applicationId, p_status: status, p_review_note: reviewNote, p_actor_role: "admin",
     });
     if (error) throw error;
+  }
+
+  /**
+   * Demo Admin 3/3의 회원 목록은 demo_installer_applications(연습용 승인
+   * 대기열 fixture 3건)이 아니라 demoAccounts의 고정 roster(Demo Dealer 1/1,
+   * Demo Installer 2/2)에서 나온다 — 이미 정상 동작 중인 데모 시공점 계정의
+   * 상태를 연습용 큐 데이터와 섞으면 둘의 의미가 달라 혼란만 커진다. 그래서
+   * 이 메서드는 스키마 준비 여부와 무관하게 항상 즉시 반환된다 (Real 회원을
+   * 절대 포함하지 않음 — Demo/Real isolation 유지).
+   */
+  async getAllMembers(): Promise<AdminMember[]> {
+    return demoAccounts
+      .filter((account): account is typeof account & { role: "dealer" | "shop" } => account.role === "dealer" || account.role === "shop")
+      .map((account) => ({
+        userId: account.id,
+        email: account.email || "-",
+        role: account.role === "shop" ? "installer" : "dealer",
+        name: account.name,
+        companyName: account.role === "shop" ? account.name : defaultDealerCompanyName,
+        phone: account.phone ?? "-",
+        createdAt: null,
+        approvalStatus: account.role === "shop" ? "approved" : null,
+      }));
   }
 
   subscribe(listener: () => void) {
