@@ -30,14 +30,15 @@ test("Real SupabaseAttachmentProvider is unchanged — still browser-direct, sti
   assert.doesNotMatch(source, /service-role|SERVICE_ROLE|demo-transaction-attachments/i);
 });
 
-test("Server-only Supabase service client reads SUPABASE_SERVICE_ROLE_KEY (never NEXT_PUBLIC_) and is never used by a browser attachment provider", async () => {
+test("Server-only Supabase service client prefers SUPABASE_SECRET_KEY, falls back to legacy SUPABASE_SERVICE_ROLE_KEY, never NEXT_PUBLIC_, and is never used by a browser attachment provider", async () => {
   const source = await read("lib/supabase/service.ts");
-  assert.match(source, /process\.env\.SUPABASE_SERVICE_ROLE_KEY/);
+  assert.match(source, /process\.env\.SUPABASE_SECRET_KEY\?\.trim\(\) \|\| process\.env\.SUPABASE_SERVICE_ROLE_KEY\?\.trim\(\)/);
+  assert.doesNotMatch(source, /NEXT_PUBLIC_SUPABASE_SECRET/);
   assert.doesNotMatch(source, /NEXT_PUBLIC_SUPABASE_SERVICE/);
   const localProvider = await read("services/attachments/attachment-provider.ts");
   const realProvider = await read("services/attachments/supabase-attachment-provider.ts");
-  assert.doesNotMatch(localProvider, /service\.ts|SERVICE_ROLE/);
-  assert.doesNotMatch(realProvider, /service\.ts|SERVICE_ROLE/);
+  assert.doesNotMatch(localProvider, /service\.ts|SECRET_KEY|SERVICE_ROLE/);
+  assert.doesNotMatch(realProvider, /service\.ts|SECRET_KEY|SERVICE_ROLE/);
 });
 
 test("Demo attachment upload route rejects requests without a valid Demo session, and excludes the admin role", async () => {
