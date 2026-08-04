@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowLeft, Bell, BellOff, Copy, FileText, ImagePlus, Info, MoreHorizontal, Paperclip, Phone, Send, X } from "lucide-react";
-import { attachmentProvider, supabaseAttachmentProvider } from "../../services/attachments";
+import { attachmentProvider, supabaseAttachmentProvider, type AttachmentProvider } from "../../services/attachments";
 import { canTransitionStage, nextForwardStage, revertStage, stageLogLabel, stageOrder, STAGE_ACTION_LABEL, STAGE_REVERT_LABEL } from "../../services/transaction-state-service";
 import type { ChatAttachment, ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
 import type { InstallerListing } from "../../types/installer";
@@ -36,7 +36,7 @@ function scheduleLabel(value?: string) {
   return date.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
 }
 
-export function TransactionChatWorkspace({ role, userId, transaction, room, installer, useRemoteAttachments, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onBack }: {
+export function TransactionChatWorkspace({ role, userId, transaction, room, installer, useRemoteAttachments, demoAttachmentProvider, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onBack }: {
   role: "dealer" | "shop";
   userId: string;
   transaction: Transaction;
@@ -44,6 +44,8 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
   /** Only meaningful for role === "dealer" — the installer's own directory listing, used by "시공점 정보 보기". */
   installer?: InstallerListing;
   useRemoteAttachments: boolean;
+  /** Set only when the Demo attachment backend (SUPABASE_SERVICE_ROLE_KEY + demo-transaction-attachments bucket) is confirmed ready; otherwise falls back to attachmentProvider (session-only), unchanged from before this existed. */
+  demoAttachmentProvider?: AttachmentProvider;
   onSend: (transaction: Transaction, message: TransactionChatMessage) => Promise<void>;
   onHide: (id: string, role: "dealer" | "shop") => void;
   onFinalPriceChange: (transaction: Transaction, finalPrice: number) => void;
@@ -176,9 +178,9 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
 
   useEffect(() => { pendingRef.current = pending; }, [pending]);
   useEffect(() => () => {
-    const provider = useRemoteAttachments ? supabaseAttachmentProvider : attachmentProvider;
+    const provider = useRemoteAttachments ? supabaseAttachmentProvider : (demoAttachmentProvider ?? attachmentProvider);
     pendingRef.current.forEach((item) => { if (provider.discard) void provider.discard(item); else provider.release(item); });
-  }, [useRemoteAttachments]);
+  }, [useRemoteAttachments, demoAttachmentProvider]);
 
   const selectFiles = async (files: FileList | null) => {
     const list = files ? Array.from(files) : [];
@@ -187,7 +189,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
     const room_ = pendingRef.current.length;
     const capped = list.slice(0, Math.max(0, MAX_ATTACHMENTS - room_));
     if (list.length > capped.length) setAttachmentError(`한 번에 최대 ${MAX_ATTACHMENTS}장까지 첨부할 수 있어요.`);
-    const provider = useRemoteAttachments ? supabaseAttachmentProvider : attachmentProvider;
+    const provider = useRemoteAttachments ? supabaseAttachmentProvider : (demoAttachmentProvider ?? attachmentProvider);
     for (const file of capped) {
       try {
         const prepared = await provider.prepare(file, room?.id);
@@ -201,7 +203,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
   const removePending = (id: string) => setPending((current) => {
     const next = current.filter((item) => {
     if (item.id === id) {
-      const provider = useRemoteAttachments ? supabaseAttachmentProvider : attachmentProvider;
+      const provider = useRemoteAttachments ? supabaseAttachmentProvider : (demoAttachmentProvider ?? attachmentProvider);
       if (provider.discard) void provider.discard(item); else provider.release(item);
     }
       return item.id !== id;
@@ -222,7 +224,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
       const key = draftKey(room.id);
       if (key) sessionStorage.removeItem(key);
     } catch (error) {
-      const provider = useRemoteAttachments ? supabaseAttachmentProvider : attachmentProvider;
+      const provider = useRemoteAttachments ? supabaseAttachmentProvider : (demoAttachmentProvider ?? attachmentProvider);
       await Promise.allSettled(pending.map((item) => provider.discard?.(item)));
       pendingRef.current = [];
       setPending([]);

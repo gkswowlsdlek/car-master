@@ -24,6 +24,39 @@ type MessageRow = StoredChatMessage;
 type ReadRow = { reader_id: string; last_read_at: string };
 type RoomRow = { id: string; transaction_id: string; created_at: string; updated_at: string; demo_chat_messages: MessageRow[]; demo_chat_reads: ReadRow[] };
 
+/**
+ * Re-signs any attachment that carries a storagePath (uploaded through
+ * DemoAttachmentProvider / app/api/demo-attachments) so the signed URL is
+ * fresh on every load instead of a stale one going 403 after ~1h — same
+ * reason supabase-chat-repository.ts re-signs Real attachments on every
+ * room load, just routed through the server since Demo has no authenticated
+ * session to call storage.createSignedUrl() from the browser. A no-op
+ * (zero network calls) when no message carries a storagePath, which is the
+ * common text-only case.
+ */
+async function resignAttachmentUrls(rooms: ChatRoom[]): Promise<ChatRoom[]> {
+  const paths = Array.from(new Set(
+    rooms.flatMap((room) => room.messages.flatMap((message) => (message.attachments ?? [])
+      .map((item) => item.storagePath)
+      .filter((path): path is string => Boolean(path)))),
+  ));
+  if (paths.length === 0) return rooms;
+  try {
+    const response = await fetch("/api/demo-attachments/sign", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paths }) });
+    if (!response.ok) return rooms;
+    const { urls } = await response.json() as { urls: Record<string, string> };
+    return rooms.map((room) => ({
+      ...room,
+      messages: room.messages.map((message) => ({
+        ...message,
+        attachments: message.attachments?.map((item) => (item.storagePath && urls[item.storagePath] ? { ...item, url: urls[item.storagePath] } : item)),
+      })),
+    }));
+  } catch {
+    return rooms;
+  }
+}
+
 export class DemoChatRepository {
   async getAll(myId: string): Promise<ChatRoom[]> {
     if (!isSupabaseConfigured) return [];
@@ -32,13 +65,14 @@ export class DemoChatRepository {
       .select("id,transaction_id,created_at,updated_at,demo_chat_messages(id,room_id,sender_id,sender_role,text,attachments,created_at),demo_chat_reads(reader_id,last_read_at)")
       .order("created_at", { referencedTable: "demo_chat_messages", ascending: true });
     if (error) throw error;
-    return ((data ?? []) as unknown as RoomRow[]).map((room) => {
+    const rooms = ((data ?? []) as unknown as RoomRow[]).map((room) => {
       const reads: ReadCursor[] = room.demo_chat_reads ?? [];
       const messages = normalizeChatMessages(room.demo_chat_messages ?? [], reads);
       const myCursor = reads.find((read) => read.reader_id === myId)?.last_read_at ?? "";
       const unreadCount = messages.filter((message) => message.senderId !== myId && message.createdAt > myCursor).length;
       return { id: room.id, transactionId: room.transaction_id, createdAt: room.created_at, updatedAt: room.updated_at, messages, unreadCount };
     });
+    return resignAttachmentUrls(rooms);
   }
 
   /** Idempotent — upserts so re-creating an already-seeded demo room (e.g. on a fresh browser) never throws. */

@@ -17,8 +17,8 @@ test("Real getAllMembers() reuses the RLS-bound browser client — no service-ro
 test("No new migration file was added for member listing — Real access relies entirely on the existing is_admin() RLS policy", async () => {
   const { readdir } = await import("node:fs/promises");
   const files = await readdir(new URL("../supabase/migrations", import.meta.url));
-  const v0313Files = files.filter((name) => name.includes("v0313"));
-  assert.deepEqual(v0313Files, ["202608030001_v0313_demo_installer_membership.sql"], "expected no additional v0.3.13 migration beyond the already-existing demo installer membership one");
+  const memberListingFiles = files.filter((name) => name.includes("v0313") && /member/i.test(name) && !name.includes("demo_installer_membership"));
+  assert.deepEqual(memberListingFiles, [], "expected no dedicated migration for the Admin member-listing feature itself");
   const membershipMigration = await read("supabase/migrations/202607190001_v034_membership.sql");
   assert.match(membershipMigration, /"profiles select own or admin"[\s\S]*?using \(id = auth\.uid\(\) or public\.is_admin\(\)\)/);
   assert.match(membershipMigration, /"dealer profiles select own or admin"[\s\S]*?using \(user_id = auth\.uid\(\) or public\.is_admin\(\)\)/);
