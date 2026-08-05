@@ -9,6 +9,30 @@ import { CURRENT_PRIVACY_VERSION } from "../../data/legal-versions";
 // it never claims a DPA is in place. Before opening v0.5 up as an external
 // B2B Beta, upgrade to Pro and re-review whether Vercel's DPA needs to be
 // executed.
+//
+// Supabase note (internal, not user-facing — findings from Supabase's own
+// official pages, checked 2026-08): Car-Master's Supabase project Primary
+// Region is Seoul (ap-northeast-2), an AWS-backed region per
+// supabase.com/docs/guides/platform/regions ("Supabase will deploy your
+// project to an available AWS region... The region you choose also
+// determines where your primary project data is stored"). Supabase's DPA
+// (supabase.com/legal/dpa) commits that Covered Data directed to a
+// specific region is "stored and primarily Processed in that region unless
+// otherwise required" — but also states Supabase "may Process Covered Data
+// anywhere that Supabase or its Sub-processors maintain facilities", so
+// "Seoul region = no data ever leaves Korea" would be an overclaim; the
+// copy below reflects that nuance instead of asserting it. Unlike Vercel,
+// no Free-plan restriction on DPA access or commercial/production use was
+// found on Supabase's official Terms of Service or DPA pages — the DPA's
+// own text ties into "acceptance of the Agreement", not a paid tier gate.
+// (HIPAA BAAs specifically ARE Enterprise-only per supabase.com/docs/
+// guides/security/hipaa-compliance, but that's a separate instrument
+// Car-Master doesn't need — no health data.) No official basis was found
+// to recommend a Supabase plan upgrade for privacy/legal reasons.
+// Supabase's legal entity is "Supabase, Inc." (supabase.com/privacy, and
+// listed as its own first entry in Supabase's official Subprocessor List
+// dated June 1, 2026, which also names Amazon Web Services, Inc as the
+// hosting sub-processor — consistent with the AWS-region regions doc).
 export function PrivacyScreen() {
   return (
     <main className="legal-page">
@@ -149,16 +173,22 @@ export function PrivacyScreen() {
             <table className="legal-table">
               <thead><tr><th>구분</th><th>업체</th><th>처리 내용</th></tr></thead>
               <tbody>
-                <tr><td>데이터베이스·인증·저장소</td><td>Supabase</td><td>회원 정보, 거래·메시지 데이터, 첨부파일 저장 및 로그인 인증 처리</td></tr>
+                <tr><td>데이터베이스·인증·저장소</td><td>Supabase (Supabase, Inc.)</td><td>회원 정보, 거래·메시지 데이터, 첨부파일 저장 및 로그인 인증 처리. Car-Master 프로젝트의 기본 리전은 대한민국 서울(AWS ap-northeast-2)로 설정되어 있음</td></tr>
                 <tr><td>애플리케이션 호스팅</td><td>Vercel</td><td>웹 서비스 배포 및 접속 처리</td></tr>
                 <tr><td>지도 표시</td><td>NAVER Cloud Platform (NAVER Maps)</td><td>시공점 위치 지도 표시. 지도 표시 과정에서 이용자의 브라우저가 네이버 서버에 직접 접속하며 IP 주소가 전달될 수 있음</td></tr>
               </tbody>
             </table>
           </div>
+          <p>
+            Supabase는 이용자가 프로젝트 생성 시 지정한 리전에 기본 데이터를 저장·처리한다는 점을 공식
+            정책으로 밝히고 있으며, Car-Master는 이 리전을 대한민국 서울로 지정해 운영하고 있습니다.
+            다만 Supabase는 고객지원, 보안, 장애 대응 등 서비스 운영 과정에서 별도의 하위처리자를
+            이용하며, 그중 일부는 국외(주로 미국)에 소재합니다 — 자세한 내용은 7번 항목을 참고해 주세요.
+          </p>
           <p className="legal-todo">
-            <b>확인 예정</b> — 위 업체들의 정확한 법인명, 서버 소재 국가, 국외이전 해당 여부, 개인정보
-            보유기간 및 Car-Master가 각 업체와 실제로 체결한 이용 조건은 각 업체의 최신 공식 정책을
-            확인하여 정확히 기재하겠습니다. 확인되지 않은 내용을 추정하여 기재하지 않았습니다.
+            <b>확인 예정</b> — Vercel, NAVER Cloud Platform의 정확한 법인명과 서버 소재 국가, 그리고 위 세
+            업체 모두와 Car-Master가 실제로 체결한 이용 조건(보유기간, 계약 조항 등)은 각 업체의 최신 공식
+            정책을 확인하여 정확히 기재하겠습니다. 확인되지 않은 내용을 추정하여 기재하지 않았습니다.
           </p>
           <p>
             Resend, 별도 SMS 발송 서비스 등은 현재 운영하고 있지 않으며, 실제로 도입되는 시점에 본 방침에
@@ -168,10 +198,21 @@ export function PrivacyScreen() {
 
         <article>
           <h2>7. 개인정보의 국외 이전</h2>
+          <p>
+            Car-Master의 Supabase 프로젝트는 대한민국 서울 리전(AWS ap-northeast-2)에 구성되어 있으며,
+            Supabase는 이용자가 지정한 리전에 기본 데이터(회원 정보, 거래·메시지 데이터, 첨부파일 등)를
+            우선적으로 저장·처리한다고 공식 정책(Data Processing Addendum)에서 명시하고 있습니다. 다만
+            Supabase는 지원, 보안 관리, 장애 대응 등 서비스 운영을 위해 자체 하위처리자(subprocessor)를
+            이용하며, Supabase가 공개한 하위처리자 목록에는 호스팅·모니터링·고객지원 관련 다수의 업체가
+            포함되어 있고 이 중 상당수는 미국에 소재한 것으로 파악됩니다. 따라서 &ldquo;서울 리전을
+            사용하므로 개인정보가 대한민국 밖으로 전혀 나가지 않는다&rdquo;고 단정할 수 없으며, 서비스
+            운영에 수반되는 범위 내에서 국외 처리가 발생할 가능성이 있습니다.
+          </p>
           <p className="legal-todo">
-            <b>확인 예정</b> — 위 처리위탁 업체의 서버 소재지 확인이 끝나는 대로 국외 이전 해당 여부와 이전
-            국가, 이전 일시·방법, 이전받는 자의 정보를 관계 법령이 정한 방식으로 이 조항에 명시하겠습니다.
-            확인 전까지는 국외 이전 여부를 단정하지 않습니다.
+            <b>확인 예정</b> — Supabase의 하위처리자 중 정확히 어떤 업체가 Car-Master 이용자의 개인정보에
+            접근할 수 있는지, 그 처리가 구체적으로 어느 국가에서 이루어지는지는 Supabase의 공식 자료에
+            국가별 상세 정보가 명시되어 있지 않아 이 시점에서 항목별로 특정하기 어렵습니다. Vercel, NAVER
+            Cloud Platform에 대한 국외이전 해당 여부도 함께 확인 후 이 조항에 반영하겠습니다.
           </p>
         </article>
 

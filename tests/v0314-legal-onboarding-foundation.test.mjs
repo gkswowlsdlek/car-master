@@ -293,6 +293,21 @@ test("PrivacyScreen articles are sequentially renumbered 1-12 after inserting th
   assert.deepEqual(numbers, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
 });
 
+test("PrivacyScreen states the sourced Supabase facts (legal entity, Seoul/AWS region) confirmed from Supabase's own official pages — never fabricated", async () => {
+  const privacy = await read("components/legal/PrivacyScreen.tsx");
+  assert.match(privacy, /Supabase \(Supabase, Inc\.\)/);
+  assert.match(privacy, /대한민국 서울\(AWS ap-northeast-2\)로 설정되어 있음/);
+  assert.match(privacy, /Car-Master의 Supabase 프로젝트는 대한민국 서울 리전\(AWS ap-northeast-2\)에 구성되어 있으며/);
+});
+
+test("PrivacyScreen's international-transfer section does not oversimplify 'Seoul region = no data ever leaves Korea' — it explicitly acknowledges subprocessor-driven international processing while still stating the confirmed region fact", async () => {
+  const privacy = await read("components/legal/PrivacyScreen.tsx");
+  const section7 = privacy.slice(privacy.indexOf("<h2>7. 개인정보의 국외 이전"), privacy.indexOf("<h2>8. "));
+  assert.match(section7, /단정할 수 없으며/);
+  assert.match(section7, /국외 처리가 발생할 가능성이 있습니다/);
+  assert.match(section7, /하위처리자/);
+});
+
 test("PrivacyScreen does not assert that Kakao login is currently active or that Kakao data is currently received — only future intent", async () => {
   const privacy = await read("components/legal/PrivacyScreen.tsx");
   assert.match(privacy, /카카오 로그인 기능이\s*실제로 활성화되어 있지 않으며 카카오로부터 어떠한 정보도 제공받고 있지 않습니다/);
