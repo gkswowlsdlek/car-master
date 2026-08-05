@@ -6,17 +6,28 @@ import { PasswordField } from "./PasswordField";
 
 type Status = "checking" | "ready" | "invalid" | "success";
 
-// Reads `code` directly from window.location instead of next/navigation's
-// useSearchParams() — this whole app is one client-rendered root screen
-// (see app/page.tsx), and useSearchParams() would force a Suspense boundary
-// this tree doesn't otherwise need. Client-only read, matches the existing
-// window.history.pushState() convention already used throughout app/page.tsx.
-function readRecoveryCode() {
-  if (typeof window === "undefined") return null;
-  return new URLSearchParams(window.location.search).get("code");
+// Reads recovery params directly from window.location instead of
+// next/navigation's useSearchParams() — this whole app is one
+// client-rendered root screen (see app/page.tsx), and useSearchParams()
+// would force a Suspense boundary this tree doesn't otherwise need.
+//
+// Two possible entry shapes land here:
+// - `verified=1`/`verified=0` — primary path. app/auth/confirm already
+//   verified the token_hash server-side (via verifyOtp) and, on success,
+//   set the session cookie before redirecting here — we only need to
+//   confirm this browser can read that session (onCheckSession).
+// - `code=...` — legacy fallback for recovery emails already sent with the
+//   old ConfirmationURL-style template before this fix; only works if this
+//   is the same browser that requested the reset (see the exchangeRecoveryCode
+//   doc comment in auth-provider.ts).
+function readRecoveryParams() {
+  if (typeof window === "undefined") return { verified: null as string | null, code: null as string | null };
+  const params = new URLSearchParams(window.location.search);
+  return { verified: params.get("verified"), code: params.get("code") };
 }
 
-export function UpdatePasswordScreen({ onExchangeCode, onUpdatePassword, onGoToLogin, onGoToForgotPassword }: {
+export function UpdatePasswordScreen({ onCheckSession, onExchangeCode, onUpdatePassword, onGoToLogin, onGoToForgotPassword }: {
+  onCheckSession: () => Promise<boolean>;
   onExchangeCode: (code: string) => Promise<boolean>;
   onUpdatePassword: (newPassword: string) => Promise<void>;
   onGoToLogin: () => void;
@@ -30,8 +41,21 @@ export function UpdatePasswordScreen({ onExchangeCode, onUpdatePassword, onGoToL
 
   useEffect(() => {
     let active = true;
-    const code = readRecoveryCode();
-    const check = code ? onExchangeCode(code) : Promise.resolve(false);
+    const { verified, code } = readRecoveryParams();
+
+    // Strip recovery params from the URL up front — before the async check
+    // even resolves — so a page refresh or a copy-pasted URL can never
+    // replay an already-used code, and verified=0/1 never lingers in
+    // browser history.
+    if (typeof window !== "undefined" && (verified !== null || code !== null)) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+
+    let check: Promise<boolean>;
+    if (verified === "1") check = onCheckSession();
+    else if (code) check = onExchangeCode(code);
+    else check = Promise.resolve(false);
+
     void check.then((ok) => { if (active) setStatus(ok ? "ready" : "invalid"); });
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps

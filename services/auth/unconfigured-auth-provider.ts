@@ -12,5 +12,6 @@ export class UnconfiguredAuthProvider implements AuthProvider {
   async logout() { /* no active session */ }
   async requestPasswordReset(_email: string): Promise<void> { void _email; throw configurationError(); }
   async exchangeRecoveryCode(_code: string): Promise<boolean> { void _code; return false; }
+  async hasValidSession(): Promise<boolean> { return false; }
   async updatePassword(_newPassword: string, _currentPassword?: string): Promise<void> { void _newPassword; void _currentPassword; throw configurationError(); }
 }

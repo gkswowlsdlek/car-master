@@ -104,6 +104,15 @@ export class SupabaseAuthProvider implements AuthProvider {
     }
   }
 
+  async hasValidSession(): Promise<boolean> {
+    try {
+      const { data, error } = await createSupabaseBrowserClient().auth.getUser();
+      return !error && Boolean(data.user);
+    } catch {
+      return false;
+    }
+  }
+
   async updatePassword(newPassword: string, currentPassword?: string) {
     const { error } = await createSupabaseBrowserClient().auth.updateUser({
       password: newPassword,

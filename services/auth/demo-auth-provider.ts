@@ -49,6 +49,10 @@ export class DemoAuthProvider implements AuthProvider {
     return false;
   }
 
+  async hasValidSession(): Promise<boolean> {
+    return false;
+  }
+
   async updatePassword(_newPassword: string, _currentPassword?: string): Promise<void> {
     void _newPassword; void _currentPassword;
     throw new Error("개발 데모 모드에서는 비밀번호 변경을 사용할 수 없습니다. Supabase 환경변수를 설정해 주세요.");

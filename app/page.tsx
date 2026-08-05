@@ -213,6 +213,7 @@ export default function Home() {
 
   const requestPasswordReset = useCallback((email: string) => authProvider.requestPasswordReset(email), []);
   const exchangeRecoveryCode = useCallback((code: string) => authProvider.exchangeRecoveryCode(code), []);
+  const checkRecoverySession = useCallback(() => authProvider.hasValidSession(), []);
   // Recovery sessions are single-purpose: sign out right after the new
   // password is set so the user proves they know it by logging in fresh,
   // rather than silently landing in their dashboard on a session that
@@ -469,7 +470,7 @@ export default function Home() {
   if (screen === "login") return <LoginScreen onLogin={authenticate} onExplore={() => goToScreen("landing")} onSignUp={() => goToScreen("signup")} onForgotPassword={() => goToScreen("forgotPassword")} />;
   if (screen === "signup") return <SignUpScreen onBack={() => goToScreen("login")} onSignUp={signUp} />;
   if (screen === "forgotPassword") return <ForgotPasswordScreen onRequestReset={requestPasswordReset} onBack={() => goToScreen("login")} />;
-  if (screen === "updatePassword") return <UpdatePasswordScreen onExchangeCode={exchangeRecoveryCode} onUpdatePassword={updatePasswordFromRecovery} onGoToLogin={() => goToScreen("login")} onGoToForgotPassword={() => goToScreen("forgotPassword")} />;
+  if (screen === "updatePassword") return <UpdatePasswordScreen onCheckSession={checkRecoverySession} onExchangeCode={exchangeRecoveryCode} onUpdatePassword={updatePasswordFromRecovery} onGoToLogin={() => goToScreen("login")} onGoToForgotPassword={() => goToScreen("forgotPassword")} />;
   if (screen === "accountStatus" && currentUser) return <AccountStatusScreen user={currentUser} onLogout={() => void logout()} />;
 
   const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;
