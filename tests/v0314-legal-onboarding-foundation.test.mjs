@@ -191,8 +191,45 @@ test("Both onboarding RPCs use SECURITY DEFINER with search_path locked to '' �
 
 test("legal_agreements is an append-only consent history table (one row per agreement event, not overwritten columns) — RLS: select own or admin, no client insert/update/delete grant", async () => {
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
-  assert.match(migration, /create table public\.legal_agreements \(\s*id bigint generated always as identity primary key,\s*user_id uuid not null references public\.profiles\(id\) on delete cascade,\s*terms_version text not null,\s*privacy_version text not null,\s*agreed_at timestamptz not null default now\(\)\s*\);/);
+  assert.match(migration, /create table public\.legal_agreements \(\s*id bigint generated always as identity primary key,\s*user_id uuid references public\.profiles\(id\) on delete set null,\s*terms_version text not null,\s*privacy_version text not null,\s*agreed_at timestamptz not null default now\(\)\s*\);/);
   assert.match(migration, /create policy "legal agreements select own or admin" on public\.legal_agreements\s*for select to authenticated\s*using \(user_id = auth\.uid\(\) or public\.is_admin\(\)\);/);
+});
+
+test("legal_agreements.user_id is ON DELETE SET NULL (not CASCADE) and nullable — deleting a profile/auth.users row anonymizes the consent record instead of erasing it, so the append-only audit trail actually survives account deletion", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  assert.match(migration, /user_id uuid references public\.profiles\(id\) on delete set null,/);
+  // Must NOT be `not null` (SET NULL requires the column to accept null),
+  // and must NOT be `on delete cascade` (the bug this migration fixes).
+  assert.doesNotMatch(migration, /user_id uuid not null references public\.profiles\(id\)/);
+  assert.doesNotMatch(migration, /legal_agreements[\s\S]{0,10}user_id uuid[^,]*on delete cascade/);
+});
+
+test("legal_agreements is the ONLY profiles-referencing table in this migration using SET NULL — this is a deliberate, narrow exception (an audit-trail table), not a general policy change to how profiles-referencing tables behave elsewhere in the schema", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  // Anchored to an actual FK definition (references public.X(id) on delete
+  // set null), not a bare phrase — the file's own explanatory comment also
+  // contains the words "on delete set null" in prose, which a naive count
+  // would double-count.
+  const setNullCount = (migration.match(/references public\.\w+\(id\) on delete set null/g) ?? []).length;
+  assert.equal(setNullCount, 1, "only legal_agreements.user_id should use ON DELETE SET NULL in this migration");
+  // This migration must not define/redefine the profiles table itself —
+  // the profiles.id -> auth.users cascade lives entirely in the earlier
+  // v0.3.4 migration and is untouched here.
+  assert.doesNotMatch(migration, /create table public\.profiles|alter table public\.profiles/);
+});
+
+test("Audit trail regression guard: no self-service or admin-facing account/profile deletion code path exists anywhere in this repo today (no deleteUser call) — documents the current state this SET NULL design defends against, so this test breaks loudly the day such a feature is actually added and the SET NULL choice should be re-reviewed", async () => {
+  // git ls-files is the source of truth for "what's actually in the repo"
+  // (mirrors the grep-based audit performed before this fix was written).
+  const { execFileSync } = await import("node:child_process");
+  const trackedFiles = execFileSync("git", ["ls-files", "*.ts", "*.tsx"], { cwd: new URL("../", import.meta.url), encoding: "utf8" })
+    .split("\n").filter(Boolean);
+  let deletionCodeFound = false;
+  for (const file of trackedFiles) {
+    const contents = await read(file);
+    if (/auth\.admin\.deleteUser|deleteUser\(/.test(contents)) deletionCodeFound = true;
+  }
+  assert.equal(deletionCodeFound, false, "no account-deletion code exists yet — if this now fails, a deletion feature was added and the legal_agreements ON DELETE SET NULL design must be re-reviewed against it");
 });
 
 test("Grant hardening: legal_agreements privileges are set with `revoke all` (not just insert/update/delete), so anon/authenticated table access never depends on ambient default privileges on the public schema", async () => {

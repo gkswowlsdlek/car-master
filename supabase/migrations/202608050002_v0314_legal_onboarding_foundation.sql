@@ -25,9 +25,26 @@
 -- the onboarding RPCs below ever insert into this table — no direct client
 -- write path, same "no client insert, RPC-only" invariant already used for
 -- profiles/dealer_profiles/installer_profiles/installer_approvals.
+--
+-- user_id is `on delete set null`, NOT `on delete cascade` — deliberately
+-- different from every other profiles-referencing table in this schema.
+-- profiles.id itself cascades from auth.users (202607190001), so deleting
+-- an auth.users row (today: only possible via the Supabase Dashboard or a
+-- privileged manual SQL delete — this repo has no self-service account-
+-- deletion UI/API/RPC at all) already cascade-deletes the profiles row.
+-- If legal_agreements also cascaded, that same deletion would silently
+-- erase the very evidence this table exists to keep, defeating its
+-- "append-only audit trail" purpose at exactly the moment it matters most.
+-- SET NULL keeps the row (still proves "someone agreed to terms version X
+-- on date Y") while dropping the now-meaningless link to a person who no
+-- longer has an account — it does not keep any additional personal data
+-- around, and it does not block a legitimate deletion the way ON DELETE
+-- RESTRICT would (RESTRICT would make deleting a user fail outright unless
+-- their consent history was manually cleared first — backwards from the
+-- goal). user_id is therefore nullable, not `not null`.
 create table public.legal_agreements (
   id bigint generated always as identity primary key,
-  user_id uuid not null references public.profiles(id) on delete cascade,
+  user_id uuid references public.profiles(id) on delete set null,
   terms_version text not null,
   privacy_version text not null,
   agreed_at timestamptz not null default now()
