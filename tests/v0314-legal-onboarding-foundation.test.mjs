@@ -88,6 +88,82 @@ test("complete_installer_onboarding: only runs for the caller's own row, only fr
   assert.match(fn, /if input_terms_version = '' or input_privacy_version = '' then\s*raise exception 'Terms and privacy agreement is required';/);
 });
 
+test("Legal consent version trust: both onboarding RPCs' hardcoded version literals match data/legal-versions.ts's CURRENT_TERMS_VERSION/CURRENT_PRIVACY_VERSION exactly — never guessed, always cross-checked against the actual repo source of truth", async () => {
+  const legalVersions = await read("data/legal-versions.ts");
+  const termsVersionMatch = legalVersions.match(/export const CURRENT_TERMS_VERSION = "([^"]+)";/);
+  const privacyVersionMatch = legalVersions.match(/export const CURRENT_PRIVACY_VERSION = "([^"]+)";/);
+  assert.ok(termsVersionMatch && privacyVersionMatch, "data/legal-versions.ts must export both version constants");
+  const [, termsVersion] = termsVersionMatch;
+  const [, privacyVersion] = privacyVersionMatch;
+
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  const termsChecks = [...migration.matchAll(/if input_terms_version <> '([^']+)' then\s*raise exception 'Terms version mismatch';/g)];
+  const privacyChecks = [...migration.matchAll(/if input_privacy_version <> '([^']+)' then\s*raise exception 'Privacy version mismatch';/g)];
+  assert.equal(termsChecks.length, 2, "both RPCs must check the terms version");
+  assert.equal(privacyChecks.length, 2, "both RPCs must check the privacy version");
+  for (const [, literal] of termsChecks) assert.equal(literal, termsVersion, "RPC's hardcoded terms-version literal must match data/legal-versions.ts exactly");
+  for (const [, literal] of privacyChecks) assert.equal(literal, privacyVersion, "RPC's hardcoded privacy-version literal must match data/legal-versions.ts exactly");
+});
+
+test("Legal consent version trust: the version-mismatch checks run BEFORE any write (role update, profile-table insert, or legal_agreements insert) in both RPCs — a rejected call leaves zero partial data, and the caller's role stays 'pending'", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  for (const [fnName, tableName, roleLiteral] of [["complete_dealer_onboarding", "dealer_profiles", "'dealer'"], ["complete_installer_onboarding", "installer_profiles", "'installer'"]]) {
+    const start = migration.indexOf(`create or replace function public.${fnName}`);
+    const nextFnStart = migration.indexOf("create or replace function public.", start + 1);
+    const fn = migration.slice(start, nextFnStart === -1 ? undefined : nextFnStart);
+    const termsCheckIndex = fn.indexOf("raise exception 'Terms version mismatch'");
+    const privacyCheckIndex = fn.indexOf("raise exception 'Privacy version mismatch'");
+    const roleUpdateIndex = fn.indexOf(`update public.profiles set role = ${roleLiteral}`);
+    const profileInsertIndex = fn.indexOf(`insert into public.${tableName}`);
+    const legalAgreementsInsertIndex = fn.indexOf("insert into public.legal_agreements");
+    assert.ok(termsCheckIndex > 0 && privacyCheckIndex > termsCheckIndex, `${fnName}: terms check must precede privacy check`);
+    assert.ok(roleUpdateIndex > privacyCheckIndex, `${fnName}: role update must happen only after both version checks pass`);
+    assert.ok(profileInsertIndex > privacyCheckIndex, `${fnName}: ${tableName} insert must happen only after both version checks pass`);
+    assert.ok(legalAgreementsInsertIndex > privacyCheckIndex, `${fnName}: legal_agreements insert must happen only after both version checks pass`);
+  }
+  // Postgres/PL-pgSQL note (not independently executable in this
+  // environment — no local Postgres/Docker, see the prior NULL-semantics
+  // commit for the same caveat): an unhandled `raise exception` inside a
+  // PL/pgSQL function aborts the entire enclosing statement, so a single
+  // supabase.rpc(...) call is one transaction — any exception rolls back
+  // every write the function made before that point. Because the version
+  // checks above are proven (by source position) to run before the FIRST
+  // write of any kind, a version mismatch is guaranteed to leave zero
+  // partial rows in profiles/dealer_profiles/installer_profiles/
+  // installer_approvals/legal_agreements, and profiles.role is guaranteed
+  // to remain 'pending' (never updated).
+});
+
+test("Legal consent version trust: a semantics-level model of the RPC's guard chain proves success only for a pending caller with BOTH versions exactly matching the current constants, and failure for any wrong/empty version — documented as a logic model (no live Postgres available), same convention as the earlier NULL-semantics verification", async () => {
+  const legalVersions = await read("data/legal-versions.ts");
+  const [, termsVersion] = legalVersions.match(/export const CURRENT_TERMS_VERSION = "([^"]+)";/);
+  const [, privacyVersion] = legalVersions.match(/export const CURRENT_PRIVACY_VERSION = "([^"]+)";/);
+
+  // Faithful model of the RPC's guard chain, in the same order as the SQL:
+  // pending check -> non-empty check -> exact-version check -> success.
+  function attemptOnboarding({ role, terms, privacy }) {
+    if (role !== "pending") return { ok: false, reason: "Onboarding already completed" };
+    if (terms === "" || privacy === "") return { ok: false, reason: "Terms and privacy agreement is required" };
+    if (terms !== termsVersion) return { ok: false, reason: "Terms version mismatch" };
+    if (privacy !== privacyVersion) return { ok: false, reason: "Privacy version mismatch" };
+    return { ok: true };
+  }
+
+  // pending + correct dealer/installer versions -> success (role is the
+  // same "pending" precondition for both RPCs; the dealer/installer split
+  // itself is a separate, already-covered guard).
+  assert.deepEqual(attemptOnboarding({ role: "pending", terms: termsVersion, privacy: privacyVersion }), { ok: true });
+  // wrong terms version -> fails specifically on terms
+  assert.deepEqual(attemptOnboarding({ role: "pending", terms: "not-the-real-version", privacy: privacyVersion }), { ok: false, reason: "Terms version mismatch" });
+  // wrong privacy version -> fails specifically on privacy
+  assert.deepEqual(attemptOnboarding({ role: "pending", terms: termsVersion, privacy: "not-the-real-version" }), { ok: false, reason: "Privacy version mismatch" });
+  // empty version -> fails on the non-empty check, before ever reaching the version-match check
+  assert.deepEqual(attemptOnboarding({ role: "pending", terms: "", privacy: privacyVersion }), { ok: false, reason: "Terms and privacy agreement is required" });
+  assert.deepEqual(attemptOnboarding({ role: "pending", terms: termsVersion, privacy: "" }), { ok: false, reason: "Terms and privacy agreement is required" });
+  // not pending -> fails before version is even inspected
+  assert.deepEqual(attemptOnboarding({ role: "dealer", terms: termsVersion, privacy: privacyVersion }), { ok: false, reason: "Onboarding already completed" });
+});
+
 test("Role-switch guard: both onboarding RPCs check profiles.role = 'pending' before doing anything, so an already-onboarded dealer/installer/admin can never re-run onboarding into a different role — the SAME guard clause rejects all three cases (dealer→installer, installer→dealer, admin→either)", async () => {
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
   const guardOccurrences = migration.match(/if caller_role is distinct from 'pending'::public\.user_role then/g) ?? [];

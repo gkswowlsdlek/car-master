@@ -169,6 +169,25 @@ begin
   if input_terms_version = '' or input_privacy_version = '' then
     raise exception 'Terms and privacy agreement is required';
   end if;
+  -- Exact-match against the CURRENT allowed version — not just "non-empty".
+  -- These literals are data/legal-versions.ts's CURRENT_TERMS_VERSION /
+  -- CURRENT_PRIVACY_VERSION as of this function's last replacement. An
+  -- authenticated caller who bypasses the UI and calls this RPC directly
+  -- (e.g. via the Supabase client with a hand-crafted payload) cannot send
+  -- an arbitrary version string and have it accepted: legal_agreements
+  -- must only ever be able to record "the user agreed to the version we
+  -- actually showed them", never a client-supplied claim. When /terms or
+  -- /privacy content changes, bump data/legal-versions.ts AND ship a new
+  -- migration (or a plain `create or replace function` in the SQL Editor)
+  -- updating these two literals to match — they are intentionally NOT
+  -- read from a table, so the two cannot silently drift apart without a
+  -- deliberate code change on both sides.
+  if input_terms_version <> '2026-08-05' then
+    raise exception 'Terms version mismatch';
+  end if;
+  if input_privacy_version <> '2026-08-05' then
+    raise exception 'Privacy version mismatch';
+  end if;
 
   update public.profiles set role = 'dealer'::public.user_role, updated_at = now() where id = caller_id;
 
@@ -232,6 +251,15 @@ begin
   end if;
   if input_terms_version = '' or input_privacy_version = '' then
     raise exception 'Terms and privacy agreement is required';
+  end if;
+  -- Exact-match against the CURRENT allowed version — see the identical
+  -- guard (and full rationale) in complete_dealer_onboarding above. Kept
+  -- in sync deliberately: both RPCs check the same two literals.
+  if input_terms_version <> '2026-08-05' then
+    raise exception 'Terms version mismatch';
+  end if;
+  if input_privacy_version <> '2026-08-05' then
+    raise exception 'Privacy version mismatch';
   end if;
 
   update public.profiles set role = 'installer'::public.user_role, updated_at = now() where id = caller_id;
