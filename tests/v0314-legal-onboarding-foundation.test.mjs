@@ -193,8 +193,35 @@ test("legal_agreements is an append-only consent history table (one row per agre
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
   assert.match(migration, /create table public\.legal_agreements \(\s*id bigint generated always as identity primary key,\s*user_id uuid not null references public\.profiles\(id\) on delete cascade,\s*terms_version text not null,\s*privacy_version text not null,\s*agreed_at timestamptz not null default now\(\)\s*\);/);
   assert.match(migration, /create policy "legal agreements select own or admin" on public\.legal_agreements\s*for select to authenticated\s*using \(user_id = auth\.uid\(\) or public\.is_admin\(\)\);/);
-  assert.match(migration, /revoke insert, update, delete on public\.legal_agreements from anon, authenticated;/);
-  assert.match(migration, /grant select on public\.legal_agreements to authenticated;/);
+});
+
+test("Grant hardening: legal_agreements privileges are set with `revoke all` (not just insert/update/delete), so anon/authenticated table access never depends on ambient default privileges on the public schema", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  // anon gets zero table-level grants on legal_agreements — REVOKE ALL,
+  // not a partial revoke that could still leave e.g. TRIGGER/REFERENCES/
+  // TRUNCATE in place if a default privilege had granted them.
+  assert.match(migration, /revoke all on table public\.legal_agreements from anon, authenticated;/);
+  // authenticated is explicitly granted SELECT only — nothing else.
+  assert.match(migration, /grant select on table public\.legal_agreements to authenticated;/);
+  // The old partial-revoke form must be gone, not merely superseded.
+  assert.doesNotMatch(migration, /revoke insert, update, delete on public\.legal_agreements/);
+  // The REVOKE ALL must run before the SELECT grant, so there is no window
+  // where a broader privilege is briefly in effect within this migration.
+  const revokeIndex = migration.indexOf("revoke all on table public.legal_agreements");
+  const grantIndex = migration.indexOf("grant select on table public.legal_agreements");
+  assert.ok(revokeIndex > 0 && grantIndex > revokeIndex, "revoke all must precede the select grant");
+});
+
+test("Grant hardening: onboarding RPCs remain EXECUTE-able by authenticated (write access is RPC-only, not table-grant-based), and service_role/postgres are never revoked anywhere in this migration", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  assert.match(migration, /revoke all on function public\.complete_dealer_onboarding\(jsonb\) from public, anon;/);
+  assert.match(migration, /grant execute on function public\.complete_dealer_onboarding\(jsonb\) to authenticated;/);
+  assert.match(migration, /revoke all on function public\.complete_installer_onboarding\(jsonb\) from public, anon;/);
+  assert.match(migration, /grant execute on function public\.complete_installer_onboarding\(jsonb\) to authenticated;/);
+  // service_role/postgres are never even named in this migration, let
+  // alone touched by a revoke — the literal strings must not appear at all.
+  assert.doesNotMatch(migration, /service_role/);
+  assert.doesNotMatch(migration, /\bpostgres\b/);
 });
 
 test("No existing RLS policy from prior migrations is modified — this migration only adds new policies on the new legal_agreements table", async () => {

@@ -41,8 +41,15 @@ create policy "legal agreements select own or admin" on public.legal_agreements
   for select to authenticated
   using (user_id = auth.uid() or public.is_admin());
 
-revoke insert, update, delete on public.legal_agreements from anon, authenticated;
-grant select on public.legal_agreements to authenticated;
+-- `revoke all` (not just insert/update/delete) so this doesn't depend on
+-- whichever default privileges anon/authenticated happen to hold on the
+-- public schema — anon gets zero table-level grants on legal_agreements,
+-- and authenticated gets exactly SELECT, explicitly. Every write still
+-- goes exclusively through the SECURITY DEFINER onboarding RPCs below,
+-- which bypass table grants entirely (same pattern as profiles/
+-- dealer_profiles/installer_profiles/installer_approvals already use).
+revoke all on table public.legal_agreements from anon, authenticated;
+grant select on table public.legal_agreements to authenticated;
 
 -- ---------------------------------------------------------------------
 -- handle_new_user(): preserve existing email/password signup, add a
