@@ -8,6 +8,9 @@ import { LoginScreen } from "../components/auth/LoginScreen";
 import { SignUpScreen } from "../components/auth/SignUpScreen";
 import { ForgotPasswordScreen } from "../components/auth/ForgotPasswordScreen";
 import { UpdatePasswordScreen } from "../components/auth/UpdatePasswordScreen";
+import { OnboardingScreen } from "../components/auth/OnboardingScreen";
+import { TermsScreen } from "../components/legal/TermsScreen";
+import { PrivacyScreen } from "../components/legal/PrivacyScreen";
 import { AdminAccountScreen } from "../components/admin/AdminAccountScreen";
 import { DealerDashboard } from "../components/dealer/DealerDashboard";
 import { InstallerDirectoryScreen } from "../components/dealer/InstallerDirectoryScreen";
@@ -50,7 +53,7 @@ import type { DemoAccount, RequestType, Role, Screen, ServiceRequest } from "../
 import type { InstallerListing } from "../types/installer";
 import type { SearchLocation } from "../types/location";
 import type { ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../types/transactions";
-import type { CurrentUser, SignUpInput, SignUpResult } from "../types/auth";
+import type { CurrentUser, DealerOnboardingInput, InstallerOnboardingInput, SignUpInput, SignUpResult } from "../types/auth";
 
 const initialDistrict = districtCenters.find((item) => item.id === "gyeonggi-hanam") ?? districtCenters[0];
 const initialLocation: SearchLocation = { id: initialDistrict.id, city: initialDistrict.city, district: initialDistrict.district, label: initialDistrict.label, latitude: initialDistrict.latitude, longitude: initialDistrict.longitude };
@@ -72,6 +75,9 @@ function pathForScreen(screen: Screen, role: Role) {
   if (screen === "signup") return "/signup";
   if (screen === "forgotPassword") return "/forgot-password";
   if (screen === "updatePassword") return "/update-password";
+  if (screen === "terms") return "/terms";
+  if (screen === "privacy") return "/privacy";
+  if (screen === "onboarding") return "/onboarding";
   if (screen === "accountStatus") return "/account-status";
   if (role === "shop") return "/shop";
   if (role === "admin") return "/admin";
@@ -79,6 +85,10 @@ function pathForScreen(screen: Screen, role: Role) {
 }
 
 function accountForUser(user: CurrentUser): DemoAccount {
+  // Callers must route a "pending" user to onboarding before ever reaching
+  // here (see enterAuthenticatedUser) — a pending role has no DemoAccount
+  // shape to map into. Fail loudly rather than silently guessing a role.
+  if (user.role === "pending") throw new Error("accountForUser called with a pending-onboarding user");
   const role: Role = user.role === "installer" ? "shop" : user.role;
   return { id: user.id, email: user.email, password: "", name: user.name, role, entryScreen: role === "dealer" ? "dealerDashboard" : role === "shop" ? "shopDashboard" : "ops", shopId: role === "shop" ? user.id : undefined };
 }
@@ -167,6 +177,15 @@ export default function Home() {
   }, []);
 
   const enterAuthenticatedUser = useCallback((user: CurrentUser, replace = false) => {
+    if (user.role === "pending") {
+      // No dealer/installer/admin account shape exists yet for a pending
+      // user (accountForUser can't map "pending" into a Role) — send them
+      // straight to onboarding instead of building a DemoAccount.
+      setCurrentUser(user);
+      setScreen("onboarding");
+      window.history[replace ? "replaceState" : "pushState"](null, "", "/onboarding");
+      return;
+    }
     const nextAccount = accountForUser(user);
     const nextScreen: Screen = user.role === "installer" && user.approvalStatus !== "approved" ? "accountStatus" : nextAccount.entryScreen;
     setCurrentUser(user); setAccount(nextAccount); setRole(nextAccount.role); setScreen(nextScreen);
@@ -222,6 +241,14 @@ export default function Home() {
     await authProvider.logout().catch(() => {});
   }, []);
   const changePassword = useCallback((currentPassword: string, newPassword: string) => authProvider.updatePassword(newPassword, currentPassword), []);
+  const completeDealerOnboarding = useCallback(async (input: DealerOnboardingInput) => {
+    const user = await authProvider.completeDealerOnboarding(input);
+    enterAuthenticatedUser(user, true);
+  }, [enterAuthenticatedUser]);
+  const completeInstallerOnboarding = useCallback(async (input: InstallerOnboardingInput) => {
+    const user = await authProvider.completeInstallerOnboarding(input);
+    enterAuthenticatedUser(user, true);
+  }, [enterAuthenticatedUser]);
 
   useEffect(() => {
     let active = true;
@@ -470,6 +497,9 @@ export default function Home() {
   if (screen === "signup") return <SignUpScreen onBack={() => goToScreen("login")} onSignUp={signUp} />;
   if (screen === "forgotPassword") return <ForgotPasswordScreen onRequestReset={requestPasswordReset} onBack={() => goToScreen("login")} />;
   if (screen === "updatePassword") return <UpdatePasswordScreen onExchangeCode={exchangeRecoveryCode} onUpdatePassword={updatePasswordFromRecovery} onGoToLogin={() => goToScreen("login")} onGoToForgotPassword={() => goToScreen("forgotPassword")} />;
+  if (screen === "terms") return <TermsScreen />;
+  if (screen === "privacy") return <PrivacyScreen />;
+  if (screen === "onboarding" && currentUser) return <OnboardingScreen user={currentUser} onCompleteDealer={completeDealerOnboarding} onCompleteInstaller={completeInstallerOnboarding} onLogout={() => void logout()} />;
   if (screen === "accountStatus" && currentUser) return <AccountStatusScreen user={currentUser} onLogout={() => void logout()} />;
 
   const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;

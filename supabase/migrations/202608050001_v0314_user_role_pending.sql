@@ -1,0 +1,16 @@
+-- Car-Master v0.3.14 Phase 2A — add 'pending' to public.user_role.
+--
+-- This is a standalone migration containing ONLY the enum value addition.
+-- Postgres (as of 12+) allows `ALTER TYPE ... ADD VALUE` inside a
+-- transaction block, but the new value cannot be referenced by any
+-- statement in the SAME transaction that added it. Supabase applies each
+-- migration file as its own transaction, so the enum value must land in a
+-- prior, already-committed migration before 202608050002 can reference
+-- 'pending'::public.user_role in the handle_new_user() trigger or the new
+-- onboarding RPCs.
+--
+-- Purely additive: every existing comparison against user_role
+-- ('dealer'/'installer'/'admin', role in (...), role = ...) is unaffected —
+-- a new enum label that nothing currently produces cannot match any
+-- existing row or change any existing query result.
+alter type public.user_role add value if not exists 'pending';

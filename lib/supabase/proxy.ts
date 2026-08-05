@@ -16,7 +16,7 @@ async function withTimeout<T>(value: PromiseLike<T>): Promise<T | null> {
 export async function updateSupabaseSession(request: NextRequest) {
   let response = NextResponse.next({ request });
   const pathname = request.nextUrl.pathname;
-  const protectedRole = pathname.startsWith("/dealer") ? "dealer" : pathname.startsWith("/shop") ? "installer" : pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/account-status") ? "installer" : null;
+  const protectedRole = pathname.startsWith("/dealer") ? "dealer" : pathname.startsWith("/shop") ? "installer" : pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/account-status") ? "installer" : pathname.startsWith("/onboarding") ? "pending" : null;
   const demoRole = await verifyDemoSession(request.cookies.get(demoSessionCookie)?.value);
   const normalizedDemoRole = demoRole === "shop" ? "installer" : demoRole;
 
@@ -51,10 +51,10 @@ export async function updateSupabaseSession(request: NextRequest) {
   if (protectedRole) {
     const userId = typeof claimsResult?.data?.claims?.sub === "string" ? claimsResult.data.claims.sub : null;
     if (!userId) return copyAuthCookies(response, NextResponse.redirect(new URL("/login", request.url)));
-    const profileResult = await withTimeout(supabase.from("profiles").select("role").eq("id", userId).single<{ role: "dealer" | "installer" | "admin" }>());
+    const profileResult = await withTimeout(supabase.from("profiles").select("role").eq("id", userId).single<{ role: "dealer" | "installer" | "admin" | "pending" }>());
     const profile = profileResult?.data;
     if (!profile) return copyAuthCookies(response, NextResponse.redirect(new URL("/login", request.url)));
-    if (profile.role !== protectedRole) return copyAuthCookies(response, NextResponse.redirect(new URL(profile.role === "dealer" ? "/dealer" : profile.role === "admin" ? "/admin" : "/account-status", request.url)));
+    if (profile.role !== protectedRole) return copyAuthCookies(response, NextResponse.redirect(new URL(profile.role === "pending" ? "/onboarding" : profile.role === "dealer" ? "/dealer" : profile.role === "admin" ? "/admin" : "/account-status", request.url)));
     if (profile.role === "installer") {
       const approvalResult = await withTimeout(supabase.from("installer_approvals").select("status").eq("user_id", userId).single<{ status: string }>());
       const approval = approvalResult?.data;

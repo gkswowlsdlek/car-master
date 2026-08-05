@@ -1,6 +1,6 @@
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
-import type { CurrentUser, InstallerApprovalStatus, SignUpInput } from "../../types/auth";
+import type { CurrentUser, DealerOnboardingInput, InstallerApprovalStatus, InstallerOnboardingInput, SignUpInput } from "../../types/auth";
 import { AuthenticationError, type AuthCredentials, type AuthProvider } from "./auth-provider";
 
 /**
@@ -20,7 +20,16 @@ function translateAuthError(error: unknown, fallback: string): string {
   return fallback;
 }
 
-type ProfileRow = { id: string; email: string; role: "dealer" | "installer" | "admin" };
+/** Same idea as translateAuthError, but for errors raised by the onboarding RPCs (complete_dealer_onboarding/complete_installer_onboarding), which speak in `raise exception` text rather than GoTrue's error vocabulary. */
+function translateOnboardingError(error: unknown, fallback: string): string {
+  const message = error instanceof Error ? error.message : "";
+  if (message.includes("Onboarding already completed")) return "이미 가입 절차를 완료했어요.";
+  if (message.includes("required") || message.includes("missing")) return "필수 정보를 입력해 주세요.";
+  if (message.includes("Authentication required") || message.includes("Profile not found")) return "로그인이 필요합니다.";
+  return fallback;
+}
+
+type ProfileRow = { id: string; email: string; role: "dealer" | "installer" | "admin" | "pending" };
 
 export class SupabaseAuthProvider implements AuthProvider {
   private currentUser: CurrentUser | null = null;
@@ -102,6 +111,36 @@ export class SupabaseAuthProvider implements AuthProvider {
     } catch {
       return false;
     }
+  }
+
+  async completeDealerOnboarding(input: DealerOnboardingInput): Promise<CurrentUser> {
+    const supabase = createSupabaseBrowserClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("로그인이 필요합니다.");
+    const { error } = await supabase.rpc("complete_dealer_onboarding", {
+      payload: {
+        name: input.name, phone: input.phone, companyName: input.companyName ?? "", activityRegion: input.activityRegion ?? "",
+        termsVersion: input.termsVersion, privacyVersion: input.privacyVersion,
+      },
+    });
+    if (error) throw new Error(translateOnboardingError(error, "온보딩 정보를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."));
+    return this.resolveUser(user);
+  }
+
+  async completeInstallerOnboarding(input: InstallerOnboardingInput): Promise<CurrentUser> {
+    const supabase = createSupabaseBrowserClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("로그인이 필요합니다.");
+    const { error } = await supabase.rpc("complete_installer_onboarding", {
+      payload: {
+        shopName: input.shopName, representativeName: input.representativeName, businessName: input.businessName,
+        businessRegistrationNumber: input.businessRegistrationNumber, address: input.address, detailAddress: input.detailAddress ?? "",
+        phone: input.phone, contactPhone: input.contactPhone, supportedServices: input.supportedServices, supportedBrands: input.supportedBrands,
+        termsVersion: input.termsVersion, privacyVersion: input.privacyVersion,
+      },
+    });
+    if (error) throw new Error(translateOnboardingError(error, "입점 신청 정보를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."));
+    return this.resolveUser(user);
   }
 
   async updatePassword(newPassword: string, currentPassword?: string) {

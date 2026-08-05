@@ -1,0 +1,273 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+
+test("202608050001 adds 'pending' to public.user_role as a standalone, additive migration", async () => {
+  const migration = await read("supabase/migrations/202608050001_v0314_user_role_pending.sql");
+  assert.match(migration, /alter type public\.user_role add value if not exists 'pending';/);
+});
+
+test("handle_new_user(): OAuth/social sign-in (no recognized signup_role) creates only a minimal pending profile — no dealer_profiles/installer_profiles/installer_approvals, no guessed default role", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  assert.match(migration, /if new\.raw_user_meta_data ->> 'signup_role' not in \('dealer', 'installer'\) then/);
+  const pendingBranch = migration.slice(migration.indexOf("not in ('dealer', 'installer') then"), migration.indexOf("return new;\n  end if;"));
+  assert.match(pendingBranch, /values \(new\.id, coalesce\(new\.email, ''\), 'pending'::public\.user_role\)/);
+  assert.doesNotMatch(pendingBranch, /dealer_profiles|installer_profiles|installer_approvals/);
+});
+
+test("handle_new_user(): existing dealer/installer email signup logic is preserved byte-for-byte (same inserts as the original v0.3.4 migration)", async () => {
+  const original = await read("supabase/migrations/202607190001_v034_membership.sql");
+  const updated = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  const originalStart = original.indexOf("requested_role := case");
+  const originalInsertBlock = original.slice(originalStart, original.indexOf("\n$$;", originalStart));
+  const updatedStart = updated.indexOf("requested_role := case");
+  const updatedInsertBlock = updated.slice(updatedStart, updated.indexOf("\n$$;", updatedStart));
+  assert.equal(updatedInsertBlock.trim(), originalInsertBlock.trim());
+});
+
+test("complete_dealer_onboarding: only runs for the caller's own row, only from role='pending', and is fully additive (dealer_profiles + legal_agreements in the same function)", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  const fn = migration.slice(migration.indexOf("create or replace function public.complete_dealer_onboarding"), migration.indexOf("create or replace function public.complete_installer_onboarding"));
+  assert.match(fn, /caller_id uuid := auth\.uid\(\);/);
+  assert.doesNotMatch(fn, /payload ->> 'userId'|payload ->> 'user_id'/);
+  assert.match(fn, /select role into caller_role from public\.profiles where id = caller_id for update;/);
+  assert.match(fn, /if caller_role is distinct from 'pending'::public\.user_role then\s*raise exception 'Onboarding already completed';/);
+  assert.match(fn, /update public\.profiles set role = 'dealer'::public\.user_role, updated_at = now\(\) where id = caller_id;/);
+  assert.match(fn, /insert into public\.dealer_profiles/);
+  assert.match(fn, /insert into public\.legal_agreements \(user_id, terms_version, privacy_version\)/);
+  assert.match(fn, /if input_terms_version = '' or input_privacy_version = '' then\s*raise exception 'Terms and privacy agreement is required';/);
+});
+
+test("complete_installer_onboarding: only runs for the caller's own row, only from role='pending', creates installer_profiles + installer_approvals (default pending) + legal_agreements", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  const fn = migration.slice(migration.indexOf("create or replace function public.complete_installer_onboarding"));
+  assert.match(fn, /caller_id uuid := auth\.uid\(\);/);
+  assert.doesNotMatch(fn, /payload ->> 'userId'|payload ->> 'user_id'/);
+  assert.match(fn, /if caller_role is distinct from 'pending'::public\.user_role then\s*raise exception 'Onboarding already completed';/);
+  assert.match(fn, /update public\.profiles set role = 'installer'::public\.user_role, updated_at = now\(\) where id = caller_id;/);
+  assert.match(fn, /insert into public\.installer_profiles \(/);
+  // No explicit status column passed — relies on installer_approvals' own `default 'pending'`, exactly like the original signup trigger.
+  assert.match(fn, /insert into public\.installer_approvals \(user_id\) values \(caller_id\);/);
+  assert.match(fn, /insert into public\.legal_agreements \(user_id, terms_version, privacy_version\)/);
+  assert.match(fn, /if input_terms_version = '' or input_privacy_version = '' then\s*raise exception 'Terms and privacy agreement is required';/);
+});
+
+test("Role-switch guard: both onboarding RPCs check profiles.role = 'pending' before doing anything, so an already-onboarded dealer/installer/admin can never re-run onboarding into a different role — the SAME guard clause rejects all three cases (dealer→installer, installer→dealer, admin→either)", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  const guardOccurrences = migration.match(/if caller_role is distinct from 'pending'::public\.user_role then/g) ?? [];
+  assert.equal(guardOccurrences.length, 2, "both complete_dealer_onboarding and complete_installer_onboarding must have the pending-only guard");
+});
+
+test("Onboarding RPCs are executable by authenticated only, revoked from public/anon — no arbitrary invocation", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  assert.match(migration, /revoke all on function public\.complete_dealer_onboarding\(jsonb\) from public, anon;/);
+  assert.match(migration, /grant execute on function public\.complete_dealer_onboarding\(jsonb\) to authenticated;/);
+  assert.match(migration, /revoke all on function public\.complete_installer_onboarding\(jsonb\) from public, anon;/);
+  assert.match(migration, /grant execute on function public\.complete_installer_onboarding\(jsonb\) to authenticated;/);
+});
+
+test("Both onboarding RPCs use SECURITY DEFINER with search_path locked to '' — same safe pattern as every existing RPC (is_admin, create_transaction_with_room, handle_new_user)", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  for (const fnName of ["complete_dealer_onboarding", "complete_installer_onboarding", "handle_new_user"]) {
+    const start = migration.indexOf(`create or replace function public.${fnName}`);
+    const nextFnStart = migration.indexOf("create or replace function public.", start + 1);
+    const block = migration.slice(start, nextFnStart === -1 ? undefined : nextFnStart);
+    assert.match(block, /security definer/, `${fnName} must be SECURITY DEFINER`);
+    assert.match(block, /set search_path = ''/, `${fnName} must lock search_path`);
+  }
+});
+
+test("legal_agreements is an append-only consent history table (one row per agreement event, not overwritten columns) — RLS: select own or admin, no client insert/update/delete grant", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  assert.match(migration, /create table public\.legal_agreements \(\s*id bigint generated always as identity primary key,\s*user_id uuid not null references public\.profiles\(id\) on delete cascade,\s*terms_version text not null,\s*privacy_version text not null,\s*agreed_at timestamptz not null default now\(\)\s*\);/);
+  assert.match(migration, /create policy "legal agreements select own or admin" on public\.legal_agreements\s*for select to authenticated\s*using \(user_id = auth\.uid\(\) or public\.is_admin\(\)\);/);
+  assert.match(migration, /revoke insert, update, delete on public\.legal_agreements from anon, authenticated;/);
+  assert.match(migration, /grant select on public\.legal_agreements to authenticated;/);
+});
+
+test("No existing RLS policy from prior migrations is modified — this migration only adds new policies on the new legal_agreements table", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  const policyMatches = migration.match(/create policy "([^"]+)"/g) ?? [];
+  assert.deepEqual(policyMatches, ['create policy "legal agreements select own or admin"']);
+});
+
+test("pending installer directory non-exposure: get_approved_installer_directory (untouched) still requires approval.status = 'approved' and caller role in ('dealer', 'admin') only — 'pending' was never added to that allowlist", async () => {
+  const foundation = await read("supabase/migrations/202607210001_v035_foundation.sql");
+  assert.match(foundation, /caller\.role in \('dealer', 'admin'\)/);
+  assert.match(foundation, /approval\.status = 'approved' and installer\.accepting_requests = true/);
+  const newMigration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  assert.doesNotMatch(newMigration, /get_approved_installer_directory/);
+});
+
+test("Demo login and is_admin()/admin bootstrap are untouched by this migration — no demo_ table/RPC and no is_admin() redefinition appears in the new files", async () => {
+  const migration1 = await read("supabase/migrations/202608050001_v0314_user_role_pending.sql");
+  const migration2 = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  assert.doesNotMatch(migration1 + migration2, /demo_|is_admin\(\)\s*\nreturns|create or replace function public\.is_admin/);
+  const demoLoginRoute = await read("app/api/demo-login/route.ts");
+  assert.doesNotMatch(demoLoginRoute, /pending|legal_agreements|onboarding/i);
+});
+
+test("AuthProvider interface gains completeDealerOnboarding/completeInstallerOnboarding; all three implementations (Supabase, Demo, Unconfigured) implement them", async () => {
+  const providerInterface = await read("services/auth/auth-provider.ts");
+  assert.match(providerInterface, /completeDealerOnboarding\(input: DealerOnboardingInput\): Promise<CurrentUser>/);
+  assert.match(providerInterface, /completeInstallerOnboarding\(input: InstallerOnboardingInput\): Promise<CurrentUser>/);
+  for (const file of ["services/auth/supabase-auth-provider.ts", "services/auth/demo-auth-provider.ts", "services/auth/unconfigured-auth-provider.ts"]) {
+    const source = await read(file);
+    assert.match(source, /completeDealerOnboarding/, `${file} missing completeDealerOnboarding`);
+    assert.match(source, /completeInstallerOnboarding/, `${file} missing completeInstallerOnboarding`);
+  }
+});
+
+test("SupabaseAuthProvider.completeDealerOnboarding/completeInstallerOnboarding call the official RPCs via .rpc(), never construct SQL manually, and always re-resolve the user afterward", async () => {
+  const source = await read("services/auth/supabase-auth-provider.ts");
+  assert.match(source, /supabase\.rpc\("complete_dealer_onboarding", \{/);
+  assert.match(source, /supabase\.rpc\("complete_installer_onboarding", \{/);
+  assert.match(source, /return this\.resolveUser\(user\);/g);
+});
+
+test("Demo and Unconfigured providers reject onboarding with a clear error instead of silently succeeding", async () => {
+  const demoProvider = await read("services/auth/demo-auth-provider.ts");
+  assert.match(demoProvider, /async completeDealerOnboarding[\s\S]*?throw new Error/);
+  assert.match(demoProvider, /async completeInstallerOnboarding[\s\S]*?throw new Error/);
+  const unconfiguredProvider = await read("services/auth/unconfigured-auth-provider.ts");
+  assert.match(unconfiguredProvider, /completeDealerOnboarding[\s\S]*?throw configurationError/);
+  assert.match(unconfiguredProvider, /completeInstallerOnboarding[\s\S]*?throw configurationError/);
+});
+
+test("types/auth.ts: UserRole includes 'pending', and onboarding input types require termsVersion/privacyVersion (never a plain boolean)", async () => {
+  const types = await read("types/auth.ts");
+  assert.match(types, /export type UserRole = "dealer" \| "installer" \| "admin" \| "pending";/);
+  assert.match(types, /export type LegalAgreementInput = \{ termsVersion: string; privacyVersion: string \};/);
+  assert.match(types, /export type DealerOnboardingInput = \{ name: string; phone: string; companyName\?: string; activityRegion\?: string \} & LegalAgreementInput;/);
+  assert.match(types, /export type InstallerOnboardingInput = \{/);
+});
+
+test("access-policy.ts: /onboarding is protected, /terms and /privacy are public, and a pending user's workspace path is /onboarding — never a dealer/installer/admin path", async () => {
+  const policy = await read("services/auth/access-policy.ts");
+  assert.match(policy, /export const protectedPaths = \["\/dealer", "\/shop", "\/admin", "\/account-status", "\/onboarding"\] as const;/);
+  assert.match(policy, /"\/forgot-password", "\/update-password", "\/auth\/callback", "\/terms", "\/privacy"\]/);
+  assert.match(policy, /if \(user\.role === "pending"\) return "\/onboarding";/);
+  assert.match(policy, /if \(pathname\.startsWith\("\/onboarding"\)\) return user\.role === "pending";/);
+});
+
+test("access-policy.ts regression: an anonymous user is still rejected from every protected path including the new /onboarding path", async () => {
+  const policy = await read("services/auth/access-policy.ts");
+  assert.match(policy, /export function canAccessWorkspacePath\(user: CurrentUser \| null, pathname: string\) \{\s*if \(!user\) return !isProtectedPath\(pathname\);/);
+});
+
+test("proxy.ts (server-side route guard): /onboarding maps to protectedRole 'pending', profile type includes 'pending', and a role mismatch correctly redirects a pending user to /onboarding instead of the pre-existing /account-status fallback", async () => {
+  const proxy = await read("lib/supabase/proxy.ts");
+  assert.match(proxy, /pathname\.startsWith\("\/onboarding"\) \? "pending" : null;/);
+  assert.match(proxy, /single<\{ role: "dealer" \| "installer" \| "admin" \| "pending" \}>\(\)/);
+  assert.match(proxy, /profile\.role === "pending" \? "\/onboarding" : profile\.role === "dealer" \? "\/dealer" : profile\.role === "admin" \? "\/admin" : "\/account-status"/);
+});
+
+test("proxy.ts regression: dealer/admin path protection, demo-session short-circuit, and the 5s fail-open timeout wrapper are all untouched", async () => {
+  const proxy = await read("lib/supabase/proxy.ts");
+  assert.match(proxy, /const AUTH_PROXY_TIMEOUT_MS = 5_000;/);
+  assert.match(proxy, /if \(protectedRole && normalizedDemoRole && \["dealer", "installer", "admin"\]\.includes\(normalizedDemoRole\)\) \{/);
+  assert.match(proxy, /pathname\.startsWith\("\/dealer"\) \? "dealer"/);
+});
+
+test("app/page.tsx: a pending user is routed straight to the onboarding screen and never reaches accountForUser (which has no Role mapping for 'pending')", async () => {
+  const page = await read("app/page.tsx");
+  assert.match(page, /if \(user\.role === "pending"\) \{[\s\S]*?setScreen\("onboarding"\);/);
+  assert.match(page, /if \(user\.role === "pending"\) throw new Error\("accountForUser called with a pending-onboarding user"\);/);
+  const enterAuthBlock = page.slice(page.indexOf("const enterAuthenticatedUser = useCallback"), page.indexOf("const authenticate = useCallback"));
+  const pendingCheckIndex = enterAuthBlock.indexOf('user.role === "pending"');
+  const accountForUserCallIndex = enterAuthBlock.indexOf("accountForUser(user)");
+  assert.ok(pendingCheckIndex >= 0 && accountForUserCallIndex > pendingCheckIndex, "the pending short-circuit must run before accountForUser is called");
+});
+
+test("app/page.tsx: onboarding completion re-enters the normal authenticated-user flow (so a newly-dealer/installer user lands in their real workspace, not stuck on /onboarding)", async () => {
+  const page = await read("app/page.tsx");
+  assert.match(page, /const completeDealerOnboarding = useCallback\(async \(input: DealerOnboardingInput\) => \{\s*const user = await authProvider\.completeDealerOnboarding\(input\);\s*enterAuthenticatedUser\(user, true\);/);
+  assert.match(page, /const completeInstallerOnboarding = useCallback\(async \(input: InstallerOnboardingInput\) => \{\s*const user = await authProvider\.completeInstallerOnboarding\(input\);\s*enterAuthenticatedUser\(user, true\);/);
+  assert.match(page, /<OnboardingScreen user=\{currentUser\} onCompleteDealer=\{completeDealerOnboarding\} onCompleteInstaller=\{completeInstallerOnboarding\} onLogout=\{\(\) => void logout\(\)\} \/>/);
+});
+
+test("OnboardingScreen blocks submission without both required consent checkboxes, links to /terms and /privacy, and opens them in a new tab so in-progress form data is never lost", async () => {
+  const source = await read("components/auth/OnboardingScreen.tsx");
+  assert.match(source, /if \(!agreedTerms \|\| !agreedPrivacy\) return setError\("이용약관과 개인정보처리방침에 모두 동의해 주세요\."\)/);
+  assert.match(source, /<a href="\/terms" target="_blank" rel="noopener noreferrer">이용약관<\/a>/);
+  assert.match(source, /<a href="\/privacy" target="_blank" rel="noopener noreferrer">개인정보처리방침<\/a>/);
+});
+
+test("OnboardingScreen validates required fields per role before calling the provider (dealer: name/phone; installer: the full required set) — no empty-string submission reaches the RPC", async () => {
+  const source = await read("components/auth/OnboardingScreen.tsx");
+  assert.match(source, /if \(!form\.name\?\.trim\(\) \|\| !form\.phone\?\.trim\(\)\) throw new Error\("이름과 연락처를 입력해 주세요\."\)/);
+  assert.match(source, /const required = \[form\.shopName, form\.representativeName, form\.businessName, form\.businessRegistrationNumber, form\.address, form\.phone, form\.contactPhone\];/);
+});
+
+test("OnboardingScreen sends the current terms/privacy version constants with every onboarding submission — never a hardcoded or missing version", async () => {
+  const source = await read("components/auth/OnboardingScreen.tsx");
+  const dealerCallCount = (source.match(/termsVersion: CURRENT_TERMS_VERSION, privacyVersion: CURRENT_PRIVACY_VERSION/g) ?? []).length;
+  assert.equal(dealerCallCount, 2, "both the dealer and installer onboarding calls must pass the current version constants");
+});
+
+test("/terms and /privacy are real Next.js routes (re-export pattern, matching every other public route) and /onboarding is a real protected route", async () => {
+  for (const [path, screenComponent] of [["app/terms/page.tsx", null], ["app/privacy/page.tsx", null], ["app/onboarding/page.tsx", null]]) {
+    const source = await read(path);
+    assert.match(source, /export \{ default \} from "\.\.\/page";/);
+    void screenComponent;
+  }
+});
+
+test("TermsScreen and PrivacyScreen render real, non-placeholder legal content — not lorem ipsum, not a copy of another company's terms — and mark unverified business/legal facts as explicit bracketed placeholders or TODOs, never fabricated", async () => {
+  const terms = await read("components/legal/TermsScreen.tsx");
+  assert.match(terms, /제1조 \(목적\)/);
+  assert.match(terms, /플랫폼 운영자/);
+  assert.match(terms, /\[사업자등록 후 기재\]/);
+  // v0.5 is a free Beta: the terms may name fee/payment concepts only to say
+  // they're explicitly out of scope for this version — never to define an
+  // actual fee schedule, refund rule, or payment/settlement process.
+  assert.match(terms, /유료 서비스에 관한 사항은 포함하지 않습니다/);
+  assert.doesNotMatch(terms, /환불 기한|환불 절차|수수료율|결제수단|정산 주기|세금계산서 발행/);
+  const privacy = await read("components/legal/PrivacyScreen.tsx");
+  assert.match(privacy, /개인정보처리방침/);
+  assert.match(privacy, /TODO/);
+  // Resend/custom SMTP aren't operated yet — the policy may name them only
+  // to say so explicitly, but must never list them as an active processor
+  // inside the vendor table itself.
+  assert.match(privacy, /Resend, 별도 SMS 발송 서비스 등은 현재 운영하고 있지 않으며/);
+  const vendorTable = privacy.slice(privacy.indexOf("<tbody>"), privacy.indexOf("</tbody>"));
+  assert.doesNotMatch(vendorTable, /Resend|SMS/i);
+});
+
+test("PrivacyScreen accurately reflects only currently-used external services (Supabase, Vercel, NAVER Maps) confirmed in code — no fabricated vendor list", async () => {
+  const privacy = await read("components/legal/PrivacyScreen.tsx");
+  assert.match(privacy, /Supabase/);
+  assert.match(privacy, /Vercel/);
+  assert.match(privacy, /NAVER/);
+  const naverLoader = await read("lib/naver-maps-loader.ts");
+  assert.ok(naverLoader.length > 0);
+});
+
+test("PrivacyScreen does not assert that Kakao login is currently active or that Kakao data is currently received — only future intent", async () => {
+  const privacy = await read("components/legal/PrivacyScreen.tsx");
+  assert.match(privacy, /카카오 로그인 기능이\s*실제로 활성화되어 있지 않으며 카카오로부터 어떠한 정보도 제공받고 있지 않습니다/);
+});
+
+test("LandingPage footer links to /terms and /privacy without a large redesign — same footer structure, two new links added", async () => {
+  const landing = await read("components/landing/LandingPage.tsx");
+  assert.match(landing, /<div className="footer-links"><a href="\/terms">이용약관<\/a><span aria-hidden="true">\|<\/span><a href="\/privacy">개인정보처리방침<\/a><\/div>/);
+  assert.match(landing, /footer-brand/);
+  assert.match(landing, /footer-meta/);
+});
+
+test("legal-page CSS defines a mobile breakpoint, matching this app's existing mobile-first responsive convention", async () => {
+  const css = await read("app/globals.css");
+  assert.match(css, /\.legal-page \{/);
+  assert.match(css, /@media \(max-width: 560px\) \{ \.legal-page \{/);
+});
+
+test("Real transaction/chat/attachment/auth code paths untouched: no changes to transaction RPCs, storage buckets, or the login/signup/logout methods themselves", async () => {
+  const supabaseProvider = await read("services/auth/supabase-auth-provider.ts");
+  assert.match(supabaseProvider, /async login\(\{ email, password \}: AuthCredentials\)/);
+  assert.match(supabaseProvider, /async signUp\(input: SignUpInput\)/);
+  assert.match(supabaseProvider, /async logout\(\)/);
+  const foundation = await read("supabase/migrations/202607210001_v035_foundation.sql");
+  assert.match(foundation, /create or replace function public\.create_transaction_with_room\(payload jsonb\)/);
+});
