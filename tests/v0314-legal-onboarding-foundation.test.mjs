@@ -190,9 +190,15 @@ test("app/page.tsx: onboarding completion re-enters the normal authenticated-use
 
 test("OnboardingScreen blocks submission without both required consent checkboxes, links to /terms and /privacy, and opens them in a new tab so in-progress form data is never lost", async () => {
   const source = await read("components/auth/OnboardingScreen.tsx");
-  assert.match(source, /if \(!agreedTerms \|\| !agreedPrivacy\) return setError\("이용약관과 개인정보처리방침에 모두 동의해 주세요\."\)/);
+  assert.match(source, /if \(!agreedTerms \|\| !agreedPrivacy\) return setError\("이용약관 동의와 개인정보처리방침 확인이 모두 필요해요\."\)/);
   assert.match(source, /<a href="\/terms" target="_blank" rel="noopener noreferrer">이용약관<\/a>/);
   assert.match(source, /<a href="\/privacy" target="_blank" rel="noopener noreferrer">개인정보처리방침<\/a>/);
+});
+
+test("OnboardingScreen's privacy checkbox is framed as policy acknowledgment, not a separate collection/use consent — matching the contract-necessity legal basis PrivacyScreen documents (no duplicate '수집·이용 동의' wording)", async () => {
+  const source = await read("components/auth/OnboardingScreen.tsx");
+  assert.match(source, /개인정보처리방침<\/a> 확인<\/span>/);
+  assert.doesNotMatch(source, /수집·이용 동의/);
 });
 
 test("OnboardingScreen validates required fields per role before calling the provider (dealer: name/phone; installer: the full required set) — no empty-string submission reaches the RPC", async () => {
@@ -227,7 +233,11 @@ test("TermsScreen and PrivacyScreen render real, non-placeholder legal content �
   assert.doesNotMatch(terms, /환불 기한|환불 절차|수수료율|결제수단|정산 주기|세금계산서 발행/);
   const privacy = await read("components/legal/PrivacyScreen.tsx");
   assert.match(privacy, /개인정보처리방침/);
-  assert.match(privacy, /TODO/);
+  // Unverified facts are marked "확인 예정" (a polished, user-facing pending-
+  // confirmation label) rather than a literal "TODO:" dev-memo prefix.
+  assert.match(privacy, /확인 예정/);
+  const todoBadgeCount = (privacy.match(/<b>확인 예정<\/b>/g) ?? []).length;
+  assert.equal(todoBadgeCount, 3, "retention period, vendor details, and international transfer must each carry the pending-confirmation badge");
   // Resend/custom SMTP aren't operated yet — the policy may name them only
   // to say so explicitly, but must never list them as an active processor
   // inside the vendor table itself.
@@ -243,6 +253,44 @@ test("PrivacyScreen accurately reflects only currently-used external services (S
   assert.match(privacy, /NAVER/);
   const naverLoader = await read("lib/naver-maps-loader.ts");
   assert.ok(naverLoader.length > 0);
+});
+
+test("PrivacyScreen never claims a Vercel DPA is in place — Vercel is described only as the hosting provider, and the Hobby-plan/DPA gap is flagged as an internal code comment, not exposed to end users", async () => {
+  const privacy = await read("components/legal/PrivacyScreen.tsx");
+  // The DEVELOPER-facing comment (above the component) is allowed to say
+  // "DPA"/"Hobby" — that's the point, it documents the real operational
+  // risk for whoever maintains this page. Only the RENDERED, user-facing
+  // JSX (the component body) must never expose that language.
+  const renderedBody = privacy.slice(privacy.indexOf("export function PrivacyScreen"));
+  assert.doesNotMatch(renderedBody, /DPA|Data Processing Agreement|데이터 처리 계약|Hobby|무료 플랜/);
+  assert.match(renderedBody, /<td>애플리케이션 호스팅<\/td><td>Vercel<\/td><td>웹 서비스 배포 및 접속 처리<\/td>/);
+  // The Hobby/DPA gap is real operational risk — it must be documented
+  // somewhere for the developer, just not on the user-facing page itself.
+  assert.match(privacy, /Vercel's Hobby plan/);
+  assert.match(privacy, /internal, not user-facing/);
+});
+
+test("PrivacyScreen's Demo wording no longer overclaims 'no personal data collected' or 'physically separated' — it accurately describes application-level/table-level separation within the same database", async () => {
+  const privacy = await read("components/legal/PrivacyScreen.tsx");
+  assert.doesNotMatch(privacy, /물리적으로 분리/);
+  assert.match(privacy, /실제 개인정보를 입력하지 않으실 것을 권장합니다/);
+  assert.match(privacy, /이용자가 Demo의 메시지, 첨부파일,\s*입력 폼 등에 직접 입력한 내용은 서비스 체험을 위해 저장될 수 있습니다/);
+  assert.match(privacy, /별도의 데이터베이스 테이블 구조로 분리되어 관리/);
+});
+
+test("PrivacyScreen documents a specific legal basis (PIPA Art. 15(1)(4), contract performance) for onboarding-necessary personal information instead of treating it as consent-based collection, and explains optional fields and the future-consent path for anything beyond contract necessity", async () => {
+  const privacy = await read("components/legal/PrivacyScreen.tsx");
+  assert.match(privacy, /2\. 개인정보 처리의 법적 근거 및 동의/);
+  assert.match(privacy, /개인정보 보호법\s*제15조제1항제4호/);
+  assert.match(privacy, /별도의 개인정보 수집·이용 동의를 받지 않으며/);
+  assert.match(privacy, /선택 항목으로 표시된 정보.*입력하지 않아도 서비스 이용에 제한이 없습니다/s);
+  assert.match(privacy, /동의를 거부할 권리와 거부 시 불이익을\s*명확히 고지하고 별도로 동의를 받습니다/);
+});
+
+test("PrivacyScreen articles are sequentially renumbered 1-12 after inserting the new legal-basis section — no duplicate or skipped section numbers", async () => {
+  const privacy = await read("components/legal/PrivacyScreen.tsx");
+  const numbers = [...privacy.matchAll(/<h2>(\d+)\. /g)].map((match) => Number(match[1]));
+  assert.deepEqual(numbers, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
 });
 
 test("PrivacyScreen does not assert that Kakao login is currently active or that Kakao data is currently received — only future intent", async () => {

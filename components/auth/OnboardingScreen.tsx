@@ -26,7 +26,7 @@ export function OnboardingScreen({ user, onCompleteDealer, onCompleteInstaller, 
 
   const submit = async () => {
     setError("");
-    if (!agreedTerms || !agreedPrivacy) return setError("이용약관과 개인정보처리방침에 모두 동의해 주세요.");
+    if (!agreedTerms || !agreedPrivacy) return setError("이용약관 동의와 개인정보처리방침 확인이 모두 필요해요.");
     setBusy(true);
     try {
       if (role === "dealer") {
@@ -87,7 +87,7 @@ export function OnboardingScreen({ user, onCompleteDealer, onCompleteInstaller, 
           </div>
           <div className="onboarding-consent">
             <label><input type="checkbox" checked={agreedTerms} onChange={(event) => setAgreedTerms(event.target.checked)} /><span>[필수] <a href="/terms" target="_blank" rel="noopener noreferrer">이용약관</a> 동의</span></label>
-            <label><input type="checkbox" checked={agreedPrivacy} onChange={(event) => setAgreedPrivacy(event.target.checked)} /><span>[필수] <a href="/privacy" target="_blank" rel="noopener noreferrer">개인정보처리방침</a> 확인 및 개인정보 수집·이용 동의</span></label>
+            <label><input type="checkbox" checked={agreedPrivacy} onChange={(event) => setAgreedPrivacy(event.target.checked)} /><span>[필수] <a href="/privacy" target="_blank" rel="noopener noreferrer">개인정보처리방침</a> 확인</span></label>
           </div>
           {error && <p className="signup-error">{error}</p>}
           <button className="primary signup-submit" disabled={busy} onClick={() => void submit()}>{busy ? "처리 중..." : role === "dealer" ? "딜러로 시작하기" : "입점 신청하기"}</button>

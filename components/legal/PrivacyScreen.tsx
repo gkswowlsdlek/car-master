@@ -1,6 +1,14 @@
 import { CURRENT_PRIVACY_VERSION } from "../../data/legal-versions";
 
 // See TermsScreen.tsx for why this is a plain <a>, not next/link.
+//
+// Vercel note (internal, not user-facing): as of this writing Car-Master
+// runs on Vercel's Hobby plan, which Vercel's own terms scope to personal/
+// non-commercial use, and Vercel's DPA is only offered on Pro/Enterprise.
+// The copy below deliberately states only "Vercel is used for hosting" —
+// it never claims a DPA is in place. Before opening v0.5 up as an external
+// B2B Beta, upgrade to Pro and re-review whether Vercel's DPA needs to be
+// executed.
 export function PrivacyScreen() {
   return (
     <main className="legal-page">
@@ -14,7 +22,7 @@ export function PrivacyScreen() {
         <section className="legal-notice">
           <p>
             본 방침은 정식 법률 검토 이전, Car-Master 베타 서비스 운영을 위해 마련된 실무용 초안입니다.
-            아직 확정되지 않은 사항은 항목별로 &ldquo;TODO&rdquo; 표시로 남겨두었으며, 확인되는 대로 갱신합니다.
+            아직 확정되지 않은 사항은 항목별로 &ldquo;확인 예정&rdquo; 표시로 남겨두었으며, 확인되는 대로 갱신합니다.
           </p>
         </section>
 
@@ -58,9 +66,12 @@ export function PrivacyScreen() {
 
           <h3>바. Demo 이용자</h3>
           <p>
-            서비스 체험을 위한 Demo 계정(딜러/시공점/관리자 샘플 계정)은 실제 회원가입 없이 제공되는
-            시연용 기능으로, 별도의 개인정보를 수집하지 않으며 Demo 이용 중 생성되는 데이터는 실제 회원의
-            데이터와 분리되어 저장·관리됩니다.
+            서비스 체험을 위한 Demo 계정(딜러/시공점/관리자 샘플 계정)은 실제 회원가입 절차 없이 제공되는
+            시연용 기능입니다. Demo 체험을 위해 실제 개인정보를 입력하실 필요는 없으며, 회사는 Demo
+            이용 시 실제 개인정보를 입력하지 않으실 것을 권장합니다. 다만 이용자가 Demo의 메시지, 첨부파일,
+            입력 폼 등에 직접 입력한 내용은 서비스 체험을 위해 저장될 수 있습니다. Demo 데이터는 실제 회원
+            데이터와 별도의 데이터베이스 테이블 구조로 분리되어 관리되며, 이는 소프트웨어적 분리를 의미하고
+            별도의 물리적으로 격리된 서버 인프라를 의미하지는 않습니다.
           </p>
 
           <h3>사. 카카오 소셜 로그인 (예정)</h3>
@@ -73,7 +84,29 @@ export function PrivacyScreen() {
         </article>
 
         <article>
-          <h2>2. 개인정보의 처리 목적</h2>
+          <h2>2. 개인정보 처리의 법적 근거 및 동의</h2>
+          <p>
+            서비스 이용 계약의 체결 및 이행을 위해 반드시 필요한 개인정보(이메일, 비밀번호, 이름 또는
+            상호명, 연락처, 딜러/시공점 가입 시 필수로 표시된 입력 정보 등)는 개인정보 보호법
+            제15조제1항제4호(정보주체와 체결한 계약을 이행하거나 계약을 체결하는 과정에서 정보주체의
+            요청에 따른 조치를 이행하기 위하여 필요한 경우)에 따라 처리합니다. 이러한 정보는 서비스
+            제공 자체를 위해 반드시 필요하므로 별도의 개인정보 수집·이용 동의를 받지 않으며, 온보딩
+            과정에서는 회원가입 계약 체결에 대한 동의(이용약관 동의) 및 본 방침을 확인했다는 동의를
+            받습니다.
+          </p>
+          <p>
+            선택 항목으로 표시된 정보(회사명, 활동지역, 영업시간, 소개글 등)는 회원이 입력 여부를 자유롭게
+            선택할 수 있으며, 입력하지 않아도 서비스 이용에 제한이 없습니다.
+          </p>
+          <p>
+            향후 계약 이행에 반드시 필요하지 않은 목적(예: 마케팅성 정보 제공)으로 개인정보를 처리하게
+            되는 경우에는, 그 시점에 처리 목적, 항목, 보유기간 및 동의를 거부할 권리와 거부 시 불이익을
+            명확히 고지하고 별도로 동의를 받습니다. 현재 Car-Master는 그러한 처리를 하지 않습니다.
+          </p>
+        </article>
+
+        <article>
+          <h2>3. 개인정보의 처리 목적</h2>
           <ul>
             <li>회원 식별 및 가입 의사 확인, 로그인 등 본인 확인</li>
             <li>딜러와 시공점 간 거래 요청 연결 및 거래방을 통한 원활한 커뮤니케이션 제공</li>
@@ -84,7 +117,7 @@ export function PrivacyScreen() {
         </article>
 
         <article>
-          <h2>3. 개인정보의 보유 및 이용기간</h2>
+          <h2>4. 개인정보의 보유 및 이용기간</h2>
           <p>
             회사는 회원 탈퇴 시 지체 없이 해당 회원의 개인정보를 파기합니다. 다만 다음 각 호의 정보는
             아래의 사유로 명시한 기간 동안 보관할 수 있습니다.
@@ -93,11 +126,11 @@ export function PrivacyScreen() {
             <li>관계 법령에서 별도의 보존기간을 정하는 경우, 해당 법령이 정한 기간 (예: 전자상거래 등에서의 소비자보호에 관한 법률 등 관련 법령 적용 대상이 되는 경우 그 법령이 정한 기간)</li>
             <li>거래 관련 분쟁 대응 및 서비스 품질 확인을 위해 필요한 경우, 관련 거래 종료 후 합리적인 기간</li>
           </ul>
-          <p className="legal-todo">TODO: 서비스 정식 운영 시점에 구체적인 보유기간(예: 탈퇴 후 O일)을 확정하여 명시할 예정입니다.</p>
+          <p className="legal-todo"><b>확인 예정</b> — 서비스 정식 운영 시점에 구체적인 보유기간(예: 탈퇴 후 O일)을 확정하여 명시하겠습니다.</p>
         </article>
 
         <article>
-          <h2>4. 개인정보의 제3자 제공</h2>
+          <h2>5. 개인정보의 제3자 제공</h2>
           <p>
             회사는 회원의 동의 없이 개인정보를 제3자에게 제공하지 않습니다. 다만 법령에 특별한 규정이 있거나
             수사기관이 법령에서 정한 절차와 방법에 따라 수사 목적으로 요구하는 경우 등 예외적인 경우에는
@@ -110,7 +143,7 @@ export function PrivacyScreen() {
         </article>
 
         <article>
-          <h2>5. 개인정보 처리위탁 및 외부 서비스</h2>
+          <h2>6. 개인정보 처리위탁 및 외부 서비스</h2>
           <p>회사는 서비스 운영을 위해 다음과 같은 외부 서비스를 이용하고 있습니다.</p>
           <div className="legal-table-wrap">
             <table className="legal-table">
@@ -123,9 +156,9 @@ export function PrivacyScreen() {
             </table>
           </div>
           <p className="legal-todo">
-            TODO: 위 업체들의 정확한 법인명, 서버 소재 국가, 국외이전 해당 여부, 개인정보 보유기간 및
-            계약조건은 각 업체의 최신 공식 정책을 확인하여 정확히 기재할 예정입니다. 확인되지 않은 내용을
-            추정하여 기재하지 않았습니다.
+            <b>확인 예정</b> — 위 업체들의 정확한 법인명, 서버 소재 국가, 국외이전 해당 여부, 개인정보
+            보유기간 및 Car-Master가 각 업체와 실제로 체결한 이용 조건은 각 업체의 최신 공식 정책을
+            확인하여 정확히 기재하겠습니다. 확인되지 않은 내용을 추정하여 기재하지 않았습니다.
           </p>
           <p>
             Resend, 별도 SMS 발송 서비스 등은 현재 운영하고 있지 않으며, 실제로 도입되는 시점에 본 방침에
@@ -134,15 +167,16 @@ export function PrivacyScreen() {
         </article>
 
         <article>
-          <h2>6. 개인정보의 국외 이전</h2>
+          <h2>7. 개인정보의 국외 이전</h2>
           <p className="legal-todo">
-            TODO: 위 처리위탁 업체의 서버 소재지 확인 결과에 따라 국외 이전 해당 여부 및 이전 국가, 이전
-            일시·방법, 이전받는 자의 정보를 관계 법령이 정한 방식으로 명시할 예정입니다.
+            <b>확인 예정</b> — 위 처리위탁 업체의 서버 소재지 확인이 끝나는 대로 국외 이전 해당 여부와 이전
+            국가, 이전 일시·방법, 이전받는 자의 정보를 관계 법령이 정한 방식으로 이 조항에 명시하겠습니다.
+            확인 전까지는 국외 이전 여부를 단정하지 않습니다.
           </p>
         </article>
 
         <article>
-          <h2>7. 개인정보의 파기절차 및 방법</h2>
+          <h2>8. 개인정보의 파기절차 및 방법</h2>
           <ul>
             <li>보유기간이 경과하거나 처리목적이 달성된 개인정보는 지체 없이 파기합니다.</li>
             <li>전자적 파일 형태의 정보는 복구가 불가능한 방법으로 삭제하며, 종이 문서 형태의 정보가 있는 경우 분쇄하거나 소각합니다.</li>
@@ -150,7 +184,7 @@ export function PrivacyScreen() {
         </article>
 
         <article>
-          <h2>8. 정보주체의 권리와 행사방법</h2>
+          <h2>9. 정보주체의 권리와 행사방법</h2>
           <ul>
             <li>회원은 언제든지 자신의 개인정보 열람, 정정, 삭제, 처리정지를 요청할 수 있습니다.</li>
             <li>권리 행사는 서비스 내 계정 설정 화면 또는 아래 문의처를 통해 요청할 수 있으며, 회사는 관계 법령이 정한 기간 내에 조치합니다.</li>
@@ -159,17 +193,17 @@ export function PrivacyScreen() {
         </article>
 
         <article>
-          <h2>9. 개인정보의 안전성 확보조치</h2>
+          <h2>10. 개인정보의 안전성 확보조치</h2>
           <ul>
             <li>비밀번호는 암호화하여 저장하며, 회사를 포함한 누구도 원문을 조회할 수 없습니다.</li>
             <li>딜러/시공점/관리자 각 역할에 따라 접근 가능한 데이터 범위를 데이터베이스 접근제어 정책으로 제한하고 있습니다.</li>
             <li>거래·메시지 관련 첨부파일은 비공개 저장소에 보관되며, 해당 거래의 참여자만 접근할 수 있습니다.</li>
-            <li>Demo 체험 데이터는 실제 회원 데이터와 물리적으로 분리된 공간에 저장됩니다.</li>
+            <li>Demo 체험 데이터는 실제 회원 데이터와 별도의 데이터베이스 테이블 구조로 분리되어 관리됩니다.</li>
           </ul>
         </article>
 
         <article>
-          <h2>10. 개인정보 보호책임자 및 문의처</h2>
+          <h2>11. 개인정보 보호책임자 및 문의처</h2>
           <dl className="legal-contact">
             <div><dt>개인정보 보호책임자</dt><dd>[사업자등록 후 지정 예정]</dd></div>
             <div><dt>문의처</dt><dd>help@car-master.kr</dd></div>
@@ -178,7 +212,7 @@ export function PrivacyScreen() {
         </article>
 
         <article>
-          <h2>11. 방침의 변경</h2>
+          <h2>12. 방침의 변경</h2>
           <p>
             이 방침의 내용이 추가, 삭제 또는 변경되는 경우 시행일자 최소 7일 전(회원에게 불리한 변경의 경우
             30일 전)부터 서비스 내 공지사항 또는 이에 준하는 방법으로 고지합니다.
