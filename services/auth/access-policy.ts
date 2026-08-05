@@ -1,6 +1,6 @@
 import type { CurrentUser } from "../../types/auth";
 
-export const publicPaths = ["/", "/login", "/signup", "/auth/callback"] as const;
+export const publicPaths = ["/", "/login", "/signup", "/forgot-password", "/update-password", "/auth/callback"] as const;
 export const protectedPaths = ["/dealer", "/shop", "/admin", "/account-status"] as const;
 
 export function isPublicPath(pathname: string) {
@@ -14,6 +14,8 @@ export function isProtectedPath(pathname: string) {
 export function publicScreenForPath(pathname: string) {
   if (pathname === "/login") return "login" as const;
   if (pathname === "/signup") return "signup" as const;
+  if (pathname === "/forgot-password") return "forgotPassword" as const;
+  if (pathname === "/update-password") return "updatePassword" as const;
   return "landing" as const;
 }
 

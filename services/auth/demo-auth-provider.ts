@@ -38,4 +38,19 @@ export class DemoAuthProvider implements AuthProvider {
     void _input;
     throw new Error("개발 데모 모드에서는 실제 회원가입을 사용할 수 없습니다. Supabase 환경변수를 설정해 주세요.");
   }
+
+  async requestPasswordReset(_email: string): Promise<void> {
+    void _email;
+    throw new Error("개발 데모 모드에서는 비밀번호 재설정을 사용할 수 없습니다. Supabase 환경변수를 설정해 주세요.");
+  }
+
+  async exchangeRecoveryCode(_code: string): Promise<boolean> {
+    void _code;
+    return false;
+  }
+
+  async updatePassword(_newPassword: string, _currentPassword?: string): Promise<void> {
+    void _newPassword; void _currentPassword;
+    throw new Error("개발 데모 모드에서는 비밀번호 변경을 사용할 수 없습니다. Supabase 환경변수를 설정해 주세요.");
+  }
 }
