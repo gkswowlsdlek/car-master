@@ -1,5 +1,5 @@
 import type { DemoAccount } from "../../types/dealer";
-import { normalizeUserRole, type CurrentUser, type SignUpInput, type SignUpResult } from "../../types/auth.ts";
+import { normalizeUserRole, type CurrentUser, type DealerOnboardingInput, type InstallerOnboardingInput, type SignUpInput, type SignUpResult } from "../../types/auth.ts";
 import { AuthenticationError, type AuthCredentials, type AuthProvider } from "./auth-provider.ts";
 
 export class DemoAuthProvider implements AuthProvider {
@@ -47,6 +47,16 @@ export class DemoAuthProvider implements AuthProvider {
   async exchangeRecoveryCode(_code: string): Promise<boolean> {
     void _code;
     return false;
+  }
+
+  async completeDealerOnboarding(_input: DealerOnboardingInput): Promise<CurrentUser> {
+    void _input;
+    throw new Error("개발 데모 모드에서는 온보딩을 사용할 수 없습니다. Supabase 환경변수를 설정해 주세요.");
+  }
+
+  async completeInstallerOnboarding(_input: InstallerOnboardingInput): Promise<CurrentUser> {
+    void _input;
+    throw new Error("개발 데모 모드에서는 온보딩을 사용할 수 없습니다. Supabase 환경변수를 설정해 주세요.");
   }
 
   async updatePassword(_newPassword: string, _currentPassword?: string): Promise<void> {
