@@ -11,10 +11,44 @@ test("202608050001 adds 'pending' to public.user_role as a standalone, additive 
 
 test("handle_new_user(): OAuth/social sign-in (no recognized signup_role) creates only a minimal pending profile — no dealer_profiles/installer_profiles/installer_approvals, no guessed default role", async () => {
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
-  assert.match(migration, /if new\.raw_user_meta_data ->> 'signup_role' not in \('dealer', 'installer'\) then/);
+  assert.match(migration, /if coalesce\(new\.raw_user_meta_data ->> 'signup_role', ''\) not in \('dealer', 'installer'\) then/);
   const pendingBranch = migration.slice(migration.indexOf("not in ('dealer', 'installer') then"), migration.indexOf("return new;\n  end if;"));
   assert.match(pendingBranch, /values \(new\.id, coalesce\(new\.email, ''\), 'pending'::public\.user_role\)/);
   assert.doesNotMatch(pendingBranch, /dealer_profiles|installer_profiles|installer_approvals/);
+});
+
+test("handle_new_user() NULL-safety fix: the bare (un-coalesced) 'NOT IN' guard is completely absent from the file — the buggy pattern can never silently reappear", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  // Any occurrence of `->> 'signup_role' not in (` must be immediately
+  // preceded by `coalesce(new.raw_user_meta_data `, i.e. every use of this
+  // comparison in the file is wrapped in coalesce — there is no bare
+  // `new.raw_user_meta_data ->> 'signup_role' not in (...)` left anywhere.
+  const bareGuardPattern = /(?<!coalesce\(new\.raw_user_meta_data )->> 'signup_role' not in \(/g;
+  assert.equal([...migration.matchAll(bareGuardPattern)].length, 0, "a bare, un-coalesced NOT IN guard must not exist anywhere in the file");
+});
+
+test("PL/pgSQL three-valued-logic model: `NULL NOT IN (...)` evaluates to NULL (not TRUE), and PL/pgSQL's IF treats a NULL condition as false — this is the exact mechanism of the BLOCKER the pre-fix guard had, verified independently of the SQL file since no local Postgres is available in this environment to execute the trigger live", () => {
+  // Faithful model of Postgres's `x NOT IN (list)` three-valued logic:
+  // NULL if x is null, otherwise a normal boolean membership test.
+  const pgNotIn = (value, list) => (value === null ? null : !list.includes(value));
+  // Faithful model of PL/pgSQL's `IF <cond> THEN ... END IF;`: only NEVER
+  // enters the branch unless cond is exactly true (both false and null are
+  // treated as "don't enter" — this is documented PL/pgSQL behavior).
+  const pgIfEntersBranch = (cond) => cond === true;
+
+  // Pre-fix guard: `signup_role NOT IN ('dealer', 'installer')`.
+  const preFixGuard = (signupRole) => pgIfEntersBranch(pgNotIn(signupRole, ["dealer", "installer"]));
+  // BLOCKER demonstration: a NULL signup_role (e.g. an OAuth-created row
+  // with no metadata at all) did NOT enter the pending branch pre-fix —
+  // it silently fell through to the CASE below, which defaults to dealer.
+  assert.equal(preFixGuard(null), false, "pre-fix: NULL signup_role incorrectly skipped the pending branch (the BLOCKER)");
+
+  // Post-fix guard: `coalesce(signup_role, '') NOT IN ('dealer', 'installer')`.
+  const postFixGuard = (signupRole) => pgIfEntersBranch(pgNotIn(signupRole ?? "", ["dealer", "installer"]));
+  assert.equal(postFixGuard(null), true, "post-fix: NULL signup_role (no metadata — the OAuth/Kakao case) must enter the pending branch");
+  assert.equal(postFixGuard("dealer"), false, "post-fix: signup_role='dealer' must NOT enter the pending branch (existing dealer signup unaffected)");
+  assert.equal(postFixGuard("installer"), false, "post-fix: signup_role='installer' must NOT enter the pending branch (existing installer signup unaffected)");
+  assert.equal(postFixGuard("something-unrecognized"), true, "post-fix: an unrecognized signup_role value must also enter the pending branch");
 });
 
 test("handle_new_user(): existing dealer/installer email signup logic is preserved byte-for-byte (same inserts as the original v0.3.4 migration)", async () => {

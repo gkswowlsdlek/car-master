@@ -57,7 +57,16 @@ as $$
 declare
   requested_role public.user_role;
 begin
-  if new.raw_user_meta_data ->> 'signup_role' not in ('dealer', 'installer') then
+  -- coalesce(..., '') is required here, not cosmetic: in SQL three-valued
+  -- logic, `NULL NOT IN (...)` evaluates to NULL (not TRUE), and PL/pgSQL's
+  -- IF treats a NULL condition as false — so a bare `signup_role NOT IN
+  -- (...)` guard would silently SKIP this branch for a NULL signup_role
+  -- (no metadata at all, e.g. an OAuth-created row) and fall through to
+  -- the CASE below, which defaults to 'dealer'. Coalescing to '' first
+  -- makes the comparison a real, non-null value ('' NOT IN (...) = true),
+  -- so NULL / '' / any unrecognized string all correctly enter the
+  -- pending branch, while exactly 'dealer'/'installer' correctly do not.
+  if coalesce(new.raw_user_meta_data ->> 'signup_role', '') not in ('dealer', 'installer') then
     -- No recognized signup_role metadata (OAuth/social sign-in, or any
     -- future path that doesn't collect role/business info before the
     -- auth.users row exists). Create only the identity anchor row and
