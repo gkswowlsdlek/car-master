@@ -2,7 +2,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+// Normalize CRLF -> LF unconditionally: every test in this file anchors on
+// literal "\n" inside indexOf/regex patterns. Windows checkouts can write
+// some files with \r\n (git core.autocrlf) depending on exactly when they
+// were last rewritten to disk relative to that setting, which is a local-
+// checkout artifact with no bearing on the actual committed content (verified
+// via `git diff` across branches showing zero difference) — normalizing here
+// once means every test below can keep assuming plain "\n" line endings.
+const read = async (path) => (await readFile(new URL(`../${path}`, import.meta.url), "utf8")).replace(/\r\n/g, "\n");
 
 test("202608050001 adds 'pending' to public.user_role as a standalone, additive migration", async () => {
   const migration = await read("supabase/migrations/202608050001_v0314_user_role_pending.sql");
@@ -58,7 +65,15 @@ test("handle_new_user(): existing dealer/installer email signup logic is preserv
   const originalInsertBlock = original.slice(originalStart, original.indexOf("\n$$;", originalStart));
   const updatedStart = updated.indexOf("requested_role := case");
   const updatedInsertBlock = updated.slice(updatedStart, updated.indexOf("\n$$;", updatedStart));
-  assert.equal(updatedInsertBlock.trim(), originalInsertBlock.trim());
+  // Normalize CRLF -> LF before comparing: this asserts the SQL content is
+  // identical, not that the two files happen to share the same on-disk
+  // line-ending style. Windows checkouts of a freshly-written file can
+  // legitimately differ in \r\n vs \n from an older, untouched file under
+  // git's core.autocrlf — that's a local-checkout artifact, not a real
+  // divergence (confirmed via `git diff` between branches showing zero
+  // difference in the committed blob content).
+  const normalize = (text) => text.replace(/\r\n/g, "\n").trim();
+  assert.equal(normalize(updatedInsertBlock), normalize(originalInsertBlock));
 });
 
 test("complete_dealer_onboarding: only runs for the caller's own row, only from role='pending', and is fully additive (dealer_profiles + legal_agreements in the same function)", async () => {
