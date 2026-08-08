@@ -92,21 +92,19 @@ test("Demo accounts (1/1, 2/2, 3/3) never reach password reset/change — Profil
   assert.match(demoSession, /export async function verifyDemoSession/);
 });
 
-test("Demo-mode AuthProvider implementations reject password reset/change with a clear message instead of silently succeeding or crashing", async () => {
-  const demoProvider = await read("services/auth/demo-auth-provider.ts");
-  assert.match(demoProvider, /async requestPasswordReset[\s\S]*?throw new Error/);
-  assert.match(demoProvider, /async exchangeRecoveryCode[\s\S]*?return false;/);
-  assert.match(demoProvider, /async updatePassword[\s\S]*?throw new Error/);
+test("the unconfigured runtime AuthProvider rejects password reset/change instead of silently succeeding", async () => {
   const unconfiguredProvider = await read("services/auth/unconfigured-auth-provider.ts");
   assert.match(unconfiguredProvider, /requestPasswordReset[\s\S]*?throw configurationError/);
+  assert.match(unconfiguredProvider, /exchangeRecoveryCode[\s\S]*?return false/);
+  assert.match(unconfiguredProvider, /updatePassword[\s\S]*?throw configurationError/);
 });
 
-test("All three AuthProvider implementations (Supabase, Demo legacy, Unconfigured) implement the extended interface — role regression guard", async () => {
+test("both runtime AuthProvider implementations implement the extended interface — role regression guard", async () => {
   const providerInterface = await read("services/auth/auth-provider.ts");
   assert.match(providerInterface, /requestPasswordReset\(email: string\): Promise<void>/);
   assert.match(providerInterface, /exchangeRecoveryCode\(code: string\): Promise<boolean>/);
   assert.match(providerInterface, /updatePassword\(newPassword: string, currentPassword\?: string\): Promise<void>/);
-  for (const file of ["services/auth/supabase-auth-provider.ts", "services/auth/demo-auth-provider.ts", "services/auth/unconfigured-auth-provider.ts"]) {
+  for (const file of ["services/auth/supabase-auth-provider.ts", "services/auth/unconfigured-auth-provider.ts"]) {
     const source = await read(file);
     assert.match(source, /requestPasswordReset/, `${file} missing requestPasswordReset`);
     assert.match(source, /exchangeRecoveryCode/, `${file} missing exchangeRecoveryCode`);

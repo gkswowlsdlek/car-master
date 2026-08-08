@@ -298,11 +298,11 @@ test("Demo login and is_admin()/admin bootstrap are untouched by this migration 
   assert.doesNotMatch(demoLoginRoute, /pending|legal_agreements|onboarding/i);
 });
 
-test("AuthProvider interface gains completeDealerOnboarding/completeInstallerOnboarding; all three implementations (Supabase, Demo, Unconfigured) implement them", async () => {
+test("AuthProvider interface gains completeDealerOnboarding/completeInstallerOnboarding; both runtime implementations (Supabase, Unconfigured) implement them", async () => {
   const providerInterface = await read("services/auth/auth-provider.ts");
   assert.match(providerInterface, /completeDealerOnboarding\(input: DealerOnboardingInput\): Promise<CurrentUser>/);
   assert.match(providerInterface, /completeInstallerOnboarding\(input: InstallerOnboardingInput\): Promise<CurrentUser>/);
-  for (const file of ["services/auth/supabase-auth-provider.ts", "services/auth/demo-auth-provider.ts", "services/auth/unconfigured-auth-provider.ts"]) {
+  for (const file of ["services/auth/supabase-auth-provider.ts", "services/auth/unconfigured-auth-provider.ts"]) {
     const source = await read(file);
     assert.match(source, /completeDealerOnboarding/, `${file} missing completeDealerOnboarding`);
     assert.match(source, /completeInstallerOnboarding/, `${file} missing completeInstallerOnboarding`);
@@ -316,10 +316,7 @@ test("SupabaseAuthProvider.completeDealerOnboarding/completeInstallerOnboarding 
   assert.match(source, /return this\.resolveUser\(user\);/g);
 });
 
-test("Demo and Unconfigured providers reject onboarding with a clear error instead of silently succeeding", async () => {
-  const demoProvider = await read("services/auth/demo-auth-provider.ts");
-  assert.match(demoProvider, /async completeDealerOnboarding[\s\S]*?throw new Error/);
-  assert.match(demoProvider, /async completeInstallerOnboarding[\s\S]*?throw new Error/);
+test("the unconfigured runtime provider rejects onboarding with a clear error instead of silently succeeding", async () => {
   const unconfiguredProvider = await read("services/auth/unconfigured-auth-provider.ts");
   assert.match(unconfiguredProvider, /completeDealerOnboarding[\s\S]*?throw configurationError/);
   assert.match(unconfiguredProvider, /completeInstallerOnboarding[\s\S]*?throw configurationError/);

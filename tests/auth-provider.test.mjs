@@ -1,27 +1,15 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { defaultDemoCredentials, getDemoCredentials } from "../lib/demo-credentials.ts";
 import { createDemoSession, verifyDemoSession } from "../lib/demo-session.ts";
-import { DemoAuthProvider } from "../services/auth/demo-auth-provider.ts";
 
-const accounts = [
-  { id: "dealer-1", email: "dealer", password: "secret", name: "딜러", role: "dealer", entryScreen: "dealerDashboard" },
-  { id: "shop-1", email: "shop", password: "secret", name: "시공점", role: "shop", entryScreen: "shopDashboard", shopId: "installer-1" },
-];
-
-test("demo auth validates credentials and exposes a canonical current user", async () => {
-  const provider = new DemoAuthProvider(accounts);
-  const user = await provider.login({ email: " SHOP ", password: "secret" });
-  assert.equal(user.role, "installer");
-  assert.equal(user.installerId, "installer-1");
-  assert.deepEqual(provider.getCurrentUser(), user);
-  await provider.logout();
-  assert.equal(provider.getCurrentUser(), null);
-});
-
-test("demo auth rejects invalid credentials", async () => {
-  const provider = new DemoAuthProvider(accounts);
-  await assert.rejects(() => provider.login({ email: "dealer", password: "wrong" }), /아이디 또는 비밀번호/);
+test("the Demo login route composes server credentials, signed sessions, and an HttpOnly cookie", async () => {
+  const route = await readFile(new URL("../app/api/demo-login/route.ts", import.meta.url), "utf8");
+  assert.match(route, /getDemoCredentials\(\)\.find/);
+  assert.match(route, /await createDemoSession\(matched\.role\)/);
+  assert.match(route, /response\.cookies\.set\(demoSessionCookie, session\.token, \{ httpOnly: true/);
+  assert.match(route, /if \(!matched\) return NextResponse\.json\(\{ matched: false \}, \{ status: 401 \}\)/);
 });
 
 test("server demo sessions are signed and reject tampering", async () => {
