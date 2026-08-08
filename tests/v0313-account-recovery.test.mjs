@@ -114,8 +114,11 @@ test("both runtime AuthProvider implementations implement the extended interface
 
 test("Real Dealer, Installer and Admin all wire the same shared PasswordChangeForm / changePassword handler — no per-role password system", async () => {
   const page = await read("app/page.tsx");
+  const installerWorkspace = await read("components/workspaces/InstallerWorkspace.tsx");
   assert.match(page, /const changePassword = useCallback\(\(currentPassword: string, newPassword: string\) => authProvider\.updatePassword\(newPassword, currentPassword\), \[\]\)/);
-  assert.match(page, /<ProfileEditor key={role}[\s\S]*?onChangePassword={changePassword}/);
+  assert.match(page, /role === "dealer"[\s\S]*?<ProfileEditor role="dealer"[\s\S]*?onChangePassword={changePassword}/);
+  assert.match(page, /<InstallerWorkspace[\s\S]*?onChangePassword={changePassword}/);
+  assert.match(installerWorkspace, /<ProfileEditor role="shop"[\s\S]*?onChangePassword={onChangePassword}/);
   assert.match(page, /<AdminAccountScreen demoSession={[\s\S]*?onChangePassword={changePassword}/);
   const profileEditor = await read("components/profile/ProfileEditor.tsx");
   const adminAccount = await read("components/admin/AdminAccountScreen.tsx");

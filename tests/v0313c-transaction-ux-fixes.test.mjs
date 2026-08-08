@@ -7,7 +7,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 test("Dealer Dashboard quick-action filters actually reach the 거래 관리 screen instead of being dropped on the floor", async () => {
   const page = await read("app/page.tsx");
   assert.match(page, /onFilterDeals=\{\(filter\) => \{ setDealFilter\(filter\); goToScreen\("deals"\); \}\}/);
-  assert.match(page, /initialStageFilter=\{role === "dealer" \? dealFilter : undefined\}/);
+  assert.match(page, /role === "dealer" && screen === "deals"[\s\S]*?initialStageFilter=\{dealFilter\}/);
   assert.doesNotMatch(page, /onOpenDeal/);
   const dashboard = await read("components/dealer/DealerDashboard.tsx");
   assert.doesNotMatch(dashboard, /onOpenDeal/);

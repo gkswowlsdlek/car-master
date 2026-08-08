@@ -21,8 +21,8 @@ import { LandingPage } from "../components/landing/LandingPage";
 import { AppShell } from "../components/layout/AppShell";
 import { MessengerScreen } from "../components/messenger/MessengerScreen";
 import { ProfileEditor, defaultDealerCompanyName } from "../components/profile/ProfileEditor";
-import { ShopDashboard } from "../components/shop/ShopDashboard";
 import { TransactionManagementScreen } from "../components/transactions/TransactionManagementScreen";
+import { InstallerWorkspace } from "../components/workspaces/InstallerWorkspace";
 import { defaultRequest } from "../data/default-request";
 import { demoAccounts, isDemoAccountId } from "../data/demo-accounts";
 import { districtCenters } from "../data/district-centers";
@@ -93,10 +93,6 @@ function accountForUser(user: CurrentUser): DemoAccount {
   return { id: user.id, email: user.email, password: "", name: user.name, role, entryScreen: role === "dealer" ? "dealerDashboard" : role === "shop" ? "shopDashboard" : "ops", shopId: role === "shop" ? user.id : undefined };
 }
 
-function roleTransactionsForActivity(transactions: Transaction[], role: Role, shopId?: string) {
-  return role === "shop" ? transactions.filter((item) => item.installerId === shopId) : transactions;
-}
-
 export default function Home() {
   const pathname = usePathname();
   const [role, setRole] = useState<Role>("dealer");
@@ -114,9 +110,11 @@ export default function Home() {
   const [priceSearch, setPriceSearch] = useState("");
   const [vehicleClass, setVehicleClass] = useState<VehicleClass>("국산 승용");
   const [selectedPackageId, setSelectedPackageId] = useState(pricePackages[0].id);
-  const [selectedTransactionId, setSelectedTransactionId] = useState("");
+  const [dealerSelectedTransactionId, setDealerSelectedTransactionId] = useState("");
   const [dealFilter, setDealFilter] = useState<TransactionStage | "전체">("전체");
-  const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  const [dealerMobileChatOpen, setDealerMobileChatOpen] = useState(false);
+  const [installerMobileFullscreen, setInstallerMobileFullscreen] = useState(false);
+  const [installerUnreadMessageCount, setInstallerUnreadMessageCount] = useState(0);
   const [approvedInstallerShops, setApprovedInstallerShops] = useState<InstallerListing[]>([]);
   const [installerDirectoryLoading, setInstallerDirectoryLoading] = useState(false);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
@@ -324,13 +322,11 @@ export default function Home() {
     return profileRepository.subscribe(refresh);
   }, [role, account.id]);
 
-  const activeTransactionId = selectedTransactionId || transactions[0]?.id || "";
   const profileActivity = useMemo(() => {
     const now = new Date();
-    const monthly = roleTransactionsForActivity(transactions, role, account.shopId).filter((item) => { const date = new Date(item.status.createdAt); return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth(); }).length;
-    const scoped = roleTransactionsForActivity(transactions, role, account.shopId);
-    return { total: scoped.length, monthly, completed: scoped.filter((item) => item.status.stage === "작업완료").length, favorites: role === "dealer" ? favoriteShopIds.length : 0 };
-  }, [transactions, role, account.shopId, favoriteShopIds.length]);
+    const monthly = transactions.filter((item) => { const date = new Date(item.status.createdAt); return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth(); }).length;
+    return { total: transactions.length, monthly, completed: transactions.filter((item) => item.status.stage === "작업완료").length, favorites: favoriteShopIds.length };
+  }, [transactions, favoriteShopIds.length]);
 
   const searchArea = async (value = query) => {
     const result = await searchLocation(value);
@@ -366,7 +362,7 @@ export default function Home() {
         await refresh();
         window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
         setRequest(defaultRequest);
-        setSelectedTransactionId(created.transactionId); setDealFilter("전체"); goToScreen("deals");
+        setDealerSelectedTransactionId(created.transactionId); setDealFilter("전체"); goToScreen("deals");
         void notificationService.notify({ type: "new_service_request", transactionId: created.transactionId, installerId: selectedShop.id });
       } catch (error) { alert(error instanceof Error ? error.message : "거래를 생성하지 못했습니다."); }
       return;
@@ -383,7 +379,7 @@ export default function Home() {
         await refresh();
         window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
         setRequest(defaultRequest);
-        setSelectedTransactionId(created.transactionId); setDealFilter("전체"); goToScreen("deals");
+        setDealerSelectedTransactionId(created.transactionId); setDealFilter("전체"); goToScreen("deals");
         void notificationService.notify({ type: "new_service_request", transactionId: created.transactionId, installerId: selectedShop.id });
       } catch (error) { alert(error instanceof Error ? error.message : "거래를 생성하지 못했습니다."); }
       return;
@@ -398,7 +394,7 @@ export default function Home() {
     transactionRepository.create(transaction); chatRepository.create(room);
     window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
     setRequest(defaultRequest);
-    setSelectedTransactionId(id); setDealFilter("전체"); goToScreen("deals");
+    setDealerSelectedTransactionId(id); setDealFilter("전체"); goToScreen("deals");
     void notificationService.notify({ type: "new_service_request", transactionId: id, installerId: selectedShop.id });
     } finally {
       setIsCreatingTransaction(false);
@@ -502,21 +498,24 @@ export default function Home() {
   if (screen === "onboarding" && currentUser) return <OnboardingScreen user={currentUser} onCompleteDealer={completeDealerOnboarding} onCompleteInstaller={completeInstallerOnboarding} onLogout={() => void logout()} />;
   if (screen === "accountStatus" && currentUser) return <AccountStatusScreen user={currentUser} onLogout={() => void logout()} />;
 
-  const roleTransactions = role === "shop" ? transactions.filter((item) => item.installerId === (account.shopId ?? selectedShop.id)) : transactions;
-  const unreadMessageCount = rooms.filter((room) => roleTransactions.some((item) => item.chatRoomId === room.id)).reduce((sum, room) => sum + room.unreadCount, 0);
-  return <AppShell role={role} account={account} company={sidebarCompanyName} screen={screen} unreadMessageCount={unreadMessageCount} mobileFullscreen={screen === "messages" && mobileChatOpen} onNavigate={goToScreen} onLogout={() => void logout()}>
+  const dealerTransactions = transactions;
+  const dealerUnreadMessageCount = rooms.filter((room) => dealerTransactions.some((item) => item.chatRoomId === room.id)).reduce((sum, room) => sum + room.unreadCount, 0);
+  const unreadMessageCount = role === "shop" ? installerUnreadMessageCount : dealerUnreadMessageCount;
+  const mobileFullscreen = role === "shop" ? installerMobileFullscreen : screen === "messages" && dealerMobileChatOpen;
+  const dealerActiveTransactionId = dealerSelectedTransactionId || dealerTransactions[0]?.id || "";
+  return <AppShell role={role} account={account} company={sidebarCompanyName} screen={screen} unreadMessageCount={unreadMessageCount} mobileFullscreen={mobileFullscreen} onNavigate={goToScreen} onLogout={() => void logout()}>
     {transactionLoadError && <div className="system-inline-error" role="alert"><span>{transactionLoadError}</span><button onClick={() => void refresh()}>다시 시도</button></div>}
     {isTransactionLoading && useSupabaseData && <p className="system-inline-loading" role="status">거래 정보를 불러오는 중입니다.</p>}
-    {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} unreadMessageCount={unreadMessageCount} onFilterDeals={(filter) => { setDealFilter(filter); goToScreen("deals"); }} onNewRequest={() => goToScreen("request")} onFindShop={() => goToScreen("dealerMap")} onPriceGuide={() => goToScreen("priceGuide")} onOpenChat={() => goToScreen("messages")} />}
+    {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} unreadMessageCount={dealerUnreadMessageCount} onFilterDeals={(filter) => { setDealFilter(filter); goToScreen("deals"); }} onNewRequest={() => goToScreen("request")} onFindShop={() => goToScreen("dealerMap")} onPriceGuide={() => goToScreen("priceGuide")} onOpenChat={() => goToScreen("messages")} />}
     {screen === "priceGuide" && <PriceGuideScreen packages={filteredPackages} selectedPackage={selectedPackage} selectedPackageId={selectedPackageId} setSelectedPackageId={setSelectedPackageId} brandFilter={priceFilter} setBrandFilter={setPriceFilter} search={priceSearch} setSearch={setPriceSearch} vehicleClass={vehicleClass} setVehicleClass={setVehicleClass} onRequest={applyPackage} />}
     {screen === "dealerMap" && <InstallerDirectoryScreen installers={availableShops} loading={useSupabaseData && installerDirectoryLoading} selectedId={selectedShopId} setSelectedId={setSelectedShopId} favoriteIds={favoriteShopIds} toggleFavorite={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => goToScreen("request")} />}
     {screen === "request" && locationError && <div className="location-search-error"><b>{locationError}</b></div>}
     {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={(area) => void searchArea(area ?? request.deliveryArea)} onSummary={() => goToScreen("requestSummary")} onPriceGuide={() => goToScreen("priceGuide")} />}
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} submitting={isCreatingTransaction} onBack={() => goToScreen("request")} onSubmit={createTransaction} />}
-    {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} rooms={rooms} onOpenTransaction={(id) => { setSelectedTransactionId(id); goToScreen("shopRequests"); }} onOpenMessage={(id) => { setSelectedTransactionId(id); goToScreen("messages"); }} onStageChange={changeStage} />}
-    {(screen === "deals" || screen === "shopRequests") && <TransactionManagementScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} initialStageFilter={role === "dealer" ? dealFilter : undefined} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUnhide={unhideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} onMarkRead={markRoomRead} onLoadContact={loadContact} onOpenMessages={(id) => { setSelectedTransactionId(id); goToScreen("messages"); }} />}
-    {screen === "messages" && <MessengerScreen role={role === "shop" ? "shop" : "dealer"} userId={account.id} transactions={roleTransactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={!useSupabaseData && demoAttachmentsReady ? demoAttachmentProvider : undefined} isLoading={isTransactionLoading} loadError={transactionLoadError} onSelect={setSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} onMobileChatOpenChange={setMobileChatOpen} />}
-    {screen === "dealerProfile" && <ProfileEditor key={role} role={role === "shop" ? "shop" : "dealer"} userId={account.id} activity={profileActivity} onChangePassword={changePassword} />}
+    {role === "shop" && <InstallerWorkspace account={account} screen={screen} transactions={transactions} rooms={rooms} installers={availableShops} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={!useSupabaseData && demoAttachmentsReady ? demoAttachmentProvider : undefined} isLoading={isTransactionLoading} loadError={transactionLoadError} onNavigate={goToScreen} onSend={sendMessage} onHide={hideTransaction} onUnhide={unhideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} onChangePassword={changePassword} onUnreadMessageCountChange={setInstallerUnreadMessageCount} onMobileFullscreenChange={setInstallerMobileFullscreen} />}
+    {role === "dealer" && screen === "deals" && <TransactionManagementScreen role="dealer" userId={account.id} transactions={dealerTransactions} rooms={rooms} selectedId={dealerActiveTransactionId} initialStageFilter={dealFilter} useRemoteAttachments={useSupabaseData} onSelect={setDealerSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onUnhide={unhideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onNewRequest={() => goToScreen("request")} onMarkRead={markRoomRead} onLoadContact={loadContact} onOpenMessages={(id) => { setDealerSelectedTransactionId(id); goToScreen("messages"); }} />}
+    {role === "dealer" && screen === "messages" && <MessengerScreen role="dealer" userId={account.id} transactions={dealerTransactions} rooms={rooms} installers={availableShops} selectedId={dealerActiveTransactionId} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={!useSupabaseData && demoAttachmentsReady ? demoAttachmentProvider : undefined} isLoading={isTransactionLoading} loadError={transactionLoadError} onSelect={setDealerSelectedTransactionId} onSend={sendMessage} onHide={hideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} onMobileChatOpenChange={setDealerMobileChatOpen} />}
+    {role === "dealer" && screen === "dealerProfile" && <ProfileEditor role="dealer" userId={account.id} activity={profileActivity} onChangePassword={changePassword} />}
     {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} demoSession={demoAccounts.some((item) => item.id === account.id)} />}
     {screen === "adminAccount" && <AdminAccountScreen demoSession={demoAccounts.some((item) => item.id === account.id)} onChangePassword={changePassword} />}
   </AppShell>;
