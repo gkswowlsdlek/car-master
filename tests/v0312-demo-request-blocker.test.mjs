@@ -9,7 +9,8 @@ test("the real-only approved-installer alert is strictly inside the useSupabaseD
   const alertLine = source.split("\n").find((line) => line.includes("관리자에게 승인된 시공점을 선택해 주세요"));
   assert.ok(alertLine, "expected the alert to still exist for real dealers");
 
-  const createTransactionBody = source.slice(source.indexOf("const createTransaction = async"), source.indexOf("const notifyNewMessage"));
+  const createTransactionStart = source.indexOf("const createTransaction = async");
+  const createTransactionBody = source.slice(createTransactionStart, source.indexOf("if (isProtectedPath", createTransactionStart));
   const supabaseBranchStart = createTransactionBody.indexOf("if (useSupabaseData) {");
   const demoBranchStart = createTransactionBody.indexOf("if (useDemoSharedBackend) {");
   const alertIndex = createTransactionBody.indexOf("관리자에게 승인된 시공점을 선택해 주세요");
@@ -19,7 +20,8 @@ test("the real-only approved-installer alert is strictly inside the useSupabaseD
 
 test("Demo Dealer creates transactions through demoTransactionRepository, never through approvedInstallerShops", async () => {
   const source = await read("app/page.tsx");
-  const createTransactionBody = source.slice(source.indexOf("const createTransaction = async"), source.indexOf("const notifyNewMessage"));
+  const createTransactionStart = source.indexOf("const createTransaction = async");
+  const createTransactionBody = source.slice(createTransactionStart, source.indexOf("if (isProtectedPath", createTransactionStart));
   const demoBranch = createTransactionBody.slice(createTransactionBody.indexOf("if (useDemoSharedBackend) {"));
   assert.match(demoBranch, /demoTransactionRepository\.createWithRoom/);
   assert.doesNotMatch(demoBranch, /approvedInstallerShops/);

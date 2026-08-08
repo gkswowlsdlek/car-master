@@ -30,29 +30,26 @@ import { demoInstallerListings } from "../data/installer-directory-demo";
 import { formatGuidePrice } from "../data/installation-price-guide";
 import { pricePackages, type PriceGuideFilter, type PricePackage, type VehicleClass } from "../data/pricePackages";
 import { calculateVehicleClassPrice } from "../data/vehicle-class-options";
+import { useTransactionActions } from "../hooks/use-transaction-actions";
 import { useTransactionStore } from "../hooks/use-transaction-store";
 import { demoAttachmentProvider } from "../services/attachments";
 import type { Brand } from "../lib/dealer-flow-data";
 import { chatRepository } from "../repositories/chat-repository";
 import { profileRepository } from "../repositories/profile-repository";
-import { demoChatRepository } from "../repositories/demo-chat-repository";
 import { installerDirectoryRepository } from "../repositories/installer-directory-repository";
-import { supabaseChatRepository } from "../repositories/supabase-chat-repository";
 import { supabaseTransactionRepository } from "../repositories/supabase-transaction-repository";
 import { transactionRepository } from "../repositories/transaction-repository";
 import { demoTransactionRepository } from "../repositories/demo-transaction-repository";
 import { searchNearbyInstallers } from "../services/installer-search";
 import { createId, createTransactionNumber } from "../services/id-service";
 import { searchLocation } from "../services/location-search";
-import { resolveDemoContact } from "../services/contact-directory";
 import { notificationService } from "../services/notifications/notification-service";
 import { authProvider, initializeAuth, routeAfterAuthInitialization } from "../services/auth";
 import { isProtectedPath, publicScreenForPath } from "../services/auth/access-policy";
-import { transitionPayment, transitionStage } from "../services/transaction-state-service";
 import type { DemoAccount, RequestType, Role, Screen, ServiceRequest } from "../types/dealer";
 import type { InstallerListing } from "../types/installer";
 import type { SearchLocation } from "../types/location";
-import type { ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../types/transactions";
+import type { ChatRoom, Transaction, TransactionStage } from "../types/transactions";
 import type { CurrentUser, DealerOnboardingInput, InstallerOnboardingInput, SignUpInput, SignUpResult } from "../types/auth";
 
 const initialDistrict = districtCenters.find((item) => item.id === "gyeonggi-hanam") ?? districtCenters[0];
@@ -119,14 +116,13 @@ export default function Home() {
   const [installerDirectoryLoading, setInstallerDirectoryLoading] = useState(false);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
   const useSupabaseData = Boolean(currentUser);
-  const { transactions, rooms, isLoading: isTransactionLoading, error: transactionLoadError, refresh, markRoomRead, demoSchemaReady, sharedRoomIds } = useTransactionStore(useSupabaseData, account.id);
+  const { transactions, rooms, isLoading: isTransactionLoading, error: transactionLoadError, refresh, demoSchemaReady, sharedRoomIds } = useTransactionStore(useSupabaseData, account.id);
   // True once the shared Demo transaction backend (202608010001 migration)
   // is confirmed live — until then every Demo mutation below falls back to
   // this browser's own localStorage exactly as before v0.3.12, instead of
   // throwing against RPCs/tables that don't exist yet.
   const useDemoSharedBackend = !useSupabaseData && demoSchemaReady === true;
-  const isSharedDemoTransaction = (transaction: Transaction) => sharedRoomIds.has(transaction.chatRoomId);
-  const demoActorRole: "dealer" | "shop" | "admin" = role === "shop" ? "shop" : role === "admin" ? "admin" : "dealer";
+  const { sendMessage, markRoomRead, loadContact, hideTransaction, unhideTransaction, changeStage, changeFinalPrice, changePayment } = useTransactionActions({ useSupabaseData, transactions, sharedRoomIds, demoActorId: account.id, role, refresh });
 
   // Demo Messenger attachment persistence (SUPABASE_SERVICE_ROLE_KEY +
   // demo-transaction-attachments bucket). Same graceful-degrade shape as
@@ -399,92 +395,6 @@ export default function Home() {
     } finally {
       setIsCreatingTransaction(false);
     }
-  };
-
-  const notifyNewMessage = (transaction: Transaction, message: TransactionChatMessage) => {
-    const recipientId = message.senderId === transaction.dealerId ? transaction.installerId : transaction.dealerId;
-    void notificationService.notify({ type: "new_message", transactionId: transaction.id, roomId: transaction.chatRoomId, recipientId, preview: message.text || "사진을 보냈습니다" });
-  };
-  const sendMessage = async (transaction: Transaction, message: TransactionChatMessage) => {
-    if (useSupabaseData) {
-      try {
-        await supabaseChatRepository.addMessage(transaction.chatRoomId, message);
-        await refresh();
-        notifyNewMessage(transaction, message);
-      } catch (error) { throw new Error(error instanceof Error ? error.message : "메시지를 전송하지 못했습니다."); }
-      return;
-    }
-    const nextMessage = { ...message, id: createId("MSG") };
-    if (isSharedDemoTransaction(transaction)) {
-      try {
-        // No local transactionRepository.update() here: the shared
-        // demo_transactions row's last_message/updated_at is touched
-        // server-side by the demo_chat_messages insert trigger (see the
-        // v0.3.12 migration) — this browser has no write grant on that
-        // table directly, and other browsers need the same update anyway.
-        await demoChatRepository.addMessage(transaction.chatRoomId, nextMessage);
-        await refresh();
-        notifyNewMessage(transaction, nextMessage);
-      } catch (error) { throw new Error(error instanceof Error ? error.message : "메시지를 전송하지 못했습니다."); }
-      return;
-    }
-    chatRepository.addMessage(transaction.chatRoomId, nextMessage);
-    transactionRepository.update({ ...transaction, lastMessage: message.text || (message.attachments?.length ? "사진을 보냈습니다" : transaction.lastMessage), status: { ...transaction.status, updatedAt: message.createdAt } });
-    notifyNewMessage(transaction, nextMessage);
-  };
-  const loadContact = async (transaction: Transaction) => {
-    if (useSupabaseData) return supabaseTransactionRepository.getContact(transaction.id);
-    return resolveDemoContact(transaction, role === "shop" ? "shop" : "dealer");
-  };
-  const hideTransaction = async (id: string, targetRole: "dealer" | "shop") => {
-    if (useSupabaseData) {
-      try { await supabaseTransactionRepository.setVisibility(id, true); await refresh(); }
-      catch (error) { alert(error instanceof Error ? error.message : "거래를 숨길 수 없습니다."); }
-      return;
-    }
-    const target = transactions.find((item) => item.id === id);
-    if (target && isSharedDemoTransaction(target)) {
-      try { await demoTransactionRepository.setVisibility(id, true, targetRole); await refresh(); }
-      catch (error) { alert(error instanceof Error ? error.message : "거래를 숨길 수 없습니다."); }
-      return;
-    }
-    if (targetRole === "dealer") transactionRepository.hideForDealer(id); else transactionRepository.hideForInstaller(id);
-  };
-  const unhideTransaction = async (id: string, targetRole: "dealer" | "shop") => {
-    if (useSupabaseData) {
-      try { await supabaseTransactionRepository.setVisibility(id, false); await refresh(); }
-      catch (error) { alert(error instanceof Error ? error.message : "숨김을 해제할 수 없습니다."); }
-      return;
-    }
-    const target = transactions.find((item) => item.id === id);
-    if (target && isSharedDemoTransaction(target)) {
-      try { await demoTransactionRepository.setVisibility(id, false, targetRole); await refresh(); }
-      catch (error) { alert(error instanceof Error ? error.message : "숨김을 해제할 수 없습니다."); }
-      return;
-    }
-    if (targetRole === "dealer") transactionRepository.unhideForDealer(id); else transactionRepository.unhideForInstaller(id);
-  };
-  const changeStage = async (transaction: Transaction, stage: TransactionStage) => {
-    const next = transitionStage(transaction, stage, role === "shop" ? "shop" : "dealer");
-    if (useSupabaseData) { await supabaseTransactionRepository.transitionStage(transaction.id, stage); await refresh(); }
-    else if (isSharedDemoTransaction(transaction)) { await demoTransactionRepository.transitionStage(transaction.id, stage, demoActorRole); await refresh(); }
-    else transactionRepository.update(next);
-    if (stage === "시공예약") void notificationService.notify({ type: "stage_confirmed", transactionId: transaction.id, stage, recipientId: transaction.dealerId });
-  };
-  const changeFinalPrice = async (transaction: Transaction, finalPrice: number) => {
-    try {
-      if (useSupabaseData) { await supabaseTransactionRepository.setFinalPrice(transaction.id, finalPrice); await refresh(); }
-      else if (isSharedDemoTransaction(transaction)) { await demoTransactionRepository.setFinalPrice(transaction.id, finalPrice, demoActorRole); await refresh(); }
-      else transactionRepository.update({ ...transaction, pricing: { ...transaction.pricing, finalPrice }, status: { ...transaction.status, updatedAt: new Date().toISOString() } });
-    } catch (error) { alert(error instanceof Error ? error.message : "최종 금액을 저장할 수 없습니다."); }
-  };
-  const changePayment = async (transaction: Transaction, status: PaymentStatus) => {
-    try {
-      const next = transitionPayment(transaction, status, role === "admin" ? "admin" : role);
-      if (useSupabaseData) { await supabaseTransactionRepository.transitionPayment(transaction.id, status); await refresh(); }
-      else if (isSharedDemoTransaction(transaction)) { await demoTransactionRepository.transitionPayment(transaction.id, status, demoActorRole); await refresh(); }
-      else transactionRepository.update(next);
-    } catch (error) { alert(error instanceof Error ? error.message : "결제 상태를 변경할 수 없습니다."); }
   };
 
   if (isProtectedPath(pathname) && !authReady) return <main className="system-state-page" aria-busy="true"><section><div className="system-state-logo">CM</div><div className="loading-line wide" /><p>회원 세션을 확인하고 있습니다.</p></section></main>;

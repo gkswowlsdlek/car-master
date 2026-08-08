@@ -76,15 +76,38 @@ test("use-transaction-store falls back to localStorage transactions until the sh
   assert.match(source, /if \(!schemaReady\) return local;/);
 });
 
-test("page.tsx only calls the shared Demo repository once the schema is confirmed ready, and real Supabase transaction calls are unchanged", async () => {
-  const source = await read("app/page.tsx");
-  assert.match(source, /const useDemoSharedBackend = !useSupabaseData && demoSchemaReady === true;/);
-  assert.match(source, /demoTransactionRepository\.createWithRoom/);
-  assert.match(source, /demoTransactionRepository\.transitionStage/);
-  assert.match(source, /demoTransactionRepository\.setFinalPrice/);
-  assert.match(source, /demoTransactionRepository\.transitionPayment/);
-  assert.match(source, /demoTransactionRepository\.setVisibility/);
-  // Real (useSupabaseData) branches are unchanged from before v0.3.12.
-  assert.match(source, /supabaseTransactionRepository\.createWithRoom/);
-  assert.match(source, /supabaseTransactionRepository\.transitionStage/);
+test("page delegates shared actions while createTransaction and all Real, Shared Demo, and Local mutation contracts stay intact", async () => {
+  const page = await read("app/page.tsx");
+  const actions = await read("hooks/use-transaction-actions.ts");
+  const store = await read("hooks/use-transaction-store.ts");
+  assert.match(page, /const useDemoSharedBackend = !useSupabaseData && demoSchemaReady === true;/);
+  assert.match(page, /useTransactionActions\(\{ useSupabaseData, transactions, sharedRoomIds, demoActorId: account\.id, role, refresh \}\)/);
+  assert.match(page, /demoTransactionRepository\.createWithRoom/);
+  assert.match(page, /supabaseTransactionRepository\.createWithRoom/);
+
+  for (const mutation of ["transitionStage", "setFinalPrice", "transitionPayment", "setVisibility"]) {
+    assert.match(actions, new RegExp(`demoTransactionRepository\\.${mutation}`));
+    assert.doesNotMatch(page, new RegExp(`demoTransactionRepository\\.${mutation}`));
+  }
+  for (const mutation of ["transitionStage", "setFinalPrice", "transitionPayment", "setVisibility", "getContact"]) {
+    assert.match(actions, new RegExp(`supabaseTransactionRepository\\.${mutation}`));
+  }
+  assert.match(actions, /supabaseChatRepository\.addMessage/);
+  assert.match(actions, /demoChatRepository\.addMessage/);
+  assert.match(actions, /chatRepository\.addMessage/);
+  assert.match(actions, /transactionRepository\.update/);
+  assert.match(actions, /supabaseChatRepository\.markRead/);
+  assert.match(actions, /demoChatRepository\.markRead/);
+  assert.doesNotMatch(store, /const markRoomRead/);
+  assert.match(actions, /await refresh\(\)/);
+  assert.match(actions, /notificationService\.notify/);
+  assert.match(actions, /const demoActorRole: "dealer" \| "shop" \| "admin" = role === "shop" \? "shop" : role === "admin" \? "admin" : "dealer"/);
+  assert.match(actions, /transitionStage\(transaction, stage, role === "shop" \? "shop" : "dealer"\)/);
+  assert.match(actions, /transitionPayment\(transaction, status, role === "admin" \? "admin" : role\)/);
+  for (const message of ["메시지를 전송하지 못했습니다.", "거래를 숨길 수 없습니다.", "숨김을 해제할 수 없습니다.", "최종 금액을 저장할 수 없습니다.", "결제 상태를 변경할 수 없습니다."]) {
+    assert.match(actions, new RegExp(message.replace(".", "\\.")));
+  }
+  for (const action of ["sendMessage", "markRoomRead", "loadContact", "hideTransaction", "unhideTransaction", "changeStage", "changeFinalPrice", "changePayment"]) {
+    assert.match(actions, new RegExp(`const ${action} = useCallback`));
+  }
 });
