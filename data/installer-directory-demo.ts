@@ -157,4 +157,3 @@ export const demoInstallerListings: InstallerListing[] = RAW_POINTS.map((point, 
     isDemo: true,
   };
 });
-
