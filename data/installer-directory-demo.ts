@@ -158,4 +158,3 @@ export const demoInstallerListings: InstallerListing[] = RAW_POINTS.map((point, 
   };
 });
 
-export const installerProvinces: string[] = Array.from(new Set(RAW_POINTS.map((point) => point.province)));

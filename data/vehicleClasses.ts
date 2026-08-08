@@ -1,22 +1,5 @@
 import type { VehicleClass } from "./pricePackages";
 
-export type VehicleClassGuide = {
-  className: VehicleClass;
-  description: string;
-  examples: string[];
-};
-
-export const vehicleClassGuides: VehicleClassGuide[] = [
-  {
-    className: "국산 승용",
-    description: "차량과 작업 범위에 맞춘 카마스터 권장 시공 패키지 가이드",
-    examples: ["G80", "그랜저", "K8", "쏘나타", "아반떼"],
-  },
-  { className: "국산 대형/SUV", description: "차량 및 유리 면적에 따라 추가금 발생 가능", examples: ["GV80", "카니발", "팰리세이드", "EV9"] },
-  { className: "수입 승용", description: "기본 가이드 가격에서 5만원 추가하는 프로토타입 기준", examples: ["E-Class", "5 Series", "Model 3"] },
-  { className: "수입 대형/SUV", description: "차량별 별도 견적", examples: ["X5", "GLE", "Model X"] },
-];
-
 export function classifyVehicleModel(model: string): VehicleClass | "" {
   const normalized = model.toLowerCase();
   if (!normalized.trim()) return "";
