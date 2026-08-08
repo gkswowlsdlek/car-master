@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile, readdir } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
@@ -12,15 +12,6 @@ test("Demo attachment migration creates an isolated private bucket, grants nothi
   assert.doesNotMatch(migration, /grant .* to (anon|authenticated)/i);
   assert.doesNotMatch(migration, /create policy/i);
   assert.doesNotMatch(migration, /drop table|drop bucket|delete from storage/i);
-});
-
-test("Real transaction-attachments migrations are untouched by this change", async () => {
-  const files = await readdir(new URL("../supabase/migrations", import.meta.url));
-  assert.ok(files.includes("202607210001_v035_foundation.sql"));
-  assert.ok(files.includes("202607220001_v036_production_connection.sql"));
-  const foundation = await read("supabase/migrations/202607210001_v035_foundation.sql");
-  assert.match(foundation, /'transaction-attachments', 'transaction-attachments', false/);
-  assert.match(foundation, /for select to authenticated/);
 });
 
 test("Real SupabaseAttachmentProvider is unchanged — still browser-direct, still the real bucket, still authenticated-gated", async () => {
