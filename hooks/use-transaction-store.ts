@@ -90,11 +90,5 @@ export function useTransactionStore(useSupabase = false, demoActorId = "") {
       throw new Error("거래 정보를 새로고침하지 못했습니다.");
     } finally { setIsLoading(false); }
   };
-  const markRoomRead = async (roomId: string) => {
-    try {
-      if (useSupabase) await supabaseChatRepository.markRead(roomId);
-      else if (sharedRoomIds.has(roomId)) await demoChatRepository.markRead(roomId, demoActorId);
-    } catch { /* read-receipts are a nice-to-have; a failed mark-read must never block or error out the chat UI */ }
-  };
-  return { transactions, rooms, isLoading, error, refresh, markRoomRead, demoSchemaReady, sharedRoomIds };
+  return { transactions, rooms, isLoading, error, refresh, demoSchemaReady, sharedRoomIds };
 }
