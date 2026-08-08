@@ -13,7 +13,7 @@ v0.3.4.9의 화면·가격 가이드·사용자 흐름을 유지하면서, 실�
 - 승인 시공점: `repositories/installer-directory-repository.ts`, `services/installer-search.ts`
 - 화면 회귀: `components/dealer/`, `components/shop/`, `components/admin/`, `components/transactions/`
 - 권한 정의: `supabase/migrations/202607190001_v034_membership.sql`, `202607210001_v035_foundation.sql`
-- 빌드·배포 설정: `package.json`, `next.config.ts`, `vite.config.ts`, `vercel.json`
+- 빌드·배포 설정: `package.json`, `next.config.ts`, `vercel.json` (`vite.config.ts`는 당시 Vinext 로컬 빌드 설정으로 존재했으나 현재 Next.js 단일화 과정에서 제거)
 
 ## localStorage 분류
 
