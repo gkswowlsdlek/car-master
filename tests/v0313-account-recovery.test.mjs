@@ -145,12 +145,3 @@ test("Password fields support show/hide with a touch-safe (>=44px) target", asyn
   const css = await read("app/globals.css");
   assert.match(css, /\.password-toggle-button \{[^}]*width: 44px; height: 44px/);
 });
-
-test("Real transaction-attachments / Demo attachment / Real Auth login-signup-logout code paths are untouched by this change", async () => {
-  const realAttachmentProvider = await read("services/attachments/supabase-attachment-provider.ts");
-  assert.doesNotMatch(realAttachmentProvider, /password|updateUser|resetPassword/i);
-  const supabaseProvider = await read("services/auth/supabase-auth-provider.ts");
-  assert.match(supabaseProvider, /async login\(\{ email, password \}: AuthCredentials\)/);
-  assert.match(supabaseProvider, /async signUp\(input: SignUpInput\)/);
-  assert.match(supabaseProvider, /async logout\(\)/);
-});

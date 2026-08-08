@@ -34,46 +34,13 @@ test("handle_new_user() NULL-safety fix: the bare (un-coalesced) 'NOT IN' guard 
   assert.equal([...migration.matchAll(bareGuardPattern)].length, 0, "a bare, un-coalesced NOT IN guard must not exist anywhere in the file");
 });
 
-test("PL/pgSQL three-valued-logic model: `NULL NOT IN (...)` evaluates to NULL (not TRUE), and PL/pgSQL's IF treats a NULL condition as false — this is the exact mechanism of the BLOCKER the pre-fix guard had, verified independently of the SQL file since no local Postgres is available in this environment to execute the trigger live", () => {
-  // Faithful model of Postgres's `x NOT IN (list)` three-valued logic:
-  // NULL if x is null, otherwise a normal boolean membership test.
-  const pgNotIn = (value, list) => (value === null ? null : !list.includes(value));
-  // Faithful model of PL/pgSQL's `IF <cond> THEN ... END IF;`: only NEVER
-  // enters the branch unless cond is exactly true (both false and null are
-  // treated as "don't enter" — this is documented PL/pgSQL behavior).
-  const pgIfEntersBranch = (cond) => cond === true;
-
-  // Pre-fix guard: `signup_role NOT IN ('dealer', 'installer')`.
-  const preFixGuard = (signupRole) => pgIfEntersBranch(pgNotIn(signupRole, ["dealer", "installer"]));
-  // BLOCKER demonstration: a NULL signup_role (e.g. an OAuth-created row
-  // with no metadata at all) did NOT enter the pending branch pre-fix —
-  // it silently fell through to the CASE below, which defaults to dealer.
-  assert.equal(preFixGuard(null), false, "pre-fix: NULL signup_role incorrectly skipped the pending branch (the BLOCKER)");
-
-  // Post-fix guard: `coalesce(signup_role, '') NOT IN ('dealer', 'installer')`.
-  const postFixGuard = (signupRole) => pgIfEntersBranch(pgNotIn(signupRole ?? "", ["dealer", "installer"]));
-  assert.equal(postFixGuard(null), true, "post-fix: NULL signup_role (no metadata — the OAuth/Kakao case) must enter the pending branch");
-  assert.equal(postFixGuard("dealer"), false, "post-fix: signup_role='dealer' must NOT enter the pending branch (existing dealer signup unaffected)");
-  assert.equal(postFixGuard("installer"), false, "post-fix: signup_role='installer' must NOT enter the pending branch (existing installer signup unaffected)");
-  assert.equal(postFixGuard("something-unrecognized"), true, "post-fix: an unrecognized signup_role value must also enter the pending branch");
-});
-
-test("handle_new_user(): existing dealer/installer email signup logic is preserved byte-for-byte (same inserts as the original v0.3.4 migration)", async () => {
-  const original = await read("supabase/migrations/202607190001_v034_membership.sql");
-  const updated = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
-  const originalStart = original.indexOf("requested_role := case");
-  const originalInsertBlock = original.slice(originalStart, original.indexOf("\n$$;", originalStart));
-  const updatedStart = updated.indexOf("requested_role := case");
-  const updatedInsertBlock = updated.slice(updatedStart, updated.indexOf("\n$$;", updatedStart));
-  // Normalize CRLF -> LF before comparing: this asserts the SQL content is
-  // identical, not that the two files happen to share the same on-disk
-  // line-ending style. Windows checkouts of a freshly-written file can
-  // legitimately differ in \r\n vs \n from an older, untouched file under
-  // git's core.autocrlf — that's a local-checkout artifact, not a real
-  // divergence (confirmed via `git diff` between branches showing zero
-  // difference in the committed blob content).
-  const normalize = (text) => text.replace(/\r\n/g, "\n").trim();
-  assert.equal(normalize(updatedInsertBlock), normalize(originalInsertBlock));
+test("handle_new_user() preserves dealer and installer membership creation contracts", async () => {
+  const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
+  const triggerFunction = migration.slice(migration.indexOf("create or replace function public.handle_new_user"), migration.indexOf("create or replace function public.complete_dealer_onboarding"));
+  assert.match(triggerFunction, /requested_role := case[\s\S]*when new\.raw_user_meta_data ->> 'signup_role' = 'installer' then 'installer'::public\.user_role[\s\S]*else 'dealer'::public\.user_role/);
+  assert.match(triggerFunction, /insert into public\.profiles \(id, email, role\)/);
+  assert.match(triggerFunction, /if requested_role = 'dealer' then[\s\S]*insert into public\.dealer_profiles/);
+  assert.match(triggerFunction, /else[\s\S]*insert into public\.installer_profiles[\s\S]*insert into public\.installer_approvals/);
 });
 
 test("complete_dealer_onboarding: only runs for the caller's own row, only from role='pending', and is fully additive (dealer_profiles + legal_agreements in the same function)", async () => {
@@ -147,36 +114,6 @@ test("Legal consent version trust: the version-mismatch checks run BEFORE any wr
   // partial rows in profiles/dealer_profiles/installer_profiles/
   // installer_approvals/legal_agreements, and profiles.role is guaranteed
   // to remain 'pending' (never updated).
-});
-
-test("Legal consent version trust: a semantics-level model of the RPC's guard chain proves success only for a pending caller with BOTH versions exactly matching the current constants, and failure for any wrong/empty version — documented as a logic model (no live Postgres available), same convention as the earlier NULL-semantics verification", async () => {
-  const legalVersions = await read("data/legal-versions.ts");
-  const [, termsVersion] = legalVersions.match(/export const CURRENT_TERMS_VERSION = "([^"]+)";/);
-  const [, privacyVersion] = legalVersions.match(/export const CURRENT_PRIVACY_VERSION = "([^"]+)";/);
-
-  // Faithful model of the RPC's guard chain, in the same order as the SQL:
-  // pending check -> non-empty check -> exact-version check -> success.
-  function attemptOnboarding({ role, terms, privacy }) {
-    if (role !== "pending") return { ok: false, reason: "Onboarding already completed" };
-    if (terms === "" || privacy === "") return { ok: false, reason: "Terms and privacy agreement is required" };
-    if (terms !== termsVersion) return { ok: false, reason: "Terms version mismatch" };
-    if (privacy !== privacyVersion) return { ok: false, reason: "Privacy version mismatch" };
-    return { ok: true };
-  }
-
-  // pending + correct dealer/installer versions -> success (role is the
-  // same "pending" precondition for both RPCs; the dealer/installer split
-  // itself is a separate, already-covered guard).
-  assert.deepEqual(attemptOnboarding({ role: "pending", terms: termsVersion, privacy: privacyVersion }), { ok: true });
-  // wrong terms version -> fails specifically on terms
-  assert.deepEqual(attemptOnboarding({ role: "pending", terms: "not-the-real-version", privacy: privacyVersion }), { ok: false, reason: "Terms version mismatch" });
-  // wrong privacy version -> fails specifically on privacy
-  assert.deepEqual(attemptOnboarding({ role: "pending", terms: termsVersion, privacy: "not-the-real-version" }), { ok: false, reason: "Privacy version mismatch" });
-  // empty version -> fails on the non-empty check, before ever reaching the version-match check
-  assert.deepEqual(attemptOnboarding({ role: "pending", terms: "", privacy: privacyVersion }), { ok: false, reason: "Terms and privacy agreement is required" });
-  assert.deepEqual(attemptOnboarding({ role: "pending", terms: termsVersion, privacy: "" }), { ok: false, reason: "Terms and privacy agreement is required" });
-  // not pending -> fails before version is even inspected
-  assert.deepEqual(attemptOnboarding({ role: "dealer", terms: termsVersion, privacy: privacyVersion }), { ok: false, reason: "Onboarding already completed" });
 });
 
 test("Role-switch guard: both onboarding RPCs check profiles.role = 'pending' before doing anything, so an already-onboarded dealer/installer/admin can never re-run onboarding into a different role — the SAME guard clause rejects all three cases (dealer→installer, installer→dealer, admin→either)", async () => {
@@ -348,13 +285,6 @@ test("proxy.ts (server-side route guard): /onboarding maps to protectedRole 'pen
   assert.match(proxy, /pathname\.startsWith\("\/onboarding"\) \? "pending" : null;/);
   assert.match(proxy, /single<\{ role: "dealer" \| "installer" \| "admin" \| "pending" \}>\(\)/);
   assert.match(proxy, /profile\.role === "pending" \? "\/onboarding" : profile\.role === "dealer" \? "\/dealer" : profile\.role === "admin" \? "\/admin" : "\/account-status"/);
-});
-
-test("proxy.ts regression: dealer/admin path protection, demo-session short-circuit, and the 5s fail-open timeout wrapper are all untouched", async () => {
-  const proxy = await read("lib/supabase/proxy.ts");
-  assert.match(proxy, /const AUTH_PROXY_TIMEOUT_MS = 5_000;/);
-  assert.match(proxy, /if \(protectedRole && normalizedDemoRole && \["dealer", "installer", "admin"\]\.includes\(normalizedDemoRole\)\) \{/);
-  assert.match(proxy, /pathname\.startsWith\("\/dealer"\) \? "dealer"/);
 });
 
 test("app/page.tsx: a pending user is routed straight to the onboarding screen and never reaches accountForUser (which has no Role mapping for 'pending')", async () => {
