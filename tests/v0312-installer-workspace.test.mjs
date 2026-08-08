@@ -29,6 +29,22 @@ test("Installer Dashboard CTA hit targets are >=44px", async () => {
   assert.match(source, /\.installer-vehicle-actions \.primary \{[^}]*min-height: 44px;/);
 });
 
+test("InstallerWorkspace owns Installer selection, derived transaction scope, Messenger fullscreen, and all four Installer screens", async () => {
+  const source = await read("components/workspaces/InstallerWorkspace.tsx");
+  const page = await read("app/page.tsx");
+  assert.match(source, /const \[selectedTransactionId, setSelectedTransactionId\] = useState\(""\)/);
+  assert.match(source, /const \[mobileChatOpen, setMobileChatOpen\] = useState\(false\)/);
+  assert.match(source, /transactions\.filter\(\(item\) => item\.installerId === account\.shopId\)/);
+  assert.match(source, /const activeTransactionId = selectedTransactionId \|\| roleTransactions\[0\]\?\.id \|\| ""/);
+  assert.match(source, /onMobileFullscreenChange\(mobileChatOpen\)/);
+  for (const screen of ["shopDashboard", "shopRequests", "messages", "dealerProfile"]) assert.match(source, new RegExp(`screen === "${screen}"`));
+  for (const component of ["ShopDashboard", "TransactionManagementScreen", "MessengerScreen", "ProfileEditor"]) assert.match(source, new RegExp(`<${component}`));
+  for (const action of ["onSend", "onHide", "onUnhide", "onFinalPriceChange", "onStageChange", "onPaymentChange", "onMarkRead", "onLoadContact"]) assert.match(source, new RegExp(`${action}=`));
+  assert.match(page, /<InstallerWorkspace/);
+  assert.doesNotMatch(page, /import \{ ShopDashboard \}/);
+  assert.doesNotMatch(page, /<ShopDashboard/);
+});
+
 test("Demo transaction backend mirrors the real RPC surface and stays actor-role gated", async () => {
   const migration = await read("supabase/migrations/202608010001_v0312_installer_workspace.sql");
   for (const fn of ["demo_create_transaction_with_room", "demo_transition_transaction_stage", "demo_set_transaction_final_price", "demo_transition_transaction_payment", "demo_set_transaction_visibility"]) {
