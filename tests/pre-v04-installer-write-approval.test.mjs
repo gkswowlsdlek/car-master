@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const migrationUrl = new URL("../supabase/migrations/202608070001_pre_v04_installer_write_approval.sql", import.meta.url);
-const readMigration = () => readFile(migrationUrl, "utf8");
+const readMigration = async () => (await readFile(migrationUrl, "utf8")).replace(/\r\n?/g, "\n");
 
 function functionBody(source, name) {
   const start = source.indexOf(`create or replace function public.${name}`);
