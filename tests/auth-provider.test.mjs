@@ -25,11 +25,42 @@ test("demo auth rejects invalid credentials", async () => {
 });
 
 test("server demo sessions are signed and reject tampering", async () => {
-  process.env.CARMASTER_DEMO_SESSION_SECRET = "test-only-session-secret";
-  const session = await createDemoSession("dealer");
-  assert.equal(await verifyDemoSession(session.token), "dealer");
-  assert.equal(await verifyDemoSession(session.token.replace("dealer", "admin")), null);
-  delete process.env.CARMASTER_DEMO_SESSION_SECRET;
+  const previousSecret = process.env.CARMASTER_DEMO_SESSION_SECRET;
+  try {
+    process.env.CARMASTER_DEMO_SESSION_SECRET = crypto.randomUUID();
+    const session = await createDemoSession("dealer");
+    assert.equal(await verifyDemoSession(session.token), "dealer");
+    assert.equal(await verifyDemoSession(session.token.replace("dealer", "admin")), null);
+  } finally {
+    if (previousSecret === undefined) delete process.env.CARMASTER_DEMO_SESSION_SECRET;
+    else process.env.CARMASTER_DEMO_SESSION_SECRET = previousSecret;
+  }
+});
+
+test("server demo sessions fail closed when the signing secret is missing", async () => {
+  const previousSecret = process.env.CARMASTER_DEMO_SESSION_SECRET;
+  try {
+    process.env.CARMASTER_DEMO_SESSION_SECRET = crypto.randomUUID();
+    const session = await createDemoSession("dealer");
+    delete process.env.CARMASTER_DEMO_SESSION_SECRET;
+    await assert.rejects(() => createDemoSession("dealer"), /Demo session secret is not configured/);
+    assert.equal(await verifyDemoSession(session.token), null);
+  } finally {
+    if (previousSecret === undefined) delete process.env.CARMASTER_DEMO_SESSION_SECRET;
+    else process.env.CARMASTER_DEMO_SESSION_SECRET = previousSecret;
+  }
+});
+
+test("server demo sessions fail closed when the signing secret is blank", async () => {
+  const previousSecret = process.env.CARMASTER_DEMO_SESSION_SECRET;
+  try {
+    process.env.CARMASTER_DEMO_SESSION_SECRET = "   ";
+    await assert.rejects(() => createDemoSession("dealer"), /Demo session secret is not configured/);
+    assert.equal(await verifyDemoSession("dealer.9999999999.invalid"), null);
+  } finally {
+    if (previousSecret === undefined) delete process.env.CARMASTER_DEMO_SESSION_SECRET;
+    else process.env.CARMASTER_DEMO_SESSION_SECRET = previousSecret;
+  }
 });
 
 test("public QA credentials resolve to the requested dealer, shop, and admin roles", () => {

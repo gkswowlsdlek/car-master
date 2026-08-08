@@ -1,9 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
-import { supabasePublishableKey, supabaseUrl } from "./config";
-import { demoSessionCookie, verifyDemoSession } from "../demo-session";
+import { NextResponse, type NextRequest } from "next/server.js";
+import { supabasePublishableKey, supabaseUrl } from "./config.ts";
+import { demoSessionCookie, verifyDemoSession } from "../demo-session.ts";
 
 const AUTH_PROXY_TIMEOUT_MS = 5_000;
+const defaultProxyRuntime = { supabaseUrl, supabasePublishableKey, createServerClient };
+
 async function withTimeout<T>(value: PromiseLike<T>): Promise<T | null> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   try {
@@ -13,7 +15,7 @@ async function withTimeout<T>(value: PromiseLike<T>): Promise<T | null> {
   }
 }
 
-export async function updateSupabaseSession(request: NextRequest) {
+export async function updateSupabaseSession(request: NextRequest, runtime = defaultProxyRuntime) {
   let response = NextResponse.next({ request });
   const pathname = request.nextUrl.pathname;
   const protectedRole = pathname.startsWith("/dealer") ? "dealer" : pathname.startsWith("/shop") ? "installer" : pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/account-status") ? "installer" : pathname.startsWith("/onboarding") ? "pending" : null;
@@ -34,8 +36,11 @@ export async function updateSupabaseSession(request: NextRequest) {
   // Public pages must not wait for a remote Supabase session check. The client
   // initializes an existing session in the background and redirects signed-in users.
   if (!protectedRole) return response;
-  if (!supabaseUrl || !supabasePublishableKey) return response;
-  const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
+  if (!runtime.supabaseUrl || !runtime.supabasePublishableKey) {
+    response.headers.set("Cache-Control", "private, no-store");
+    return copyAuthCookies(response, NextResponse.redirect(new URL("/login", request.url)));
+  }
+  const supabase = runtime.createServerClient(runtime.supabaseUrl, runtime.supabasePublishableKey, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll(cookiesToSet, responseOptions) {
