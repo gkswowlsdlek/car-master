@@ -12,8 +12,7 @@
     "start": "next start",
     "test": "node --experimental-strip-types --test --experimental-test-isolation=none tests/transaction-state-service.test.mjs tests/auth-provider.test.mjs tests/access-policy.test.mjs tests/auth-initialization.test.mjs tests/proxy-security.test.mjs tests/pre-v04-installer-write-approval.test.mjs tests/v035-foundation.test.mjs tests/v035-stability.test.mjs tests/v036-production-connection.test.mjs tests/v0311-dealer-ux.test.mjs tests/v0312-installer-workspace.test.mjs tests/v0312-demo-request-blocker.test.mjs tests/v0312b-workspace-polish.test.mjs tests/v0313-admin-demo-membership.test.mjs tests/v0313b-admin-weekly-volume.test.mjs tests/v0313c-transaction-ux-fixes.test.mjs tests/v0313-admin-members.test.mjs tests/v0313-demo-attachment-persistence.test.mjs tests/v0313-account-recovery.test.mjs tests/v0314-legal-onboarding-foundation.test.mjs",
     "test:production-smoke": "node tools/next-production-smoke.mjs",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:generate": "drizzle-kit generate"
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",
