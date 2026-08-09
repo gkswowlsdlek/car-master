@@ -21,7 +21,7 @@ import { useTransactionActions } from "../hooks/use-transaction-actions";
 import { useTransactionStore } from "../hooks/use-transaction-store";
 import { demoAttachmentProvider } from "../services/attachments";
 import { authProvider, initializeAuth, routeAfterAuthInitialization } from "../services/auth";
-import { isProtectedPath, publicScreenForPath } from "../services/auth/access-policy";
+import { isProtectedPath, legacyRoleForUserRole, publicScreenForPath, workspacePathForRole, workspacePathForUser } from "../services/auth/access-policy";
 import type { DemoAccount, Role, Screen } from "../types/dealer";
 import type { CurrentUser, DealerOnboardingInput, InstallerOnboardingInput, SignUpInput, SignUpResult } from "../types/auth";
 
@@ -35,9 +35,7 @@ function pathForScreen(screen: Screen, role: Role) {
   if (screen === "privacy") return "/privacy";
   if (screen === "onboarding") return "/onboarding";
   if (screen === "accountStatus") return "/account-status";
-  if (role === "shop") return "/shop";
-  if (role === "admin") return "/admin";
-  return "/dealer";
+  return workspacePathForRole(role);
 }
 
 function accountForUser(user: CurrentUser): DemoAccount {
@@ -45,7 +43,7 @@ function accountForUser(user: CurrentUser): DemoAccount {
   // here (see enterAuthenticatedUser) — a pending role has no DemoAccount
   // shape to map into. Fail loudly rather than silently guessing a role.
   if (user.role === "pending") throw new Error("accountForUser called with a pending-onboarding user");
-  const role: Role = user.role === "installer" ? "shop" : user.role;
+  const role: Role = legacyRoleForUserRole(user.role);
   return { id: user.id, email: user.email, password: "", name: user.name, role, entryScreen: role === "dealer" ? "dealerDashboard" : role === "shop" ? "shopDashboard" : "ops", shopId: role === "shop" ? user.id : undefined };
 }
 
@@ -104,7 +102,7 @@ export default function Home() {
       return;
     }
     const nextAccount = accountForUser(user);
-    const nextScreen: Screen = user.role === "installer" && user.approvalStatus !== "approved" ? "accountStatus" : nextAccount.entryScreen;
+    const nextScreen: Screen = workspacePathForUser(user) === "/account-status" ? "accountStatus" : nextAccount.entryScreen;
     setCurrentUser(user); setAccount(nextAccount); setRole(nextAccount.role); setScreen(nextScreen);
     const path = pathForScreen(nextScreen, nextAccount.role);
     window.history[replace ? "replaceState" : "pushState"](null, "", path);
