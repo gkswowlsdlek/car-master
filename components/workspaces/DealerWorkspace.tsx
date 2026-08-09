@@ -88,7 +88,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
   const [dealFilter, setDealFilter] = useState<TransactionStage | "전체">("전체");
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [approvedInstallerShops, setApprovedInstallerShops] = useState<InstallerListing[]>([]);
-  const [installerDirectoryLoading, setInstallerDirectoryLoading] = useState(false);
+  const [installerDirectoryLoading, setInstallerDirectoryLoading] = useState(useSupabaseData);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
 
   const availableShops = useMemo<InstallerListing[]>(() => useSupabaseData ? [...approvedInstallerShops, ...demoInstallerListings] : demoInstallerListings, [approvedInstallerShops, useSupabaseData]);
@@ -97,7 +97,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
   const selectedPackage = pricePackages.find((item) => item.id === selectedPackageId) ?? pricePackages[0];
   const filteredPackages = pricePackages.filter((item) => {
     const keyword = priceSearch.trim().toLowerCase();
-    const matchesFilter = priceFilter === "전체" || priceFilter === "기타" && item.brandGroup === "기타" || priceFilter === "글라스틴트" && item.brand.startsWith("글라스틴트") || item.brand === priceFilter;
+    const matchesFilter = priceFilter === "전체" || priceFilter === "기타" && item.brandGroup === "기타" || priceFilter === "솔라가드" && item.brand.startsWith("솔라가드") || item.brand === priceFilter;
     return matchesFilter && (!keyword || `${item.brand} ${item.product} ${item.description}`.toLowerCase().includes(keyword));
   });
   const unreadMessageCount = useMemo(() => rooms.filter((room) => transactions.some((item) => item.chatRoomId === room.id)).reduce((sum, room) => sum + room.unreadCount, 0), [rooms, transactions]);
