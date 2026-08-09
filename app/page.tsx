@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { AdminOverview } from "../components/admin/AdminOverview";
 import { AccountStatusScreen } from "../components/auth/AccountStatusScreen";
 import { LoginScreen } from "../components/auth/LoginScreen";
 import { SignUpScreen } from "../components/auth/SignUpScreen";
@@ -11,9 +10,9 @@ import { UpdatePasswordScreen } from "../components/auth/UpdatePasswordScreen";
 import { OnboardingScreen } from "../components/auth/OnboardingScreen";
 import { TermsScreen } from "../components/legal/TermsScreen";
 import { PrivacyScreen } from "../components/legal/PrivacyScreen";
-import { AdminAccountScreen } from "../components/admin/AdminAccountScreen";
 import { LandingPage } from "../components/landing/LandingPage";
 import { AppShell } from "../components/layout/AppShell";
+import { AdminWorkspace } from "../components/workspaces/AdminWorkspace";
 import { DealerWorkspace } from "../components/workspaces/DealerWorkspace";
 import { InstallerWorkspace } from "../components/workspaces/InstallerWorkspace";
 import { demoAccounts, isDemoAccountId } from "../data/demo-accounts";
@@ -235,7 +234,6 @@ export default function Home() {
     {isTransactionLoading && useSupabaseData && <p className="system-inline-loading" role="status">거래 정보를 불러오는 중입니다.</p>}
     {role === "dealer" && <DealerWorkspace account={account} screen={screen} transactions={transactions} rooms={rooms} useSupabaseData={useSupabaseData} useDemoSharedBackend={useDemoSharedBackend} demoAttachmentProvider={!useSupabaseData && demoAttachmentsReady ? demoAttachmentProvider : undefined} isLoading={isTransactionLoading} loadError={transactionLoadError} onNavigate={goToScreen} onRefresh={refresh} onSend={sendMessage} onHide={hideTransaction} onUnhide={unhideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} onChangePassword={changePassword} onCompanyNameChange={setDealerCompanyName} onUnreadMessageCountChange={setDealerUnreadMessageCount} onMobileFullscreenChange={setDealerMobileFullscreen} />}
     {role === "shop" && <InstallerWorkspace account={account} screen={screen} transactions={transactions} rooms={rooms} installers={demoInstallerListings} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={!useSupabaseData && demoAttachmentsReady ? demoAttachmentProvider : undefined} isLoading={isTransactionLoading} loadError={transactionLoadError} onNavigate={goToScreen} onSend={sendMessage} onHide={hideTransaction} onUnhide={unhideTransaction} onFinalPriceChange={changeFinalPrice} onStageChange={changeStage} onPaymentChange={changePayment} onMarkRead={markRoomRead} onLoadContact={loadContact} onChangePassword={changePassword} onUnreadMessageCountChange={setInstallerUnreadMessageCount} onMobileFullscreenChange={setInstallerMobileFullscreen} />}
-    {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} demoSession={demoAccounts.some((item) => item.id === account.id)} />}
-    {screen === "adminAccount" && <AdminAccountScreen demoSession={demoAccounts.some((item) => item.id === account.id)} onChangePassword={changePassword} />}
+    {role === "admin" && <AdminWorkspace account={account} screen={screen} transactions={transactions} rooms={rooms} onChangePassword={changePassword} />}
   </AppShell>;
 }

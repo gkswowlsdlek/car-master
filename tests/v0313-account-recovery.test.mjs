@@ -116,12 +116,14 @@ test("Real Dealer, Installer and Admin all wire the same shared PasswordChangeFo
   const page = await read("app/page.tsx");
   const dealerWorkspace = await read("components/workspaces/DealerWorkspace.tsx");
   const installerWorkspace = await read("components/workspaces/InstallerWorkspace.tsx");
+  const adminWorkspace = await read("components/workspaces/AdminWorkspace.tsx");
   assert.match(page, /const changePassword = useCallback\(\(currentPassword: string, newPassword: string\) => authProvider\.updatePassword\(newPassword, currentPassword\), \[\]\)/);
   assert.match(page, /<DealerWorkspace[\s\S]*?onChangePassword={changePassword}/);
   assert.match(dealerWorkspace, /<ProfileEditor role="dealer"[\s\S]*?onChangePassword={onChangePassword}/);
   assert.match(page, /<InstallerWorkspace[\s\S]*?onChangePassword={changePassword}/);
   assert.match(installerWorkspace, /<ProfileEditor role="shop"[\s\S]*?onChangePassword={onChangePassword}/);
-  assert.match(page, /<AdminAccountScreen demoSession={[\s\S]*?onChangePassword={changePassword}/);
+  assert.match(page, /<AdminWorkspace[\s\S]*?onChangePassword={changePassword}/);
+  assert.match(adminWorkspace, /<AdminAccountScreen[\s\S]*?onChangePassword={onChangePassword}/);
   const profileEditor = await read("components/profile/ProfileEditor.tsx");
   const adminAccount = await read("components/admin/AdminAccountScreen.tsx");
   assert.match(profileEditor, /import { PasswordChangeForm } from "..\/auth\/PasswordChangeForm"/);
