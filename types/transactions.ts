@@ -17,6 +17,8 @@ export type Transaction = {
   id: string;
   dealerId: string;
   installerId: string;
+  /** Real Supabase Shop id; optional while legacy and Demo transactions coexist. */
+  shopId?: string | null;
   installerName: string;
   vehicle: { maker: string; model: string; class: VehicleClass | "" };
   service: { brand?: string; product?: string; workDescription: string; extraRequest?: string };

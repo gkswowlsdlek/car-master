@@ -7,7 +7,7 @@ type StageEventRow = {
 };
 
 type TransactionRow = {
-  id: string; dealer_id: string; installer_id: string; installer_name: string;
+  id: string; dealer_id: string; installer_id: string; shop_id: string | null; installer_name: string;
   vehicle: Transaction["vehicle"]; service: Transaction["service"]; pricing: Transaction["pricing"];
   schedule: Transaction["schedule"]; stage: Transaction["status"]["stage"];
   hidden_by_dealer: boolean; hidden_by_installer: boolean; last_message: string;
@@ -21,7 +21,7 @@ function mapTransaction(row: TransactionRow): Transaction {
     .map((event) => ({ id: `EVT-${event.id}`, fromStage: event.from_stage, toStage: event.to_stage, actorRole: event.actor_role, direction: event.direction, createdAt: event.created_at }))
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   return {
-    id: row.id, dealerId: row.dealer_id, installerId: row.installer_id, installerName: row.installer_name,
+    id: row.id, dealerId: row.dealer_id, installerId: row.installer_id, shopId: row.shop_id ?? null, installerName: row.installer_name,
     vehicle: row.vehicle, service: row.service, pricing: row.pricing, schedule: row.schedule,
     status: { stage: row.stage, createdAt: row.created_at, updatedAt: row.updated_at },
     visibility: { hiddenByDealer: row.hidden_by_dealer, hiddenByInstaller: row.hidden_by_installer },
@@ -32,7 +32,7 @@ function mapTransaction(row: TransactionRow): Transaction {
 export class SupabaseTransactionRepository {
   async getAll() {
     const { data, error } = await createSupabaseBrowserClient().from("transactions")
-      .select("id,dealer_id,installer_id,installer_name,vehicle,service,pricing,schedule,stage,hidden_by_dealer,hidden_by_installer,last_message,created_at,updated_at,transaction_rooms(id),transaction_stage_events(id,from_stage,to_stage,actor_role,direction,created_at)")
+      .select("id,dealer_id,installer_id,shop_id,installer_name,vehicle,service,pricing,schedule,stage,hidden_by_dealer,hidden_by_installer,last_message,created_at,updated_at,transaction_rooms(id),transaction_stage_events(id,from_stage,to_stage,actor_role,direction,created_at)")
       .order("updated_at", { ascending: false });
     if (error) throw error;
     return ((data ?? []) as unknown as TransactionRow[]).map(mapTransaction);
