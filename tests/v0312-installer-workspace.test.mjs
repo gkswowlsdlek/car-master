@@ -45,6 +45,24 @@ test("InstallerWorkspace owns Installer selection, derived transaction scope, Me
   assert.doesNotMatch(page, /<ShopDashboard/);
 });
 
+test("page delegates each role's detailed screen composition to its workspace", async () => {
+  const page = await read("app/page.tsx");
+  const adminWorkspace = await read("components/workspaces/AdminWorkspace.tsx");
+
+  for (const workspace of ["DealerWorkspace", "InstallerWorkspace", "AdminWorkspace"]) {
+    assert.match(page, new RegExp(`<${workspace}`));
+  }
+  for (const component of ["DealerDashboard", "ShopDashboard", "AdminOverview", "AdminAccountScreen"]) {
+    assert.doesNotMatch(page, new RegExp(`import \\{ ${component} \\}`));
+    assert.doesNotMatch(page, new RegExp(`<${component}`));
+  }
+  assert.match(adminWorkspace, /screen === "ops"/);
+  assert.match(adminWorkspace, /<AdminOverview/);
+  assert.match(adminWorkspace, /screen === "adminAccount"/);
+  assert.match(adminWorkspace, /<AdminAccountScreen/);
+  assert.match(adminWorkspace, /demoAccounts\.some\(\(item\) => item\.id === account\.id\)/);
+});
+
 test("Demo transaction backend mirrors the real RPC surface and stays actor-role gated", async () => {
   const migration = await read("supabase/migrations/202608010001_v0312_installer_workspace.sql");
   for (const fn of ["demo_create_transaction_with_room", "demo_transition_transaction_stage", "demo_set_transaction_final_price", "demo_transition_transaction_payment", "demo_set_transaction_visibility"]) {
