@@ -76,14 +76,21 @@ test("use-transaction-store falls back to localStorage transactions until the sh
   assert.match(source, /if \(!schemaReady\) return local;/);
 });
 
-test("page delegates shared actions while createTransaction and all Real, Shared Demo, and Local mutation contracts stay intact", async () => {
+test("page delegates shared actions and DealerWorkspace owns createTransaction while all Real, Shared Demo, and Local contracts stay intact", async () => {
   const page = await read("app/page.tsx");
+  const dealerWorkspace = await read("components/workspaces/DealerWorkspace.tsx");
   const actions = await read("hooks/use-transaction-actions.ts");
   const store = await read("hooks/use-transaction-store.ts");
   assert.match(page, /const useDemoSharedBackend = !useSupabaseData && demoSchemaReady === true;/);
   assert.match(page, /useTransactionActions\(\{ useSupabaseData, transactions, sharedRoomIds, demoActorId: account\.id, role, refresh \}\)/);
-  assert.match(page, /demoTransactionRepository\.createWithRoom/);
-  assert.match(page, /supabaseTransactionRepository\.createWithRoom/);
+  assert.match(page, /<DealerWorkspace/);
+  assert.doesNotMatch(page, /import \{ DealerDashboard \}/);
+  assert.doesNotMatch(page, /<DealerDashboard/);
+  assert.match(dealerWorkspace, /demoTransactionRepository\.createWithRoom/);
+  assert.match(dealerWorkspace, /supabaseTransactionRepository\.createWithRoom/);
+  assert.match(dealerWorkspace, /transactionRepository\.create\(transaction\); chatRepository\.create\(room\)/);
+  assert.match(dealerWorkspace, /await onRefresh\(\)/);
+  assert.match(dealerWorkspace, /notificationService\.notify\(\{ type: "new_service_request"/);
 
   for (const mutation of ["transitionStage", "setFinalPrice", "transitionPayment", "setVisibility"]) {
     assert.match(actions, new RegExp(`demoTransactionRepository\\.${mutation}`));
