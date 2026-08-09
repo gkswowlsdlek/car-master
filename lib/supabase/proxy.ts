@@ -2,6 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server.js";
 import { supabasePublishableKey, supabaseUrl } from "./config.ts";
 import { demoSessionCookie, verifyDemoSession } from "../demo-session.ts";
+import { isProtectedPath, normalizeUserRole, resolveAuthenticatedDestination } from "../../services/auth/access-policy.ts";
+import type { InstallerApprovalStatus, UserRole } from "../../types/auth.ts";
 
 const AUTH_PROXY_TIMEOUT_MS = 5_000;
 const defaultProxyRuntime = { supabaseUrl, supabasePublishableKey, createServerClient };
@@ -18,24 +20,19 @@ async function withTimeout<T>(value: PromiseLike<T>): Promise<T | null> {
 export async function updateSupabaseSession(request: NextRequest, runtime = defaultProxyRuntime) {
   let response = NextResponse.next({ request });
   const pathname = request.nextUrl.pathname;
-  const protectedRole = pathname.startsWith("/dealer") ? "dealer" : pathname.startsWith("/shop") ? "installer" : pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/account-status") ? "installer" : pathname.startsWith("/onboarding") ? "pending" : null;
+  const protectedRoute = isProtectedPath(pathname);
   const demoRole = await verifyDemoSession(request.cookies.get(demoSessionCookie)?.value);
-  const normalizedDemoRole = demoRole === "shop" ? "installer" : demoRole;
 
   // Public demo sessions unlock only the prototype UI. Supabase RLS still
   // receives no authenticated user and continues to protect real member data.
-  if (protectedRole && normalizedDemoRole && ["dealer", "installer", "admin"].includes(normalizedDemoRole)) {
+  if (protectedRoute && demoRole) {
     response.headers.set("Cache-Control", "private, no-store");
-    if (normalizedDemoRole === protectedRole) {
-      if (pathname.startsWith("/account-status")) return NextResponse.redirect(new URL("/shop", request.url));
-      return response;
-    }
-    const demoPath = normalizedDemoRole === "dealer" ? "/dealer" : normalizedDemoRole === "admin" ? "/admin" : "/shop";
-    return NextResponse.redirect(new URL(demoPath, request.url));
+    const destination = resolveAuthenticatedDestination(normalizeUserRole(demoRole), demoRole === "shop" ? "approved" : undefined, pathname);
+    return destination === pathname ? response : NextResponse.redirect(new URL(destination, request.url));
   }
   // Public pages must not wait for a remote Supabase session check. The client
   // initializes an existing session in the background and redirects signed-in users.
-  if (!protectedRole) return response;
+  if (!protectedRoute) return response;
   if (!runtime.supabaseUrl || !runtime.supabasePublishableKey) {
     response.headers.set("Cache-Control", "private, no-store");
     return copyAuthCookies(response, NextResponse.redirect(new URL("/login", request.url)));
@@ -53,20 +50,20 @@ export async function updateSupabaseSession(request: NextRequest, runtime = defa
   });
   const claimsResult = await withTimeout(supabase.auth.getClaims());
   response.headers.set("Cache-Control", "private, no-store");
-  if (protectedRole) {
+  if (protectedRoute) {
     const userId = typeof claimsResult?.data?.claims?.sub === "string" ? claimsResult.data.claims.sub : null;
     if (!userId) return copyAuthCookies(response, NextResponse.redirect(new URL("/login", request.url)));
-    const profileResult = await withTimeout(supabase.from("profiles").select("role").eq("id", userId).single<{ role: "dealer" | "installer" | "admin" | "pending" }>());
+    const profileResult = await withTimeout(supabase.from("profiles").select("role").eq("id", userId).single<{ role: UserRole }>());
     const profile = profileResult?.data;
     if (!profile) return copyAuthCookies(response, NextResponse.redirect(new URL("/login", request.url)));
-    if (profile.role !== protectedRole) return copyAuthCookies(response, NextResponse.redirect(new URL(profile.role === "pending" ? "/onboarding" : profile.role === "dealer" ? "/dealer" : profile.role === "admin" ? "/admin" : "/account-status", request.url)));
+    let approvalStatus: InstallerApprovalStatus | undefined;
     if (profile.role === "installer") {
       const approvalResult = await withTimeout(supabase.from("installer_approvals").select("status").eq("user_id", userId).single<{ status: string }>());
-      const approval = approvalResult?.data;
-      const approved = approval?.status === "approved";
-      if (pathname.startsWith("/shop") && !approved) return copyAuthCookies(response, NextResponse.redirect(new URL("/account-status", request.url)));
-      if (pathname.startsWith("/account-status") && approved) return copyAuthCookies(response, NextResponse.redirect(new URL("/shop", request.url)));
+      const status = approvalResult?.data?.status;
+      if (status === "pending" || status === "approved" || status === "rejected" || status === "suspended") approvalStatus = status;
     }
+    const destination = resolveAuthenticatedDestination(profile.role, approvalStatus, pathname);
+    if (destination !== pathname) return copyAuthCookies(response, NextResponse.redirect(new URL(destination, request.url)));
   }
   return response;
 }

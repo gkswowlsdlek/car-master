@@ -32,7 +32,3 @@ export type InstallerOnboardingInput = {
   address: string; detailAddress?: string; phone: string; contactPhone: string;
   supportedServices: string[]; supportedBrands: string[];
 } & LegalAgreementInput;
-
-export function normalizeUserRole(role: LegacyUserRole): UserRole {
-  return role === "shop" ? "installer" : role;
-}

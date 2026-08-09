@@ -1,4 +1,4 @@
-import type { CurrentUser } from "../../types/auth";
+import type { CurrentUser, InstallerApprovalStatus, LegacyUserRole, UserRole } from "../../types/auth";
 
 export const publicPaths = ["/", "/login", "/signup", "/forgot-password", "/update-password", "/auth/callback", "/terms", "/privacy"] as const;
 export const protectedPaths = ["/dealer", "/shop", "/admin", "/account-status", "/onboarding"] as const;
@@ -21,19 +21,34 @@ export function publicScreenForPath(pathname: string) {
   return "landing" as const;
 }
 
+export function normalizeUserRole(role: UserRole | LegacyUserRole): UserRole {
+  return role === "shop" ? "installer" : role;
+}
+
+export function legacyRoleForUserRole(role: Exclude<UserRole, "pending">): LegacyUserRole {
+  return role === "installer" ? "shop" : role;
+}
+
+export function workspacePathForRole(role: UserRole | LegacyUserRole, approvalStatus?: InstallerApprovalStatus) {
+  if (role === "shop") return "/shop" as const;
+  const normalizedRole = normalizeUserRole(role);
+  if (normalizedRole === "pending") return "/onboarding" as const;
+  if (normalizedRole === "admin") return "/admin" as const;
+  if (normalizedRole === "dealer") return "/dealer" as const;
+  return approvalStatus === "approved" ? "/shop" as const : "/account-status" as const;
+}
+
 export function workspacePathForUser(user: CurrentUser) {
-  if (user.role === "pending") return "/onboarding";
-  if (user.role === "admin") return "/admin";
-  if (user.role === "dealer") return "/dealer";
-  return user.approvalStatus === "approved" ? "/shop" : "/account-status";
+  return workspacePathForRole(user.role, user.approvalStatus);
+}
+
+export function resolveAuthenticatedDestination(role: UserRole | LegacyUserRole, approvalStatus: InstallerApprovalStatus | undefined, pathname: string) {
+  const homePath = workspacePathForRole(role, approvalStatus);
+  if (!isProtectedPath(pathname)) return homePath;
+  return pathname === homePath || pathname.startsWith(`${homePath}/`) ? pathname : homePath;
 }
 
 export function canAccessWorkspacePath(user: CurrentUser | null, pathname: string) {
   if (!user) return !isProtectedPath(pathname);
-  if (pathname.startsWith("/dealer")) return user.role === "dealer";
-  if (pathname.startsWith("/admin")) return user.role === "admin";
-  if (pathname.startsWith("/shop")) return user.role === "installer" && user.approvalStatus === "approved";
-  if (pathname.startsWith("/account-status")) return user.role === "installer" && user.approvalStatus !== "approved";
-  if (pathname.startsWith("/onboarding")) return user.role === "pending";
-  return true;
+  return !isProtectedPath(pathname) || resolveAuthenticatedDestination(user.role, user.approvalStatus, pathname) === pathname;
 }

@@ -271,8 +271,8 @@ test("access-policy.ts: /onboarding is protected, /terms and /privacy are public
   const policy = await read("services/auth/access-policy.ts");
   assert.match(policy, /export const protectedPaths = \["\/dealer", "\/shop", "\/admin", "\/account-status", "\/onboarding"\] as const;/);
   assert.match(policy, /"\/forgot-password", "\/update-password", "\/auth\/callback", "\/terms", "\/privacy"\]/);
-  assert.match(policy, /if \(user\.role === "pending"\) return "\/onboarding";/);
-  assert.match(policy, /if \(pathname\.startsWith\("\/onboarding"\)\) return user\.role === "pending";/);
+  assert.match(policy, /if \(normalizedRole === "pending"\) return "\/onboarding" as const;/);
+  assert.match(policy, /return workspacePathForRole\(user\.role, user\.approvalStatus\);/);
 });
 
 test("access-policy.ts regression: an anonymous user is still rejected from every protected path including the new /onboarding path", async () => {
@@ -282,9 +282,9 @@ test("access-policy.ts regression: an anonymous user is still rejected from ever
 
 test("proxy.ts (server-side route guard): /onboarding maps to protectedRole 'pending', profile type includes 'pending', and a role mismatch correctly redirects a pending user to /onboarding instead of the pre-existing /account-status fallback", async () => {
   const proxy = await read("lib/supabase/proxy.ts");
-  assert.match(proxy, /pathname\.startsWith\("\/onboarding"\) \? "pending" : null;/);
-  assert.match(proxy, /single<\{ role: "dealer" \| "installer" \| "admin" \| "pending" \}>\(\)/);
-  assert.match(proxy, /profile\.role === "pending" \? "\/onboarding" : profile\.role === "dealer" \? "\/dealer" : profile\.role === "admin" \? "\/admin" : "\/account-status"/);
+  assert.match(proxy, /isProtectedPath, normalizeUserRole, resolveAuthenticatedDestination/);
+  assert.match(proxy, /single<\{ role: UserRole \}>\(\)/);
+  assert.match(proxy, /resolveAuthenticatedDestination\(profile\.role, approvalStatus, pathname\)/);
 });
 
 test("app/page.tsx: a pending user is routed straight to the onboarding screen and never reaches accountForUser (which has no Role mapping for 'pending')", async () => {

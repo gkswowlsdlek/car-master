@@ -36,6 +36,22 @@ function assertRedirectsToLogin(response) {
   assert.equal(response.headers.get("location"), "https://car-master.example/login");
 }
 
+function authenticatedRuntime(role, approvalStatus) {
+  return {
+    supabaseUrl: "https://configured.example.test",
+    supabasePublishableKey: "configured-test-key",
+    createServerClient() {
+      return {
+        auth: { getClaims: async () => ({ data: { claims: { sub: "user-1" } } }) },
+        from(table) {
+          const data = table === "profiles" ? { role } : { status: approvalStatus };
+          return { select: () => ({ eq: () => ({ single: async () => ({ data }) }) }) };
+        },
+      };
+    },
+  };
+}
+
 test("configured Supabase rejects an anonymous protected-route request", async () => {
   assertRedirectsToLogin(await updateSupabaseSession(requestFor("/dealer"), configuredAnonymousRuntime));
 });
@@ -67,5 +83,29 @@ test("valid Demo sessions still enter their matching workspace without Supabase 
   } finally {
     if (previousSecret === undefined) delete process.env.CARMASTER_DEMO_SESSION_SECRET;
     else process.env.CARMASTER_DEMO_SESSION_SECRET = previousSecret;
+  }
+});
+
+test("real Dealer, approved Installer, and Admin wrong-role requests redirect directly to their canonical workspace", async () => {
+  for (const [role, approvalStatus, home, wrongPaths] of [
+    ["dealer", undefined, "/dealer", ["/shop", "/admin"]],
+    ["installer", "approved", "/shop", ["/dealer", "/admin"]],
+    ["admin", undefined, "/admin", ["/dealer", "/shop"]],
+  ]) {
+    assertPasses(await updateSupabaseSession(requestFor(home), authenticatedRuntime(role, approvalStatus)));
+    for (const pathname of wrongPaths) {
+      const response = await updateSupabaseSession(requestFor(pathname), authenticatedRuntime(role, approvalStatus));
+      assert.equal(response.status, 307);
+      assert.equal(response.headers.get("location"), `https://car-master.example${home}`);
+    }
+  }
+});
+
+test("pending, rejected, and suspended Installers stay on account status and never enter shop", async () => {
+  for (const status of ["pending", "rejected", "suspended"]) {
+    assertPasses(await updateSupabaseSession(requestFor("/account-status"), authenticatedRuntime("installer", status)));
+    const response = await updateSupabaseSession(requestFor("/shop"), authenticatedRuntime("installer", status));
+    assert.equal(response.status, 307);
+    assert.equal(response.headers.get("location"), "https://car-master.example/account-status");
   }
 });
