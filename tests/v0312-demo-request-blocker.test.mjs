@@ -5,12 +5,12 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("the real-only approved-installer alert is strictly inside the useSupabaseData branch, not reachable from Demo", async () => {
-  const source = await read("app/page.tsx");
+  const source = await read("components/workspaces/DealerWorkspace.tsx");
   const alertLine = source.split("\n").find((line) => line.includes("관리자에게 승인된 시공점을 선택해 주세요"));
   assert.ok(alertLine, "expected the alert to still exist for real dealers");
 
   const createTransactionStart = source.indexOf("const createTransaction = async");
-  const createTransactionBody = source.slice(createTransactionStart, source.indexOf("if (isProtectedPath", createTransactionStart));
+  const createTransactionBody = source.slice(createTransactionStart, source.indexOf("return <>", createTransactionStart));
   const supabaseBranchStart = createTransactionBody.indexOf("if (useSupabaseData) {");
   const demoBranchStart = createTransactionBody.indexOf("if (useDemoSharedBackend) {");
   const alertIndex = createTransactionBody.indexOf("관리자에게 승인된 시공점을 선택해 주세요");
@@ -19,9 +19,9 @@ test("the real-only approved-installer alert is strictly inside the useSupabaseD
 });
 
 test("Demo Dealer creates transactions through demoTransactionRepository, never through approvedInstallerShops", async () => {
-  const source = await read("app/page.tsx");
+  const source = await read("components/workspaces/DealerWorkspace.tsx");
   const createTransactionStart = source.indexOf("const createTransaction = async");
-  const createTransactionBody = source.slice(createTransactionStart, source.indexOf("if (isProtectedPath", createTransactionStart));
+  const createTransactionBody = source.slice(createTransactionStart, source.indexOf("return <>", createTransactionStart));
   const demoBranch = createTransactionBody.slice(createTransactionBody.indexOf("if (useDemoSharedBackend) {"));
   assert.match(demoBranch, /demoTransactionRepository\.createWithRoom/);
   assert.doesNotMatch(demoBranch, /approvedInstallerShops/);
@@ -56,7 +56,7 @@ test("migration seeds demo_chat_rooms before demo_transactions (FK-safe on a fre
 });
 
 test("Real Dealer approval-gate wording and RPC are unchanged", async () => {
-  const source = await read("app/page.tsx");
+  const source = await read("components/workspaces/DealerWorkspace.tsx");
   assert.match(source, /supabaseTransactionRepository\.createWithRoom/);
   const migration = await read("supabase/migrations/202608010001_v0312_installer_workspace.sql");
   assert.doesNotMatch(migration, /alter table public\.transactions/);
