@@ -5,7 +5,7 @@ import test from "node:test";
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("Demo installer-membership backend mirrors the real approval workflow's statuses and stays RPC-only for mutations", async () => {
-  const migration = await read("supabase/migrations/202608030001_v0313_demo_installer_membership.sql");
+  const migration = await read("supabase/retired-migrations/202608030001_v0313_demo_installer_membership.sql");
   assert.match(migration, /check \(status in \('pending', 'approved', 'rejected', 'suspended'\)\)/);
   assert.match(migration, /function public\.demo_review_installer_application/);
   // No table-level insert/update/delete grant to anon — RPC-only, matching
