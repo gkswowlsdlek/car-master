@@ -12,6 +12,8 @@
 .help-quick-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
 .help-quick-grid > a { display: flex; align-items: center; gap: 12px; border: 1px solid var(--color-line); border-radius: var(--radius-lg); background: #fff; padding: 18px; color: inherit; text-decoration: none; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 .help-quick-grid > a:hover { transform: translateY(-2px); border-color: var(--color-primary-border); box-shadow: var(--shadow-md); }
+.help-quick-disabled { display: flex; align-items: center; gap: 12px; border: 1px dashed var(--color-line-strong); border-radius: var(--radius-lg); background: var(--color-surface-soft); padding: 18px; color: var(--color-muted); }
+.help-quick-disabled > svg { flex: 0 0 auto; color: var(--color-muted); }.help-quick-disabled span { display: grid; gap: 4px; }.help-quick-disabled b { color: var(--color-text-soft); }
 .help-quick-grid > a > svg:first-child { flex: 0 0 auto; color: var(--color-primary); }
 .help-quick-grid > a > svg:last-child { margin-left: auto; color: var(--color-muted-soft); }
 .help-quick-grid span { display: grid; gap: 4px; }.help-quick-grid small { color: var(--color-muted); font-size: 11px; }
