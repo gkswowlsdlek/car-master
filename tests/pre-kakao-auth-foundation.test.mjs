@@ -1,0 +1,30 @@
+import { readFile } from "node:fs/promises";
+import assert from "node:assert/strict";
+
+const migration = await readFile(new URL("../supabase/migrations/202608120001_pre_kakao_shop_claim_foundation.sql", import.meta.url), "utf8");
+assert.match(migration, /create table public\.shop_claim_requests/);
+assert.match(migration, /status public\.shop_claim_request_status not null default 'pending'/);
+assert.match(migration, /request_shop_claim/);
+assert.match(migration, /Only Installer accounts can request a Shop claim/);
+assert.match(migration, /review_shop_claim/);
+assert.match(migration, /Only administrators can review Shop claims/);
+assert.match(migration, /ownership_status = 'unclaimed'/);
+assert.match(migration, /shop_memberships/);
+assert.match(migration, /ownership_status = 'claimed'/);
+assert.match(migration, /revoke all on function public\.request_shop_claim/);
+assert.match(migration, /revoke all on function public\.review_shop_claim/);
+assert.doesNotMatch(migration, /kakao|client_secret|admin signup/i);
+assert.match(migration, /where status = 'pending'/);
+assert.match(migration, /request_row\.status <> 'pending'/);
+assert.match(migration, /ownership_status = 'unclaimed'.*raise exception 'Shop has already been claimed'/s);
+assert.match(migration, /public\.is_admin\(\).*raise exception 'Only administrators can review Shop claims'/s);
+assert.match(migration, /role = 'installer'::public\.user_role/);
+assert.match(migration, /claim requests select own or admin/);
+assert.match(migration, /reviewed_by uuid references public\.profiles\(id\) on delete set null/);
+
+const onboarding = await readFile(new URL("../supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql", import.meta.url), "utf8");
+assert.match(onboarding, /coalesce\(new\.raw_user_meta_data ->> 'signup_role', ''\) not in \('dealer', 'installer'\)/);
+assert.match(onboarding, /approval_status|installer_approvals/);
+const policy = await readFile(new URL("../services/auth/access-policy.ts", import.meta.url), "utf8");
+assert.match(policy, /admin/);
+assert.doesNotMatch(policy, /signup.*admin/i);
