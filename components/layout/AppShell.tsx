@@ -104,6 +104,7 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
         <div className="app-mobile-more-head"><b>더보기</b><button onClick={() => setMoreOpen(false)} aria-label="닫기"><X size={18} /></button></div>
         <div className="app-mobile-more-grid">
           {overflow.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => go(item.screen)}><item.icon size={20} strokeWidth={2} aria-hidden="true" /><span>{item.label}</span></button>)}
+          <button onClick={() => { setMoreOpen(false); window.location.href = role === "shop" ? "/help/shop" : "/help"; }}><HelpCircle size={20} strokeWidth={2} aria-hidden="true" /><span>고객센터</span></button>
           <button onClick={() => { setMoreOpen(false); onLogout(); }}><LogOut size={20} aria-hidden="true" /><span>로그아웃</span></button>
         </div>
       </div>
