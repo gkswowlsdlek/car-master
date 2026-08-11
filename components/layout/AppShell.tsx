@@ -79,7 +79,7 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
       <button className="app-logo" onClick={() => onNavigate(homeScreen)}><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><small>{roleLabel} 워크스페이스</small></button>
       <div className="sidebar-section-label">업무 메뉴</div>
       <nav>{items.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
-      <div className="sidebar-support"><HelpCircle size={19} /><b>도움이 필요하신가요?</b><span>베타 운영팀이 도와드립니다.</span><button onClick={() => alert("카마스터 베타 운영 문의: help@car-master.kr")}>운영팀 문의</button></div>
+      <div className="sidebar-support"><HelpCircle size={19} /><b>도움이 필요하신가요?</b><span>자주 찾는 도움말과 이용 안내를 확인하세요.</span><button onClick={() => { window.location.href = role === "shop" ? "/help/shop" : "/help"; }}>고객센터 열기</button></div>
       <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
     </aside>
     <main className="app-main">
