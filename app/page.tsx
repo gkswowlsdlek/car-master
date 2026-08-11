@@ -214,7 +214,7 @@ export default function Home() {
   }, [enterAuthenticatedUser]);
 
   if (isProtectedPath(pathname) && !authReady) return <main className="system-state-page" aria-busy="true"><section><div className="system-state-logo">CM</div><div className="loading-line wide" /><p>회원 세션을 확인하고 있습니다.</p></section></main>;
-  if (screen === "landing") return <LandingPage onStart={() => goToScreen("login")} onPriceGuide={() => goToScreen("login")} />;
+  if (screen === "landing") return <LandingPage onStart={() => goToScreen("login")} />;
   if (screen === "login") return <LoginScreen onLogin={authenticate} onExplore={() => goToScreen("landing")} onSignUp={() => goToScreen("signup")} onForgotPassword={() => goToScreen("forgotPassword")} />;
   if (screen === "signup") return <SignUpScreen onBack={() => goToScreen("login")} onSignUp={signUp} />;
   if (screen === "forgotPassword") return <ForgotPasswordScreen onRequestReset={requestPasswordReset} onBack={() => goToScreen("login")} />;

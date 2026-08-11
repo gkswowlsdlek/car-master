@@ -13,9 +13,19 @@ test("Dealer Dashboard quick-action filters actually reach the 거래 관리 scr
   assert.doesNotMatch(dashboard, /onOpenDeal/);
 });
 
-test("오늘 입고 예정 card count matches what clicking it actually filters to (시공예약 stage only)", async () => {
+// Production-Safe UI Backport replaced the 4 colored stage-count cards
+// (오늘 입고 예정/확인 대기/진행 중/최근 완료) with a single "진행 중인 거래"
+// list of actual transactions — there's no longer a standalone count that
+// could drift from what clicking it filters to, since each row IS the
+// transaction it links to. This test now guards the thing that replaced it:
+// the list's membership rule (ACTIVE_STAGES) is the one place that decides
+// both what's shown and what "진행 중" means, so display and click-through
+// can't diverge.
+test("Dealer Dashboard's 진행 중인 거래 list and its click-through both key off the same ACTIVE_STAGES definition — no separate, potentially-drifting count", async () => {
   const dashboard = await read("components/dealer/DealerDashboard.tsx");
-  assert.match(dashboard, /deal\.status\.stage === "시공예약" && isToday\(deal\.schedule\.confirmedInboundAt \?\? deal\.schedule\.requestedInboundAt\)/);
+  assert.match(dashboard, /const ACTIVE_STAGES: TransactionStage\[\] = \["시공예약", "입고"\];/);
+  assert.match(dashboard, /ACTIVE_STAGES\.includes\(deal\.status\.stage\)/);
+  assert.match(dashboard, /onClick=\{\(\) => onOpenTransaction\(deal\.id\)\}/);
 });
 
 test("TransactionManagementScreen exposes a 거래 숨기기 action (not just 숨김 해제), wired through the same onHide the Messenger already uses", async () => {

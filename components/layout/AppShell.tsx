@@ -5,15 +5,22 @@ import type { ReactNode } from "react";
 import { ArrowLeft, Bell, Building2, CircleDollarSign, Gauge, HelpCircle, LogOut, MapPin, MessageCircle, MoreHorizontal, Plus, Settings2, UserRound, UsersRound, X, type LucideIcon } from "lucide-react";
 import type { DemoAccount, Role, Screen } from "../../types/dealer";
 
+// Dealer's own core flow (North Star: "가까운 시공점 찾기" first) drives the
+// order here — 홈/시공점찾기/거래관리/메시지 are the 4 items MOBILE_PRIMARY_COUNT
+// keeps on the mobile bottom nav without overflow. "시공 요청" is deliberately
+// NOT a nav destination — the product flow is Shop 먼저 찾기 → 선택 → 요청, so
+// it stays only as a strong CTA on the Dashboard (and the existing topbar
+// quick-action button), never a sidebar/bottom-nav item. 마이페이지/권장 시공
+// 패키지 are real, unremoved routes — kept at the tail so they still surface
+// in the sidebar and in mobile's "더보기" sheet.
 const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon }[]> = {
   dealer: [
-    { screen: "dealerDashboard", label: "대시보드", icon: Gauge },
-    { screen: "priceGuide", label: "권장 시공 패키지", icon: CircleDollarSign },
+    { screen: "dealerDashboard", label: "홈", icon: Gauge },
     { screen: "dealerMap", label: "시공점 찾기", icon: MapPin },
-    { screen: "request", label: "시공 요청", icon: Plus },
     { screen: "deals", label: "거래 관리", icon: Building2 },
     { screen: "messages", label: "메시지", icon: MessageCircle },
     { screen: "dealerProfile", label: "마이페이지", icon: UserRound },
+    { screen: "priceGuide", label: "권장 시공 패키지", icon: CircleDollarSign },
   ],
   shop: [
     { screen: "shopDashboard", label: "홈", icon: Gauge },
@@ -28,7 +35,7 @@ const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon
 };
 
 const screenTitles: Partial<Record<Screen, string>> = {
-  dealerDashboard: "대시보드", shopDashboard: "시공점 대시보드", priceGuide: "권장 시공 패키지 가이드", request: "새 시공 요청",
+  dealerDashboard: "홈", shopDashboard: "시공점 대시보드", priceGuide: "권장 시공 패키지 가이드", request: "새 시공 요청",
   requestSummary: "요청 최종 확인", dealerMap: "시공점 찾기", deals: "거래 관리", shopRequests: "거래 관리", messages: "메시지", dealerProfile: "마이페이지", ops: "운영 현황", adminAccount: "계정",
 };
 
@@ -44,10 +51,9 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
   const items = navigation[role];
   let overflow = items.length > MOBILE_PRIMARY_COUNT ? items.slice(MOBILE_PRIMARY_COUNT) : [];
   let primary = overflow.length > 0 ? items.slice(0, MOBILE_PRIMARY_COUNT) : items;
-  // "메시지"와 "시공 요청"(빠른 실행)은 사이드바 순서와 무관하게 모바일 하단
-  // 네비에 항상 남아야 하므로, 더보기로 밀려날 primary 항목이 있으면 그것부터
-  // 대신 넘긴다.
-  const pinnedScreens: Screen[] = ["messages", "request"];
+  // "메시지"는 사이드바 순서와 무관하게 모바일 하단 네비에 항상 남아야 하므로,
+  // 더보기로 밀려날 primary 항목이 있으면 그것부터 대신 넘긴다.
+  const pinnedScreens: Screen[] = ["messages"];
   for (const pinned of pinnedScreens) {
     if (overflow.length === 0 || primary.some((item) => item.screen === pinned)) continue;
     const pinnedItem = items.find((item) => item.screen === pinned);
@@ -72,7 +78,7 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
     <aside className="app-sidebar">
       <button className="app-logo" onClick={() => onNavigate(homeScreen)}><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><small>{roleLabel} 워크스페이스</small></button>
       <div className="sidebar-section-label">업무 메뉴</div>
-      <nav>{items.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "request" && <em>빠른 실행</em>}{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
+      <nav>{items.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
       <div className="sidebar-support"><HelpCircle size={19} /><b>도움이 필요하신가요?</b><span>베타 운영팀이 도와드립니다.</span><button onClick={() => alert("카마스터 베타 운영 문의: help@car-master.kr")}>운영팀 문의</button></div>
       <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
     </aside>
@@ -82,7 +88,7 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
           messenger-focus-topbar's base rule is display:none, only overridden
           at desktop widths, so the existing mobile Inbox/chat header flow is
           untouched. */}
-      <header className="app-topbar app-topbar-default"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>v0.3.13</small></div></div></div></header>
+      <header className="app-topbar app-topbar-default"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div></div></div></header>
       <header className="app-topbar messenger-focus-topbar"><button type="button" className="messenger-back-to-workspace" onClick={() => onNavigate(homeScreen)}><ArrowLeft size={17} aria-hidden="true" /> Car-Master</button><b>메시지</b><button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button></header>
       <div className="beta-environment-bar"><span>WORKSPACE</span><p>회원과 거래를 안전하게 연결하는 카마스터 업무공간입니다.</p></div>
       {children}

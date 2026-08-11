@@ -12,6 +12,13 @@ import { InstallerCard } from "./InstallerCard";
 import { InstallerDetailPanel } from "./InstallerDetailPanel";
 import { administrativeRegionNames, administrativeRegions, normalizeAdministrativeRegion, type AdministrativeRegion } from "../../data/administrative-regions";
 
+// rating/response/recent sort keys are kept as dead-but-reversible branches
+// in the `sorted` comparator below — real rating/response-time/recent-
+// transaction data doesn't exist yet for any non-Demo listing (every real
+// listing carries rating=0/reviewCount=0/recentTransactionCount=0), so
+// those sort options would silently do nothing for a Real Dealer. Ships
+// "가까운 순" only; the select UI itself is removed (not shown disabled/
+// "준비 중") until real data exists to restore it.
 type SortKey = "distance" | "rating" | "response" | "recent";
 const SORT_LABELS: Record<SortKey, string> = { distance: "가까운 순", rating: "평점 높은 순", response: "응답 빠른 순", recent: "최근 작업 많은 순" };
 
@@ -43,7 +50,7 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
   const [workFilter, setWorkFilter] = useState<WorkType | "전체">("전체");
   const [brandFilter, setBrandFilter] = useState<Brand | "전체">("전체");
   const [onlyAvailable, setOnlyAvailable] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey>("distance");
+  const [sortKey] = useState<SortKey>("distance");
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -123,7 +130,6 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
       <label className="search-field"><Search size={18} aria-hidden="true" /><input aria-label="시공점 검색" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="시공점, 지역, 브랜드, 작업 종류로 검색" /></label>
       <label className="installer-filter-toggle"><input type="checkbox" checked={onlyAvailable} onChange={(event) => setOnlyAvailable(event.target.checked)} /> 요청 가능한 시공점만</label>
       <button className="button button-secondary installer-filter-open" onClick={() => setFilterSheetOpen(true)}><ListFilter size={16} /> 필터</button>
-      <label className="installer-sort-select">정렬<select value={sortKey} onChange={(event) => setSortKey(event.target.value as SortKey)}>{(Object.keys(SORT_LABELS) as SortKey[]).map((key) => <option key={key} value={key}>{SORT_LABELS[key]}</option>)}</select></label>
     </div>
     {locationStatus === "unavailable" && sortKey === "distance" && <p className="installer-location-note">현재 위치를 사용할 수 없어 정확한 거리 대신 기본 지역 기준으로 표시됩니다.</p>}
 
@@ -138,7 +144,7 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
       <div className={`installer-list-pane ${mobileView === "map" ? "mobile-hidden" : ""}`}>
         <div className="installer-list-head"><b>{sorted.length}곳</b><span>{SORT_LABELS[sortKey]}</span></div>
         {sorted.length === 0 ? <div className="installer-empty-state"><span>🔍</span><h2>조건에 맞는 시공점이 없습니다.</h2><p>검색어나 필터를 조정해 보세요.</p><button className="button button-secondary" onClick={resetFilters}>필터 초기화</button></div> : <div className="installer-list" ref={listRef}>
-          {sorted.map(({ installer, distanceLabel }) => <InstallerCard key={installer.id} installer={installer} distanceLabel={distanceLabel} selected={installer.id === focusedInstallerId} favorite={favoriteIds.includes(installer.id)} onToggleFavorite={() => toggleFavorite(installer.id)} onSelect={() => selectInstaller(installer.id)} onOpenDetail={() => selectAndOpenDetail(installer.id)} onRequest={() => { selectInstaller(installer.id); onRequest(); }} />)}
+          {sorted.map(({ installer, distanceLabel }) => <InstallerCard key={installer.id} installer={installer} distanceLabel={distanceLabel} selected={installer.id === focusedInstallerId} favorite={favoriteIds.includes(installer.id)} onToggleFavorite={() => toggleFavorite(installer.id)} onOpenDetail={() => selectAndOpenDetail(installer.id)} onRequest={() => { selectInstaller(installer.id); onRequest(); }} />)}
         </div>}
       </div>
       <div className={`installer-map-pane ${mobileView === "list" ? "mobile-hidden" : ""}`}>

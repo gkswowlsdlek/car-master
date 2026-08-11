@@ -692,14 +692,39 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
    visual system (tokens above already remapped to the new palette).
    ============================================================ */
 
-/* Dealer: "지금 확인이 필요해요" focus banner (sits above the metric grid) */
-.dealer-focus-banner { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: 100%; margin-bottom: 18px; border-radius: 16px; background: var(--color-ink); padding: 22px 26px; text-align: left; box-shadow: var(--shadow-md); transition: transform .18s ease, box-shadow .18s ease; }
-.dealer-focus-banner:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-.dealer-focus-banner .eyebrow { color: #8fb6ff; }
-.dealer-focus-banner h2 { margin: 6px 0 4px; color: #fff; font-size: 21px; letter-spacing: -.02em; }
-.dealer-focus-desc { margin: 0; color: #c7d2e0; font-size: 13.5px; }
-.dealer-focus-cta { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; background: var(--color-primary); padding: 10px 18px; color: #fff; font-size: 14px; font-weight: 700; }
-@media (max-width:640px) { .dealer-focus-banner { flex-direction: column; align-items: stretch; gap: 14px; padding: 20px; } .dealer-focus-cta { justify-content: center; } }
+/* Dealer: 가까운 시공점 찾기 primary action + compact "확인 필요" alert pill
+   above the 진행 중인 거래 list. Production-Safe UI Backport replaced the
+   old dark heading/desc/cta banner markup with single-line buttons, so
+   these rules are icon-text-icon row layouts, not heading blocks. */
+.dealer-primary-action { display: flex; align-items: center; gap: 14px; width: 100%; margin-bottom: 14px; border: 1px solid var(--color-primary-border); border-radius: 16px; background: var(--color-primary-soft); padding: 18px 20px; text-align: left; box-shadow: var(--shadow-sm); transition: transform .16s ease, box-shadow .16s ease; }
+.dealer-primary-action:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.dealer-primary-action > svg:first-child { flex: 0 0 auto; color: var(--color-primary); }
+.dealer-primary-action > span { display: grid; gap: 3px; }
+.dealer-primary-action > span > b { font-size: 16px; }
+.dealer-primary-action > span > small { color: var(--color-muted); font-size: 12.5px; }
+.dealer-primary-action > svg:last-child { flex: 0 0 auto; margin-left: auto; color: var(--color-primary); }
+
+.dealer-focus-banner { display: flex; align-items: center; gap: 8px; width: 100%; margin-bottom: 14px; border: 1px solid var(--color-warning-bg); border-radius: 999px; background: var(--color-warning-bg); padding: 12px 18px; color: #9a3412; font-size: 13.5px; font-weight: 700; text-align: left; }
+.dealer-focus-banner:hover { border-color: var(--color-warning); }
+.dealer-focus-banner svg:first-child { flex: 0 0 auto; color: var(--color-warning); }
+.dealer-focus-banner svg:last-child { flex: 0 0 auto; margin-left: auto; }
+
+.dealer-welcome-subtitle { display: block; margin-top: 6px; color: var(--color-muted); font-size: 15px; font-weight: 500; }
+
+.dealer-active-deals { margin-bottom: 14px; border: 1px solid var(--color-line); border-radius: 16px; background: #fff; padding: 18px 20px; }
+.dealer-active-deals .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.dealer-active-deals-more { background: transparent; padding: 4px; color: var(--color-primary); font-size: 12.5px; font-weight: 700; }
+.dealer-active-deals ul { display: grid; }
+.dealer-active-deals li { border-top: 1px solid var(--color-line); }
+.dealer-active-deals li:first-child { border-top: 0; }
+.dealer-active-deals li > button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; background: transparent; padding: 12px 2px; text-align: left; }
+.dealer-active-deals li > button > span { display: grid; min-width: 0; gap: 3px; }
+.dealer-active-deals li > button > span > b { font-size: 14px; }
+.dealer-active-deals li > button > span > small { color: var(--color-muted); font-size: 12px; }
+
+.dealer-secondary-actions { display: flex; gap: 8px; margin-bottom: 4px; }
+.dealer-secondary-actions .button { flex: 1; }
+@media (max-width:640px) { .dealer-focus-banner { font-size: 13px; } }
 
 /* Installer: urgent/delayed work queue promoted above the metric grid */
 .shop-priority-banner { margin-bottom: 18px; border: 1px solid var(--color-danger-bg); border-radius: 16px; background: #fff; padding: 20px 22px; box-shadow: var(--shadow-sm); }
@@ -752,20 +777,30 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .installer-card { position: relative; display: flex; flex-direction: column; gap: 8px; width: 100%; border: 1px solid var(--color-line); border-radius: var(--radius-lg); background: var(--color-surface); padding: 16px 18px; box-shadow: var(--shadow-sm); transition: border-color .18s ease, box-shadow .18s ease; }
 .installer-card:hover { border-color: var(--color-line-strong); box-shadow: var(--shadow-md); }
 .installer-card.selected { border-color: var(--color-primary); background: var(--color-primary-soft); box-shadow: 0 0 0 1px var(--color-primary) inset; }
-.installer-card .favorite-star { position: absolute; top: 12px; right: 12px; z-index: 1; background: transparent; }
+/* Star now overlays the photo placeholder — a small backdrop keeps it
+   legible regardless of the placeholder's neutral tone. */
+.installer-card .favorite-star { position: absolute; top: 12px; right: 12px; z-index: 1; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 999px; background: rgba(255,255,255,.92); box-shadow: var(--shadow-sm); }
 .installer-card-body { display: flex; flex-direction: column; gap: 8px; width: 100%; border: 0; background: transparent; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-.installer-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding-right: 30px; }
+/* Photo first, then name+distance, then location/status/works — Card
+   never fetches real photos (Shop Photos backend isn't in this Production
+   DB yet), so it's always this neutral placeholder. */
+.installer-card-photo { display: grid; place-items: center; height: 96px; border-radius: var(--radius-md); background: var(--color-surface-soft); color: var(--color-muted-soft); }
+.installer-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.installer-card-name { font-size: 15px; }
+.installer-card-top > span { flex: 0 0 auto; color: var(--color-muted); font-size: 12.5px; font-weight: 700; }
 .installer-card-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.installer-card-heading b { font-size: 15px; }
 .demo-badge { display: inline-flex; align-items: center; border-radius: 999px; background: var(--color-warning-bg); padding: 3px 9px; color: var(--color-warning); font-size: 10.5px; font-weight: 800; }
 /* Neutral (not success-green) on purpose — this marks "지도 위치가 등록됨", not "인증/공식 등록 완료". Always paired with the "데모 시공점" badge and the literal 위치 label so it can't read as verification. */
 .demo-location-badge { display: inline-flex; align-items: center; gap: 3px; border-radius: 999px; background: var(--color-primary); padding: 4px 10px 4px 8px; color: #fff; font-size: 12px; font-weight: 800; box-shadow: 0 2px 6px rgba(49,130,246,.28); }
 .demo-location-badge svg { flex: 0 0 auto; }
+/* Pill treatment matching demo-badge/delivery-adjacent badges — was bare
+   colored text before, the only inconsistent badge. Blue/neutral, not
+   success-green: a listing state, not a quality certification. */
+.verified-badge { display: inline-flex; align-items: center; border-radius: 999px; background: var(--color-primary-soft); padding: 3px 9px; color: var(--color-primary-hover); font-size: 10.5px; font-weight: 800; }
 .installer-availability { flex: 0 0 auto; border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 800; }
 .installer-availability.open { background: var(--color-success-bg); color: var(--color-success); }
 .installer-availability.closed { background: var(--color-line); color: var(--color-muted); }
 .installer-card-location { margin: 0; color: var(--color-muted); font-size: 12.5px; }
-.installer-card-meta { display: flex; flex-wrap: wrap; gap: 10px; color: var(--color-text-soft); font-size: 12.5px; font-weight: 600; }
 .installer-card-works, .installer-card-brands { margin: 0; color: var(--color-muted); font-size: 12px; }
 .installer-card-actions { display: flex; gap: 8px; margin-top: 4px; }
 .installer-card-actions .button { flex: 1; min-height: 38px; font-size: 13px; }
@@ -799,15 +834,20 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .installer-detail-pane { display: none; }
 .installer-detail-panel { display: flex; flex-direction: column; gap: 14px; border: 1px solid var(--color-line); border-radius: var(--radius-lg); background: var(--color-surface); padding: 22px; box-shadow: var(--shadow-md); }
 .installer-detail-close { display: none; }
-.installer-detail-head { display: flex; justify-content: space-between; gap: 12px; }
-.installer-detail-head h2 { margin: 6px 0 4px; }
-.installer-detail-head p { margin: 0; color: var(--color-muted); font-size: 12.5px; }
+.installer-detail-head { display: grid; gap: 4px; }
+.installer-detail-head h2 { margin: 6px 0 0; }
+.installer-detail-location { margin: 0; color: var(--color-muted); font-size: 12.5px; }
+.installer-detail-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 2px; }
 .installer-detail-map { height: 180px; border-radius: var(--radius-md); overflow: hidden; }
 .installer-detail-map .naver-map-shell, .installer-detail-map .naver-map-fallback { height: 180px; border-radius: var(--radius-md); }
-.installer-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0; }
-.installer-detail-grid div { display: grid; gap: 3px; }
-.installer-detail-grid dt { color: var(--color-muted); font-size: 11px; }
-.installer-detail-grid dd { margin: 0; font-size: 13px; font-weight: 700; }
+.installer-detail-section { border-top: 1px solid var(--color-line); padding-top: 14px; }
+.installer-detail-label { margin: 0 0 4px; color: var(--color-muted); font-size: 11px; font-weight: 700; }
+.installer-detail-value { margin: 0; font-size: 13.5px; font-weight: 600; line-height: 1.6; }
+.installer-detail-section-secondary { display: grid; gap: 8px; }
+.installer-detail-section-secondary p { display: flex; justify-content: space-between; gap: 10px; margin: 0; font-size: 12.5px; }
+.installer-detail-section-secondary p span:first-child { color: var(--color-muted); }
+.installer-detail-section-secondary p span:last-child { font-weight: 700; }
+.installer-detail-closed-note { margin: 0; border-radius: var(--radius-sm); background: var(--color-surface-soft); padding: 10px 12px; color: var(--color-muted); font-size: 12.5px; text-align: center; }
 .installer-detail-panel .card-actions .primary { width: 100%; }
 
 .installer-detail-overlay, .installer-filter-overlay { position: fixed; inset: 0; z-index: 150; display: flex; justify-content: flex-end; }
@@ -986,56 +1026,12 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 /* v0.3.11 — Dealer Experience / Meeting Ready.
    Keep the existing token system and product structure; these rules only
    strengthen hierarchy, touch targets, and narrow-screen containment. */
-.dealer-today-actions {
-  display: grid;
-  grid-template-columns: minmax(180px,1.1fr) repeat(3,minmax(170px,1fr));
-  align-items: stretch;
-  overflow: hidden;
-  margin-bottom: 18px;
-  border: 1px solid var(--color-line);
-  border-radius: 16px;
-  background: #fff;
-}
-.dealer-today-actions > div { display: grid; align-content: center; gap: 4px; padding: 18px 20px; }
-.dealer-today-actions h2 { margin: 0; font-size: 18px; }
-.dealer-today-actions > button {
-  display: grid;
-  grid-template-columns: auto minmax(0,1fr) auto auto;
-  align-items: center;
-  gap: 9px;
-  min-height: 72px;
-  border-left: 1px solid var(--color-line);
-  border-radius: 0;
-  background: #fff;
-  color: var(--color-text-soft);
-  padding: 14px 16px;
-  text-align: left;
-}
-.dealer-today-actions > button:hover { background: var(--color-primary-soft); color: var(--color-primary); }
-.dealer-today-actions > button > svg:first-child { color: var(--color-primary); }
-.dealer-today-actions > button span { overflow: hidden; font-size: 13px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
-.dealer-today-actions > button b { font-size: 20px; font-variant-numeric: tabular-nums; }
-.dashboard-quick-actions > .section-head { align-items: end; }
-.dashboard-quick-actions > .section-head > p { margin: 0; color: var(--color-muted); font-size: 12px; }
 .request-submit-area { display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid var(--color-primary-border); border-radius: 12px; background: var(--color-primary-soft); padding: 14px; }
 .request-submit-area p { margin: 0; color: var(--color-muted); font-size: 12px; line-height: 1.55; }
 .request-submit-area .request-submit-button { flex: 0 0 auto; min-width: 190px; min-height: 48px; }
 
-@media (max-width: 1180px) {
-  .dealer-today-actions { grid-template-columns: 1fr 1fr 1fr; }
-  .dealer-today-actions > div { grid-column: 1/-1; border-bottom: 1px solid var(--color-line); }
-  .dealer-today-actions > button:first-of-type { border-left: 0; }
-}
-
 @media (max-width: 760px) {
   .topbar-actions > .primary { display: none; }
-  .dealer-today-actions { grid-template-columns: 1fr; margin-bottom: 14px; }
-  .dealer-today-actions > div { grid-column: auto; padding: 16px; }
-  .dealer-today-actions > button { min-height: 58px; border-top: 1px solid var(--color-line); border-left: 0; padding: 10px 14px; }
-  .dealer-today-actions > div + button { border-top: 0; }
-  .dashboard-quick-actions > .section-head > p { display: none; }
-  .dashboard-quick-actions > div:last-child { display: grid; grid-template-columns: 1fr 1fr; }
-  .dashboard-quick-actions > div:last-child > button { width: 100%; min-width: 0; min-height: 48px; }
 
   .request-submit-area { align-items: stretch; flex-direction: column; }
   .request-submit-area .request-submit-button { width: 100%; min-width: 0; }
@@ -1068,8 +1064,6 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 }
 
 @media (max-width: 390px) {
-  .dashboard-quick-actions > div:last-child { grid-template-columns: 1fr; }
-  .dealer-today-actions > button span { font-size: 12px; }
   .vehicle-class-picker { grid-template-columns: 1fr 1fr; }
   .vehicle-class-picker button { min-width: 0; }
 }
