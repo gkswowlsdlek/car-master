@@ -33,7 +33,7 @@ function distanceKm(a: GeoPosition, b: { lat: number; lng: number }) {
 }
 function responseMinutes(value: string) { return Number(value.match(/\d+/)?.[0] ?? Number.MAX_SAFE_INTEGER); }
 
-export function InstallerDirectoryScreen({ installers, loading, selectedId, setSelectedId, favoriteIds, toggleFavorite, selectedBrand, isOtherBrand, onRequest }: {
+export function InstallerDirectoryScreen({ installers, loading, selectedId, setSelectedId, favoriteIds, toggleFavorite, selectedBrand, isOtherBrand, onRequest, onShopSearchRequest }: {
   installers: InstallerListing[];
   loading?: boolean;
   selectedId: string;
@@ -43,6 +43,8 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
   selectedBrand?: string;
   isOtherBrand: boolean;
   onRequest: () => void;
+  /** Only passed in Real (Supabase) mode — surfaces the "원하는 시공점을 찾지 못하셨나요?" CTA when the filtered list is empty. */
+  onShopSearchRequest?: () => void;
 }) {
   const [search, setSearch] = useState("");
   const [province, setProvince] = useState("전체");
@@ -143,7 +145,7 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
     <div className="installer-directory-layout">
       <div className={`installer-list-pane ${mobileView === "map" ? "mobile-hidden" : ""}`}>
         <div className="installer-list-head"><b>{sorted.length}곳</b><span>{SORT_LABELS[sortKey]}</span></div>
-        {sorted.length === 0 ? <div className="installer-empty-state"><span>🔍</span><h2>조건에 맞는 시공점이 없습니다.</h2><p>검색어나 필터를 조정해 보세요.</p><button className="button button-secondary" onClick={resetFilters}>필터 초기화</button></div> : <div className="installer-list" ref={listRef}>
+        {sorted.length === 0 ? <div className="installer-empty-state"><span>🔍</span><h2>조건에 맞는 시공점이 없습니다.</h2><p>검색어나 필터를 조정해 보세요.</p><button className="button button-secondary" onClick={resetFilters}>필터 초기화</button>{onShopSearchRequest && <div className="installer-empty-state-shop-search"><p>원하는 시공점을 찾지 못하셨나요?<br />카마스터가 직접 확인해드릴게요.</p><button className="button button-primary" onClick={onShopSearchRequest}>시공점 찾기 요청</button></div>}</div> : <div className="installer-list" ref={listRef}>
           {sorted.map(({ installer, distanceLabel }) => <InstallerCard key={installer.id} installer={installer} distanceLabel={distanceLabel} selected={installer.id === focusedInstallerId} favorite={favoriteIds.includes(installer.id)} onToggleFavorite={() => toggleFavorite(installer.id)} onOpenDetail={() => selectAndOpenDetail(installer.id)} onRequest={() => { selectInstaller(installer.id); onRequest(); }} />)}
         </div>}
       </div>
