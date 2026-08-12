@@ -125,7 +125,7 @@ test("Dealer directory screen surfaces the '시공점 찾기 요청' CTA only in
 test("DealerWorkspace only passes the shop-search-request entry points (directory CTA, dashboard button, screen render) in Real/Supabase mode — never for Demo/local", () => {
   assert.match(dealerWorkspaceSource, /onShopSearchRequest=\{useSupabaseData \? \(\) => onNavigate\("shopSearchRequests"\) : undefined\}/);
   assert.match(dealerWorkspaceSource, /onShopSearchRequests=\{useSupabaseData \? \(\) => onNavigate\("shopSearchRequests"\) : undefined\}/);
-  assert.match(dealerWorkspaceSource, /\{screen === "shopSearchRequests" && useSupabaseData && <ShopSearchRequestScreen \/>\}/);
+  assert.match(dealerWorkspaceSource, /\{screen === "shopSearchRequests" && useSupabaseData && <ShopSearchRequestScreen /);
 });
 
 test("ShopSearchRequestScreen's create form collects every required field (region/workType/vehicle/desiredInboundDate/dateFlexible/optional note) and saves through the repository, never localStorage", () => {
@@ -159,7 +159,7 @@ test("AdminShopSearchRequestPanel shows Dealer name/phone/region/work/vehicle/de
   }
   assert.match(adminPanelSource, /Dealer에게 노출되지 않음/);
   assert.match(adminPanelSource, /selected\.status === "requested" && <button className="approve" onClick=\{\(\) => void startProcessing\(selected\.id\)\}>/);
-  assert.match(adminPanelSource, /\(selected\.status === "requested" \|\| selected\.status === "in_progress"\) && <button className="reject" onClick=\{\(\) => void markUnable\(selected\.id\)\}>/);
+  assert.match(adminPanelSource, /selected\.status === "shop_proposed"\) && <button className="reject" onClick=\{\(\) => void markUnable\(selected\.id\)\}>/);
 });
 
 test("AdminShopSearchRequestPanel default order relies on get_admin_shop_search_requests' own oldest-open-first sort — it does not re-sort client-side", () => {

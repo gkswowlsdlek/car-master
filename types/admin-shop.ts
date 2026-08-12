@@ -28,3 +28,13 @@ export type RegisteredShopResult = {
   supportedServices: WorkType[];
   supportedBrands: Brand[];
 };
+
+/** A result row from admin_search_shops — used when Admin proposes an existing Shop for a Phase 2 request. */
+export type SearchableShop = {
+  id: string;
+  shopName: string;
+  address: string;
+  phone: string;
+  supportedServices: string[];
+  supportedBrands: string[];
+};
