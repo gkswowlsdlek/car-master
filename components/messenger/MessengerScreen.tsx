@@ -74,7 +74,12 @@ export function MessengerScreen({ role, userId, transactions, rooms, installers,
   const totalUnread = useMemo(() => rows.reduce((sum, { room }) => sum + (room?.unreadCount ?? 0), 0), [rows]);
   const selected = filtered.find((item) => item.transaction.id === selectedId) ?? filtered[0];
   const selectedRoom = rooms.find((item) => item.transactionId === selected?.transaction.id);
-  const selectedInstaller = installers?.find((item) => item.id === selected?.transaction.installerId);
+  // installers[].id is installer_shops.id (Shop-model identity) — matched
+  // against transaction.shopId, not the legacy installerId, so this keeps
+  // resolving correctly for Shops with no linked Installer Account too.
+  // Account Foundation B1 already backfilled shopId onto every legacy
+  // transaction, so this also still matches old transactions unchanged.
+  const selectedInstaller = installers?.find((item) => item.id === selected?.transaction.shopId);
 
   const openRoom = (id: string) => {
     onSelect(id);

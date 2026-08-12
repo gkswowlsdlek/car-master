@@ -105,7 +105,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
   const profileActivity = useMemo(() => {
     const now = new Date();
     const monthly = transactions.filter((item) => { const date = new Date(item.status.createdAt); return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth(); }).length;
-    return { total: transactions.length, monthly, completed: transactions.filter((item) => item.status.stage === "작업완료").length, favorites: favoriteShopIds.length };
+    return { total: transactions.length, monthly, completed: transactions.filter((item) => item.status.stage === "작업완료" || item.status.stage === "출고").length, favorites: favoriteShopIds.length };
   }, [favoriteShopIds.length, transactions]);
 
   useEffect(() => {
@@ -171,8 +171,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
       if (useSupabaseData) {
         if (!approvedInstallerShops.some((shop) => shop.id === selectedShop.id)) { alert("관리자에게 승인된 시공점을 선택해 주세요."); return; }
         try {
-          const created = await supabaseTransactionRepository.createWithRoom({
-            installerId: selectedShop.id,
+          const created = await supabaseTransactionRepository.createWithShopRoom(selectedShop.id, {
             vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass },
             service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest },
             pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" },

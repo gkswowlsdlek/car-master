@@ -7,7 +7,7 @@ type StageEventRow = {
 };
 
 type TransactionRow = {
-  id: string; dealer_id: string; installer_id: string; shop_id: string | null; installer_name: string;
+  id: string; dealer_id: string; installer_id: string | null; shop_id: string | null; installer_name: string;
   vehicle: Transaction["vehicle"]; service: Transaction["service"]; pricing: Transaction["pricing"];
   schedule: Transaction["schedule"]; stage: Transaction["status"]["stage"];
   hidden_by_dealer: boolean; hidden_by_installer: boolean; last_message: string;
@@ -41,6 +41,18 @@ export class SupabaseTransactionRepository {
   async createWithRoom(value: Pick<Transaction, "installerId" | "vehicle" | "service" | "pricing" | "schedule">) {
     const { data, error } = await createSupabaseBrowserClient().rpc("create_transaction_with_room", { payload: {
       installerId: value.installerId, vehicle: value.vehicle, service: value.service, pricing: value.pricing, schedule: value.schedule,
+    } });
+    if (error) throw error;
+    return data as { transactionId: string; roomId: string; messageId: string };
+  }
+
+  /** Shop-centric creation — the Dealer selects an installer_shops row (not
+   * an Installer Account), and the room is created immediately, no
+   * acceptance gate. Works whether or not the Shop has a linked Installer
+   * Account. */
+  async createWithShopRoom(shopId: string, value: Pick<Transaction, "vehicle" | "service" | "pricing" | "schedule">) {
+    const { data, error } = await createSupabaseBrowserClient().rpc("create_shop_transaction_with_room", { payload: {
+      shopId, vehicle: value.vehicle, service: value.service, pricing: value.pricing, schedule: value.schedule,
     } });
     if (error) throw error;
     return data as { transactionId: string; roomId: string; messageId: string };

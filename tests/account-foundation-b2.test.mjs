@@ -8,7 +8,9 @@ const normalize = (source) => source.replace(/\r\n?/g, "\n");
 test("Transaction keeps an optional Shop id without changing legacy or Demo identity", async () => {
   const source = normalize(await read("types/transactions.ts"));
   assert.match(source, /shopId\?: string \| null/);
-  assert.match(source, /installerId: string;/);
+  // Dealer immediate-transaction Phase 1 made installerId nullable — a Shop
+  // with no linked Installer Account is a valid transaction counterpart.
+  assert.match(source, /installerId: string \| null;/);
   assert.match(source, /installerName: string;/);
   const demo = normalize(await read("repositories/demo-transaction-repository.ts"));
   assert.match(demo, /installer_id/);

@@ -28,8 +28,15 @@ test("시공점은 거래 단계를 한 단계씩 순서대로 진행할 수 있
   assert.deepEqual(updated.stageLog[0], { id: updated.stageLog[0].id, fromStage: "견적", toStage: "시공예약", actorRole: "shop", direction: "forward", createdAt: "2026-07-17T01:00:00.000Z" });
 });
 
-test("딜러는 시공 진행 단계를 임의로 변경할 수 없다", () => {
-  assert.throws(() => transitionStage(makeTransaction("견적"), "시공예약", "dealer"));
+// Dealer immediate-transaction Phase 1: the flow must never stall waiting on
+// an Installer who may never open Car-Master, so the dealer can now drive
+// their own transaction's work stage forward/back too — this client-side
+// helper only encodes "is this move shape allowed," the server RPC is what
+// enforces "does this actor own this transaction."
+test("딜러도 자신의 거래는 시공 진행 단계를 진행할 수 있다", () => {
+  const updated = transitionStage(makeTransaction("견적"), "시공예약", "dealer", "2026-07-17T01:00:00.000Z");
+  assert.equal(updated.status.stage, "시공예약");
+  assert.equal(updated.stageLog[0].actorRole, "dealer");
 });
 
 test("여러 단계를 한 번에 건너뛸 수 없다", () => {
@@ -47,9 +54,10 @@ test("두 단계 이전으로는 되돌릴 수 없다", () => {
   assert.throws(() => transitionStage(makeTransaction("입고"), "견적", "shop"));
 });
 
-test("가장 첫 단계에서는 되돌릴 곳이 없고, 마지막 단계에는 다음 행동이 없다", () => {
+test("가장 첫 단계에서는 되돌릴 곳이 없고, 마지막 단계(출고)에는 다음 행동이 없다", () => {
   assert.equal(revertStage("견적"), undefined);
-  assert.equal(nextForwardStage("작업완료"), undefined);
+  assert.equal(nextForwardStage("작업완료"), "출고");
+  assert.equal(nextForwardStage("출고"), undefined);
 });
 
 test("작업완료에 도달하면 완료 시각이 기록되고, 되돌리면 지워진다", () => {

@@ -57,7 +57,9 @@ test("migration seeds demo_chat_rooms before demo_transactions (FK-safe on a fre
 
 test("Real Dealer approval-gate wording and RPC are unchanged", async () => {
   const source = await read("components/workspaces/DealerWorkspace.tsx");
-  assert.match(source, /supabaseTransactionRepository\.createWithRoom/);
+  // Dealer immediate-transaction Phase 1 moved the Real path to the
+  // Shop-centric createWithShopRoom — see tests/dealer-immediate-transaction-flow.test.mjs.
+  assert.match(source, /supabaseTransactionRepository\.createWithShopRoom/);
   const migration = await read("supabase/migrations/202608010001_v0312_installer_workspace.sql");
   assert.doesNotMatch(migration, /alter table public\.transactions/);
   assert.doesNotMatch(migration, /alter table public\.installer_approvals/);

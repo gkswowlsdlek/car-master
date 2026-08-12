@@ -18,4 +18,6 @@ export type InstallerListing = InstallerShop & {
   nextAvailableDate: string;
   /** true = 데모 시공점, false = 카마스터 등록(실) 시공점 */
   isDemo: boolean;
+  /** 시공점 전화번호. 등록되지 않은 경우 undefined — 절대 임의로 채우지 않는다. */
+  contactPhone?: string;
 };

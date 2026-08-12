@@ -56,7 +56,7 @@ export function InstallerWorkspace({ account, screen, transactions, rooms, insta
     return {
       total: roleTransactions.length,
       monthly,
-      completed: roleTransactions.filter((item) => item.status.stage === "작업완료").length,
+      completed: roleTransactions.filter((item) => item.status.stage === "작업완료" || item.status.stage === "출고").length,
       favorites: 0,
     };
   }, [roleTransactions]);

@@ -32,6 +32,9 @@ export function useTransactionActions({ useSupabaseData, transactions, sharedRoo
 
   const notifyNewMessage = useCallback((transaction: Transaction, message: TransactionChatMessage) => {
     const recipientId = message.senderId === transaction.dealerId ? transaction.installerId : transaction.dealerId;
+    // A Shop with no linked Installer Account has no recipient to notify —
+    // never fabricate one, just skip (this is a no-op placeholder service today anyway).
+    if (!recipientId) return;
     void notificationService.notify({ type: "new_message", transactionId: transaction.id, roomId: transaction.chatRoomId, recipientId, preview: message.text || "사진을 보냈습니다" });
   }, []);
 

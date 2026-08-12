@@ -20,12 +20,12 @@ function weeklyVolume(transactions: Transaction[]) {
 
 export function AdminOverview({ transactions, rooms, demoSession = false }: { transactions: Transaction[]; rooms: ChatRoom[]; demoSession?: boolean }) {
   const referenceTime = Math.max(0, ...transactions.map((item) => new Date(item.status.updatedAt).getTime()));
-  const stalled = transactions.filter((item) => item.status.stage !== "작업완료" && item.status.stage !== "취소" && referenceTime - new Date(item.status.updatedAt).getTime() > 1000 * 60 * 60 * 24 * 3).length;
+  const stalled = transactions.filter((item) => !["작업완료", "출고", "취소"].includes(item.status.stage) && referenceTime - new Date(item.status.updatedAt).getTime() > 1000 * 60 * 60 * 24 * 3).length;
   const volume = weeklyVolume(transactions);
   const maxVolume = Math.max(1, ...volume);
   const stats = [
     { label: "전체 거래", value: transactions.length, note: "플랫폼 누적", icon: TrendingUp, tone: "blue" },
-    { label: "진행 중", value: transactions.filter((item) => !["작업완료", "취소"].includes(item.status.stage)).length, note: "현재 운영 거래", icon: Activity, tone: "violet" },
+    { label: "진행 중", value: transactions.filter((item) => !["작업완료", "출고", "취소"].includes(item.status.stage)).length, note: "현재 운영 거래", icon: Activity, tone: "violet" },
     { label: "확인 필요", value: transactions.filter((item) => item.status.stage === "견적").length + stalled, note: "신규·장기 미응답", icon: CircleAlert, tone: "orange" },
     { label: "정산 완료", value: transactions.filter((item) => item.pricing.paymentStatus === "정산완료").length, note: "누적 정산", icon: CreditCard, tone: "green" },
   ];
