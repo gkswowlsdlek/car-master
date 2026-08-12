@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { ArrowLeft, Bell, Building2, CircleDollarSign, Gauge, HelpCircle, LogOut, MapPin, MessageCircle, MoreHorizontal, Plus, Settings2, UserRound, UsersRound, X, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Bell, Building2, CircleDollarSign, Gauge, HelpCircle, LogOut, MapPin, Menu, MessageCircle, MoreHorizontal, Plus, Settings2, UserRound, UsersRound, X, type LucideIcon } from "lucide-react";
 import type { DemoAccount, Role, Screen } from "../../types/dealer";
 
 // Dealer's own core flow (North Star: "가까운 시공점 찾기" first) drives the
@@ -92,7 +92,7 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
           messenger-focus-topbar's base rule is display:none, only overridden
           at desktop widths, so the existing mobile Inbox/chat header flow is
           untouched. */}
-      <header className="app-topbar app-topbar-default"><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div></div></div></header>
+      <header className="app-topbar app-topbar-default"><button className="mobile-sidebar-toggle" onClick={() => setMoreOpen(true)} aria-label="업무 메뉴 열기"><Menu size={20} /></button><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div></div></div></header>
       <header className="app-topbar messenger-focus-topbar"><button type="button" className="messenger-back-to-workspace" onClick={() => onNavigate(homeScreen)}><ArrowLeft size={17} aria-hidden="true" /> Car-Master</button><b>메시지</b><button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button></header>
       <div className="beta-environment-bar"><span>WORKSPACE</span><p>회원과 거래를 안전하게 연결하는 카마스터 업무공간입니다.</p></div>
       {children}
