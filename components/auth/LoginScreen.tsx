@@ -42,7 +42,7 @@ export function LoginScreen({ onLogin, onExplore, onSignUp, onForgotPassword }: 
           <button className="primary full" onClick={() => void submit()} disabled={isSubmitting} aria-busy={isSubmitting}>{isSubmitting ? "로그인 중..." : "워크스페이스 로그인"} {!isSubmitting && <ArrowRight size={17} />}</button>
           <button className="login-signup-link" onClick={onSignUp}>처음이신가요? <b>회원가입</b></button>
           <div className="login-security-note"><ShieldCheck size={19} /><span><b>안전한 회원 워크스페이스</b><small>회원 역할과 시공점 승인 상태에 따라 접근 권한을 확인합니다.</small></span></div>
-          <p className="login-support-note">계정 발급이나 로그인에 문제가 있나요? <button onClick={() => alert("베타 운영 문의: help@car-master.kr")}>운영팀 문의</button></p>
+          <p className="login-support-note">계정 발급이나 로그인에 문제가 있나요? <button onClick={() => { window.location.href = "/help"; }}>도움말 보기</button></p>
         </section>
         <LoginWorkspaceBenefits className="login-benefits-mobile" />
       </div>
