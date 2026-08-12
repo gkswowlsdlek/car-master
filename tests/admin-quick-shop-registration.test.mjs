@@ -74,7 +74,8 @@ test("find_duplicate_shop_candidates is admin-only and matches on exact phone OR
 });
 
 test("get_admin_shop_search_requests (redefined this phase) still requires is_admin and now also returns registered_shop_id, without dropping any prior column", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.get_admin_shop_search_requests"), migrationSource.indexOf("revoke all on function public.get_admin_shop_search_requests"));
+  assert.match(migrationSource, /drop function if exists public\.get_admin_shop_search_requests\(\);/);
+  const fn = migrationSource.slice(migrationSource.indexOf("create function public.get_admin_shop_search_requests"), migrationSource.indexOf("revoke all on function public.get_admin_shop_search_requests"));
   assert.match(fn, /if not public\.is_admin\(\) then raise exception/);
   assert.match(fn, /r\.registered_shop_id/);
   for (const col of ["dealer_name", "dealer_phone", "admin_note", "region", "work_type", "status"]) {
@@ -84,7 +85,9 @@ test("get_admin_shop_search_requests (redefined this phase) still requires is_ad
 
 test("every RPC in this migration keeps the SECURITY DEFINER + empty search_path + revoke-then-grant convention used across the schema", () => {
   for (const name of ["find_duplicate_shop_candidates", "admin_register_shop", "get_admin_shop_search_requests"]) {
-    const start = migrationSource.indexOf(`create or replace function public.${name}`);
+    const start = migrationSource.indexOf(`create or replace function public.${name}`) >= 0
+      ? migrationSource.indexOf(`create or replace function public.${name}`)
+      : migrationSource.indexOf(`create function public.${name}`);
     assert.ok(start >= 0, `expected public.${name} to be defined`);
     const body = migrationSource.slice(start, start + 700);
     assert.match(body, /security definer/, `${name} should be security definer`);

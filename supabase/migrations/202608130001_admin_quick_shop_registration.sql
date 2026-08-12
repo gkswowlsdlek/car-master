@@ -117,8 +117,12 @@ grant execute on function public.admin_register_shop(jsonb) to authenticated;
 
 -- get_admin_shop_search_requests (Phase 2) needs to surface registered_shop_id
 -- too, so Admin sees "이미 등록됨" and the resulting Shop when reopening a
--- request they already worked. Same authorization/shape otherwise.
-create or replace function public.get_admin_shop_search_requests()
+-- request they already worked. Same authorization/shape otherwise. Postgres
+-- can't CREATE OR REPLACE a function whose RETURNS TABLE shape changed (a
+-- new output column counts as a return-type change) — drop then recreate.
+drop function if exists public.get_admin_shop_search_requests();
+
+create function public.get_admin_shop_search_requests()
 returns table (
   id uuid, dealer_id uuid, dealer_name text, dealer_phone text, region text, work_type text,
   vehicle_maker text, vehicle_model text, desired_inbound_date text, date_flexible boolean,
