@@ -5,6 +5,26 @@ export type TransactionActorRole = "dealer" | "shop" | "admin";
 /** The five stages a transaction moves through, one step at a time. */
 export const stageOrder: TransactionStage[] = ["견적", "시공예약", "입고", "작업완료", "출고"];
 
+/**
+ * Dealer-facing product spec is exactly 4 stages (입고 전/작업 중/작업 완료/출고) —
+ * internal DB stage keys stay the granular 5-stage model above (Shop/Admin
+ * still see and drive that directly). This is a display-only collapse for
+ * the dealer role: 견적 and 시공예약 both read as "입고 전".
+ */
+export const DEALER_STAGE_LABELS = ["입고 전", "작업 중", "작업 완료", "출고"] as const;
+
+export function dealerStageIndex(stage: TransactionStage): number {
+  if (stage === "견적" || stage === "시공예약") return 0;
+  if (stage === "입고") return 1;
+  if (stage === "작업완료") return 2;
+  return 3; // 출고 — 취소 also falls back here but is handled separately by dealerStageLabel
+}
+
+export function dealerStageLabel(stage: TransactionStage): string {
+  if (stage === "취소") return "취소";
+  return DEALER_STAGE_LABELS[dealerStageIndex(stage)];
+}
+
 /** Button label for moving forward INTO this stage (the "다음 행동" CTA). */
 export const STAGE_ACTION_LABEL: Record<TransactionStage, string> = {
   견적: "견적 확정", 시공예약: "시공예약 확정", 입고: "입고 처리", 작업완료: "작업완료", 출고: "출고 처리", 취소: "취소 처리",

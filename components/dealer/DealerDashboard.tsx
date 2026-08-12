@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, CircleDollarSign, Clock3, MapPin, Plus, Search } from "lucide-react";
 import type { Transaction, TransactionStage } from "../../types/transactions";
+import { dealerStageLabel } from "../../services/transaction-state-service";
 
 // 진행 중 = 시공예약(확정된 일정 대기)/입고(작업 중) — 완료/취소/견적(확인 대기,
 // 별도 배너로 이미 다룸)은 여기 포함하지 않는다. Dashboard와 클릭 결과가
@@ -38,7 +39,7 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransa
       <div className="section-head"><p className="eyebrow">진행 중인 거래</p>{activeDeals.length > visibleActiveDeals.length && <button className="dealer-active-deals-more" onClick={() => onFilterDeals("전체")}>전체 보기</button>}</div>
       <ul>{visibleActiveDeals.map((deal) => <li key={deal.id}><button onClick={() => onOpenTransaction(deal.id)}>
         <span><b>{deal.vehicle.maker} {deal.vehicle.model}</b><small>{deal.installerName}</small></span>
-        <em className={`status-chip status-${deal.status.stage}`}>{deal.status.stage}</em>
+        <em className={`status-chip status-${deal.status.stage}`}>{dealerStageLabel(deal.status.stage)}</em>
       </button></li>)}</ul>
     </section>}
 
