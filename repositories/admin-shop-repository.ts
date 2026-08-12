@@ -1,7 +1,8 @@
 import { createSupabaseBrowserClient } from "../lib/supabase/client";
-import type { DuplicateShopCandidate, QuickRegisterShopInput } from "../types/admin-shop";
+import type { DuplicateShopCandidate, QuickRegisterShopInput, SearchableShop } from "../types/admin-shop";
 
 type DuplicateRow = { id: string; shop_name: string; address: string; phone: string; approval_status: string; ownership_status: "unclaimed" | "claimed" };
+type SearchableShopRow = { id: string; shop_name: string; address: string; phone: string; supported_services: string[]; supported_brands: string[] };
 
 /** DUPLICATE_CANDIDATE_EXISTS from admin_register_shop's own server-side re-check. */
 export const DUPLICATE_CANDIDATE_ERROR = "DUPLICATE_CANDIDATE_EXISTS";
@@ -29,6 +30,16 @@ export class AdminShopRepository {
     } });
     if (error) throw error;
     return data as string;
+  }
+
+  /** Approved Shops only, real DB data — used when Admin proposes an existing Shop (not one they just quick-registered). */
+  async searchShops(query: string): Promise<SearchableShop[]> {
+    const { data, error } = await createSupabaseBrowserClient().rpc("admin_search_shops", { p_query: query });
+    if (error) throw error;
+    return ((data ?? []) as SearchableShopRow[]).map((row) => ({
+      id: row.id, shopName: row.shop_name, address: row.address, phone: row.phone,
+      supportedServices: row.supported_services ?? [], supportedBrands: row.supported_brands ?? [],
+    }));
   }
 }
 

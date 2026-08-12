@@ -613,6 +613,27 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .admin-quick-shop-registered-note { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; color: var(--color-muted); font-size: 11px; }
 @media (max-width:760px) { .admin-quick-shop-result { grid-template-columns: 1fr; } }
 
+/* Phase 4: Admin Shop 제안 + Dealer 제안 확인 */
+.admin-propose-quick-pick { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-bottom: 16px; }
+.admin-propose-search-row { align-items: end; }
+.admin-propose-search-row button { height: 46px; }
+.admin-propose-results { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; max-height: 260px; overflow-y: auto; }
+.admin-propose-results li { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--color-line); border-radius: 10px; padding: 10px 12px; }
+.admin-propose-results li div { display: grid; gap: 2px; min-width: 0; }
+.admin-propose-results li span { color: var(--color-muted); font-size: 11px; }
+.admin-propose-results li em { color: var(--color-muted-soft); font-size: 10px; font-style: normal; }
+
+.shop-proposal-card { margin-top: 12px; border-top: 1px solid var(--color-line); padding-top: 12px; }
+.shop-proposal-lead { margin: 0 0 10px; color: var(--color-primary); font-size: 12.5px; font-weight: 700; }
+.shop-proposal-card dl { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 14px; }
+.shop-proposal-card dl div { display: grid; gap: 3px; }
+.shop-proposal-card dt { color: var(--color-muted-soft); font-size: 9px; }
+.shop-proposal-card dd { margin: 0; color: var(--color-text-soft); font-size: 12px; font-weight: 650; }
+.shop-proposal-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.shop-proposal-accept-form { display: grid; gap: 12px; }
+.shop-proposal-accept-form label { display: grid; gap: 6px; font-size: 12px; font-weight: 700; color: var(--color-text-soft); }
+@media (max-width:760px) { .shop-proposal-card dl { grid-template-columns: 1fr; }.shop-proposal-actions { flex-direction: column; align-items: stretch; } }
+
 .marketing-brand { align-items: flex-start; }
 .account-status-shell { width: min(900px,100%); display: grid; gap: 18px; }.account-status-shell .account-status-card { width: 100%; }.installer-registration-editor { padding: 28px; }.installer-registration-editor h2 { margin: 0 0 6px; }.installer-registration-editor > p { margin: 0 0 20px; color: var(--color-muted); }.installer-registration-editor > div { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.installer-registration-editor label { display: grid; gap: 7px; color: var(--color-text-soft); font-size: 11px; font-weight: 750; }.installer-registration-editor input { height: 46px; }.installer-registration-editor .registration-message { margin: 14px 0; border-radius: 10px; background: var(--color-primary-soft); color: var(--color-primary-hover); padding: 10px 12px; font-size: 11px; }.installer-registration-editor .primary { margin-top: 18px; }.account-status-page { align-items: start; }.account-status-shell { margin-top: 4vh; }
 @media (max-width:760px) { .installer-registration-editor { padding: 22px 18px; }.installer-registration-editor > div { grid-template-columns: 1fr; } }

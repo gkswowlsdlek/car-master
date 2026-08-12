@@ -1,18 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Phone, Plus, Search, ThumbsDown, ThumbsUp } from "lucide-react";
+import { vehicleClassOptions, type VehicleClass } from "../../data/vehicle-class-options";
 import { shopSearchRequestRepository } from "../../repositories/shop-search-request-repository";
 import type { ShopSearchRequest } from "../../types/shop-search-request";
 
 export const SHOP_SEARCH_REQUEST_STATUS_LABEL: Record<ShopSearchRequest["status"], string> = {
-  requested: "요청 접수", in_progress: "카마스터 확인 중", cancelled: "취소됨", unable_to_connect: "연결 어려움",
+  requested: "요청 접수", in_progress: "카마스터 확인 중", shop_proposed: "시공점 제안됨",
+  transaction_linked: "거래 연결 완료", cancelled: "취소됨", unable_to_connect: "연결 어려움",
 };
 
 const dateLabel = (value: string) => new Date(value).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" });
 
 /** Only shown in Real (Supabase) mode — this is real, stored data, not a demo/local placeholder. */
-export function ShopSearchRequestScreen({ initialFormOpen = false }: { initialFormOpen?: boolean }) {
+export function ShopSearchRequestScreen({ initialFormOpen = false, onTransactionCreated }: {
+  initialFormOpen?: boolean;
+  /** Fired after "이 시공점으로 진행" successfully creates the Transaction+Room — the workspace navigates the dealer into the room. */
+  onTransactionCreated: (transactionId: string) => void;
+}) {
   const [requests, setRequests] = useState<ShopSearchRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -26,6 +32,15 @@ export function ShopSearchRequestScreen({ initialFormOpen = false }: { initialFo
   const [desiredInboundDate, setDesiredInboundDate] = useState("");
   const [dateFlexible, setDateFlexible] = useState(false);
   const [dealerNote, setDealerNote] = useState("");
+
+  // Proposal decision state, per proposal id — only one request is normally
+  // "제안됨" at a time, but this keeps each card's UI independent regardless.
+  const [acceptingProposalId, setAcceptingProposalId] = useState<string | null>(null);
+  const [decliningProposalId, setDecliningProposalId] = useState<string | null>(null);
+  const [vehicleClass, setVehicleClass] = useState<VehicleClass | "">("");
+  const [declineNote, setDeclineNote] = useState("");
+  const [decisionPending, setDecisionPending] = useState(false);
+  const [decisionError, setDecisionError] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -74,6 +89,38 @@ export function ShopSearchRequestScreen({ initialFormOpen = false }: { initialFo
     }
   };
 
+  const confirmAccept = async (proposalId: string) => {
+    if (!vehicleClass || decisionPending) return;
+    setDecisionPending(true);
+    setDecisionError("");
+    try {
+      const { transactionId } = await shopSearchRequestRepository.acceptProposal(proposalId, vehicleClass);
+      setAcceptingProposalId(null);
+      setVehicleClass("");
+      onTransactionCreated(transactionId);
+    } catch (error) {
+      setDecisionError(error instanceof Error ? error.message : "거래를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setDecisionPending(false);
+    }
+  };
+
+  const confirmDecline = async (proposalId: string) => {
+    if (decisionPending) return;
+    setDecisionPending(true);
+    setDecisionError("");
+    try {
+      await shopSearchRequestRepository.declineProposal(proposalId, declineNote.trim() || undefined);
+      setDecliningProposalId(null);
+      setDeclineNote("");
+      await load();
+    } catch {
+      setDecisionError("처리하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setDecisionPending(false);
+    }
+  };
+
   return <section className="shop-search-request-screen">
     <div className="page-title"><div><p className="eyebrow">SHOP SEARCH REQUEST</p><h1>시공점 찾기 요청</h1><p className="page-subtitle">원하는 시공점을 찾지 못하셨나요? 카마스터가 직접 확인해드릴게요.</p></div>
       {!formOpen && <button className="primary" onClick={() => setFormOpen(true)}><Plus size={16} /> 시공점 찾기 요청</button>}</div>
@@ -102,6 +149,39 @@ export function ShopSearchRequestScreen({ initialFormOpen = false }: { initialFo
       : <ul className="shop-search-request-list">{requests.map((item) => <li key={item.id} className={`status-${item.status}`}>
           <div><b>{item.vehicleMaker} {item.vehicleModel} · {item.workType}</b><span>{item.region} · 희망 입고일 {dateLabel(item.desiredInboundDate)}{item.dateFlexible && " (날짜 조정 가능)"}</span>{item.dealerNote && <em>{item.dealerNote}</em>}</div>
           <div className="shop-search-request-list-meta"><em className={`status-chip status-${item.status}`}>{SHOP_SEARCH_REQUEST_STATUS_LABEL[item.status]}</em><small>{dateLabel(item.createdAt)} 요청</small>{(item.status === "requested" || item.status === "in_progress") && <button className="button button-secondary" onClick={() => void cancel(item.id)}>요청 취소</button>}</div>
+
+          {item.status === "shop_proposed" && item.proposedShop && <div className="shop-proposal-card">
+            <p className="shop-proposal-lead">카마스터가 시공점을 찾았습니다.</p>
+            <dl>
+              <div><dt>업체명</dt><dd>{item.proposedShop.shopName}</dd></div>
+              <div><dt>주소</dt><dd>{item.proposedShop.address}</dd></div>
+              {item.proposedShop.supportedServices.length > 0 && <div><dt>가능 작업</dt><dd>{item.proposedShop.supportedServices.join(", ")}</dd></div>}
+              {item.proposedShop.supportedBrands.length > 0 && <div><dt>취급 브랜드</dt><dd>{item.proposedShop.supportedBrands.join(", ")}</dd></div>}
+              {item.proposedShop.phone && <div><dt>전화번호</dt><dd>{item.proposedShop.phone}</dd></div>}
+            </dl>
+            {decisionError && <p className="login-error">{decisionError}</p>}
+
+            {acceptingProposalId === item.proposedShop.proposalId ? <div className="shop-proposal-accept-form">
+              <label><span>차종 분류</span><select value={vehicleClass} onChange={(event) => setVehicleClass(event.target.value as VehicleClass)}>
+                <option value="">선택해 주세요</option>
+                {vehicleClassOptions.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+              </select></label>
+              <div className="shop-search-request-form-actions">
+                <button className="button button-secondary" onClick={() => { setAcceptingProposalId(null); setVehicleClass(""); }}>취소</button>
+                <button className="button button-primary" onClick={() => void confirmAccept(item.proposedShop!.proposalId)} disabled={!vehicleClass || decisionPending}>{decisionPending ? "처리 중…" : "거래방 만들기"}</button>
+              </div>
+            </div> : decliningProposalId === item.proposedShop.proposalId ? <div className="shop-proposal-accept-form">
+              <label><span>이유 (선택)</span><input value={declineNote} onChange={(event) => setDeclineNote(event.target.value)} placeholder="예: 거리가 너무 멀어요" /></label>
+              <div className="shop-search-request-form-actions">
+                <button className="button button-secondary" onClick={() => { setDecliningProposalId(null); setDeclineNote(""); }}>취소</button>
+                <button className="button button-primary" onClick={() => void confirmDecline(item.proposedShop!.proposalId)} disabled={decisionPending}>{decisionPending ? "처리 중…" : "다른 시공점 요청"}</button>
+              </div>
+            </div> : <div className="shop-proposal-actions">
+              {item.proposedShop.phone && <a className="button button-secondary" href={`tel:${item.proposedShop.phone.replace(/[^0-9+]/g, "")}`}><Phone size={16} /> 전화하기</a>}
+              <button className="button button-secondary" onClick={() => setDecliningProposalId(item.proposedShop!.proposalId)}><ThumbsDown size={16} /> 다른 시공점 찾아주세요</button>
+              <button className="button button-primary" onClick={() => setAcceptingProposalId(item.proposedShop!.proposalId)}><ThumbsUp size={16} /> 이 시공점으로 진행</button>
+            </div>}
+          </div>}
         </li>)}</ul>}
   </section>;
 }
