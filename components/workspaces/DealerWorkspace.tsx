@@ -150,6 +150,12 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
     if (nearest) setSelectedShopId(nearest.shop.id);
   };
 
+  const searchHomeLocation = async (value: string, workType: string) => {
+    setRequest((current) => ({ ...current, requestType: workType as RequestType }));
+    await searchArea(value);
+    onNavigate("dealerMap");
+  };
+
   const applyPackage = (item: PricePackage, nextClass = vehicleClass, optionalServices: string[] = [], requestType: RequestType = "실제 시공 요청") => {
     const price = calculateVehicleClassPrice(item.guidePrice, nextClass);
     const expectedPrice = price.priceRequiresInquiry ? nextClass === "국산 대형/SUV" ? "추가금 발생 가능" : "별도 견적" : formatGuidePrice(price.finalGuidePrice ?? item.guidePrice);
@@ -215,7 +221,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
   };
 
   return <>
-    {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} onFilterDeals={(filter) => { setDealFilter(filter); onNavigate("deals"); }} onOpenTransaction={(id) => { setSelectedTransactionId(id); setDealFilter("전체"); onNavigate("deals"); }} onNewRequest={() => onNavigate("request")} onFindShop={() => onNavigate("dealerMap")} onPriceGuide={() => onNavigate("priceGuide")} />}
+    {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} onFilterDeals={(filter) => { setDealFilter(filter); onNavigate("deals"); }} onOpenTransaction={(id) => { setSelectedTransactionId(id); setDealFilter("전체"); onNavigate("deals"); }} onNewRequest={() => onNavigate("request")} onFindShop={() => onNavigate("dealerMap")} onSearchLocation={searchHomeLocation} onPriceGuide={() => onNavigate("priceGuide")} />}
     {screen === "priceGuide" && <PriceGuideScreen packages={filteredPackages} selectedPackage={selectedPackage} selectedPackageId={selectedPackageId} setSelectedPackageId={setSelectedPackageId} brandFilter={priceFilter} setBrandFilter={setPriceFilter} search={priceSearch} setSearch={setPriceSearch} vehicleClass={vehicleClass} setVehicleClass={setVehicleClass} onRequest={applyPackage} />}
     {screen === "dealerMap" && <InstallerDirectoryScreen installers={availableShops} loading={useSupabaseData && installerDirectoryLoading} selectedId={selectedShopId} setSelectedId={setSelectedShopId} favoriteIds={favoriteShopIds} toggleFavorite={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => onNavigate("request")} />}
     {screen === "request" && locationError && <div className="location-search-error"><b>{locationError}</b></div>}
