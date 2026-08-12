@@ -21,6 +21,8 @@ export type AdminShopSearchRequest = ShopSearchRequest & {
   dealerName: string;
   dealerPhone: string;
   adminNote?: string;
+  /** Set once an Admin has quick-registered a Shop while working this request (Phase 3). */
+  registeredShopId?: string;
 };
 
 export type CreateShopSearchRequestInput = {

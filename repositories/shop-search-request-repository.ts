@@ -7,7 +7,7 @@ type DealerRow = {
   status: ShopSearchRequestStatus; created_at: string; updated_at: string;
 };
 
-type AdminRow = DealerRow & { dealer_id: string; dealer_name: string; dealer_phone: string; admin_note: string | null };
+type AdminRow = DealerRow & { dealer_id: string; dealer_name: string; dealer_phone: string; admin_note: string | null; registered_shop_id: string | null };
 
 function mapDealerRow(row: DealerRow): ShopSearchRequest {
   return {
@@ -43,7 +43,7 @@ export class ShopSearchRequestRepository {
     if (error) throw error;
     return ((data ?? []) as AdminRow[]).map((row) => ({
       ...mapDealerRow(row), dealerId: row.dealer_id, dealerName: row.dealer_name, dealerPhone: row.dealer_phone,
-      adminNote: row.admin_note ?? undefined,
+      adminNote: row.admin_note ?? undefined, registeredShopId: row.registered_shop_id ?? undefined,
     }));
   }
 

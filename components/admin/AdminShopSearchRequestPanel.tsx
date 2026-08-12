@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { PlayCircle, RefreshCw, Search, XCircle } from "lucide-react";
+import { PlayCircle, RefreshCw, Search, Store, XCircle } from "lucide-react";
 import { shopSearchRequestRepository } from "../../repositories/shop-search-request-repository";
 import type { AdminShopSearchRequest } from "../../types/shop-search-request";
 import { SHOP_SEARCH_REQUEST_STATUS_LABEL } from "../dealer/ShopSearchRequestScreen";
+import { AdminQuickShopRegistrationModal } from "./AdminQuickShopRegistrationModal";
 
 const dateLabel = (value: string) => new Date(value).toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" });
 
@@ -18,6 +19,7 @@ export function AdminShopSearchRequestPanel({ demoSession = false }: { demoSessi
   const [loading, setLoading] = useState(!demoSession);
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
+  const [registrationOpen, setRegistrationOpen] = useState(false);
 
   const load = useCallback(async () => {
     if (demoSession) return;
@@ -89,7 +91,9 @@ export function AdminShopSearchRequestPanel({ demoSession = false }: { demoSessi
           <div className="approval-actions">
             {selected.status === "requested" && <button className="approve" onClick={() => void startProcessing(selected.id)}><PlayCircle size={16} /> 확인 시작</button>}
             {(selected.status === "requested" || selected.status === "in_progress") && <button className="reject" onClick={() => void markUnable(selected.id)}><XCircle size={16} /> 연결 어려움</button>}
+            {!selected.registeredShopId && <button onClick={() => setRegistrationOpen(true)}><Store size={16} /> 시공점 빠른 등록</button>}
           </div>
+          {selected.registeredShopId && <p className="admin-quick-shop-registered-note"><Store size={14} /> 이 요청으로 시공점이 등록되었습니다.</p>}
           <div className="admin-note-field">
             <label htmlFor="shop-search-request-admin-note">운영 메모 (Dealer에게 노출되지 않음)</label>
             <textarea id="shop-search-request-admin-note" rows={3} value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} placeholder="예: 미사 A업체 전화 안 받음" />
@@ -98,5 +102,6 @@ export function AdminShopSearchRequestPanel({ demoSession = false }: { demoSessi
         </aside>}
       </div>}
     {demoSession && <p className="compact-empty-note">Demo 세션에서는 실제 Supabase 계정으로 로그인해야 이 패널이 실제 데이터를 표시합니다.</p>}
+    {registrationOpen && selected && <AdminQuickShopRegistrationModal requestId={selected.id} onClose={() => { setRegistrationOpen(false); void load(); }} onRegistered={() => void load()} />}
   </section>;
 }
