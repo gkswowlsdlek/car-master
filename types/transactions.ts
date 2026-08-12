@@ -1,6 +1,11 @@
 import type { VehicleClass } from "../data/vehicle-class-options";
 
-export type TransactionStage = "견적" | "시공예약" | "입고" | "작업완료" | "출고" | "취소";
+/** 견적/시공예약/입고/작업완료/출고 = normal work progress. 취소/시공불가 =
+ * an exception termination, not a work stage — see isTerminalOutcome() in
+ * services/transaction-state-service.ts. Both live in this same DB column
+ * (transactions.stage is plain text, not an enum), matching how 취소 was
+ * already modeled before this phase; 시공불가 follows the same shape. */
+export type TransactionStage = "견적" | "시공예약" | "입고" | "작업완료" | "출고" | "취소" | "시공불가";
 export type PaymentStatus = "미결제" | "결제대기" | "결제완료" | "정산대기" | "정산완료";
 
 /** One row of the 거래 로그: every forward advance and every one-step revert. */
@@ -26,6 +31,8 @@ export type Transaction = {
   pricing: { baseGuidePrice?: number; surcharge?: number; finalPrice?: number; paymentStatus: PaymentStatus; paymentAt?: string; settlementDueAt?: string };
   schedule: { requestedInboundAt?: string; confirmedInboundAt?: string; completedAt?: string };
   status: { stage: TransactionStage; createdAt: string; updatedAt: string };
+  /** Short reason for the current 취소/시공불가 outcome, if any — never shown as a payment/settlement field. */
+  outcomeNote?: string;
   visibility: { hiddenByDealer: boolean; hiddenByInstaller: boolean };
   chatRoomId: string;
   lastMessage: string;

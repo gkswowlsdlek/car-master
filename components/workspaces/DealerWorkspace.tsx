@@ -66,6 +66,8 @@ type DealerWorkspaceProps = {
   onFinalPriceChange: (transaction: Transaction, finalPrice: number) => void;
   onStageChange: (transaction: Transaction, stage: TransactionStage) => Promise<void>;
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
+  onEndOutcome: (transaction: Transaction, outcome: "취소" | "시공불가", note?: string) => Promise<void>;
+  onFindAnotherShop: () => void;
   onMarkRead: (roomId: string) => void;
   onLoadContact: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
@@ -74,7 +76,7 @@ type DealerWorkspaceProps = {
   onMobileFullscreenChange: (open: boolean) => void;
 };
 
-export function DealerWorkspace({ account, screen, transactions, rooms, useSupabaseData, useDemoSharedBackend, demoAttachmentProvider, isLoading, loadError, onNavigate, onRefresh, onSend, onHide, onUnhide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onChangePassword, onCompanyNameChange, onUnreadMessageCountChange, onMobileFullscreenChange }: DealerWorkspaceProps) {
+export function DealerWorkspace({ account, screen, transactions, rooms, useSupabaseData, useDemoSharedBackend, demoAttachmentProvider, isLoading, loadError, onNavigate, onRefresh, onSend, onHide, onUnhide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onFindAnotherShop, onMarkRead, onLoadContact, onChangePassword, onCompanyNameChange, onUnreadMessageCountChange, onMobileFullscreenChange }: DealerWorkspaceProps) {
   const [query, setQuery] = useState("하남시");
   const [location, setLocation] = useState<SearchLocation>(initialLocation);
   const [locationError, setLocationError] = useState("");
@@ -227,8 +229,8 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
     {screen === "request" && locationError && <div className="location-search-error"><b>{locationError}</b></div>}
     {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={(area) => void searchArea(area ?? request.deliveryArea)} onSummary={() => onNavigate("requestSummary")} onPriceGuide={() => onNavigate("priceGuide")} />}
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} submitting={isCreatingTransaction} onBack={() => onNavigate("request")} onSubmit={createTransaction} />}
-    {screen === "deals" && <TransactionManagementScreen role="dealer" userId={account.id} transactions={transactions} rooms={rooms} selectedId={activeTransactionId} initialStageFilter={dealFilter} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onUnhide={onUnhide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onNewRequest={() => onNavigate("request")} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onOpenMessages={(id) => { setSelectedTransactionId(id); onNavigate("messages"); }} />}
-    {screen === "messages" && <MessengerScreen role="dealer" userId={account.id} transactions={transactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={demoAttachmentProvider} isLoading={isLoading} loadError={loadError} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onMobileChatOpenChange={setMobileChatOpen} />}
+    {screen === "deals" && <TransactionManagementScreen role="dealer" userId={account.id} transactions={transactions} rooms={rooms} selectedId={activeTransactionId} initialStageFilter={dealFilter} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onUnhide={onUnhide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onFindAnotherShop={onFindAnotherShop} onNewRequest={() => onNavigate("request")} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onOpenMessages={(id) => { setSelectedTransactionId(id); onNavigate("messages"); }} />}
+    {screen === "messages" && <MessengerScreen role="dealer" userId={account.id} transactions={transactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={demoAttachmentProvider} isLoading={isLoading} loadError={loadError} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onFindAnotherShop={onFindAnotherShop} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onMobileChatOpenChange={setMobileChatOpen} />}
     {screen === "shopSearchRequests" && useSupabaseData && <ShopSearchRequestScreen onTransactionCreated={(id) => { void onRefresh().then(() => { setSelectedTransactionId(id); setDealFilter("전체"); onNavigate("deals"); }); }} />}
     {screen === "dealerProfile" && <ProfileEditor role="dealer" userId={account.id} activity={profileActivity} onChangePassword={onChangePassword} />}
   </>;
