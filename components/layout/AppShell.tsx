@@ -49,6 +49,9 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
   const [moreOpen, setMoreOpen] = useState(false);
   const roleLabel = role === "dealer" ? "딜러" : role === "shop" ? "시공점" : "관리자";
   const items = navigation[role];
+  const secondaryScreens: Screen[] = role === "dealer" ? ["dealerProfile", "priceGuide"] : role === "shop" ? ["dealerProfile"] : ["adminAccount"];
+  const primaryItems = items.filter((item) => !secondaryScreens.includes(item.screen));
+  const secondaryItems = items.filter((item) => secondaryScreens.includes(item.screen));
   let overflow = items.length > MOBILE_PRIMARY_COUNT ? items.slice(MOBILE_PRIMARY_COUNT) : [];
   let primary = overflow.length > 0 ? items.slice(0, MOBILE_PRIMARY_COUNT) : items;
   // "메시지"는 사이드바 순서와 무관하게 모바일 하단 네비에 항상 남아야 하므로,
@@ -78,7 +81,8 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
     <aside className="app-sidebar">
       <button className="app-logo" onClick={() => onNavigate(homeScreen)}><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><small>{roleLabel} 워크스페이스</small></button>
       <div className="sidebar-section-label">업무 메뉴</div>
-      <nav>{items.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
+      <nav className="sidebar-primary-nav">{primaryItems.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
+      {secondaryItems.length > 0 && <><div className="sidebar-subsection-label">보조 메뉴</div><nav className="sidebar-secondary-nav">{secondaryItems.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={17} strokeWidth={2} /></i><span>{item.label}</span></button>)}</nav></>}
       <div className="sidebar-support"><HelpCircle size={19} /><b>도움이 필요하신가요?</b><span>자주 찾는 도움말과 이용 안내를 확인하세요.</span><button onClick={() => { window.location.href = role === "shop" ? "/help/shop" : "/help"; }}>고객센터 열기</button></div>
       <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
     </aside>
