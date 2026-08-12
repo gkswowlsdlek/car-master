@@ -2,22 +2,22 @@ import type { PaymentStatus, Transaction, TransactionStage, TransactionStageEven
 
 export type TransactionActorRole = "dealer" | "shop" | "admin";
 
-/** The only four stages a transaction moves through, one step at a time. */
-export const stageOrder: TransactionStage[] = ["견적", "시공예약", "입고", "작업완료"];
+/** The five stages a transaction moves through, one step at a time. */
+export const stageOrder: TransactionStage[] = ["견적", "시공예약", "입고", "작업완료", "출고"];
 
 /** Button label for moving forward INTO this stage (the "다음 행동" CTA). */
 export const STAGE_ACTION_LABEL: Record<TransactionStage, string> = {
-  견적: "견적 확정", 시공예약: "시공예약 확정", 입고: "입고 처리", 작업완료: "작업완료", 취소: "취소 처리",
+  견적: "견적 확정", 시공예약: "시공예약 확정", 입고: "입고 처리", 작업완료: "작업완료", 출고: "출고 처리", 취소: "취소 처리",
 };
 
 /** Label for the small "이전 단계로" link when reverting back to this stage. */
 export const STAGE_REVERT_LABEL: Record<TransactionStage, string> = {
-  견적: "견적으로 되돌리기", 시공예약: "시공예약으로 되돌리기", 입고: "입고 상태로 되돌리기", 작업완료: "작업완료로 되돌리기", 취소: "취소로 되돌리기",
+  견적: "견적으로 되돌리기", 시공예약: "시공예약으로 되돌리기", 입고: "입고 상태로 되돌리기", 작업완료: "작업완료로 되돌리기", 출고: "출고로 되돌리기", 취소: "취소로 되돌리기",
 };
 
 /** Past-tense form of the same label, used in the 거래 로그 list. */
 export const STAGE_REVERT_LOG_LABEL: Record<TransactionStage, string> = {
-  견적: "견적으로 되돌림", 시공예약: "시공예약으로 되돌림", 입고: "입고로 되돌림", 작업완료: "작업완료로 되돌림", 취소: "취소로 되돌림",
+  견적: "견적으로 되돌림", 시공예약: "시공예약으로 되돌림", 입고: "입고로 되돌림", 작업완료: "작업완료로 되돌림", 출고: "출고로 되돌림", 취소: "취소로 되돌림",
 };
 
 export function stageLogLabel(event: TransactionStageEvent): string {
@@ -35,16 +35,18 @@ export function revertStage(current: TransactionStage): TransactionStage | undef
 }
 
 /**
- * Only the assigned installer (or an admin) can move the stage — this is a
- * "다음 행동" a shop performs, not something a dealer controls. Exactly one
- * step forward or one step back; no skipping and no jumping to an arbitrary
- * past stage. 취소 is kept only for backward compatibility with any
- * already-cancelled transaction and is reachable by dealer/admin from any
- * stage, but the new UI does not expose a way to trigger it.
+ * Beta core requirement: the flow must never stall waiting on an Installer
+ * who may never open Car-Master, so the dealer can drive the work stage
+ * forward/back on their own transaction too, same as the shop side — this
+ * function only encodes "is this move shape allowed" (one step forward or
+ * one step back, no skipping, no jumping to an arbitrary past stage); the
+ * server RPC is what enforces "does this actor own this transaction." 취소
+ * is kept only for backward compatibility with any already-cancelled
+ * transaction and is reachable by dealer/admin from any stage, but the UI
+ * does not expose a way to trigger it.
  */
 export function canTransitionStage(current: TransactionStage, next: TransactionStage, role: TransactionActorRole) {
   if (next === "취소") return role === "dealer" || role === "admin";
-  if (role !== "shop" && role !== "admin") return false;
   const currentIndex = stageOrder.indexOf(current);
   const nextIndex = stageOrder.indexOf(next);
   if (currentIndex < 0 || nextIndex < 0) return false;

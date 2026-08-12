@@ -105,7 +105,11 @@ test("page delegates shared actions and DealerWorkspace owns createTransaction w
   assert.doesNotMatch(page, /import \{ DealerDashboard \}/);
   assert.doesNotMatch(page, /<DealerDashboard/);
   assert.match(dealerWorkspace, /demoTransactionRepository\.createWithRoom/);
-  assert.match(dealerWorkspace, /supabaseTransactionRepository\.createWithRoom/);
+  // Dealer immediate-transaction Phase 1: the Real/Supabase path moved from
+  // the legacy installerId-keyed createWithRoom to the Shop-centric
+  // createWithShopRoom (works for Shops with no linked Installer Account) —
+  // Demo is untouched, still createWithRoom, see the assertion above.
+  assert.match(dealerWorkspace, /supabaseTransactionRepository\.createWithShopRoom/);
   assert.match(dealerWorkspace, /transactionRepository\.create\(transaction\); chatRepository\.create\(room\)/);
   assert.match(dealerWorkspace, /await onRefresh\(\)/);
   assert.match(dealerWorkspace, /notificationService\.notify\(\{ type: "new_service_request"/);

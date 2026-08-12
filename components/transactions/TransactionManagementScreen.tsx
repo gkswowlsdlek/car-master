@@ -64,7 +64,7 @@ export function TransactionManagementScreen({ role, transactions, selectedId, in
   };
   const hideSelected = () => {
     if (!selected) return;
-    const warning = selected.status.stage !== "작업완료" && role === "shop" ? "진행 중인 거래입니다. 그래도 숨기시겠습니까?\n" : "";
+    const warning = selected.status.stage !== "작업완료" && selected.status.stage !== "출고" && role === "shop" ? "진행 중인 거래입니다. 그래도 숨기시겠습니까?\n" : "";
     if (confirm(`${warning}이 거래방은 목록에서 숨겨집니다. 거래 기록은 카마스터에 보관됩니다.`)) onHide(selected.id, role);
   };
 
@@ -80,7 +80,7 @@ export function TransactionManagementScreen({ role, transactions, selectedId, in
             <header><div><small>{selected.id}</small><h2>{selected.vehicle.maker} {selected.vehicle.model}</h2><p>{selected.installerName} · {selected.service.product ?? selected.service.workDescription}</p></div><em className={`status-chip status-${selected.status.stage}`}>{selected.status.stage}</em></header>
             <section className="transaction-progress-card"><div><span>거래 진행 단계</span><b>{selected.status.stage}</b></div><ol>{stageOrder.map((stage, index) => <li className={index < selectedStageIndex ? "complete" : index === selectedStageIndex ? "active" : ""} key={stage}><i>{index < selectedStageIndex ? "✓" : index + 1}</i><span>{stage}</span></li>)}</ol></section>
             <dl className="transaction-core-info"><div><dt>시공 품목</dt><dd>{selected.service.workDescription}</dd></div><div><dt>다음 일정</dt><dd>{scheduleDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt)}</dd></div><div><dt>확정 금액</dt><dd>{won(selected.pricing.finalPrice)}</dd></div><div><dt>결제 상태</dt><dd>{selected.pricing.paymentStatus}</dd></div></dl>
-            {role === "shop" && !["작업완료", "취소"].includes(selected.status.stage) && <div className="transaction-price-editor"><span>최종 시공금액 입력</span><div><input value={finalPriceDraft} onChange={(event) => setFinalPriceDraft(event.target.value)} placeholder="예: 450000" inputMode="numeric" /><button className="secondary" onClick={saveFinalPrice} disabled={!finalPriceDraft}>저장</button></div></div>}
+            {role === "shop" && !["작업완료", "출고", "취소"].includes(selected.status.stage) && <div className="transaction-price-editor"><span>최종 시공금액 입력</span><div><input value={finalPriceDraft} onChange={(event) => setFinalPriceDraft(event.target.value)} placeholder="예: 450000" inputMode="numeric" /><button className="secondary" onClick={saveFinalPrice} disabled={!finalPriceDraft}>저장</button></div></div>}
             {role === "dealer" && selected.pricing.finalPrice != null && selected.pricing.paymentStatus === "미결제" && <div className="transaction-price-editor"><span>시공점이 확정한 금액이에요</span><button className="primary" onClick={() => onPaymentChange(selected, "결제대기")}>금액 확인</button></div>}
             <footer><button className="secondary" onClick={() => onOpenMessages(selected.id)}><MessageCircle size={17} /> 메시지 열기</button>{(role === "dealer" ? selected.visibility.hiddenByDealer : selected.visibility.hiddenByInstaller) ? <button className="secondary" onClick={() => onUnhide(selected.id, role)}>숨김 해제</button> : <button className="secondary" onClick={hideSelected}>거래 숨기기</button>}{canAdvance && <button className="primary" onClick={() => void advance()} disabled={stagePending}>{stagePending ? "처리 중…" : STAGE_ACTION_LABEL[nextStage!] } <ArrowRight size={17} /></button>}</footer>
           </article>}

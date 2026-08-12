@@ -12,7 +12,7 @@ const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleS
 const fileSize = (value: number) => value < 1024 * 1024 ? `${Math.max(1, Math.round(value / 1024))}KB` : `${(value / 1024 / 1024).toFixed(1)}MB`;
 // 시공예약 확정 → accept, 입고 처리 → start-work(작업의 시작), 작업완료 → complete-work.
 // start-work-button / complete-work-button 문자열은 tests/v036-production-connection.test.mjs가 그대로 검증한다.
-const stageActionTestId = (stage?: TransactionStage) => stage === "시공예약" ? "accept-transaction-button" : stage === "입고" ? "start-work-button" : stage === "작업완료" ? "complete-work-button" : undefined;
+const stageActionTestId = (stage?: TransactionStage) => stage === "시공예약" ? "accept-transaction-button" : stage === "입고" ? "start-work-button" : stage === "작업완료" ? "complete-work-button" : stage === "출고" ? "dispatch-transaction-button" : undefined;
 const MAX_ATTACHMENTS = 4;
 const QUICK_REPLIES = ["확인했습니다.", "가능합니다.", "일정 확인 후 답변드릴게요.", "입고 가능합니다."];
 
@@ -238,7 +238,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
     textareaRef.current?.focus();
   };
   const hide = () => {
-    const warning = transaction.status.stage !== "작업완료" && role === "shop" ? "진행 중인 거래입니다. 그래도 숨기시겠습니까?\n" : "";
+    const warning = transaction.status.stage !== "작업완료" && transaction.status.stage !== "출고" && role === "shop" ? "진행 중인 거래입니다. 그래도 숨기시겠습니까?\n" : "";
     if (confirm(`${warning}이 거래방은 목록에서 숨겨집니다. 거래 기록은 카마스터에 보관됩니다.`)) onHide(transaction.id, role);
   };
   const openContact = async () => {
@@ -281,6 +281,12 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
           </div>
         </div>}
       </section>
+      {role === "dealer" && (transaction.status.stage === "견적" || transaction.status.stage === "시공예약") && <div className="phone-confirm-banner" role="status">
+        <p>이 시공점은 전화 확인이 필요합니다. 시공 가능 여부와 입고 일정을 시공점에 직접 확인해주세요.</p>
+        {installer?.contactPhone
+          ? <a className="button button-primary" href={`tel:${installer.contactPhone.replace(/[^0-9+]/g, "")}`}><Phone size={16} /> 전화하기</a>
+          : <span className="phone-confirm-fallback">전화 또는 카카오톡 등으로 확인해주세요.</span>}
+      </div>}
       <div className="messenger-messages" ref={messagesContainer} onScroll={handleScroll}>
         <div className="message-date-divider"><span>거래방 생성 · {dayLabel(transaction.status.createdAt)}</span></div>
         {timeline.map((entry, index) => {

@@ -1,6 +1,6 @@
 import type { VehicleClass } from "../data/vehicle-class-options";
 
-export type TransactionStage = "견적" | "시공예약" | "입고" | "작업완료" | "취소";
+export type TransactionStage = "견적" | "시공예약" | "입고" | "작업완료" | "출고" | "취소";
 export type PaymentStatus = "미결제" | "결제대기" | "결제완료" | "정산대기" | "정산완료";
 
 /** One row of the 거래 로그: every forward advance and every one-step revert. */
@@ -16,7 +16,8 @@ export type TransactionStageEvent = {
 export type Transaction = {
   id: string;
   dealerId: string;
-  installerId: string;
+  /** Null when the Shop has no linked Installer Account (admin-preregistered, unclaimed). */
+  installerId: string | null;
   /** Real Supabase Shop id; optional while legacy and Demo transactions coexist. */
   shopId?: string | null;
   installerName: string;
