@@ -4,6 +4,7 @@ import type { ChatRoom, Transaction } from "../../types/transactions";
 import { AdminTransactionPanel } from "./AdminTransactionPanel";
 import { InstallerApprovalPanel } from "./InstallerApprovalPanel";
 import { AdminMemberPanel } from "./AdminMemberPanel";
+import { AdminShopSearchRequestPanel } from "./AdminShopSearchRequestPanel";
 
 const WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"];
 
@@ -35,6 +36,7 @@ export function AdminOverview({ transactions, rooms, demoSession = false }: { tr
     <div className="admin-alert-strip"><div><span>!</span><p><b>운영 확인</b> 신규 요청 {transactions.filter((item) => item.status.stage === "견적").length}건과 장기 미응답 {stalled}건을 확인해 주세요.</p></div><div><span>가격 상품</span><b>{pricePackages.length}개 운영 중</b></div></div>
     <section className="admin-insight-grid"><article className="card admin-chart-card"><header><div><p className="eyebrow">TRANSACTION VOLUME</p><h2>주간 거래량</h2></div><span><TrendingUp size={15} /> 이번 주</span></header><div className="admin-chart" aria-label="주간 거래량 시각화">{volume.map((count, index) => <i key={index} style={{ height: `${Math.max(6, Math.round((count / maxVolume) * 100))}%` }} aria-label={`${WEEKDAY_LABELS[index]}요일 ${count}건`}><span>{WEEKDAY_LABELS[index]}</span></i>)}</div></article><article className="card admin-health-card"><p className="eyebrow">SERVICE HEALTH</p><h2>운영 상태</h2><div><span><CheckCircle2 size={18} /> 서비스 운영</span><b>정상</b></div><div><span><Activity size={18} /> 활성 거래방</span><b>{rooms.length}개</b></div><div><span><CreditCard size={18} /> 가격 상품</span><b>{pricePackages.length}개</b></div></article></section>
     <AdminTransactionPanel transactions={transactions} rooms={rooms} />
+    <AdminShopSearchRequestPanel demoSession={demoSession} />
     <InstallerApprovalPanel demoSession={demoSession} />
     <AdminMemberPanel demoSession={demoSession} />
   </section>;

@@ -557,6 +557,40 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .installer-approval-panel { margin-top: 20px; padding: 28px; }.installer-approval-panel > header { display: flex; align-items: center; justify-content: space-between; }.installer-approval-panel h2 { margin: 4px 0 18px; }.installer-approval-panel > header > button { display: inline-flex; align-items: center; gap: 7px; background: transparent; color: var(--color-primary); font-size: 11px; font-weight: 750; }.installer-approval-layout { display: grid; grid-template-columns: minmax(300px,.8fr) minmax(380px,1.2fr); gap: 18px; }.installer-application-list { overflow: hidden; border: 1px solid var(--color-line); border-radius: 14px; }.installer-application-list > button { width: 100%; display: grid; grid-template-columns: 36px minmax(0,1fr) auto; align-items: center; gap: 10px; border-bottom: 1px solid var(--color-primary-soft); background: #fff; padding: 14px; text-align: left; }.installer-application-list > button.selected { background: var(--color-primary-soft); box-shadow: inset 3px 0 var(--color-primary); }.installer-application-list > button > svg { color: var(--color-muted); }.installer-application-list span { display: grid; gap: 3px; }.installer-application-list small { color: var(--color-muted); font-size: 10px; }.installer-approval-layout > aside { border: 1px solid var(--color-line); border-radius: 14px; background: var(--color-surface-soft); padding: 20px; }.installer-approval-layout > aside > header { display: flex; justify-content: space-between; }.installer-approval-layout aside h3 { margin: 0; }.installer-approval-layout aside header p { margin: 4px 0; color: var(--color-muted); font-size: 11px; }.installer-approval-layout dl { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }.installer-approval-layout dl div { display: grid; gap: 4px; }.installer-approval-layout dt { color: var(--color-muted-soft); font-size: 9px; }.installer-approval-layout dd { margin: 0; color: var(--color-text-soft); font-size: 12px; font-weight: 650; }.approval-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 20px; }.approval-actions button { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--color-primary-soft); border-radius: 10px; background: #fff; padding: 9px 11px; font-size: 10px; font-weight: 750; }.approval-actions .approve { border-color: var(--color-success-bg); color: var(--color-success); }.approval-actions .reject,.approval-actions .suspend { border-color: var(--color-danger-bg); color: var(--color-danger); }
 @media (max-width:760px) { .signup-page,.account-status-page { padding: 28px 16px 52px; }.signup-shell h1 { font-size: 32px; }.signup-role-picker,.signup-grid { grid-template-columns: 1fr; }.signup-form,.signup-complete,.account-status-card { padding: 25px 20px; }.installer-approval-layout { grid-template-columns: 1fr; }.installer-approval-layout dl { grid-template-columns: 1fr; }.account-status-profile { grid-template-columns: 36px 1fr; }.account-status-profile em { grid-column: 2; justify-self: start; } }
 
+/* Phase 2: 시공점 찾기 요청 */
+.admin-shop-search-request-panel { margin-top: 20px; padding: 28px; }
+.admin-shop-search-request-panel > header { display: flex; align-items: center; justify-content: space-between; }
+.admin-shop-search-request-panel h2 { margin: 4px 0 18px; }
+.admin-shop-search-request-panel > header > button { display: inline-flex; align-items: center; gap: 7px; background: transparent; color: var(--color-primary); font-size: 11px; font-weight: 750; }
+.admin-shop-search-request-panel .installer-application-list em,
+.admin-shop-search-request-panel aside header em { border-radius: 999px; padding: 6px 9px; font-size: 9px; font-style: normal; font-weight: 800; text-transform: uppercase; }
+.shop-search-request-status-requested,.status-chip.status-requested { background: var(--color-warning-bg); color: var(--color-warning); }
+.shop-search-request-status-in_progress,.status-chip.status-in_progress { background: var(--color-primary-soft); color: var(--color-primary); }
+.shop-search-request-status-cancelled,.status-chip.status-cancelled { background: var(--color-line); color: var(--color-muted); }
+.shop-search-request-status-unable_to_connect,.status-chip.status-unable_to_connect { background: var(--color-danger-bg); color: var(--color-danger); }
+.admin-note-field { display: grid; gap: 8px; margin-top: 18px; border-top: 1px solid var(--color-line); padding-top: 16px; }
+.admin-note-field label { color: var(--color-muted-soft); font-size: 10px; font-weight: 750; text-transform: uppercase; }
+.admin-note-field textarea { resize: vertical; }
+.admin-note-field button { justify-self: start; }
+.compact-empty-note { margin: 12px 0 0; color: var(--color-muted); font-size: 11px; }
+
+.shop-search-request-screen { display: grid; gap: 18px; }
+.shop-search-request-form { display: grid; gap: 14px; padding: 24px; }
+.shop-search-request-form h2 { margin: 0; }
+.shop-search-request-form label { display: grid; gap: 7px; color: var(--color-text-soft); font-size: 12px; font-weight: 700; }
+.shop-search-request-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.shop-search-request-form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.shop-search-request-list { display: grid; gap: 10px; }
+.shop-search-request-list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--color-line); border-radius: 14px; background: #fff; padding: 16px; }
+.shop-search-request-list li > div:first-child { display: grid; gap: 4px; }
+.shop-search-request-list li > div:first-child span { color: var(--color-muted); font-size: 12px; }
+.shop-search-request-list li > div:first-child em { color: var(--color-muted-soft); font-size: 11px; font-style: normal; }
+.shop-search-request-list-meta { display: flex; align-items: center; gap: 10px; }
+.shop-search-request-list-meta small { color: var(--color-muted); font-size: 10px; }
+.installer-empty-state-shop-search { display: grid; gap: 10px; margin-top: 18px; border-top: 1px solid var(--color-line); padding-top: 18px; text-align: center; }
+.installer-empty-state-shop-search p { margin: 0; color: var(--color-muted); font-size: 12px; line-height: 1.6; }
+@media (max-width:760px) { .shop-search-request-form-row { grid-template-columns: 1fr; }.shop-search-request-list li { flex-direction: column; align-items: stretch; } }
+
 .marketing-brand { align-items: flex-start; }
 .account-status-shell { width: min(900px,100%); display: grid; gap: 18px; }.account-status-shell .account-status-card { width: 100%; }.installer-registration-editor { padding: 28px; }.installer-registration-editor h2 { margin: 0 0 6px; }.installer-registration-editor > p { margin: 0 0 20px; color: var(--color-muted); }.installer-registration-editor > div { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.installer-registration-editor label { display: grid; gap: 7px; color: var(--color-text-soft); font-size: 11px; font-weight: 750; }.installer-registration-editor input { height: 46px; }.installer-registration-editor .registration-message { margin: 14px 0; border-radius: 10px; background: var(--color-primary-soft); color: var(--color-primary-hover); padding: 10px 12px; font-size: 11px; }.installer-registration-editor .primary { margin-top: 18px; }.account-status-page { align-items: start; }.account-status-shell { margin-top: 4vh; }
 @media (max-width:760px) { .installer-registration-editor { padding: 22px 18px; }.installer-registration-editor > div { grid-template-columns: 1fr; } }

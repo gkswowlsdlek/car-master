@@ -8,7 +8,7 @@ import { dealerStageLabel } from "../../services/transaction-state-service";
 // 항상 같은 정의를 쓰도록 이 상수 하나로 고정.
 const ACTIVE_STAGES: TransactionStage[] = ["시공예약", "입고"];
 
-export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransaction, onNewRequest, onFindShop, onSearchLocation, onPriceGuide }: {
+export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransaction, onNewRequest, onFindShop, onSearchLocation, onPriceGuide, onShopSearchRequests }: {
   dealerName: string;
   deals: Transaction[];
   onFilterDeals: (filter: TransactionStage | "전체") => void;
@@ -17,6 +17,8 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransa
   onFindShop: () => void;
   onSearchLocation: (area: string, workType: string) => void;
   onPriceGuide: () => void;
+  /** Only passed in Real (Supabase) mode. */
+  onShopSearchRequests?: () => void;
 }) {
   const [area, setArea] = useState("");
   const [workType, setWorkType] = useState("썬팅");
@@ -46,6 +48,7 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransa
     <div className="dealer-secondary-actions">
       <button className="button button-ghost" onClick={onNewRequest}><Plus size={16} aria-hidden="true" /> 새 시공 요청</button>
       <button className="button button-ghost" onClick={onPriceGuide}><CircleDollarSign size={16} aria-hidden="true" /> 권장 패키지 확인</button>
+      {onShopSearchRequests && <button className="button button-ghost" onClick={onShopSearchRequests}><Search size={16} aria-hidden="true" /> 시공점 찾기 요청</button>}
     </div>
 
     {deals.length === 0 && <section className="empty-state dashboard-empty"><span>+</span><h2>아직 거래가 없습니다.</h2><p>가까운 시공점을 찾아 첫 시공 요청을 만들어 보세요.</p><button className="primary" onClick={onFindShop}>가까운 시공점 찾기</button></section>}
