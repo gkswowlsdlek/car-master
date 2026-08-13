@@ -124,7 +124,7 @@ test("use-transaction-actions exposes a dedicated endOutcome (not routed through
   const fn = actionsHookSource.slice(actionsHookSource.indexOf("const endOutcome = useCallback"), actionsHookSource.indexOf("const changeFinalPrice"));
   assert.match(fn, /supabaseTransactionRepository\.endOutcome\(transaction\.id, outcome, note\)/);
   assert.match(fn, /transitionStage\(transaction, outcome, role === "shop" \? "shop" : "dealer"\)/);
-  assert.match(actionsHookSource, /return \{ sendMessage, markRoomRead, loadContact, hideTransaction, unhideTransaction, changeStage, endOutcome, changeFinalPrice, changePayment \};/);
+  assert.match(actionsHookSource, /return \{ sendMessage, markRoomRead, loadContact, hideTransaction, unhideTransaction, changeStage, endOutcome, setContactStatus, changeFinalPrice, changePayment \};/);
 });
 
 test("TransactionChatWorkspace hides the normal stage-advance controls once a transaction is terminated and shows a distinct outcome banner with the reason, instead of silently leaving the old CTA visible", () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Phone, Search } from "lucide-react";
+import { Phone, PhoneOff, Search } from "lucide-react";
 import type { Transaction, TransactionStage } from "../../types/transactions";
 import { dealerStageLabel, isTerminalOutcome } from "../../services/transaction-state-service";
 
@@ -120,7 +120,9 @@ export function DealerTransactionManagementScreen({ transactions, initialGroupFi
       : <div className="dealer-transaction-list">
           {filtered.map((item) => {
             const terminal = isTerminalOutcome(item.status.stage);
-            const needsPhoneConfirm = item.status.stage === "견적" || item.status.stage === "시공예약";
+            const inPhoneConfirmWindow = item.status.stage === "견적" || item.status.stage === "시공예약";
+            const needsPhoneConfirm = inPhoneConfirmWindow && item.contactStatus == null;
+            const contactUnreachable = item.contactStatus === "unreachable";
             const scheduled = !terminal && item.status.stage !== "출고" ? shortDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt) : undefined;
             const price = won(item.pricing.finalPrice);
             return <button key={item.id} data-testid={`transaction-card-${item.id}`} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} className="dealer-transaction-row" onClick={() => onOpenTransaction(item.id)}>
@@ -131,6 +133,7 @@ export function DealerTransactionManagementScreen({ transactions, initialGroupFi
               <div className="dealer-transaction-row-meta">
                 <em className={`status-chip status-${item.status.stage}`}>{dealerStageLabel(item.status.stage)}</em>
                 {needsPhoneConfirm && <small className="phone-confirm-flag"><Phone size={11} aria-hidden="true" /> 전화 확인 필요</small>}
+                {contactUnreachable && <small className="phone-confirm-flag phone-confirm-flag-unreachable"><PhoneOff size={11} aria-hidden="true" /> 연락 안 됨</small>}
                 {scheduled && <small>입고 예정 {scheduled}</small>}
                 {price && <small>{price}</small>}
                 <small className="dealer-transaction-row-activity">{activityTime(item.status.updatedAt)}</small>

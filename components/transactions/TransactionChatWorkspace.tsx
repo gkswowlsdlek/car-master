@@ -2,10 +2,12 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowLeft, Ban, Bell, BellOff, Copy, FileText, ImagePlus, Info, MoreHorizontal, Paperclip, Phone, Search, Send, X, XCircle } from "lucide-react";
+import { ArrowDown, ArrowLeft, Ban, Bell, BellOff, Check, Copy, FileText, ImagePlus, Info, MoreHorizontal, Paperclip, Phone, PhoneOff, Search, Send, X, XCircle } from "lucide-react";
 import { attachmentProvider, supabaseAttachmentProvider, type AttachmentProvider } from "../../services/attachments";
+import { generateShopMessage } from "../../services/shop-message";
+import { translateTransactionError } from "../../services/transaction-errors";
 import { canTransitionStage, dealerStageIndex, dealerStageLabel, DEALER_STAGE_LABELS, isTerminalOutcome, nextForwardStage, revertStage, stageLogLabel, stageOrder, STAGE_ACTION_LABEL, STAGE_REVERT_LABEL } from "../../services/transaction-state-service";
-import type { ChatAttachment, ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
+import type { ChatAttachment, ChatRoom, ContactStatus, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
 import type { InstallerListing } from "../../types/installer";
 import { EndTransactionOutcomeModal } from "./EndTransactionOutcomeModal";
 
@@ -37,7 +39,7 @@ function scheduleLabel(value?: string) {
   return date.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" });
 }
 
-export function TransactionChatWorkspace({ role, userId, transaction, room, installer, useRemoteAttachments, demoAttachmentProvider, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onFindAnotherShop, onMarkRead, onLoadContact, onBack }: {
+export function TransactionChatWorkspace({ role, userId, transaction, room, installer, useRemoteAttachments, demoAttachmentProvider, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onSetContactStatus, onFindAnotherShop, onMarkRead, onLoadContact, onBack }: {
   role: "dealer" | "shop";
   userId: string;
   transaction: Transaction;
@@ -54,7 +56,9 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
   /** 취소/시공불가 — never deletes the Transaction/Room/Messages/Shop, just ends the work lifecycle (Phase 5). */
   onEndOutcome: (transaction: Transaction, outcome: "취소" | "시공불가", note?: string) => Promise<void>;
-  /** Only meaningful for role === "dealer" on a terminated transaction — sends the dealer back to Shop Search. */
+  /** Phone-contact result (Phase 8) — independent signal, never forces a stage/outcome change. */
+  onSetContactStatus?: (transaction: Transaction, status: ContactStatus) => Promise<void>;
+  /** Meaningful for role === "dealer" on a terminated transaction, or after an "연락이 안 돼요" contact result — sends the dealer back to Shop Search. */
   onFindAnotherShop?: () => void;
   onMarkRead?: (roomId: string) => void;
   onLoadContact?: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
@@ -81,6 +85,8 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
   const [contactCopied, setContactCopied] = useState(false);
   const [notificationsMuted, setNotificationsMuted] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [contactStatusPending, setContactStatusPending] = useState(false);
+  const [shopMessageCopied, setShopMessageCopied] = useState(false);
   const imageInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const messageEnd = useRef<HTMLDivElement>(null);
@@ -110,7 +116,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
     try {
       await onStageChange(transaction, next);
     } catch (error) {
-      setStageError(error instanceof Error ? error.message : "상태를 변경하지 못했습니다. 다시 시도해 주세요.");
+      setStageError(translateTransactionError(error, "상태를 변경하지 못했습니다. 다시 시도해 주세요."));
     } finally {
       setStagePending(false);
     }
@@ -207,7 +213,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
         pendingRef.current = [...pendingRef.current, prepared];
         setPending([...pendingRef.current]);
       } catch (error) {
-        setAttachmentError(error instanceof Error ? error.message : "파일을 업로드하지 못했습니다.");
+        setAttachmentError(translateTransactionError(error, "파일을 업로드하지 못했습니다."));
       }
     }
   };
@@ -239,7 +245,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
       await Promise.allSettled(pending.map((item) => provider.discard?.(item)));
       pendingRef.current = [];
       setPending([]);
-      setAttachmentError(error instanceof Error ? error.message : "메시지를 보내지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      setAttachmentError(translateTransactionError(error, "메시지를 보내지 못했습니다. 잠시 후 다시 시도해 주세요."));
     } finally {
       setIsSending(false);
     }
@@ -273,6 +279,17 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
     onFinalPriceChange(transaction, value);
     setFinalPrice("");
   };
+  const recordContactResult = async (status: ContactStatus) => {
+    if (!onSetContactStatus || contactStatusPending) return;
+    setContactStatusPending(true);
+    try { await onSetContactStatus(transaction, status); } finally { setContactStatusPending(false); }
+  };
+  const copyShopMessage = () => {
+    void navigator.clipboard?.writeText(generateShopMessage(transaction)).then(() => {
+      setShopMessageCopied(true);
+      setTimeout(() => setShopMessageCopied(false), 2000);
+    });
+  };
 
   return <article className="messenger-workspace" data-testid={`transaction-detail-${transaction.id}`}>
     <section className="messenger-center">
@@ -305,12 +322,32 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
         </div>}
       </section>
       {endOutcomeModal && <EndTransactionOutcomeModal outcome={endOutcomeModal} onClose={() => setEndOutcomeModal(null)} onConfirm={async (note) => { await onEndOutcome(transaction, endOutcomeModal, note); setEndOutcomeModal(null); }} />}
-      {role === "dealer" && (transaction.status.stage === "견적" || transaction.status.stage === "시공예약") && <div className="phone-confirm-banner" role="status">
-        <p>이 시공점은 전화 확인이 필요합니다. 시공 가능 여부와 입고 일정을 시공점에 직접 확인해주세요.</p>
-        {installer?.contactPhone
-          ? <a className="button button-primary" href={`tel:${installer.contactPhone.replace(/[^0-9+]/g, "")}`}><Phone size={16} /> 전화하기</a>
-          : <span className="phone-confirm-fallback">전화 또는 카카오톡 등으로 확인해주세요.</span>}
-      </div>}
+      {role === "dealer" && (transaction.status.stage === "견적" || transaction.status.stage === "시공예약") && (
+        transaction.contactStatus === "contacted" ? <div className="phone-confirm-banner phone-confirm-done" role="status">
+          <p><Check size={15} /> 시공점 연락 확인됨</p>
+        </div>
+        : transaction.contactStatus === "unreachable" ? <div className="phone-confirm-banner phone-confirm-unreachable" role="status">
+          <p><PhoneOff size={16} /> 시공점과 연락이 되지 않았어요. 다시 시도하거나 다른 시공점을 찾아보세요.</p>
+          <div className="phone-confirm-actions">
+            {installer?.contactPhone
+              ? <a className="button button-primary" href={`tel:${installer.contactPhone.replace(/[^0-9+]/g, "")}`}><Phone size={16} /> 다시 전화하기</a>
+              : <span className="phone-confirm-fallback">전화 또는 카카오톡 등으로 다시 확인해주세요.</span>}
+            {onFindAnotherShop && <button type="button" className="button button-secondary" onClick={onFindAnotherShop}><Search size={16} /> 다른 시공점 찾기</button>}
+          </div>
+        </div>
+        : <div className="phone-confirm-banner" role="status">
+          <p>이 시공점은 전화 확인이 필요합니다. 시공 가능 여부와 입고 일정을 시공점에 직접 확인해주세요.</p>
+          <div className="phone-confirm-actions">
+            {installer?.contactPhone
+              ? <a className="button button-primary" href={`tel:${installer.contactPhone.replace(/[^0-9+]/g, "")}`}><Phone size={16} /> 전화하기</a>
+              : <span className="phone-confirm-fallback">전화 또는 카카오톡 등으로 확인해주세요.</span>}
+          </div>
+          {onSetContactStatus && <div className="phone-confirm-result-row">
+            <button type="button" className="button button-secondary" disabled={contactStatusPending} onClick={() => void recordContactResult("contacted")}>연결됐어요</button>
+            <button type="button" className="button button-secondary" disabled={contactStatusPending} onClick={() => void recordContactResult("unreachable")}>연락이 안 돼요</button>
+          </div>}
+        </div>
+      )}
       <div className="messenger-messages" ref={messagesContainer} onScroll={handleScroll}>
         <div className="message-date-divider"><span>거래방 생성 · {dayLabel(transaction.status.createdAt)}</span></div>
         {timeline.map((entry, index) => {
@@ -356,6 +393,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
           <div><dt>시공 가능 필름</dt><dd>{installer?.brands.length ? installer.brands.join(", ") : "등록된 정보가 없습니다."}</dd></div>
         </dl>
         <div className="sidebar-settlement"><h4>연락처</h4><button className="button button-secondary" onClick={() => void openContact()}>연락처 확인</button></div>
+        {role === "dealer" && <div className="sidebar-settlement"><h4>시공점에 보낼 내용</h4><button type="button" className="button button-secondary" onClick={copyShopMessage}><Copy size={16} /> {shopMessageCopied ? "복사됨" : "시공점에 보낼 내용 복사"}</button></div>}
       </> : <>
         <div className="briefing-title"><span>거래 요약</span><h3>거래 정보</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div>
         <div className="sidebar-stage"><span>현재 상태</span><b>{role === "dealer" ? dealerStageLabel(transaction.status.stage) : transaction.status.stage}</b><div className="stage-progress-rail sidebar-stage-rail">{role === "dealer" ? DEALER_STAGE_LABELS.map((label, index) => { const dealerIndex = dealerStageIndex(transaction.status.stage); return <span className={index < dealerIndex ? "complete" : index === dealerIndex ? "active" : ""} key={label}><i>{index < dealerIndex ? "✓" : index + 1}</i><small>{label}</small></span>; }) : stageOrder.map((stage, index) => <span className={index < stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage}</small></span>)}</div></div>

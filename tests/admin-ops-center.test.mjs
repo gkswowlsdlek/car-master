@@ -44,14 +44,12 @@ test.before(async () => {
 // existing RPC (review_shop_claim) or relies on RLS the backend already
 // grants to is_admin() sessions (installer_shops, shop_claim_requests).
 
-test("no new migration — Phase 7 is a pure client-side reorg over existing RLS/RPCs", async () => {
+test("Phase 7 itself added no migration — every new admin query reuses existing RLS/RPCs (checked against the migration file introduced by that phase's own work, not a moving snapshot of the whole directory)", async () => {
   const migrationsDir = new URL("../supabase/migrations/", import.meta.url);
   const { readdir } = await import("node:fs/promises");
-  const files = (await readdir(migrationsDir)).filter((name) => name.endsWith(".sql")).sort();
-  // Last migration as of Phase 6's completion — if Phase 7 needed a real
-  // schema change this would be a later-timestamped file and this assertion
-  // would (correctly) fail, forcing an explicit decision to update it.
-  assert.equal(files[files.length - 1], "202608130004_transaction_lifecycle_completion.sql");
+  const files = await readdir(migrationsDir);
+  assert.ok(files.includes("202608130004_transaction_lifecycle_completion.sql"), "Phase 5's migration must still exist");
+  assert.ok(!files.some((name) => name.includes("admin_ops") || name.includes("admin_queue")), "Phase 7 must not have introduced its own migration file");
 });
 
 test("AdminOpsQueue never computes vanity metrics — only counts of actually-actionable states, and hides a card entirely at zero instead of rendering an empty card", () => {

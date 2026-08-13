@@ -128,7 +128,7 @@ export function ShopDashboard({ transactions, rooms, onOpenTransaction, onOpenMe
       <div className="section-head"><div><p className="eyebrow">오늘 완료</p><h2><CheckCircle2 size={20} /> 오늘 완료 {completedToday.length}대</h2></div></div>
       <div>{completedToday.map((item) => <button key={item.id} onClick={() => onOpenTransaction(item.id)}>
         <span><b>{item.vehicle.maker} {item.vehicle.model}</b><small>{serviceLabel(item)}</small></span>
-        <em>{item.pricing.finalPrice ? won(item.pricing.finalPrice) : "최종 금액 입력 필요"}</em>
+        <em>{item.pricing.finalPrice ? won(item.pricing.finalPrice) : "최종 시공금액 입력 필요"}</em>
       </button>)}</div>
     </section>}
   </section>;

@@ -18,12 +18,13 @@ import { transactionRepository } from "../../repositories/transaction-repository
 import type { AttachmentProvider } from "../../services/attachments";
 import { createId, createTransactionNumber } from "../../services/id-service";
 import { searchNearbyInstallers } from "../../services/installer-search";
+import { translateTransactionError } from "../../services/transaction-errors";
 import { searchLocation } from "../../services/location-search";
 import { notificationService } from "../../services/notifications/notification-service";
 import type { DemoAccount, RequestType, Screen, ServiceRequest } from "../../types/dealer";
 import type { InstallerListing } from "../../types/installer";
 import type { SearchLocation } from "../../types/location";
-import type { ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
+import type { ChatRoom, ContactStatus, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
 import { DealerDashboard } from "../dealer/DealerDashboard";
 import { InstallerDirectoryScreen } from "../dealer/InstallerDirectoryScreen";
 import { PriceGuideScreen } from "../dealer/PriceGuideScreen";
@@ -66,6 +67,7 @@ type DealerWorkspaceProps = {
   onStageChange: (transaction: Transaction, stage: TransactionStage) => Promise<void>;
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
   onEndOutcome: (transaction: Transaction, outcome: "취소" | "시공불가", note?: string) => Promise<void>;
+  onSetContactStatus: (transaction: Transaction, status: ContactStatus) => Promise<void>;
   onFindAnotherShop: () => void;
   onMarkRead: (roomId: string) => void;
   onLoadContact: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
@@ -75,7 +77,7 @@ type DealerWorkspaceProps = {
   onMobileFullscreenChange: (open: boolean) => void;
 };
 
-export function DealerWorkspace({ account, screen, transactions, rooms, useSupabaseData, useDemoSharedBackend, demoAttachmentProvider, isLoading, loadError, onNavigate, onRefresh, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onFindAnotherShop, onMarkRead, onLoadContact, onChangePassword, onCompanyNameChange, onUnreadMessageCountChange, onMobileFullscreenChange }: DealerWorkspaceProps) {
+export function DealerWorkspace({ account, screen, transactions, rooms, useSupabaseData, useDemoSharedBackend, demoAttachmentProvider, isLoading, loadError, onNavigate, onRefresh, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onSetContactStatus, onFindAnotherShop, onMarkRead, onLoadContact, onChangePassword, onCompanyNameChange, onUnreadMessageCountChange, onMobileFullscreenChange }: DealerWorkspaceProps) {
   const [query, setQuery] = useState("하남시");
   const [location, setLocation] = useState<SearchLocation>(initialLocation);
   const [locationError, setLocationError] = useState("");
@@ -93,7 +95,12 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
   const [installerDirectoryLoading, setInstallerDirectoryLoading] = useState(useSupabaseData);
   const [isCreatingTransaction, setIsCreatingTransaction] = useState(false);
 
-  const availableShops = useMemo<InstallerListing[]>(() => useSupabaseData ? [...approvedInstallerShops, ...demoInstallerListings] : demoInstallerListings, [approvedInstallerShops, useSupabaseData]);
+  // Phase 8: a real, Supabase-authenticated Dealer must only ever see real
+  // Shops — demoInstallerListings (≈250 fictional "데모 시공점"-badged
+  // entries) previously got concatenated in here too, so they could rank
+  // into the top real-shop search/map results by literal distance. Demo
+  // listings now only ever appear for an actual Demo session (useSupabaseData === false).
+  const availableShops = useMemo<InstallerListing[]>(() => useSupabaseData ? approvedInstallerShops : demoInstallerListings, [approvedInstallerShops, useSupabaseData]);
   const nearbyResults = useMemo(() => searchNearbyInstallers(location, availableShops).filter((item) => item.shop.approved && item.shop.available).slice(0, 28), [availableShops, location]);
   const selectedShop = availableShops.find((shop) => shop.id === selectedShopId) ?? nearbyResults[0]?.shop ?? demoInstallerListings[0];
   const selectedPackage = pricePackages.find((item) => item.id === selectedPackageId) ?? pricePackages[0];
@@ -184,7 +191,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
           setRequest(defaultRequest);
           setSelectedTransactionId(created.transactionId); setDealFilter("전체"); onNavigate("deals");
           void notificationService.notify({ type: "new_service_request", transactionId: created.transactionId, installerId: selectedShop.id });
-        } catch (error) { alert(error instanceof Error ? error.message : "거래를 생성하지 못했습니다."); }
+        } catch (error) { alert(translateTransactionError(error, "거래를 생성하지 못했습니다.")); }
         return;
       }
       if (useDemoSharedBackend) {
@@ -201,7 +208,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
           setRequest(defaultRequest);
           setSelectedTransactionId(created.transactionId); setDealFilter("전체"); onNavigate("deals");
           void notificationService.notify({ type: "new_service_request", transactionId: created.transactionId, installerId: selectedShop.id });
-        } catch (error) { alert(error instanceof Error ? error.message : "거래를 생성하지 못했습니다."); }
+        } catch (error) { alert(translateTransactionError(error, "거래를 생성하지 못했습니다.")); }
         return;
       }
       const existing = transactionRepository.getAll();
@@ -229,7 +236,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
     {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={(area) => void searchArea(area ?? request.deliveryArea)} onSummary={() => onNavigate("requestSummary")} onPriceGuide={() => onNavigate("priceGuide")} />}
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} submitting={isCreatingTransaction} onBack={() => onNavigate("request")} onSubmit={createTransaction} />}
     {screen === "deals" && <DealerTransactionManagementScreen transactions={transactions} initialGroupFilter={dealFilter} onOpenTransaction={(id) => { setSelectedTransactionId(id); onNavigate("messages"); }} onNewRequest={() => onNavigate("request")} onFindShop={() => onNavigate("dealerMap")} />}
-    {screen === "messages" && <MessengerScreen role="dealer" userId={account.id} transactions={transactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={demoAttachmentProvider} isLoading={isLoading} loadError={loadError} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onFindAnotherShop={onFindAnotherShop} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onMobileChatOpenChange={setMobileChatOpen} />}
+    {screen === "messages" && <MessengerScreen role="dealer" userId={account.id} transactions={transactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={demoAttachmentProvider} isLoading={isLoading} loadError={loadError} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onSetContactStatus={onSetContactStatus} onFindAnotherShop={onFindAnotherShop} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onMobileChatOpenChange={setMobileChatOpen} />}
     {screen === "shopSearchRequests" && useSupabaseData && <ShopSearchRequestScreen onTransactionCreated={(id) => { void onRefresh().then(() => { setSelectedTransactionId(id); setDealFilter("전체"); onNavigate("deals"); }); }} />}
     {screen === "dealerProfile" && <ProfileEditor role="dealer" userId={account.id} activity={profileActivity} onChangePassword={onChangePassword} />}
   </>;

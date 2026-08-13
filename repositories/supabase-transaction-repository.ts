@@ -1,5 +1,5 @@
 import { createSupabaseBrowserClient } from "../lib/supabase/client";
-import type { PaymentStatus, Transaction, TransactionStageEvent } from "../types/transactions";
+import type { ContactStatus, PaymentStatus, Transaction, TransactionStageEvent } from "../types/transactions";
 
 type StageEventRow = {
   id: number; from_stage: TransactionStageEvent["fromStage"]; to_stage: TransactionStageEvent["toStage"];
@@ -10,6 +10,7 @@ type TransactionRow = {
   id: string; dealer_id: string; installer_id: string | null; shop_id: string | null; installer_name: string;
   vehicle: Transaction["vehicle"]; service: Transaction["service"]; pricing: Transaction["pricing"];
   schedule: Transaction["schedule"]; stage: Transaction["status"]["stage"]; outcome_note: string | null;
+  contact_status: ContactStatus | null;
   hidden_by_dealer: boolean; hidden_by_installer: boolean; last_message: string;
   created_at: string; updated_at: string; transaction_rooms: { id: string } | { id: string }[] | null;
   transaction_stage_events: StageEventRow[] | null;
@@ -25,6 +26,7 @@ function mapTransaction(row: TransactionRow): Transaction {
     vehicle: row.vehicle, service: row.service, pricing: row.pricing, schedule: row.schedule,
     status: { stage: row.stage, createdAt: row.created_at, updatedAt: row.updated_at },
     outcomeNote: row.outcome_note ?? undefined,
+    contactStatus: row.contact_status ?? undefined,
     visibility: { hiddenByDealer: row.hidden_by_dealer, hiddenByInstaller: row.hidden_by_installer },
     chatRoomId: room?.id ?? "", lastMessage: row.last_message, stageLog,
   };
@@ -40,7 +42,7 @@ export class SupabaseTransactionRepository {
    */
   async getAll() {
     const { data, error } = await createSupabaseBrowserClient().from("transactions")
-      .select("id,dealer_id,installer_id,shop_id,installer_name,vehicle,service,pricing,schedule,stage,outcome_note,hidden_by_dealer,hidden_by_installer,last_message,created_at,updated_at,transaction_rooms(id),transaction_stage_events(id,from_stage,to_stage,actor_role,direction,created_at)")
+      .select("id,dealer_id,installer_id,shop_id,installer_name,vehicle,service,pricing,schedule,stage,outcome_note,contact_status,hidden_by_dealer,hidden_by_installer,last_message,created_at,updated_at,transaction_rooms(id),transaction_stage_events(id,from_stage,to_stage,actor_role,direction,created_at)")
       .order("updated_at", { ascending: false })
       .limit(500);
     if (error) throw error;
@@ -105,6 +107,15 @@ export class SupabaseTransactionRepository {
       p_transaction_id: transactionId,
       p_outcome: outcome,
       p_note: note ?? null,
+    });
+    if (error) throw error;
+  }
+
+  /** Phone-contact result — independent of stage/outcome, never forces either to change. */
+  async setContactStatus(transactionId: string, status: ContactStatus) {
+    const { error } = await createSupabaseBrowserClient().rpc("set_transaction_contact_status", {
+      p_transaction_id: transactionId,
+      p_status: status,
     });
     if (error) throw error;
   }
