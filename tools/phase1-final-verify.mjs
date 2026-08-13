@@ -55,9 +55,19 @@ try {
 
   // 3. Select shop -> request
   log("STEP 3: select first shop, click 시공 요청");
-  const requestButtons = page.locator(".installer-card-actions button.button-primary");
-  await requestButtons.first().waitFor({ timeout: 15000 });
-  await requestButtons.first().click();
+  await page.locator(".installer-card-actions button.button-primary").first().waitFor({ timeout: 15000 });
+  await page.waitForTimeout(2000); // let map/list re-renders settle before interacting
+  let clicked = false;
+  for (let attempt = 0; attempt < 5 && !clicked; attempt++) {
+    try {
+      await page.locator(".installer-card-actions button.button-primary").first().click({ timeout: 8000 });
+      clicked = true;
+    } catch (e) {
+      log(`  click attempt ${attempt + 1} failed, retrying:`, e.message.split("\n")[0]);
+      await page.waitForTimeout(1000);
+    }
+  }
+  if (!clicked) throw new Error("Could not click 시공 요청 after 5 attempts — list kept re-rendering");
   await page.waitForSelector(".service-request-form", { timeout: 20000 });
   result.steps.selectShop = "PASS";
 
@@ -170,10 +180,23 @@ try {
   );
   await shot(page, "06-released-status.png");
 
-  // 13. Refresh and verify persistence
-  log("STEP 13: reload page, verify 출고 status persists");
+  // 13. Refresh and verify persistence. This is a client-state SPA (no
+  // per-screen URL routing), so a hard reload is expected to land back on
+  // the dashboard, not the same room — re-navigate to the transaction and
+  // check its stage there, which is what actually proves server persistence.
+  log("STEP 13: reload page, re-open the same transaction, verify 출고 status persists");
   await page.reload({ waitUntil: "networkidle" });
-  await page.waitForSelector(".messenger-workspace", { timeout: 20000 }).catch(() => {});
+  await page.waitForSelector("text=DEALER WORKSPACE", { timeout: 20000 }).catch((e) => result.issues.push("dashboard not shown after reload: " + e.message));
+  if (await page.locator(".messenger-workspace").isVisible().catch(() => false)) {
+    result.steps.landedInRoomAfterReload = true;
+  } else {
+    result.steps.landedInRoomAfterReload = false;
+    await page.click('nav >> text=거래 관리').catch(() => {});
+    await page.waitForTimeout(1500);
+    const dealCard = page.locator('[data-testid^="transaction-card-"], [data-testid^="deal-card-"], .deal-list button, .dealer-deal-list button').first();
+    if (await dealCard.count() > 0) { await dealCard.click().catch(() => {}); }
+    await page.waitForSelector(".messenger-workspace", { timeout: 15000 }).catch((e) => result.issues.push("could not reopen transaction after reload: " + e.message));
+  }
   await waitStageText(page, "출고", 15000).then(
     () => { result.steps.persistAfterRefresh = "PASS"; },
     (e) => { result.steps.persistAfterRefresh = "FAIL"; result.issues.push("stage did not persist as 출고 after refresh: " + e.message); }
