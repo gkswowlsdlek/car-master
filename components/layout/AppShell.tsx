@@ -30,13 +30,14 @@ const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon
   ],
   admin: [
     { screen: "ops", label: "운영 현황", icon: UsersRound },
+    { screen: "adminShops", label: "시공점 관리", icon: Building2 },
     { screen: "adminAccount", label: "계정", icon: UserRound },
   ],
 };
 
 const screenTitles: Partial<Record<Screen, string>> = {
   dealerDashboard: "홈", shopDashboard: "시공점 대시보드", priceGuide: "권장 시공 패키지 가이드", request: "새 시공 요청",
-  requestSummary: "요청 최종 확인", dealerMap: "시공점 찾기", deals: "거래 관리", shopRequests: "거래 관리", messages: "메시지", dealerProfile: "마이페이지", ops: "운영 현황", adminAccount: "계정",
+  requestSummary: "요청 최종 확인", dealerMap: "시공점 찾기", deals: "거래 관리", shopRequests: "거래 관리", messages: "메시지", dealerProfile: "마이페이지", ops: "운영 현황", adminShops: "시공점 관리", adminAccount: "계정",
 };
 
 const MOBILE_PRIMARY_COUNT = 4;

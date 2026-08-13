@@ -4,13 +4,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Building2, Users } from "lucide-react";
 import { membershipRepository, type AdminMember } from "../../repositories/membership-repository";
 import { demoMembershipRepository } from "../../repositories/demo-membership-repository";
+import { INSTALLER_APPROVAL_STATUS_LABEL } from "../../services/admin-labels";
 
 type RoleFilter = "전체" | "dealer" | "installer";
 type ApprovalFilter = "전체" | InstallerApprovalStatusValue;
 type InstallerApprovalStatusValue = "pending" | "approved" | "rejected" | "suspended";
 
 const roleLabel: Record<AdminMember["role"], string> = { dealer: "Dealer", installer: "Installer" };
-const approvalLabel: Record<InstallerApprovalStatusValue, string> = { pending: "승인 대기", approved: "승인", rejected: "거절", suspended: "정지" };
+const approvalLabel = INSTALLER_APPROVAL_STATUS_LABEL;
 
 export function AdminMemberPanel({ demoSession = false }: { demoSession?: boolean }) {
   const [members, setMembers] = useState<AdminMember[]>([]);

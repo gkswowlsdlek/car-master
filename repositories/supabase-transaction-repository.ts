@@ -31,10 +31,18 @@ function mapTransaction(row: TransactionRow): Transaction {
 }
 
 export class SupabaseTransactionRepository {
+  /**
+   * Ordered most-recently-active first with a 500-row cap. RLS already
+   * scopes Dealer/Installer callers to their own handful of rows, so the
+   * cap is invisible to them at any realistic Beta volume — it exists to
+   * protect the Admin path, which is the one caller RLS lets see every
+   * transaction on the platform (Phase 7 pagination-safety pass).
+   */
   async getAll() {
     const { data, error } = await createSupabaseBrowserClient().from("transactions")
       .select("id,dealer_id,installer_id,shop_id,installer_name,vehicle,service,pricing,schedule,stage,outcome_note,hidden_by_dealer,hidden_by_installer,last_message,created_at,updated_at,transaction_rooms(id),transaction_stage_events(id,from_stage,to_stage,actor_role,direction,created_at)")
-      .order("updated_at", { ascending: false });
+      .order("updated_at", { ascending: false })
+      .limit(500);
     if (error) throw error;
     return ((data ?? []) as unknown as TransactionRow[]).map(mapTransaction);
   }
