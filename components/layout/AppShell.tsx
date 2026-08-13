@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { ArrowLeft, Bell, Building2, CircleDollarSign, Gauge, HelpCircle, LogOut, MapPin, Menu, MessageCircle, MoreHorizontal, Plus, Settings2, UserRound, UsersRound, X, type LucideIcon } from "lucide-react";
+import { ArrowLeft, Bell, Building2, Gauge, HelpCircle, LogOut, MapPin, Menu, MessageCircle, MoreHorizontal, Plus, Settings2, UserRound, UsersRound, X, type LucideIcon } from "lucide-react";
 import type { DemoAccount, Role, Screen } from "../../types/dealer";
 
 // Dealer's own core flow (North Star: "가까운 시공점 찾기" first) drives the
@@ -13,20 +13,21 @@ import type { DemoAccount, Role, Screen } from "../../types/dealer";
 // quick-action button), never a sidebar/bottom-nav item. 마이페이지/권장 시공
 // 패키지 are real, unremoved routes — kept at the tail so they still surface
 // in the sidebar and in mobile's "더보기" sheet.
-const navigation: Record<Role, { screen: Screen; label: string; icon: LucideIcon }[]> = {
+const navigation: Record<Role, { screen?: Screen; href?: string; label: string; icon: LucideIcon }[]> = {
   dealer: [
     { screen: "dealerDashboard", label: "홈", icon: Gauge },
     { screen: "dealerMap", label: "시공점 찾기", icon: MapPin },
     { screen: "deals", label: "거래 관리", icon: Building2 },
     { screen: "messages", label: "메시지", icon: MessageCircle },
+    { href: "/help", label: "고객센터", icon: HelpCircle },
     { screen: "dealerProfile", label: "마이페이지", icon: UserRound },
-    { screen: "priceGuide", label: "권장 시공 패키지", icon: CircleDollarSign },
   ],
   shop: [
     { screen: "shopDashboard", label: "홈", icon: Gauge },
     { screen: "shopRequests", label: "거래방", icon: Building2 },
     { screen: "messages", label: "메시지", icon: MessageCircle },
     { screen: "dealerProfile", label: "시공점 관리", icon: Settings2 },
+    { href: "/help/shop", label: "고객센터", icon: HelpCircle },
   ],
   admin: [
     { screen: "ops", label: "운영 현황", icon: UsersRound },
@@ -50,9 +51,8 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
   const [moreOpen, setMoreOpen] = useState(false);
   const roleLabel = role === "dealer" ? "딜러" : role === "shop" ? "시공점" : "관리자";
   const items = navigation[role];
-  const secondaryScreens: Screen[] = role === "dealer" ? ["dealerProfile", "priceGuide"] : role === "shop" ? ["dealerProfile"] : ["adminAccount"];
-  const primaryItems = items.filter((item) => !secondaryScreens.includes(item.screen));
-  const secondaryItems = items.filter((item) => secondaryScreens.includes(item.screen));
+  const primaryItems = items;
+  const secondaryItems: typeof items = [];
   let overflow = items.length > MOBILE_PRIMARY_COUNT ? items.slice(MOBILE_PRIMARY_COUNT) : [];
   let primary = overflow.length > 0 ? items.slice(0, MOBILE_PRIMARY_COUNT) : items;
   // "메시지"는 사이드바 순서와 무관하게 모바일 하단 네비에 항상 남아야 하므로,
@@ -63,28 +63,27 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
     const pinnedItem = items.find((item) => item.screen === pinned);
     if (!pinnedItem) continue;
     let bumpIndex = primary.length - 1;
-    while (bumpIndex > 0 && pinnedScreens.includes(primary[bumpIndex].screen)) bumpIndex--;
+    while (bumpIndex > 0 && primary[bumpIndex].screen && pinnedScreens.includes(primary[bumpIndex].screen as Screen)) bumpIndex--;
     const bumped = primary[bumpIndex];
     primary = [...primary.slice(0, bumpIndex), pinnedItem, ...primary.slice(bumpIndex + 1)];
     overflow = [bumped, ...overflow.filter((item) => item.screen !== pinned)];
   }
-  const overflowActive = overflow.some((item) => isActive(screen, item.screen));
-  const go = (target: Screen) => { setMoreOpen(false); onNavigate(target); };
+  const overflowActive = overflow.some((item) => item.screen ? isActive(screen, item.screen) : false);
+  const go = (item: typeof items[number]) => { setMoreOpen(false); if (item.href) window.location.assign(item.href); else if (item.screen) onNavigate(item.screen); };
   // Desktop Messenger reads as its own focused workspace, not a page inside
   // the general Dealer/Shop chrome, so the sidebar and workspace topbar step
   // aside for a minimal "back to Car-Master" bar. Mobile is untouched here —
   // it already has its own dedicated Inbox/fullscreen-chat handling via
   // mobileFullscreen, driven separately by MessengerScreen's mobile view state.
   const messengerFocus = screen === "messages";
-  const homeScreen = navigation[role][0].screen;
+  const homeScreen = navigation[role][0].screen ?? "dealerDashboard";
 
   return <div className={`app-frame${mobileFullscreen ? " mobile-chat-fullscreen" : ""}${messengerFocus ? " messenger-focus" : ""}`}>
     <aside className="app-sidebar">
       <button className="app-logo" onClick={() => onNavigate(homeScreen)}><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><small>{roleLabel} 워크스페이스</small></button>
       <div className="sidebar-section-label">업무 메뉴</div>
-      <nav className="sidebar-primary-nav">{primaryItems.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
-      {secondaryItems.length > 0 && <><div className="sidebar-subsection-label">보조 메뉴</div><nav className="sidebar-secondary-nav">{secondaryItems.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => onNavigate(item.screen)}><i aria-hidden="true"><item.icon size={17} strokeWidth={2} /></i><span>{item.label}</span></button>)}</nav></>}
-      <div className="sidebar-support"><HelpCircle size={19} /><b>도움이 필요하신가요?</b><span>자주 찾는 도움말과 이용 안내를 확인하세요.</span><button onClick={() => { window.location.href = role === "shop" ? "/help/shop" : "/help"; }}>고객센터 열기</button></div>
+      <nav className="sidebar-primary-nav">{primaryItems.map((item) => <button key={item.href ?? item.screen} className={item.screen ? (isActive(screen, item.screen) ? "active" : "") : ""} onClick={() => go(item)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
+      {secondaryItems.length > 0 && <><div className="sidebar-subsection-label">보조 메뉴</div><nav className="sidebar-secondary-nav">{secondaryItems.map((item) => <button key={item.href ?? item.screen} className={item.screen ? (isActive(screen, item.screen) ? "active" : "") : ""} onClick={() => go(item)}><i aria-hidden="true"><item.icon size={17} strokeWidth={2} /></i><span>{item.label}</span></button>)}</nav></>}
       <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
     </aside>
     <main className="app-main">
@@ -100,7 +99,7 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
     </main>
 
     <nav className="app-mobile-nav" aria-label="주요 메뉴">
-      {primary.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => go(item.screen)}><span className="mobile-nav-icon">{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}<item.icon size={20} strokeWidth={2} aria-hidden="true" /></span><span>{item.label}</span></button>)}
+      {primary.map((item) => <button key={item.href ?? item.screen} className={item.screen ? (isActive(screen, item.screen) ? "active" : "") : ""} onClick={() => go(item)}><span className="mobile-nav-icon">{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}<item.icon size={20} strokeWidth={2} aria-hidden="true" /></span><span>{item.label}</span></button>)}
       {overflow.length > 0 && <button className={overflowActive ? "active" : ""} onClick={() => setMoreOpen(true)} aria-haspopup="true" aria-expanded={moreOpen}><MoreHorizontal size={20} aria-hidden="true" /><span>더보기</span></button>}
     </nav>
     {moreOpen && <div className="app-mobile-more" role="dialog" aria-modal="true" aria-label="더보기 메뉴">
@@ -108,7 +107,7 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
       <div className="app-mobile-more-sheet">
         <div className="app-mobile-more-head"><b>더보기</b><button onClick={() => setMoreOpen(false)} aria-label="닫기"><X size={18} /></button></div>
         <div className="app-mobile-more-grid">
-          {overflow.map((item) => <button key={item.screen} className={isActive(screen, item.screen) ? "active" : ""} onClick={() => go(item.screen)}><item.icon size={20} strokeWidth={2} aria-hidden="true" /><span>{item.label}</span></button>)}
+          {overflow.map((item) => <button key={item.href ?? item.screen} className={item.screen ? (isActive(screen, item.screen) ? "active" : "") : ""} onClick={() => go(item)}><item.icon size={20} strokeWidth={2} aria-hidden="true" /><span>{item.label}</span></button>)}
           <button onClick={() => { setMoreOpen(false); window.location.href = role === "shop" ? "/help/shop" : "/help"; }}><HelpCircle size={20} strokeWidth={2} aria-hidden="true" /><span>고객센터</span></button>
           <button onClick={() => { setMoreOpen(false); onLogout(); }}><LogOut size={20} aria-hidden="true" /><span>로그아웃</span></button>
         </div>
