@@ -11,7 +11,7 @@ export type DemoAccount = { id: string; email: string; password: string; name: s
 export type ServiceRequest = {
   maker: string; model: string; vehicleType: "신차" | "재시공"; deliveryArea: string; preferredBrand: Brand;
   works: string[]; workDescription: string; extraRequest: string;
-  inboundStart: string; inboundEnd: string; memo: string; requestType: RequestType; extraWorkNote: string;
+  inboundStart: string; inboundEnd: string; releaseDate: string; memo: string; requestType: RequestType; extraWorkNote: string;
   vehicleClass: VehicleClass | ""; selectedPackageId?: string; selectedPackageName?: string;
   selectedPackageBrand?: string; selectedPackageProduct?: string; expectedPrice?: string;
   baseGuidePrice?: number; surcharge?: number; finalGuidePrice?: number; priceRequiresInquiry?: boolean;
