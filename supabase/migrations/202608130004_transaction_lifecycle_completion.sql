@@ -53,8 +53,10 @@ begin
   elsif caller_role = 'dealer'::public.user_role then
     if current_transaction.dealer_id <> auth.uid() then raise exception 'Transaction access denied'; end if;
   elsif caller_role = 'installer'::public.user_role then
-    if current_transaction.installer_id <> auth.uid()
-      and not (current_transaction.shop_id is not null and public.has_active_shop_membership(current_transaction.shop_id)) then
+    if not (
+      (current_transaction.installer_id is not null and current_transaction.installer_id = auth.uid())
+      or (current_transaction.shop_id is not null and public.has_active_shop_membership(current_transaction.shop_id))
+    ) then
       raise exception 'Transaction access denied';
     end if;
   else
@@ -125,8 +127,10 @@ begin
   elsif caller_role = 'dealer'::public.user_role then
     if target.dealer_id <> auth.uid() then raise exception 'Transaction access denied'; end if;
   elsif caller_role = 'installer'::public.user_role then
-    if target.installer_id <> auth.uid()
-      and not (target.shop_id is not null and public.has_active_shop_membership(target.shop_id)) then
+    if not (
+      (target.installer_id is not null and target.installer_id = auth.uid())
+      or (target.shop_id is not null and public.has_active_shop_membership(target.shop_id))
+    ) then
       raise exception 'Transaction access denied';
     end if;
   else

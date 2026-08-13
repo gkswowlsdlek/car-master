@@ -45,7 +45,7 @@ test("end_transaction_outcome only accepts 취소/시공불가, never deletes an
   const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.end_transaction_outcome"), migrationSource.indexOf("revoke all on function public.end_transaction_outcome"));
   assert.match(fn, /if p_outcome not in \('취소', '시공불가'\) then/);
   assert.match(fn, /if current_transaction\.dealer_id <> auth\.uid\(\) then raise exception 'Transaction access denied';/);
-  assert.match(fn, /current_transaction\.installer_id <> auth\.uid\(\)\s*\n\s*and not \(current_transaction\.shop_id is not null and public\.has_active_shop_membership\(current_transaction\.shop_id\)\)/);
+  assert.match(fn, /\(current_transaction\.installer_id is not null and current_transaction\.installer_id = auth\.uid\(\)\)\s*\n\s*or \(current_transaction\.shop_id is not null and public\.has_active_shop_membership\(current_transaction\.shop_id\)\)/);
   assert.doesNotMatch(fn, /delete from/i);
 });
 
@@ -59,7 +59,7 @@ test("end_transaction_outcome refuses to re-end an already-terminated transactio
 test("set_transaction_final_price now also allows the dealer (own transaction) and a shop-membership-connected operator, not just the legacy installer_id match", () => {
   const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.set_transaction_final_price"), migrationSource.indexOf("revoke all on function public.set_transaction_final_price"));
   assert.match(fn, /elsif caller_role = 'dealer'::public\.user_role then\s*\n\s*if target\.dealer_id <> auth\.uid\(\) then raise exception 'Transaction access denied';/);
-  assert.match(fn, /elsif caller_role = 'installer'::public\.user_role then\s*\n\s*if target\.installer_id <> auth\.uid\(\)\s*\n\s*and not \(target\.shop_id is not null and public\.has_active_shop_membership\(target\.shop_id\)\)/);
+  assert.match(fn, /elsif caller_role = 'installer'::public\.user_role then\s*\n\s*if not \(\s*\n\s*\(target\.installer_id is not null and target\.installer_id = auth\.uid\(\)\)\s*\n\s*or \(target\.shop_id is not null and public\.has_active_shop_membership\(target\.shop_id\)\)/);
 });
 
 test("set_transaction_final_price no longer force-blocks on stage — Product decision: never require the amount to unblock 출고, observe real omission rate first", () => {
@@ -76,6 +76,15 @@ test("set_transaction_final_price validates a positive integer-won amount within
 test("set_transaction_final_price records a system message with the formatted amount, matching the room's existing audit-trail convention", () => {
   const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.set_transaction_final_price"), migrationSource.indexOf("revoke all on function public.set_transaction_final_price"));
   assert.match(fn, /최종 시공금액이 ' \|\| to_char\(p_final_price, 'FM999,999,999'\) \|\| '원으로 기록되었습니다\./);
+});
+
+test("installer authorization never uses a bare `installer_id <> auth.uid()` comparison — NULL installer_id (the no-installer-account Shop case) must NOT silently bypass the shop-membership check", () => {
+  for (const name of ["end_transaction_outcome", "set_transaction_final_price"]) {
+    const start = migrationSource.indexOf(`create or replace function public.${name}`);
+    const end = migrationSource.indexOf(`revoke all on function public.${name}`);
+    const fn = migrationSource.slice(start, end);
+    assert.doesNotMatch(fn, /\.installer_id <> auth\.uid\(\)/);
+  }
 });
 
 test("both redefined functions keep the SECURITY DEFINER + empty search_path + revoke-then-grant convention, and use plain CREATE OR REPLACE (no signature/return-type change, so no drop needed)", () => {
