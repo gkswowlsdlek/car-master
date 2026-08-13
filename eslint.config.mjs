@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Parallel git worktrees checked out alongside this repo (each is a
+    // full copy of the source tree on another branch) — not part of this
+    // branch's source, must never be linted from here.
+    ".worktrees/**",
   ]),
 ]);
 
