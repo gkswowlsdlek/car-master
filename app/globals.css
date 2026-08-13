@@ -1158,6 +1158,14 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
   .app-frame.mobile-chat-fullscreen .messenger-workspace { height: 100%; min-height: 0; max-height: none; border-radius: 0; overflow: hidden; }
   .app-frame.mobile-chat-fullscreen .messenger-center { min-height: 0; grid-template-rows: auto minmax(0,1fr) auto; }
 }
+
+@media (min-width: 1024px) {
+  .app-frame.messenger-focus { grid-template-columns: 288px minmax(0,1fr); }
+  .app-frame.messenger-focus .app-sidebar { display: grid; }
+  .app-frame.messenger-focus .beta-environment-bar { display: block; }
+  .app-frame.messenger-focus .app-topbar-default { display: flex; }
+  .app-frame.messenger-focus .messenger-focus-topbar { display: none; }
+}
 @media (min-width: 761px) { .chat-back-button { display: none; } }
 
 /* Desktop Messenger Focus Mode shell: hide the general Dealer/Shop sidebar
