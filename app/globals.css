@@ -812,6 +812,8 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .stage-progress-rail span.complete i { border-color: var(--color-success); background: var(--color-success); color: #fff; }
 .stage-error { margin: 0; border-radius: var(--radius-sm); background: var(--color-danger-bg); padding: 9px 12px; color: var(--color-danger); font-size: 12.5px; font-weight: 600; }
 .stage-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.dealer-stage-current { margin: 0; width: 100%; color: var(--color-text-soft); font-size: 13.5px; font-weight: 600; }
+.dealer-stage-current b { color: var(--color-primary); font-size: 15px; }
 .stage-cta { min-height: 48px; padding-inline: 22px; font-size: 15px; }
 .stage-revert-link { background: transparent; padding: 4px; color: var(--color-muted); font-size: 12.5px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 .stage-revert-link:hover { color: var(--color-text-soft); }

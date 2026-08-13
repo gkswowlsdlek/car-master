@@ -18,6 +18,9 @@ const fileSize = (value: number) => value < 1024 * 1024 ? `${Math.max(1, Math.ro
 const stageActionTestId = (stage?: TransactionStage) => stage === "시공예약" ? "accept-transaction-button" : stage === "입고" ? "start-work-button" : stage === "작업완료" ? "complete-work-button" : stage === "출고" ? "dispatch-transaction-button" : undefined;
 const MAX_ATTACHMENTS = 4;
 const QUICK_REPLIES = ["확인했습니다.", "가능합니다.", "일정 확인 후 답변드릴게요.", "입고 가능합니다."];
+// Dealer-facing advance button text — grammatically correct particle per label
+// (완료/출고 end in a vowel so take 로, 중 ends in a consonant so takes 으로).
+const DEALER_ADVANCE_BUTTON_TEXT: Record<string, string> = { "작업 중": "작업 중으로 변경", "작업 완료": "작업 완료로 변경", "출고": "출고로 변경" };
 
 function dayLabel(iso: string) {
   const date = new Date(iso);
@@ -98,6 +101,12 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
   const backStage = revertStage(transaction.status.stage);
   const canAdvance = Boolean(forwardStage) && canTransitionStage(transaction.status.stage, forwardStage!, role);
   const canRevert = Boolean(backStage) && canTransitionStage(transaction.status.stage, backStage!, role);
+  // Dealer product spec is exactly 4 stages (입고 전/작업 중/작업 완료/출고, see
+  // dealerStageLabel). 견적→시공예약 both collapse into "입고 전", so a dealer's
+  // first advance click needs to chain two raw-stage hops to reach a visibly
+  // different dealer-facing state in one click — see advanceFromQuoteToInbound.
+  const dealerCurrentIndex = dealerStageIndex(transaction.status.stage);
+  const dealerNextLabel = dealerCurrentIndex < 3 ? DEALER_STAGE_LABELS[dealerCurrentIndex + 1] : undefined;
 
   // Stage changes are projected into the timeline from transaction.stageLog
   // (the existing source of truth) instead of also writing a chat_messages
@@ -129,6 +138,24 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
   };
   const confirmComplete = () => { setConfirmCompleteOpen(false); void runStageChange("작업완료"); };
   const confirmDispatch = () => { setConfirmDispatchOpen(false); void runStageChange("출고"); };
+  const advanceFromQuoteToInbound = async () => {
+    if (stagePending) return;
+    setStagePending(true);
+    setStageError("");
+    try {
+      await onStageChange(transaction, "시공예약");
+      await onStageChange({ ...transaction, status: { ...transaction.status, stage: "시공예약" } }, "입고");
+    } catch (error) {
+      setStageError(translateTransactionError(error, "상태를 변경하지 못했습니다. 다시 시도해 주세요."));
+    } finally {
+      setStagePending(false);
+    }
+  };
+  const handleDealerAdvanceClick = () => {
+    if (!dealerNextLabel || stagePending) return;
+    if (transaction.status.stage === "견적") { void advanceFromQuoteToInbound(); return; }
+    handleAdvanceClick();
+  };
 
   const terminalOutcome = isTerminalOutcome(transaction.status.stage);
 
@@ -301,8 +328,13 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
           {transaction.outcomeNote && <p>{transaction.outcomeNote}</p>}
           {role === "dealer" && onFindAnotherShop && <button type="button" className="button button-secondary" onClick={onFindAnotherShop}><Search size={16} /> 다른 시공점 찾기</button>}
         </div> : <div className="stage-actions">
-          {canAdvance && <button data-testid={stageActionTestId(forwardStage)} className="primary stage-cta" onClick={handleAdvanceClick} disabled={stagePending} aria-busy={stagePending}>{stagePending ? "처리 중…" : STAGE_ACTION_LABEL[forwardStage!]}</button>}
-          {canRevert && <button type="button" className="stage-revert-link" onClick={() => void runStageChange(backStage!)} disabled={stagePending}>↩ {STAGE_REVERT_LABEL[backStage!]}</button>}
+          {role === "dealer" ? <>
+            <p className="dealer-stage-current">현재 상태: <b>{dealerStageLabel(transaction.status.stage)}</b></p>
+            {dealerNextLabel && <button type="button" data-testid="dealer-stage-advance-button" className="primary stage-cta" onClick={handleDealerAdvanceClick} disabled={stagePending} aria-busy={stagePending}>{stagePending ? "처리 중…" : DEALER_ADVANCE_BUTTON_TEXT[dealerNextLabel]}</button>}
+          </> : <>
+            {canAdvance && <button data-testid={stageActionTestId(forwardStage)} className="primary stage-cta" onClick={handleAdvanceClick} disabled={stagePending} aria-busy={stagePending}>{stagePending ? "처리 중…" : STAGE_ACTION_LABEL[forwardStage!]}</button>}
+            {canRevert && <button type="button" className="stage-revert-link" onClick={() => void runStageChange(backStage!)} disabled={stagePending}>↩ {STAGE_REVERT_LABEL[backStage!]}</button>}
+          </>}
         </div>}
         {confirmCompleteOpen && <div className="stage-confirm-overlay" role="dialog" aria-modal="true">
           <div className="stage-confirm-backdrop" onClick={() => setConfirmCompleteOpen(false)} />
@@ -397,7 +429,7 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
       </> : <>
         <div className="briefing-title"><span>거래 요약</span><h3>거래 정보</h3><p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p></div>
         <div className="sidebar-stage"><span>현재 상태</span><b>{role === "dealer" ? dealerStageLabel(transaction.status.stage) : transaction.status.stage}</b><div className="stage-progress-rail sidebar-stage-rail">{role === "dealer" ? DEALER_STAGE_LABELS.map((label, index) => { const dealerIndex = dealerStageIndex(transaction.status.stage); return <span className={index < dealerIndex ? "complete" : index === dealerIndex ? "active" : ""} key={label}><i>{index < dealerIndex ? "✓" : index + 1}</i><small>{label}</small></span>; }) : stageOrder.map((stage, index) => <span className={index < stageIndex ? "complete" : index === stageIndex ? "active" : ""} key={stage}><i>{index < stageIndex ? "✓" : index + 1}</i><small>{stage}</small></span>)}</div></div>
-        <dl className="briefing-data"><div><dt>다음 일정</dt><dd>{scheduleLabel(transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt)}</dd></div><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model} ({transaction.vehicle.class || "미분류"})</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>상대 업체</dt><dd>{role === "dealer" ? transaction.installerName : "담당 딜러"}</dd></div></dl>
+        <dl className="briefing-data"><div><dt>다음 일정</dt><dd>{scheduleLabel(transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt)}</dd></div><div><dt>출고 희망일</dt><dd>{scheduleLabel(transaction.schedule.desiredReleaseAt)}</dd></div><div><dt>차량</dt><dd>{transaction.vehicle.maker} {transaction.vehicle.model} ({transaction.vehicle.class || "미분류"})</dd></div><div><dt>시공 품목</dt><dd>{transaction.service.workDescription}</dd></div><div><dt>상대 업체</dt><dd>{role === "dealer" ? transaction.installerName : "담당 딜러"}</dd></div></dl>
         <div className="sidebar-settlement"><h4>최종 시공금액</h4><p className="final-amount-value"><b>{won(transaction.pricing.finalPrice)}</b></p>{(role === "shop" || role === "dealer") && <div><input value={finalPrice} onChange={(event) => setFinalPrice(event.target.value)} placeholder="최종 시공금액" inputMode="numeric" /><button onClick={savePrice}>저장</button></div>}</div>
         <div className="sidebar-settlement"><h4>결제 상태</h4><p>{transaction.pricing.paymentStatus}</p>{role === "dealer" && transaction.pricing.finalPrice && transaction.pricing.paymentStatus === "미결제" && <button onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>}</div>
         <div className="sidebar-stage-log">

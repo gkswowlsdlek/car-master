@@ -32,7 +32,7 @@ export type Transaction = {
   vehicle: { maker: string; model: string; class: VehicleClass | "" };
   service: { brand?: string; product?: string; workDescription: string; extraRequest?: string };
   pricing: { baseGuidePrice?: number; surcharge?: number; finalPrice?: number; paymentStatus: PaymentStatus; paymentAt?: string; settlementDueAt?: string };
-  schedule: { requestedInboundAt?: string; confirmedInboundAt?: string; completedAt?: string };
+  schedule: { requestedInboundAt?: string; confirmedInboundAt?: string; desiredReleaseAt?: string; completedAt?: string };
   status: { stage: TransactionStage; createdAt: string; updatedAt: string };
   /** Short reason for the current 취소/시공불가 outcome, if any — never shown as a payment/settlement field. */
   outcomeNote?: string;

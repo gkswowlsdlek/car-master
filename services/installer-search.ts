@@ -1,4 +1,4 @@
-import type { InstallerShop } from "../lib/dealer-flow-data";
+import type { InstallerListing } from "../types/installer";
 import type { InstallerSearchResult, SearchLocation } from "../types/location";
 
 export function calculateDistanceKm(origin: { latitude: number; longitude: number }, destination: { latitude: number; longitude: number }) {
@@ -14,7 +14,7 @@ export function calculateDistanceKm(origin: { latitude: number; longitude: numbe
 export function formatDistanceKm(value: number) { return `${value.toFixed(value < 10 ? 1 : 0)}km`; }
 const responseMinutes = (value: string) => Number(value.match(/\d+/)?.[0] ?? Number.MAX_SAFE_INTEGER);
 
-export function searchNearbyInstallers(location: SearchLocation, shops: InstallerShop[]): InstallerSearchResult[] {
+export function searchNearbyInstallers(location: SearchLocation, shops: InstallerListing[]): InstallerSearchResult[] {
   return shops.map((shop) => {
     if (shop.lat == null || shop.lng == null) return { shop, distanceKm: null, distanceLabel: "거리 정보 없음" };
     const distanceKm = calculateDistanceKm(location, { latitude: shop.lat, longitude: shop.lng });

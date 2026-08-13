@@ -1,4 +1,4 @@
-import type { InstallerShop } from "../lib/dealer-flow-data";
+import type { InstallerListing } from "./installer";
 
 export type SearchLocation = {
   id: string;
@@ -10,7 +10,7 @@ export type SearchLocation = {
 };
 
 export type InstallerSearchResult = {
-  shop: InstallerShop;
+  shop: InstallerListing;
   distanceKm: number | null;
   distanceLabel: string;
 };

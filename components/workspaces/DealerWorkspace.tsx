@@ -184,7 +184,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
             vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass },
             service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest },
             pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" },
-            schedule: { requestedInboundAt: request.inboundStart },
+            schedule: { requestedInboundAt: request.inboundStart, desiredReleaseAt: request.releaseDate },
           });
           await onRefresh();
           window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
@@ -201,7 +201,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
             vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass },
             service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest },
             pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" },
-            schedule: { requestedInboundAt: request.inboundStart },
+            schedule: { requestedInboundAt: request.inboundStart, desiredReleaseAt: request.releaseDate },
           }, account.id);
           await onRefresh();
           window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
@@ -216,7 +216,7 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
       const now = new Date().toISOString();
       const id = createTransactionNumber(sequence);
       const chatRoomId = createId("CHAT");
-      const transaction: Transaction = { id, dealerId: account.id, installerId: selectedShop.id, installerName: selectedShop.name, vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass }, service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest }, pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" }, schedule: { requestedInboundAt: request.inboundStart }, status: { stage: "견적", createdAt: now, updatedAt: now }, visibility: { hiddenByDealer: false, hiddenByInstaller: false }, chatRoomId, lastMessage: "새 시공 요청이 접수되었습니다.", stageLog: [{ id: createId("EVT"), fromStage: null, toStage: "견적", actorRole: "dealer", direction: "forward", createdAt: now }] };
+      const transaction: Transaction = { id, dealerId: account.id, installerId: selectedShop.id, installerName: selectedShop.name, vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass }, service: { brand: request.selectedPackageBrand, product: request.selectedPackageProduct, workDescription: request.workDescription, extraRequest: request.extraRequest }, pricing: { baseGuidePrice: request.baseGuidePrice, surcharge: request.surcharge, finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice, paymentStatus: "미결제" }, schedule: { requestedInboundAt: request.inboundStart, desiredReleaseAt: request.releaseDate }, status: { stage: "견적", createdAt: now, updatedAt: now }, visibility: { hiddenByDealer: false, hiddenByInstaller: false }, chatRoomId, lastMessage: "새 시공 요청이 접수되었습니다.", stageLog: [{ id: createId("EVT"), fromStage: null, toStage: "견적", actorRole: "dealer", direction: "forward", createdAt: now }] };
       const room: ChatRoom = { id: chatRoomId, transactionId: id, createdAt: now, updatedAt: now, unreadCount: 0, messages: [{ id: createId("MSG"), roomId: chatRoomId, senderId: "system", senderRole: "system", text: "거래방이 생성되었습니다. 자동 작업 브리핑을 확인하세요.", createdAt: now, readBy: [account.id] }] };
       transactionRepository.create(transaction); chatRepository.create(room);
       window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
