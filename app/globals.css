@@ -880,6 +880,39 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .dealer-secondary-actions .button { flex: 1; }
 @media (max-width:640px) { .dealer-focus-banner { font-size: 13px; } }
 
+/* Dealer Home V1: vehicle-first workspace hierarchy. Presentation only; all
+   existing search, transaction and request callbacks remain unchanged. */
+.dealer-home-prototype { max-width: 1240px; }
+.dealer-home-prototype .dealer-welcome { display: flex; align-items: end; justify-content: space-between; margin-bottom: 22px; }
+.dealer-home-prototype .dealer-welcome h1 { font-size: clamp(30px, 3vw, 42px); letter-spacing: -.045em; }
+.dealer-home-prototype .dealer-welcome-subtitle { display: block; margin-top: 8px; color: var(--color-muted); font-size: 14px; font-weight: 500; letter-spacing: -.01em; }
+.dealer-home-prototype .dealer-location-first { margin: 0 0 18px; border-radius: 14px; background: #fff; padding: 24px; box-shadow: 0 8px 24px rgba(25, 38, 58, .06); }
+.dealer-home-prototype .dealer-location-first-copy { align-items: center; }
+.dealer-home-prototype .dealer-location-first-copy > svg { width: 38px; height: 38px; margin-top: 0; border-radius: 10px; background: var(--color-primary-soft); padding: 9px; }
+.dealer-home-prototype .dealer-location-first-copy h2 { margin-top: 3px; font-size: 22px; letter-spacing: -.035em; }
+.dealer-home-prototype .dealer-location-form { grid-template-columns: minmax(0, 1fr) 170px 138px; max-width: 940px; margin-top: 18px; }
+.dealer-home-prototype .dealer-location-form input:focus,
+.dealer-home-prototype .dealer-location-form select:focus { outline: 3px solid color-mix(in srgb, var(--color-primary) 16%, transparent); border-color: var(--color-primary); }
+.dealer-home-prototype .dealer-location-form button { justify-content: center; border-radius: 9px; }
+.dealer-home-prototype .dealer-focus-banner { margin: 0 0 18px; border-radius: 10px; }
+.dealer-home-prototype .dealer-active-deals { margin-bottom: 18px; border-radius: 14px; padding: 20px 22px; box-shadow: 0 4px 16px rgba(25, 38, 58, .04); }
+.dealer-home-prototype .dealer-active-deals .eyebrow { margin: 0; color: var(--color-text); font-size: 14px; letter-spacing: -.01em; }
+.dealer-home-prototype .dealer-active-deals li > button { min-height: 60px; border-radius: 8px; padding-inline: 8px; }
+.dealer-home-prototype .dealer-active-deals li > button:hover { background: var(--color-surface-soft); }
+.dealer-home-prototype .dealer-secondary-actions { justify-content: flex-start; margin: 0 0 4px; }
+.dealer-home-prototype .dealer-secondary-actions .button { flex: 0 0 auto; min-height: 38px; border-color: transparent; background: transparent; padding-inline: 10px; color: var(--color-muted); }
+.dealer-home-prototype .dealer-secondary-actions .button:hover { border-color: var(--color-line); background: var(--color-surface-soft); color: var(--color-text); }
+.dealer-home-prototype .dashboard-empty { margin-top: 18px; border: 1px dashed var(--color-line); background: var(--color-surface-soft); box-shadow: none; }
+@media (max-width:760px) {
+  .dealer-home-prototype .dealer-welcome { display: block; margin-bottom: 18px; }
+  .dealer-home-prototype .dealer-welcome h1 { font-size: 30px; }
+  .dealer-home-prototype .dealer-location-first { padding: 20px 16px; }
+  .dealer-home-prototype .dealer-location-form { grid-template-columns: 1fr; max-width: none; }
+  .dealer-home-prototype .dealer-location-form button { width: 100%; }
+  .dealer-home-prototype .dealer-secondary-actions { display: grid; grid-template-columns: 1fr; }
+  .dealer-home-prototype .dealer-secondary-actions .button { justify-content: flex-start; }
+}
+
 /* Installer: urgent/delayed work queue promoted above the metric grid */
 .shop-priority-banner { margin-bottom: 18px; border: 1px solid var(--color-danger-bg); border-radius: 16px; background: #fff; padding: 20px 22px; box-shadow: var(--shadow-sm); }
 .shop-priority-banner > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }

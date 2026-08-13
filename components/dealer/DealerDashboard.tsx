@@ -28,7 +28,7 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransa
     .sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt));
   const visibleActiveDeals = activeDeals.slice(0, 4);
 
-  return <section className="dealer-dashboard role-home role-home-dealer">
+  return <section className="dealer-dashboard role-home role-home-dealer dealer-home-prototype">
     <header className="dealer-welcome"><div><p className="eyebrow">DEALER WORKSPACE</p><h1>{dealerName} 딜러님,<span className="dealer-welcome-subtitle">오늘 출고할 차량이 있나요?</span></h1></div></header>
 
     <section className="dealer-location-first"><div className="dealer-location-first-copy"><MapPin size={22} /><div><p className="eyebrow">FIND AN INSTALLER</p><h2>어디로 출고하시나요?</h2><p>지역을 선택하면 해당 지역의 시공점 탐색으로 바로 이어집니다.</p></div></div><div className="dealer-location-form"><label><span>지역 또는 주소</span><input value={area} onChange={(event) => setArea(event.target.value)} placeholder="예: 서울 강남구" onKeyDown={(event) => { if (event.key === "Enter" && area.trim()) onSearchLocation(area.trim(), workType); }} /></label><label><span>작업 유형</span><select value={workType} onChange={(event) => setWorkType(event.target.value)}><option>썬팅</option><option>PPF</option><option>블랙박스</option><option>유리막</option><option>기타</option></select></label><button className="primary" onClick={() => area.trim() ? onSearchLocation(area.trim(), workType) : onFindShop()}><Search size={17} /> 시공점 찾기</button></div></section>
