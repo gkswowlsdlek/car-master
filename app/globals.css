@@ -795,6 +795,33 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 }
 @media (max-width:389px) { .app-main > :is(.dealer-dashboard,.dealer-screen,.transaction-management-screen,.profile-editor,.request-page,.summary-page,.section) { padding-inline: 12px; }.map-search { grid-template-columns: 1fr; } }
 
+/* Phase 1 product polish: keep the existing blue language while making the
+   workspace read as a calm, desktop-first operations tool. */
+.app-sidebar { width: 100%; background: #fff; }
+.app-logo { min-height: 58px; }
+.app-sidebar nav button { min-height: 48px; font-size: 15px; }
+.app-sidebar nav button span { letter-spacing: -.01em; }
+.sidebar-support { margin-inline: 2px; border: 1px solid var(--color-line); background: #f8fafc; }
+.sidebar-support button { min-height: 34px; }
+.app-main { background: #f8fafc; }
+.app-topbar { background: rgba(255,255,255,.98); }
+.beta-environment-bar { border-bottom: 1px solid var(--color-line); background: #fff; }
+.dealer-dashboard { max-width: 1480px; }
+.dealer-location-first { background: #fff; box-shadow: 0 8px 24px rgba(15,23,42,.06); }
+.dealer-location-first-copy h2 { font-size: clamp(24px,2.3vw,32px); }
+.dealer-location-form input:focus, .dealer-location-form select:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-soft); outline: 0; }
+.dealer-active-deals { box-shadow: 0 4px 16px rgba(15,23,42,.04); }
+.dealer-active-deals li > button { min-height: 64px; }
+.dealer-secondary-actions { justify-content: flex-start; }
+.dealer-secondary-actions .button { flex: 0 0 auto; }
+.installer-directory-layout { min-height: 560px; }
+.installer-list-pane, .installer-map-pane, .installer-detail-pane { min-width: 0; }
+.request-shop-panel { box-shadow: 0 8px 24px rgba(15,23,42,.06); }
+.transaction-management-screen { max-width: 1480px !important; }
+.transaction-operations-detail { box-shadow: inset 1px 0 var(--color-line); }
+.transaction-progress-card { background: #fff; }
+.transaction-chat { background: #fff; }
+
 /* Installer workspace operations polish */
 .shop-operations-metrics { grid-template-columns: repeat(5,minmax(0,1fr)); }
 .shop-operations-metrics .shop-metric-card { min-height: 136px; }
