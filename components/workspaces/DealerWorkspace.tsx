@@ -32,7 +32,7 @@ import { ServiceRequestScreen } from "../dealer/ServiceRequestScreen";
 import { ShopSearchRequestScreen } from "../dealer/ShopSearchRequestScreen";
 import { MessengerScreen } from "../messenger/MessengerScreen";
 import { ProfileEditor, defaultDealerCompanyName } from "../profile/ProfileEditor";
-import { TransactionManagementScreen } from "../transactions/TransactionManagementScreen";
+import { DealerTransactionManagementScreen } from "../transactions/DealerTransactionManagementScreen";
 
 const initialDistrict = districtCenters.find((item) => item.id === "gyeonggi-hanam") ?? districtCenters[0];
 const initialLocation: SearchLocation = { id: initialDistrict.id, city: initialDistrict.city, district: initialDistrict.district, label: initialDistrict.label, latitude: initialDistrict.latitude, longitude: initialDistrict.longitude };
@@ -62,7 +62,6 @@ type DealerWorkspaceProps = {
   onRefresh: () => Promise<void>;
   onSend: (transaction: Transaction, message: TransactionChatMessage) => Promise<void>;
   onHide: (id: string, role: "dealer" | "shop") => void;
-  onUnhide: (id: string, role: "dealer" | "shop") => void;
   onFinalPriceChange: (transaction: Transaction, finalPrice: number) => void;
   onStageChange: (transaction: Transaction, stage: TransactionStage) => Promise<void>;
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
@@ -76,7 +75,7 @@ type DealerWorkspaceProps = {
   onMobileFullscreenChange: (open: boolean) => void;
 };
 
-export function DealerWorkspace({ account, screen, transactions, rooms, useSupabaseData, useDemoSharedBackend, demoAttachmentProvider, isLoading, loadError, onNavigate, onRefresh, onSend, onHide, onUnhide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onFindAnotherShop, onMarkRead, onLoadContact, onChangePassword, onCompanyNameChange, onUnreadMessageCountChange, onMobileFullscreenChange }: DealerWorkspaceProps) {
+export function DealerWorkspace({ account, screen, transactions, rooms, useSupabaseData, useDemoSharedBackend, demoAttachmentProvider, isLoading, loadError, onNavigate, onRefresh, onSend, onHide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onFindAnotherShop, onMarkRead, onLoadContact, onChangePassword, onCompanyNameChange, onUnreadMessageCountChange, onMobileFullscreenChange }: DealerWorkspaceProps) {
   const [query, setQuery] = useState("하남시");
   const [location, setLocation] = useState<SearchLocation>(initialLocation);
   const [locationError, setLocationError] = useState("");
@@ -223,13 +222,13 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
   };
 
   return <>
-    {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} onFilterDeals={(filter) => { setDealFilter(filter); onNavigate("deals"); }} onOpenTransaction={(id) => { setSelectedTransactionId(id); setDealFilter("전체"); onNavigate("deals"); }} onNewRequest={() => onNavigate("request")} onFindShop={() => onNavigate("dealerMap")} onSearchLocation={searchHomeLocation} onPriceGuide={() => onNavigate("priceGuide")} onShopSearchRequests={useSupabaseData ? () => onNavigate("shopSearchRequests") : undefined} />}
+    {screen === "dealerDashboard" && <DealerDashboard dealerName={account.name} deals={transactions.filter((item) => !item.visibility.hiddenByDealer)} onFilterDeals={(filter) => { setDealFilter(filter); onNavigate("deals"); }} onOpenTransaction={(id) => { setSelectedTransactionId(id); onNavigate("messages"); }} onNewRequest={() => onNavigate("request")} onFindShop={() => onNavigate("dealerMap")} onSearchLocation={searchHomeLocation} onPriceGuide={() => onNavigate("priceGuide")} onShopSearchRequests={useSupabaseData ? () => onNavigate("shopSearchRequests") : undefined} />}
     {screen === "priceGuide" && <PriceGuideScreen packages={filteredPackages} selectedPackage={selectedPackage} selectedPackageId={selectedPackageId} setSelectedPackageId={setSelectedPackageId} brandFilter={priceFilter} setBrandFilter={setPriceFilter} search={priceSearch} setSearch={setPriceSearch} vehicleClass={vehicleClass} setVehicleClass={setVehicleClass} onRequest={applyPackage} />}
     {screen === "dealerMap" && <InstallerDirectoryScreen installers={availableShops} loading={useSupabaseData && installerDirectoryLoading} selectedId={selectedShopId} setSelectedId={setSelectedShopId} favoriteIds={favoriteShopIds} toggleFavorite={(id) => setFavoriteShopIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])} selectedBrand={request.selectedPackageBrand} isOtherBrand={selectedPackage.brandGroup === "기타"} onRequest={() => onNavigate("request")} onShopSearchRequest={useSupabaseData ? () => onNavigate("shopSearchRequests") : undefined} />}
     {screen === "request" && locationError && <div className="location-search-error"><b>{locationError}</b></div>}
     {screen === "request" && <ServiceRequestScreen request={request} setRequest={setRequest} shops={nearbyResults.map((item) => ({ shop: item.shop, distanceLabel: item.distanceLabel }))} selectedShop={selectedShop} selectedShopId={selectedShopId} setSelectedShopId={setSelectedShopId} onFindShops={(area) => void searchArea(area ?? request.deliveryArea)} onSummary={() => onNavigate("requestSummary")} onPriceGuide={() => onNavigate("priceGuide")} />}
     {screen === "requestSummary" && <RequestSummary request={request} shop={selectedShop} submitting={isCreatingTransaction} onBack={() => onNavigate("request")} onSubmit={createTransaction} />}
-    {screen === "deals" && <TransactionManagementScreen role="dealer" userId={account.id} transactions={transactions} rooms={rooms} selectedId={activeTransactionId} initialStageFilter={dealFilter} useRemoteAttachments={useSupabaseData} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onUnhide={onUnhide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onFindAnotherShop={onFindAnotherShop} onNewRequest={() => onNavigate("request")} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onOpenMessages={(id) => { setSelectedTransactionId(id); onNavigate("messages"); }} />}
+    {screen === "deals" && <DealerTransactionManagementScreen transactions={transactions} initialGroupFilter={dealFilter} onOpenTransaction={(id) => { setSelectedTransactionId(id); onNavigate("messages"); }} onNewRequest={() => onNavigate("request")} onFindShop={() => onNavigate("dealerMap")} />}
     {screen === "messages" && <MessengerScreen role="dealer" userId={account.id} transactions={transactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={demoAttachmentProvider} isLoading={isLoading} loadError={loadError} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onFindAnotherShop={onFindAnotherShop} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onMobileChatOpenChange={setMobileChatOpen} />}
     {screen === "shopSearchRequests" && useSupabaseData && <ShopSearchRequestScreen onTransactionCreated={(id) => { void onRefresh().then(() => { setSelectedTransactionId(id); setDealFilter("전체"); onNavigate("deals"); }); }} />}
     {screen === "dealerProfile" && <ProfileEditor role="dealer" userId={account.id} activity={profileActivity} onChangePassword={onChangePassword} />}
