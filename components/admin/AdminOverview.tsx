@@ -14,12 +14,17 @@ import { AdminMemberPanel } from "./AdminMemberPanel";
  */
 export function AdminOverview({ transactions, rooms, demoSession = false, onOpenShopManagement }: { transactions: Transaction[]; rooms: ChatRoom[]; demoSession?: boolean; onOpenShopManagement: () => void }) {
   const [transactionGroup, setTransactionGroup] = useState<TransactionGroup>("전체");
+  const [contactFilter, setContactFilter] = useState<"전체" | "연락실패">("전체");
+
+  const scrollToTransactionPanel = () => document.getElementById("admin-transaction-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return <section className="section admin-overview role-home role-home-admin">
     <header className="workspace-heading"><div><p className="eyebrow">OPERATIONS QUEUE</p><h1>카마스터 운영 현황</h1><p>지금 처리가 필요한 항목을 오래된 순으로 보여드립니다.</p></div><div className="admin-header-badges"><span className="admin-live-badge"><i /> 실시간 운영</span><span className={`admin-live-badge admin-source-badge ${demoSession ? "demo" : "real"}`}><i /> {demoSession ? "Demo 데이터" : "실제 운영 데이터"}</span></div></header>
-    <AdminOpsQueue transactions={transactions} demoSession={demoSession} onOpenShopManagement={onOpenShopManagement} onOpenTerminatedTransactions={() => { setTransactionGroup("종료"); document.getElementById("admin-transaction-panel")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} />
+    <AdminOpsQueue transactions={transactions} demoSession={demoSession} onOpenShopManagement={onOpenShopManagement}
+      onOpenTerminatedTransactions={() => { setTransactionGroup("종료"); setContactFilter("전체"); scrollToTransactionPanel(); }}
+      onOpenUnreachableTransactions={() => { setTransactionGroup("전체"); setContactFilter("연락실패"); scrollToTransactionPanel(); }} />
     <AdminShopSearchRequestPanel demoSession={demoSession} />
-    <AdminTransactionPanel transactions={transactions} rooms={rooms} group={transactionGroup} onGroupChange={setTransactionGroup} />
+    <AdminTransactionPanel transactions={transactions} rooms={rooms} group={transactionGroup} onGroupChange={setTransactionGroup} contactFilter={contactFilter} onContactFilterChange={setContactFilter} />
     <InstallerApprovalPanel demoSession={demoSession} />
     <AdminMemberPanel demoSession={demoSession} />
   </section>;

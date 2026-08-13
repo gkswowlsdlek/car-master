@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Phone, Plus, Search, ThumbsDown, ThumbsUp } from "lucide-react";
 import { vehicleClassOptions, type VehicleClass } from "../../data/vehicle-class-options";
 import { shopSearchRequestRepository } from "../../repositories/shop-search-request-repository";
+import { translateTransactionError } from "../../services/transaction-errors";
 import type { ShopSearchRequest } from "../../types/shop-search-request";
 
 export const SHOP_SEARCH_REQUEST_STATUS_LABEL: Record<ShopSearchRequest["status"], string> = {
@@ -73,7 +74,7 @@ export function ShopSearchRequestScreen({ initialFormOpen = false, onTransaction
       setFormOpen(false);
       await load();
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "요청을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      setSubmitError(translateTransactionError(error, "요청을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요."));
     } finally {
       setSubmitting(false);
     }
@@ -99,7 +100,7 @@ export function ShopSearchRequestScreen({ initialFormOpen = false, onTransaction
       setVehicleClass("");
       onTransactionCreated(transactionId);
     } catch (error) {
-      setDecisionError(error instanceof Error ? error.message : "거래를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+      setDecisionError(translateTransactionError(error, "거래를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요."));
     } finally {
       setDecisionPending(false);
     }

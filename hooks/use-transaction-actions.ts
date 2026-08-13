@@ -11,8 +11,9 @@ import { resolveDemoContact } from "../services/contact-directory";
 import { createId } from "../services/id-service";
 import { notificationService } from "../services/notifications/notification-service";
 import { transitionPayment, transitionStage } from "../services/transaction-state-service";
+import { translateTransactionError } from "../services/transaction-errors";
 import type { Role } from "../types/dealer";
-import type { PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../types/transactions";
+import type { ContactStatus, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../types/transactions";
 
 type UseTransactionActionsOptions = {
   useSupabaseData: boolean;
@@ -78,13 +79,13 @@ export function useTransactionActions({ useSupabaseData, transactions, sharedRoo
   const hideTransaction = useCallback(async (id: string, targetRole: "dealer" | "shop") => {
     if (useSupabaseData) {
       try { await supabaseTransactionRepository.setVisibility(id, true); await refresh(); }
-      catch (error) { alert(error instanceof Error ? error.message : "거래를 숨길 수 없습니다."); }
+      catch (error) { alert(translateTransactionError(error, "거래를 숨길 수 없습니다.")); }
       return;
     }
     const target = transactions.find((item) => item.id === id);
     if (target && isSharedDemoTransaction(target)) {
       try { await demoTransactionRepository.setVisibility(id, true, targetRole); await refresh(); }
-      catch (error) { alert(error instanceof Error ? error.message : "거래를 숨길 수 없습니다."); }
+      catch (error) { alert(translateTransactionError(error, "거래를 숨길 수 없습니다.")); }
       return;
     }
     if (targetRole === "dealer") transactionRepository.hideForDealer(id); else transactionRepository.hideForInstaller(id);
@@ -93,13 +94,13 @@ export function useTransactionActions({ useSupabaseData, transactions, sharedRoo
   const unhideTransaction = useCallback(async (id: string, targetRole: "dealer" | "shop") => {
     if (useSupabaseData) {
       try { await supabaseTransactionRepository.setVisibility(id, false); await refresh(); }
-      catch (error) { alert(error instanceof Error ? error.message : "숨김을 해제할 수 없습니다."); }
+      catch (error) { alert(translateTransactionError(error, "숨김을 해제할 수 없습니다.")); }
       return;
     }
     const target = transactions.find((item) => item.id === id);
     if (target && isSharedDemoTransaction(target)) {
       try { await demoTransactionRepository.setVisibility(id, false, targetRole); await refresh(); }
-      catch (error) { alert(error instanceof Error ? error.message : "숨김을 해제할 수 없습니다."); }
+      catch (error) { alert(translateTransactionError(error, "숨김을 해제할 수 없습니다.")); }
       return;
     }
     if (targetRole === "dealer") transactionRepository.unhideForDealer(id); else transactionRepository.unhideForInstaller(id);
@@ -128,12 +129,22 @@ export function useTransactionActions({ useSupabaseData, transactions, sharedRoo
     transactionRepository.update({ ...next, outcomeNote: note });
   }, [demoActorRole, isSharedDemoTransaction, refresh, role, useSupabaseData]);
 
+  /** Phone-contact result (Phase 8) — never touches stage/outcome, purely a
+   * separate signal. No demo-backend RPC exists for this yet, so Demo
+   * sessions (shared or local) fall back to a local-only update. */
+  const setContactStatus = useCallback(async (transaction: Transaction, status: ContactStatus) => {
+    try {
+      if (useSupabaseData) { await supabaseTransactionRepository.setContactStatus(transaction.id, status); await refresh(); return; }
+      transactionRepository.update({ ...transaction, contactStatus: status, status: { ...transaction.status, updatedAt: new Date().toISOString() } });
+    } catch (error) { alert(translateTransactionError(error, "연락 결과를 저장하지 못했습니다.")); }
+  }, [refresh, useSupabaseData]);
+
   const changeFinalPrice = useCallback(async (transaction: Transaction, finalPrice: number) => {
     try {
       if (useSupabaseData) { await supabaseTransactionRepository.setFinalPrice(transaction.id, finalPrice); await refresh(); }
       else if (isSharedDemoTransaction(transaction)) { await demoTransactionRepository.setFinalPrice(transaction.id, finalPrice, demoActorRole); await refresh(); }
       else transactionRepository.update({ ...transaction, pricing: { ...transaction.pricing, finalPrice }, status: { ...transaction.status, updatedAt: new Date().toISOString() } });
-    } catch (error) { alert(error instanceof Error ? error.message : "최종 금액을 저장할 수 없습니다."); }
+    } catch (error) { alert(translateTransactionError(error, "최종 금액을 저장할 수 없습니다.")); }
   }, [demoActorRole, isSharedDemoTransaction, refresh, useSupabaseData]);
 
   const changePayment = useCallback(async (transaction: Transaction, status: PaymentStatus) => {
@@ -142,8 +153,8 @@ export function useTransactionActions({ useSupabaseData, transactions, sharedRoo
       if (useSupabaseData) { await supabaseTransactionRepository.transitionPayment(transaction.id, status); await refresh(); }
       else if (isSharedDemoTransaction(transaction)) { await demoTransactionRepository.transitionPayment(transaction.id, status, demoActorRole); await refresh(); }
       else transactionRepository.update(next);
-    } catch (error) { alert(error instanceof Error ? error.message : "결제 상태를 변경할 수 없습니다."); }
+    } catch (error) { alert(translateTransactionError(error, "결제 상태를 변경할 수 없습니다.")); }
   }, [demoActorRole, isSharedDemoTransaction, refresh, role, useSupabaseData]);
 
-  return { sendMessage, markRoomRead, loadContact, hideTransaction, unhideTransaction, changeStage, endOutcome, changeFinalPrice, changePayment };
+  return { sendMessage, markRoomRead, loadContact, hideTransaction, unhideTransaction, changeStage, endOutcome, setContactStatus, changeFinalPrice, changePayment };
 }

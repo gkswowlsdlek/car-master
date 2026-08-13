@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertOctagon, Building2, PlayCircle, Search, Send, UserCheck } from "lucide-react";
+import { AlertOctagon, Building2, PhoneOff, PlayCircle, Search, Send, UserCheck } from "lucide-react";
 import { createSupabaseBrowserClient } from "../../lib/supabase/client";
 import { shopSearchRequestRepository } from "../../repositories/shop-search-request-repository";
 import type { Transaction } from "../../types/transactions";
@@ -20,7 +20,7 @@ const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ b
  * count가 0인 항목은 렌더링하지 않는다 (§3). 매출/가입자수 같은 vanity
  * metric은 절대 넣지 않는다 (§16).
  */
-export function AdminOpsQueue({ transactions, demoSession, onOpenShopManagement, onOpenTerminatedTransactions }: { transactions: Transaction[]; demoSession: boolean; onOpenShopManagement: () => void; onOpenTerminatedTransactions: () => void }) {
+export function AdminOpsQueue({ transactions, demoSession, onOpenShopManagement, onOpenTerminatedTransactions, onOpenUnreachableTransactions }: { transactions: Transaction[]; demoSession: boolean; onOpenShopManagement: () => void; onOpenTerminatedTransactions: () => void; onOpenUnreachableTransactions: () => void }) {
   const [counts, setCounts] = useState<QueueCounts | null>(null);
 
   useEffect(() => {
@@ -46,11 +46,14 @@ export function AdminOpsQueue({ transactions, demoSession, onOpenShopManagement,
   }, [demoSession]);
 
   const terminatedCount = transactions.filter((item) => item.status.stage === "취소" || item.status.stage === "시공불가").length;
+  // Phone-contact result (Phase 8) — an independent signal from stage/outcome, already loaded on the transactions prop, no new query.
+  const unreachableCount = transactions.filter((item) => item.contactStatus === "unreachable").length;
 
   const cards = [
     { key: "requested", count: counts?.requested ?? 0, icon: Search, label: "시공점 찾기 요청", onClick: () => scrollTo("admin-shop-search-request-panel") },
     { key: "inProgress", count: counts?.inProgress ?? 0, icon: PlayCircle, label: "카마스터 확인 중인 요청", onClick: () => scrollTo("admin-shop-search-request-panel") },
     { key: "shopProposed", count: counts?.shopProposed ?? 0, icon: Send, label: "Dealer 응답 대기", onClick: () => scrollTo("admin-shop-search-request-panel") },
+    { key: "unreachable", count: unreachableCount, icon: PhoneOff, label: "연락 실패 거래", onClick: onOpenUnreachableTransactions },
     { key: "terminated", count: terminatedCount, icon: AlertOctagon, label: "취소·시공불가 거래", onClick: onOpenTerminatedTransactions },
     { key: "installerPending", count: counts?.installerPending ?? 0, icon: UserCheck, label: "Installer 승인 대기", onClick: () => scrollTo("installer-approval-panel") },
     { key: "shopClaimPending", count: counts?.shopClaimPending ?? 0, icon: Building2, label: "업체 연결 승인 대기", onClick: onOpenShopManagement },

@@ -7,6 +7,9 @@ import type { VehicleClass } from "../data/vehicle-class-options";
  * already modeled before this phase; 시공불가 follows the same shape. */
 export type TransactionStage = "견적" | "시공예약" | "입고" | "작업완료" | "출고" | "취소" | "시공불가";
 export type PaymentStatus = "미결제" | "결제대기" | "결제완료" | "정산대기" | "정산완료";
+/** Phone-contact result — a signal independent from both work stage and
+ * outcome (취소/시공불가). undefined = 확인 전; never inferred from stage. */
+export type ContactStatus = "contacted" | "unreachable";
 
 /** One row of the 거래 로그: every forward advance and every one-step revert. */
 export type TransactionStageEvent = {
@@ -33,6 +36,7 @@ export type Transaction = {
   status: { stage: TransactionStage; createdAt: string; updatedAt: string };
   /** Short reason for the current 취소/시공불가 outcome, if any — never shown as a payment/settlement field. */
   outcomeNote?: string;
+  contactStatus?: ContactStatus;
   visibility: { hiddenByDealer: boolean; hiddenByInstaller: boolean };
   chatRoomId: string;
   lastMessage: string;
