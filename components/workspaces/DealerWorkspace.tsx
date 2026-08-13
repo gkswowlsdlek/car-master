@@ -33,6 +33,7 @@ import { ServiceRequestScreen } from "../dealer/ServiceRequestScreen";
 import { ShopSearchRequestScreen } from "../dealer/ShopSearchRequestScreen";
 import { MessengerScreen } from "../messenger/MessengerScreen";
 import { ProfileEditor, defaultDealerCompanyName } from "../profile/ProfileEditor";
+import { HelpCenterScreen } from "../support/HelpCenterScreen";
 import { DealerTransactionManagementScreen } from "../transactions/DealerTransactionManagementScreen";
 
 const initialDistrict = districtCenters.find((item) => item.id === "gyeonggi-hanam") ?? districtCenters[0];
@@ -239,5 +240,6 @@ export function DealerWorkspace({ account, screen, transactions, rooms, useSupab
     {screen === "messages" && <MessengerScreen role="dealer" userId={account.id} transactions={transactions} rooms={rooms} installers={availableShops} selectedId={activeTransactionId} useRemoteAttachments={useSupabaseData} demoAttachmentProvider={demoAttachmentProvider} isLoading={isLoading} loadError={loadError} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onSetContactStatus={onSetContactStatus} onFindAnotherShop={onFindAnotherShop} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onMobileChatOpenChange={setMobileChatOpen} />}
     {screen === "shopSearchRequests" && useSupabaseData && <ShopSearchRequestScreen onTransactionCreated={(id) => { void onRefresh().then(() => { setSelectedTransactionId(id); setDealFilter("전체"); onNavigate("deals"); }); }} />}
     {screen === "dealerProfile" && <ProfileEditor role="dealer" userId={account.id} activity={profileActivity} onChangePassword={onChangePassword} />}
+    {screen === "dealerHelp" && <HelpCenterScreen role="dealer" />}
   </>;
 }

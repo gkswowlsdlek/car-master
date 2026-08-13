@@ -1176,7 +1176,13 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
    this >=761px override swaps which one shows. */
 .messenger-focus-topbar { display: none; }
 .messenger-back-to-workspace { display: none; }
-@media (min-width: 761px) {
+/* Phase A fix: this used to be an unqualified (min-width:761px) block, which
+   also matches >=1024px viewports and — being later in source order than
+   the >=1024px "keep the Dealer sidebar visible" block above — silently won
+   the cascade and hid the sidebar again on desktop. Capping this range to
+   the 761-1023px tablet band removes the overlap; >=1024px is now owned
+   exclusively by the block above. */
+@media (min-width: 761px) and (max-width: 1023px) {
   .app-frame.messenger-focus { grid-template-columns: minmax(0,1fr); }
   .app-frame.messenger-focus .app-sidebar { display: none; }
   .app-frame.messenger-focus .beta-environment-bar { display: none; }
@@ -1237,6 +1243,33 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .app-logo img { width: 190px; max-width: 100%; }
 .app-logo small { color: var(--color-muted); font-size: 11px; font-weight: 700; letter-spacing: .01em; }
 .sidebar-profile > div small { color: var(--color-muted); font-size: 11px; }
+
+/* Phase A: Dealer Workspace Rebuild — R1-scale Sidebar on a softer
+   Navy/Blue-Slate surface (not R1's near-black, not R2.1's plain white).
+   This is deliberately the last word on .app-sidebar/.app-logo/nav sizing —
+   the v0.3.1/v0.3.6/v0.3.11 layers above are superseded but left in place
+   rather than hunted down and deleted; a follow-up pass can retire them.
+   Only visual/surface properties are set here (no `display`), so the
+   existing <=1180px / <=760px responsive rules elsewhere are untouched. */
+.app-sidebar { grid-template-rows: auto auto 1fr auto; background: linear-gradient(175deg,#3b4a63 0%,#31404f 100%); border-right: 1px solid rgba(15,23,42,.14); padding: 22px 16px 18px; }
+.app-logo { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 6px; padding: 14px; border-radius: 14px; background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.08); }
+.app-logo img { width: 168px; }
+.app-logo small { margin: 0; color: var(--color-muted); font-size: 10px; font-weight: 700; letter-spacing: .04em; }
+.sidebar-section-label { padding: 18px 12px 10px; color: rgba(255,255,255,.42); font-size: 11px; font-weight: 800; letter-spacing: .1em; }
+.app-sidebar nav { gap: 4px; }
+.app-sidebar nav button { grid-template-columns: 38px 1fr auto; min-height: 54px; border-radius: 12px; padding: 0 12px 0 8px; color: rgba(255,255,255,.72); font-size: 15.5px; font-weight: 650; transition: background .15s ease, color .15s ease; }
+.app-sidebar nav button:hover { background: rgba(255,255,255,.07); color: #fff; }
+.app-sidebar nav button i { width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,.1); color: rgba(255,255,255,.75); }
+.app-sidebar nav button.active { background: rgba(58,130,255,.24); box-shadow: inset 3px 0 0 var(--color-primary); color: #fff; font-weight: 800; }
+.app-sidebar nav button.active::before { display: none; }
+.app-sidebar nav button.active i { background: var(--color-primary); color: #fff; }
+.app-sidebar nav button em { background: rgba(255,255,255,.14); color: #fff; }
+.sidebar-profile { border-top: 1px solid rgba(255,255,255,.14); padding-top: 16px; }
+.sidebar-profile > span { background: var(--color-primary); }
+.sidebar-profile b { color: #fff; }
+.sidebar-profile small,.sidebar-profile > div small { color: rgba(255,255,255,.55); }
+.sidebar-profile > button { color: rgba(255,255,255,.55); }
+.sidebar-profile > button:hover { background: rgba(255,255,255,.1); color: #fff; }
 
 .transaction-workspace-layout { grid-template-columns: 300px minmax(0,1fr); }
 .transaction-operations-detail { display: grid; align-content: start; gap: 18px; min-width: 0; background: #fff; padding: 24px; }

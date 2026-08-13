@@ -15,11 +15,11 @@ import type { DemoAccount, Role, Screen } from "../../types/dealer";
 // in the sidebar and in mobile's "더보기" sheet.
 const navigation: Record<Role, { screen?: Screen; href?: string; label: string; icon: LucideIcon }[]> = {
   dealer: [
-    { screen: "dealerDashboard", label: "홈", icon: Gauge },
+    { screen: "dealerDashboard", label: "대시보드", icon: Gauge },
     { screen: "dealerMap", label: "시공점 찾기", icon: MapPin },
     { screen: "deals", label: "거래 관리", icon: Building2 },
     { screen: "messages", label: "메시지", icon: MessageCircle },
-    { href: "/help", label: "고객센터", icon: HelpCircle },
+    { screen: "dealerHelp", label: "고객센터", icon: HelpCircle },
     { screen: "dealerProfile", label: "마이페이지", icon: UserRound },
   ],
   shop: [
@@ -37,8 +37,8 @@ const navigation: Record<Role, { screen?: Screen; href?: string; label: string; 
 };
 
 const screenTitles: Partial<Record<Screen, string>> = {
-  dealerDashboard: "홈", shopDashboard: "시공점 대시보드", priceGuide: "권장 시공 패키지 가이드", request: "새 시공 요청",
-  requestSummary: "요청 최종 확인", dealerMap: "시공점 찾기", deals: "거래 관리", shopRequests: "거래 관리", messages: "메시지", dealerProfile: "마이페이지", ops: "운영 현황", adminShops: "시공점 관리", adminAccount: "계정",
+  dealerDashboard: "대시보드", shopDashboard: "시공점 대시보드", priceGuide: "권장 시공 패키지 가이드", request: "새 시공 요청",
+  requestSummary: "요청 최종 확인", dealerMap: "시공점 찾기", deals: "거래 관리", shopRequests: "거래 관리", messages: "메시지", dealerProfile: "마이페이지", ops: "운영 현황", adminShops: "시공점 관리", adminAccount: "계정", dealerHelp: "고객센터",
 };
 
 const MOBILE_PRIMARY_COUNT = 4;
@@ -82,7 +82,7 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
     <aside className="app-sidebar">
       <button className="app-logo" onClick={() => onNavigate(homeScreen)}><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><small>{roleLabel} 워크스페이스</small></button>
       <div className="sidebar-section-label">업무 메뉴</div>
-      <nav className="sidebar-primary-nav">{primaryItems.map((item) => <button key={item.href ?? item.screen} className={item.screen ? (isActive(screen, item.screen) ? "active" : "") : ""} onClick={() => go(item)}><i aria-hidden="true"><item.icon size={18} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
+      <nav className="sidebar-primary-nav">{primaryItems.map((item) => <button key={item.href ?? item.screen} className={item.screen ? (isActive(screen, item.screen) ? "active" : "") : ""} onClick={() => go(item)}><i aria-hidden="true"><item.icon size={20} strokeWidth={2} /></i><span>{item.label}</span>{item.screen === "messages" && unreadMessageCount > 0 && <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>}</button>)}</nav>
       {secondaryItems.length > 0 && <><div className="sidebar-subsection-label">보조 메뉴</div><nav className="sidebar-secondary-nav">{secondaryItems.map((item) => <button key={item.href ?? item.screen} className={item.screen ? (isActive(screen, item.screen) ? "active" : "") : ""} onClick={() => go(item)}><i aria-hidden="true"><item.icon size={17} strokeWidth={2} /></i><span>{item.label}</span></button>)}</nav></>}
       <div className="sidebar-profile"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div><button onClick={onLogout} aria-label="로그아웃"><LogOut size={16} /></button></div>
     </aside>
