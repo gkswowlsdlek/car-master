@@ -15,7 +15,7 @@ let dealerWorkspaceSource;
 let messengerScreenSource;
 let chatWorkspaceSource;
 let managementScreenSource;
-let adminOverviewSource;
+let adminTransactionPanelSource;
 
 test.before(async () => {
   migrationSource = normalize(await read("supabase/migrations/202608120002_dealer_immediate_transaction_flow.sql"));
@@ -28,7 +28,7 @@ test.before(async () => {
   messengerScreenSource = normalize(await read("components/messenger/MessengerScreen.tsx"));
   chatWorkspaceSource = normalize(await read("components/transactions/TransactionChatWorkspace.tsx"));
   managementScreenSource = normalize(await read("components/transactions/TransactionManagementScreen.tsx"));
-  adminOverviewSource = normalize(await read("components/admin/AdminOverview.tsx"));
+  adminTransactionPanelSource = normalize(await read("components/admin/AdminTransactionPanel.tsx"));
 });
 
 // Dealer immediate-transaction Phase 1 — the room is created the instant a
@@ -170,8 +170,13 @@ test("hide-transaction terminal-stage checks treat 출고/취소/시공불가 th
   assert.match(managementScreenSource, /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(selected\.status\.stage\) && role === "shop"/);
 });
 
-test("AdminOverview's stalled/진행 중 counts exclude 출고/시공불가 the same way they already exclude 작업완료/취소", () => {
-  assert.match(adminOverviewSource, /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(item\.status\.stage\)/);
+// Phase 7 moved the "what counts as still in progress" logic out of
+// AdminOverview's now-removed vanity stat cards and into AdminTransactionPanel's
+// group filter (진행중/완료/종료), reusing isTerminalOutcome (취소/시공불가) —
+// same exclusion, better factored, matching Dealer Phase 6's own groupOf().
+test("Admin's 진행중/완료/종료 grouping excludes 출고/취소/시공불가 from '진행중' the same way the old stalled-count logic did", () => {
+  assert.match(adminTransactionPanelSource, /if \(isTerminalOutcome\(stage\)\) return "종료";/);
+  assert.match(adminTransactionPanelSource, /if \(stage === "출고"\) return "완료";/);
 });
 
 test("regression: create_transaction_with_room (legacy installerId path) is untouched by this migration — old Installer-account transactions keep working unchanged", async () => {

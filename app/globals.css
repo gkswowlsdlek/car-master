@@ -659,6 +659,14 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 @media (hover:hover) { .dealer-transaction-row:hover { border-color: var(--color-primary-border); box-shadow: var(--shadow-sm); background: var(--color-surface-soft); } }
 @media (max-width:760px) { .dealer-deal-groups { display: flex; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; } .dealer-deal-groups button { flex: 0 0 auto; } .dealer-transaction-row-activity { margin-left: 0; } }
 
+/* Phase 7: Admin 운영센터 보강 (운영 큐 + 시공점 관리/Claim, vanity metric 없음) */
+.admin-ops-queue { margin: 18px 0; }
+.admin-ops-queue-strip { grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); }
+.admin-transaction-groups { margin: 14px 0 0; }
+.admin-shop-management .admin-shop-search-request-panel + .admin-shop-search-request-panel { margin-top: 24px; }
+.admin-shop-management .admin-member-tools { grid-template-columns: minmax(220px,1fr); }
+@media (max-width:760px) { .admin-ops-queue-strip { grid-template-columns: 1fr 1fr; } }
+
 .marketing-brand { align-items: flex-start; }
 .account-status-shell { width: min(900px,100%); display: grid; gap: 18px; }.account-status-shell .account-status-card { width: 100%; }.installer-registration-editor { padding: 28px; }.installer-registration-editor h2 { margin: 0 0 6px; }.installer-registration-editor > p { margin: 0 0 20px; color: var(--color-muted); }.installer-registration-editor > div { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.installer-registration-editor label { display: grid; gap: 7px; color: var(--color-text-soft); font-size: 11px; font-weight: 750; }.installer-registration-editor input { height: 46px; }.installer-registration-editor .registration-message { margin: 14px 0; border-radius: 10px; background: var(--color-primary-soft); color: var(--color-primary-hover); padding: 10px 12px; font-size: 11px; }.installer-registration-editor .primary { margin-top: 18px; }.account-status-page { align-items: start; }.account-status-shell { margin-top: 4vh; }
 @media (max-width:760px) { .installer-registration-editor { padding: 22px 18px; }.installer-registration-editor > div { grid-template-columns: 1fr; } }

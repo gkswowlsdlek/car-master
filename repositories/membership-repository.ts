@@ -18,9 +18,10 @@ export type AdminMember = {
 type DealerProfileJoinRow = { user_id: string; name: string; phone: string; company_name: string | null; profiles: { email: string; created_at: string } | { email: string; created_at: string }[] };
 
 export class SupabaseMembershipRepository {
+  /** Admin-only, capped at 300 — a new limit added in Phase 7's pagination-safety pass (was unbounded). */
   async getInstallerApplications(): Promise<InstallerApplication[]> {
     const supabase = createSupabaseBrowserClient();
-    const { data, error } = await supabase.from("installer_profiles").select("user_id,shop_name,representative_name,business_name,business_registration_number,address,detail_address,phone,contact_phone,supported_services,supported_brands,profiles!inner(email,created_at),installer_approvals!inner(status,review_note)");
+    const { data, error } = await supabase.from("installer_profiles").select("user_id,shop_name,representative_name,business_name,business_registration_number,address,detail_address,phone,contact_phone,supported_services,supported_brands,profiles!inner(email,created_at),installer_approvals!inner(status,review_note)").limit(300);
     if (error) throw error;
     return ((data ?? []) as unknown as InstallerApplicationJoinRow[]).map((row) => {
       const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
@@ -41,7 +42,7 @@ export class SupabaseMembershipRepository {
   async getAllMembers(): Promise<AdminMember[]> {
     const supabase = createSupabaseBrowserClient();
     const [dealerResult, installerApplications] = await Promise.all([
-      supabase.from("dealer_profiles").select("user_id,name,phone,company_name,profiles!inner(email,created_at)"),
+      supabase.from("dealer_profiles").select("user_id,name,phone,company_name,profiles!inner(email,created_at)").limit(300),
       this.getInstallerApplications(),
     ]);
     if (dealerResult.error) throw dealerResult.error;
