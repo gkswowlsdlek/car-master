@@ -822,6 +822,31 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .transaction-progress-card { background: #fff; }
 .transaction-chat { background: #fff; }
 
+/* Structural review pass: make the primary work surfaces visibly different
+   from the earlier card-heavy prototype without changing data or actions. */
+@media (min-width: 1024px) {
+  .app-frame { grid-template-columns: 288px minmax(0,1fr); }
+  .app-sidebar nav button { min-height: 54px; padding-inline: 14px; }
+  .app-sidebar nav button i { width: 32px; height: 32px; }
+  .app-sidebar nav button span { font-size: 15px; }
+  .dealer-location-first { padding: 34px 36px; }
+  .dealer-location-form { grid-template-columns: minmax(0,1fr) 220px 160px; }
+  .installer-directory-layout { grid-template-columns: minmax(360px,.72fr) minmax(0,1.28fr); gap: 18px; }
+  .installer-detail-pane { grid-column: 1 / -1; }
+  .installer-map-pane { min-height: 610px; }
+  .transaction-room-layout.transaction-workspace-layout { grid-template-columns: 300px minmax(0,1fr); }
+  .transaction-operations-detail { padding: 30px 34px; }
+  .transaction-progress-card { padding: 22px; }
+  .transaction-management-screen .transaction-list > button { grid-template-columns: 1fr auto; align-items: center; gap: 5px 12px; min-height: 78px; padding: 12px 16px; }
+  .transaction-management-screen .transaction-list > button > em { grid-column: 1 / -1; }
+  .transaction-management-screen .transaction-list > button > small { color: var(--color-text-soft); }
+  .app-frame.messenger-focus { grid-template-columns: 288px minmax(0,1fr); }
+  .app-frame.messenger-focus .app-sidebar { display: grid; }
+  .app-frame.messenger-focus .app-topbar-default { display: flex; }
+  .app-frame.messenger-focus .messenger-focus-topbar { display: none; }
+  .app-frame.messenger-focus .beta-environment-bar { display: block; }
+}
+
 /* Installer workspace operations polish */
 .shop-operations-metrics { grid-template-columns: repeat(5,minmax(0,1fr)); }
 .shop-operations-metrics .shop-metric-card { min-height: 136px; }
