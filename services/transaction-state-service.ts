@@ -17,27 +17,36 @@ export function dealerStageIndex(stage: TransactionStage): number {
   if (stage === "견적" || stage === "시공예약") return 0;
   if (stage === "입고") return 1;
   if (stage === "작업완료") return 2;
-  return 3; // 출고 — 취소 also falls back here but is handled separately by dealerStageLabel
+  return 3; // 출고 — 취소/시공불가 also fall back here but are handled separately by dealerStageLabel
 }
 
 export function dealerStageLabel(stage: TransactionStage): string {
   if (stage === "취소") return "취소";
+  if (stage === "시공불가") return "시공 불가";
   return DEALER_STAGE_LABELS[dealerStageIndex(stage)];
+}
+
+/** 취소/시공불가 end the transaction outside the normal work-stage
+ * progression — see end_transaction_outcome (not transition_transaction_stage). */
+export const TERMINAL_OUTCOME_STAGES: TransactionStage[] = ["취소", "시공불가"];
+
+export function isTerminalOutcome(stage: TransactionStage): boolean {
+  return TERMINAL_OUTCOME_STAGES.includes(stage);
 }
 
 /** Button label for moving forward INTO this stage (the "다음 행동" CTA). */
 export const STAGE_ACTION_LABEL: Record<TransactionStage, string> = {
-  견적: "견적 확정", 시공예약: "시공예약 확정", 입고: "입고 처리", 작업완료: "작업완료", 출고: "출고 처리", 취소: "취소 처리",
+  견적: "견적 확정", 시공예약: "시공예약 확정", 입고: "입고 처리", 작업완료: "작업완료", 출고: "출고 처리", 취소: "취소 처리", 시공불가: "시공 불가 처리",
 };
 
 /** Label for the small "이전 단계로" link when reverting back to this stage. */
 export const STAGE_REVERT_LABEL: Record<TransactionStage, string> = {
-  견적: "견적으로 되돌리기", 시공예약: "시공예약으로 되돌리기", 입고: "입고 상태로 되돌리기", 작업완료: "작업완료로 되돌리기", 출고: "출고로 되돌리기", 취소: "취소로 되돌리기",
+  견적: "견적으로 되돌리기", 시공예약: "시공예약으로 되돌리기", 입고: "입고 상태로 되돌리기", 작업완료: "작업완료로 되돌리기", 출고: "출고로 되돌리기", 취소: "취소로 되돌리기", 시공불가: "시공불가로 되돌리기",
 };
 
 /** Past-tense form of the same label, used in the 거래 로그 list. */
 export const STAGE_REVERT_LOG_LABEL: Record<TransactionStage, string> = {
-  견적: "견적으로 되돌림", 시공예약: "시공예약으로 되돌림", 입고: "입고로 되돌림", 작업완료: "작업완료로 되돌림", 출고: "출고로 되돌림", 취소: "취소로 되돌림",
+  견적: "견적으로 되돌림", 시공예약: "시공예약으로 되돌림", 입고: "입고로 되돌림", 작업완료: "작업완료로 되돌림", 출고: "출고로 되돌림", 취소: "취소로 되돌림", 시공불가: "시공불가로 되돌림",
 };
 
 export function stageLogLabel(event: TransactionStageEvent): string {
@@ -66,7 +75,7 @@ export function revertStage(current: TransactionStage): TransactionStage | undef
  * does not expose a way to trigger it.
  */
 export function canTransitionStage(current: TransactionStage, next: TransactionStage, role: TransactionActorRole) {
-  if (next === "취소") return role === "dealer" || role === "admin";
+  if (next === "취소" || next === "시공불가") return role === "dealer" || role === "admin";
   const currentIndex = stageOrder.indexOf(current);
   const nextIndex = stageOrder.indexOf(next);
   if (currentIndex < 0 || nextIndex < 0) return false;

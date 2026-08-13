@@ -113,6 +113,21 @@ export function useTransactionActions({ useSupabaseData, transactions, sharedRoo
     if (stage === "시공예약") void notificationService.notify({ type: "stage_confirmed", transactionId: transaction.id, stage, recipientId: transaction.dealerId });
   }, [demoActorRole, isSharedDemoTransaction, refresh, role, useSupabaseData]);
 
+  /** 취소/시공불가 — never deletes the Transaction/Room/Messages/Shop, just ends the work lifecycle (Phase 5). */
+  const endOutcome = useCallback(async (transaction: Transaction, outcome: "취소" | "시공불가", note?: string) => {
+    if (useSupabaseData) { await supabaseTransactionRepository.endOutcome(transaction.id, outcome, note); await refresh(); return; }
+    if (isSharedDemoTransaction(transaction)) {
+      // Demo's transition RPC only mirrors 취소 (the pre-existing legacy
+      // special case) — 시공불가 isn't modeled in the Demo backend this
+      // phase, and will surface as a normal error to the demo user.
+      await demoTransactionRepository.transitionStage(transaction.id, outcome, demoActorRole);
+      await refresh();
+      return;
+    }
+    const next = transitionStage(transaction, outcome, role === "shop" ? "shop" : "dealer");
+    transactionRepository.update({ ...next, outcomeNote: note });
+  }, [demoActorRole, isSharedDemoTransaction, refresh, role, useSupabaseData]);
+
   const changeFinalPrice = useCallback(async (transaction: Transaction, finalPrice: number) => {
     try {
       if (useSupabaseData) { await supabaseTransactionRepository.setFinalPrice(transaction.id, finalPrice); await refresh(); }
@@ -130,5 +145,5 @@ export function useTransactionActions({ useSupabaseData, transactions, sharedRoo
     } catch (error) { alert(error instanceof Error ? error.message : "결제 상태를 변경할 수 없습니다."); }
   }, [demoActorRole, isSharedDemoTransaction, refresh, role, useSupabaseData]);
 
-  return { sendMessage, markRoomRead, loadContact, hideTransaction, unhideTransaction, changeStage, changeFinalPrice, changePayment };
+  return { sendMessage, markRoomRead, loadContact, hideTransaction, unhideTransaction, changeStage, endOutcome, changeFinalPrice, changePayment };
 }

@@ -124,7 +124,7 @@ test("TransactionStage/stageOrder/label maps all learn 출고 as the terminal st
 test("canTransitionStage no longer gates forward/backward moves to role === shop|admin only — the dealer can drive their own transaction's stage too, server-side ownership is what actually enforces access", () => {
   const fn = stateServiceSource.slice(stateServiceSource.indexOf("export function canTransitionStage"), stateServiceSource.indexOf("export function transitionStage"));
   assert.doesNotMatch(fn, /role !== "shop" && role !== "admin"/);
-  assert.match(fn, /if \(next === "취소"\) return role === "dealer" \|\| role === "admin";/);
+  assert.match(fn, /if \(next === "취소" \|\| next === "시공불가"\) return role === "dealer" \|\| role === "admin";/);
 });
 
 test("Transaction.installerId is nullable in the type contract, matching the DB column now allowing null for Shops with no linked Installer Account", () => {
@@ -165,14 +165,13 @@ test("TransactionChatWorkspace shows a 전화 확인 필요 banner to the dealer
   assert.doesNotMatch(chatWorkspaceSource, /카카오톡.*버튼|kakao.*button/i);
 });
 
-test("hide-transaction and price-editor terminal-stage checks treat 출고 the same as 작업완료 (both are past the point where a shop still needs to touch the transaction)", () => {
-  assert.match(chatWorkspaceSource, /transaction\.status\.stage !== "작업완료" && transaction\.status\.stage !== "출고" && role === "shop"/);
-  assert.match(managementScreenSource, /selected\.status\.stage !== "작업완료" && selected\.status\.stage !== "출고" && role === "shop"/);
-  assert.match(managementScreenSource, /!\["작업완료", "출고", "취소"\]\.includes\(selected\.status\.stage\)/);
+test("hide-transaction terminal-stage checks treat 출고/취소/시공불가 the same as 작업완료 (all past the point where a shop still needs to touch the transaction)", () => {
+  assert.match(chatWorkspaceSource, /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(transaction\.status\.stage\) && role === "shop"/);
+  assert.match(managementScreenSource, /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(selected\.status\.stage\) && role === "shop"/);
 });
 
-test("AdminOverview's stalled/진행 중 counts exclude 출고 the same way they already exclude 작업완료/취소", () => {
-  assert.match(adminOverviewSource, /!\["작업완료", "출고", "취소"\]\.includes\(item\.status\.stage\)/);
+test("AdminOverview's stalled/진행 중 counts exclude 출고/시공불가 the same way they already exclude 작업완료/취소", () => {
+  assert.match(adminOverviewSource, /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(item\.status\.stage\)/);
 });
 
 test("regression: create_transaction_with_room (legacy installerId path) is untouched by this migration — old Installer-account transactions keep working unchanged", async () => {

@@ -27,6 +27,7 @@ type InstallerWorkspaceProps = {
   onFinalPriceChange: (transaction: Transaction, finalPrice: number) => void;
   onStageChange: (transaction: Transaction, stage: TransactionStage) => Promise<void>;
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
+  onEndOutcome: (transaction: Transaction, outcome: "취소" | "시공불가", note?: string) => Promise<void>;
   onMarkRead: (roomId: string) => void;
   onLoadContact: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
@@ -34,7 +35,7 @@ type InstallerWorkspaceProps = {
   onMobileFullscreenChange: (open: boolean) => void;
 };
 
-export function InstallerWorkspace({ account, screen, transactions, rooms, installers, useRemoteAttachments, demoAttachmentProvider, isLoading, loadError, onNavigate, onSend, onHide, onUnhide, onFinalPriceChange, onStageChange, onPaymentChange, onMarkRead, onLoadContact, onChangePassword, onUnreadMessageCountChange, onMobileFullscreenChange }: InstallerWorkspaceProps) {
+export function InstallerWorkspace({ account, screen, transactions, rooms, installers, useRemoteAttachments, demoAttachmentProvider, isLoading, loadError, onNavigate, onSend, onHide, onUnhide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onMarkRead, onLoadContact, onChangePassword, onUnreadMessageCountChange, onMobileFullscreenChange }: InstallerWorkspaceProps) {
   const [selectedTransactionId, setSelectedTransactionId] = useState("");
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
 
@@ -78,8 +79,8 @@ export function InstallerWorkspace({ account, screen, transactions, rooms, insta
 
   return <>
     {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} rooms={rooms} onOpenTransaction={openTransaction} onOpenMessage={openMessages} onStageChange={onStageChange} />}
-    {screen === "shopRequests" && <TransactionManagementScreen role="shop" userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useRemoteAttachments} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onUnhide={onUnhide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onNewRequest={() => onNavigate("request")} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onOpenMessages={openMessages} />}
-    {screen === "messages" && <MessengerScreen role="shop" userId={account.id} transactions={roleTransactions} rooms={rooms} installers={installers} selectedId={activeTransactionId} useRemoteAttachments={useRemoteAttachments} demoAttachmentProvider={demoAttachmentProvider} isLoading={isLoading} loadError={loadError} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onMobileChatOpenChange={setMobileChatOpen} />}
+    {screen === "shopRequests" && <TransactionManagementScreen role="shop" userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useRemoteAttachments} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onUnhide={onUnhide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onNewRequest={() => onNavigate("request")} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onOpenMessages={openMessages} />}
+    {screen === "messages" && <MessengerScreen role="shop" userId={account.id} transactions={roleTransactions} rooms={rooms} installers={installers} selectedId={activeTransactionId} useRemoteAttachments={useRemoteAttachments} demoAttachmentProvider={demoAttachmentProvider} isLoading={isLoading} loadError={loadError} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onMobileChatOpenChange={setMobileChatOpen} />}
     {screen === "dealerProfile" && <ProfileEditor role="shop" userId={account.id} activity={profileActivity} onChangePassword={onChangePassword} />}
   </>;
 }
