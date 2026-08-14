@@ -38,7 +38,7 @@ test("InstallerWorkspace owns Installer selection, derived transaction scope, Me
   assert.match(source, /const activeTransactionId = selectedTransactionId \|\| roleTransactions\[0\]\?\.id \|\| ""/);
   assert.match(source, /onMobileFullscreenChange\(mobileChatOpen\)/);
   for (const screen of ["shopDashboard", "shopRequests", "messages", "dealerProfile"]) assert.match(source, new RegExp(`screen === "${screen}"`));
-  for (const component of ["ShopDashboard", "TransactionManagementScreen", "MessengerScreen", "ProfileEditor"]) assert.match(source, new RegExp(`<${component}`));
+  for (const component of ["ShopDashboard", "TransactionManagementScreen", "MessengerScreen", "ShopManagementScreen"]) assert.match(source, new RegExp(`<${component}`));
   for (const action of ["onSend", "onHide", "onUnhide", "onFinalPriceChange", "onStageChange", "onPaymentChange", "onMarkRead", "onLoadContact"]) assert.match(source, new RegExp(`${action}=`));
   assert.match(page, /<InstallerWorkspace/);
   assert.doesNotMatch(page, /import \{ ShopDashboard \}/);
