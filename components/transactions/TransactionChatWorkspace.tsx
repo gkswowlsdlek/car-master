@@ -328,6 +328,15 @@ export function TransactionChatWorkspace({ role, userId, transaction, room, inst
           {transaction.outcomeNote && <p>{transaction.outcomeNote}</p>}
           {role === "dealer" && onFindAnotherShop && <button type="button" className="button button-secondary" onClick={onFindAnotherShop}><Search size={16} /> 다른 시공점 찾기</button>}
         </div> : <div className="stage-actions">
+          {/* Phase E: a read-only stepper — clicking a step never changes stage,
+              only the existing advance/revert buttons below do — so this can't
+              be used to bypass canTransitionStage(). */}
+          <div className="room-stepper" role="img" aria-label={`진행 단계: ${role === "dealer" ? dealerStageLabel(transaction.status.stage) : transaction.status.stage}`}>
+            {(role === "dealer" ? DEALER_STAGE_LABELS : stageOrder).map((label, index) => {
+              const current = role === "dealer" ? dealerCurrentIndex : stageIndex;
+              return <span key={label} className={index < current ? "complete" : index === current ? "active" : ""}><i>{index < current ? "✓" : index + 1}</i><small>{label}</small></span>;
+            })}
+          </div>
           {role === "dealer" ? <>
             <p className="dealer-stage-current">현재 상태: <b>{dealerStageLabel(transaction.status.stage)}</b></p>
             {dealerNextLabel && <button type="button" data-testid="dealer-stage-advance-button" className="primary stage-cta" onClick={handleDealerAdvanceClick} disabled={stagePending} aria-busy={stagePending}>{stagePending ? "처리 중…" : DEALER_ADVANCE_BUTTON_TEXT[dealerNextLabel]}</button>}
