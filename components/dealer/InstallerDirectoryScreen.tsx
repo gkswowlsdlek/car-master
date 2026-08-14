@@ -126,12 +126,15 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
   </div>;
 
   return <section className="dealer-screen installer-directory">
-    <div className="page-title"><div><p className="eyebrow">INSTALLER NETWORK</p><h1>전국 시공점 찾기</h1><p className="page-subtitle">지도와 목록에서 시공점을 비교하고 바로 시공 요청을 보내세요.</p></div></div>
+    <header className="ws-dashboard-header"><p className="ws-eyebrow">Dealer Workspace</p><h1>시공점 찾기</h1><p className="ws-page-subtitle">지역과 작업 조건에 맞는 시공점을 찾아보세요.</p></header>
 
-    <div className="installer-toolbar">
-      <label className="search-field"><Search size={18} aria-hidden="true" /><input aria-label="시공점 검색" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="시공점, 지역, 브랜드, 작업 종류로 검색" /></label>
-      <label className="installer-filter-toggle"><input type="checkbox" checked={onlyAvailable} onChange={(event) => setOnlyAvailable(event.target.checked)} /> 요청 가능한 시공점만</label>
-      <button className="button button-secondary installer-filter-open" onClick={() => setFilterSheetOpen(true)}><ListFilter size={16} /> 필터</button>
+    <div className="ws-shop-search-bar">
+      <div className="installer-toolbar">
+        <label className="search-field"><Search size={18} aria-hidden="true" /><input aria-label="시공점 검색" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="시공점, 지역, 브랜드, 작업 종류로 검색" /></label>
+        <label className="installer-filter-toggle"><input type="checkbox" checked={onlyAvailable} onChange={(event) => setOnlyAvailable(event.target.checked)} /> 요청 가능한 시공점만</label>
+        <button className="button button-secondary installer-filter-open" onClick={() => setFilterSheetOpen(true)}><ListFilter size={16} /> 필터</button>
+      </div>
+      <div className="ws-shop-search-filters">{filterControls}</div>
     </div>
     {locationStatus === "unavailable" && sortKey === "distance" && <p className="installer-location-note">현재 위치를 사용할 수 없어 정확한 거리 대신 기본 지역 기준으로 표시됩니다.</p>}
 
@@ -156,9 +159,6 @@ export function InstallerDirectoryScreen({ installers, loading, selectedId, setS
           <span className="installer-map-legend"><i className="installer-map-legend-star" aria-hidden="true">★</i> 위치 등록 데모 시공점</span>
         </div>
       </div>
-      {selected && <div className="installer-detail-pane">
-        <InstallerDetailPanel installer={selected} distanceLabel={selectedDistanceLabel} selectedBrand={selectedBrand} isOtherBrand={isOtherBrand} onRequest={() => { setSelectedId(selected.id); onRequest(); }} />
-      </div>}
     </div>
 
     {detailOpen && selected && typeof document !== "undefined" && createPortal(

@@ -924,11 +924,18 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .installer-location-note, .installer-loading-note { margin: 0; color: var(--color-muted); font-size: 12.5px; }
 .installer-mobile-tabs { display: none; }
 
-.installer-directory-layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(360px,420px); gap: var(--workspace-gap); align-items: start; }
+/* Phase C: Shop Search rebuild — List 40% / Map 60%, search+filters as one
+   Section-level card above the workspace (not a full hero), matching the
+   Dashboard's Background -> Section -> Card language. */
+.ws-page-subtitle { margin: 4px 0 0; color: var(--color-muted); font-size: 13px; }
+.ws-shop-search-bar { border: 1px solid var(--color-line); border-radius: var(--radius-lg); background: #fff; padding: 16px 18px; box-shadow: var(--shadow-sm); }
+.ws-shop-search-filters { display: none; }
+
+.installer-directory-layout { display: grid; grid-template-columns: minmax(380px,2fr) minmax(0,3fr); gap: var(--workspace-gap); align-items: stretch; }
 .installer-list-pane { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .installer-list-head { display: flex; align-items: baseline; justify-content: space-between; }
 .installer-list-head span { color: var(--color-muted); font-size: 12px; }
-.installer-list { display: flex; flex-direction: column; gap: 10px; max-height: 74vh; overflow-y: auto; padding-right: 2px; }
+.installer-list { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; overflow-y: auto; padding-right: 2px; }
 
 .installer-card { position: relative; display: flex; flex-direction: column; gap: 8px; width: 100%; border: 1px solid var(--color-line); border-radius: var(--radius-lg); background: var(--color-surface); padding: 16px 18px; box-shadow: var(--shadow-sm); transition: border-color .18s ease, box-shadow .18s ease; }
 .installer-card:hover { border-color: var(--color-line-strong); box-shadow: var(--shadow-md); }
@@ -961,18 +968,18 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .installer-card-actions { display: flex; gap: 8px; margin-top: 4px; }
 .installer-card-actions .button { flex: 1; min-height: 38px; font-size: 13px; }
 
-.installer-empty-state { display: grid; justify-items: center; gap: 8px; border: 1px dashed var(--color-line-strong); border-radius: var(--radius-lg); padding: 48px 20px; text-align: center; }
+.installer-empty-state { display: grid; flex: 1; align-content: center; justify-items: center; gap: 8px; border: 1px dashed var(--color-line-strong); border-radius: var(--radius-lg); padding: 48px 20px; text-align: center; }
 .installer-empty-state span { font-size: 26px; }
 .installer-empty-state h2 { margin: 0; font-size: 16px; }
 .installer-empty-state p { margin: 0; color: var(--color-muted); font-size: 13px; }
 
-.installer-map-pane { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 8px; }
-.naver-map-shell { position: relative; height: 520px; border: 1px solid var(--color-line); border-radius: var(--radius-lg); overflow: hidden; }
+.installer-map-pane { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 8px; min-height: 520px; }
+.naver-map-shell { position: relative; flex: 1; min-height: 520px; border: 1px solid var(--color-line); border-radius: var(--radius-lg); overflow: hidden; }
 .naver-map-canvas { width: 100%; height: 100%; }
 .naver-map-loading { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(247,248,250,.92); color: var(--color-muted); font-size: 13px; font-weight: 600; }
 .naver-map-spinner { width: 16px; height: 16px; border: 2px solid var(--color-line-strong); border-top-color: var(--color-primary); border-radius: 999px; animation: naver-spin .8s linear infinite; }
 @keyframes naver-spin { to { transform: rotate(360deg); } }
-.naver-map-fallback { display: grid; place-items: center; gap: 6px; height: 520px; border: 1px dashed var(--color-line-strong); border-radius: var(--radius-lg); background: var(--color-surface-soft); padding: 24px; text-align: center; }
+.naver-map-fallback { display: grid; flex: 1; place-items: center; gap: 6px; min-height: 520px; border: 1px dashed var(--color-line-strong); border-radius: var(--radius-lg); background: var(--color-surface-soft); padding: 24px; text-align: center; }
 .naver-map-fallback-title { margin: 0; font-weight: 800; }
 .naver-map-fallback-body { margin: 0; max-width: 320px; color: var(--color-muted); font-size: 13px; }
 .naver-marker-pin { position: relative; width: 100%; height: 100%; border: 2px solid #fff; border-radius: 999px 999px 999px 2px; background: var(--color-primary); box-shadow: var(--shadow-sm); transform: rotate(-45deg); }
@@ -1018,10 +1025,13 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .installer-filter-sheet .installer-filter-controls select { min-width: 0; width: 100%; }
 .installer-filter-apply { width: 100%; margin-top: 14px; }
 
-@media (min-width: 1180px) {
-  .installer-directory-layout { grid-template-columns: minmax(0,1fr) minmax(340px,400px) minmax(320px,380px); }
-  .installer-detail-pane { display: block; position: sticky; top: 88px; }
-  .installer-detail-overlay { display: none !important; }
+@media (min-width: 1024px) {
+  /* Desktop can show every search condition at once — filters move out of
+     the sheet into the search bar itself, and the shop detail always opens
+     as an overlay (no permanent 3rd column) so List/Map keep their 40:60
+     share of the workspace. */
+  .ws-shop-search-filters { display: block; padding-top: 14px; margin-top: 14px; border-top: 1px solid var(--color-line); }
+  .installer-filter-open { display: none; }
 }
 
 @media (max-width: 767px) {
