@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, CircleDollarSign, Clock3, MapPin, Plus, Search } from "lucide-react";
+import { Building2, CheckCircle2, CircleDollarSign, MapPin, Phone, Plus, Search, TriangleAlert } from "lucide-react";
 import type { Transaction, TransactionStage } from "../../types/transactions";
 import { dealerStageLabel } from "../../services/transaction-state-service";
 
@@ -7,6 +7,28 @@ import { dealerStageLabel } from "../../services/transaction-state-service";
 // 별도 배너로 이미 다룸)은 여기 포함하지 않는다. Dashboard와 클릭 결과가
 // 항상 같은 정의를 쓰도록 이 상수 하나로 고정.
 const ACTIVE_STAGES: TransactionStage[] = ["시공예약", "입고"];
+const COMPLETED_STAGES: TransactionStage[] = ["작업완료", "출고"];
+
+function isThisMonth(iso: string) {
+  const date = new Date(iso);
+  const now = new Date();
+  return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+}
+
+function DealRow({ deal, onOpenTransaction }: { deal: Transaction; onOpenTransaction: (id: string) => void }) {
+  return <button className="ws-row" onClick={() => onOpenTransaction(deal.id)}>
+    <span className="ws-row-main">
+      <b>{deal.vehicle.maker} {deal.vehicle.model}</b>
+      <small>{deal.installerName} · {deal.service.workDescription || deal.service.product || "작업 내용 미정"}</small>
+    </span>
+    {deal.contactStatus === undefined && <span className="ws-badge ws-badge-red"><Phone size={11} /> 전화 확인 필요</span>}
+    <em className={`status-chip status-${deal.status.stage}`}>{dealerStageLabel(deal.status.stage)}</em>
+  </button>;
+}
+
+function EmptyRow({ children }: { children: string }) {
+  return <p className="ws-empty-row">{children}</p>;
+}
 
 export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransaction, onNewRequest, onFindShop, onSearchLocation, onPriceGuide, onShopSearchRequests }: {
   dealerName: string;
@@ -22,35 +44,65 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransa
 }) {
   const [area, setArea] = useState("");
   const [workType, setWorkType] = useState("썬팅");
-  const waitingCount = deals.filter((deal) => deal.status.stage === "견적").length;
-  const activeDeals = deals
-    .filter((deal) => ACTIVE_STAGES.includes(deal.status.stage))
-    .sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt));
+
+  const waitingDeals = deals.filter((deal) => deal.status.stage === "견적").sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt));
+  const activeDeals = deals.filter((deal) => ACTIVE_STAGES.includes(deal.status.stage)).sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt));
+  const monthlyCompletedCount = deals.filter((deal) => COMPLETED_STAGES.includes(deal.status.stage) && isThisMonth(deal.status.updatedAt)).length;
+  const visibleWaitingDeals = waitingDeals.slice(0, 5);
   const visibleActiveDeals = activeDeals.slice(0, 4);
+  const hasAnyDeal = deals.length > 0;
 
-  return <section className="dealer-dashboard role-home role-home-dealer">
-    <header className="dealer-welcome"><div><p className="eyebrow">DEALER WORKSPACE</p><h1>{dealerName} 딜러님,<span className="dealer-welcome-subtitle">오늘 출고할 차량이 있나요?</span></h1></div></header>
+  const submitSearch = () => (area.trim() ? onSearchLocation(area.trim(), workType) : onFindShop());
 
-    <section className="dealer-location-first"><div className="dealer-location-first-copy"><MapPin size={22} /><div><p className="eyebrow">FIND AN INSTALLER</p><h2>어디로 출고하시나요?</h2><p>지역을 선택하면 해당 지역의 시공점 탐색으로 바로 이어집니다.</p></div></div><div className="dealer-location-form"><label><span>지역 또는 주소</span><input value={area} onChange={(event) => setArea(event.target.value)} placeholder="예: 서울 강남구" onKeyDown={(event) => { if (event.key === "Enter" && area.trim()) onSearchLocation(area.trim(), workType); }} /></label><label><span>작업 유형</span><select value={workType} onChange={(event) => setWorkType(event.target.value)}><option>썬팅</option><option>PPF</option><option>블랙박스</option><option>유리막</option><option>기타</option></select></label><button className="primary" onClick={() => area.trim() ? onSearchLocation(area.trim(), workType) : onFindShop()}><Search size={17} /> 시공점 찾기</button></div></section>
+  return <section className="dealer-dashboard">
+    <header className="ws-dashboard-header">
+      <p className="ws-eyebrow">Dealer Workspace</p>
+      <h1>{dealerName} 딜러님</h1>
+    </header>
 
-    {waitingCount > 0 && <button className="dealer-focus-banner" onClick={() => onFilterDeals("견적")}>
-      <Clock3 size={16} aria-hidden="true" /> 확인이 필요한 요청이 {waitingCount}건 있어요 <ArrowRight size={14} aria-hidden="true" />
-    </button>}
+    <section className="ws-search-hero">
+      <div className="ws-search-hero-copy">
+        <span className="ws-search-hero-icon"><MapPin size={20} /></span>
+        <div>
+          <h2>어디로 출고하시나요?</h2>
+          <p>지역과 작업 종류를 입력하면 해당 지역의 시공점을 바로 찾을 수 있어요.</p>
+        </div>
+      </div>
+      <div className="ws-search-form">
+        <label>
+          <span>지역 또는 주소</span>
+          <input value={area} onChange={(event) => setArea(event.target.value)} placeholder="예: 서울 강남구" onKeyDown={(event) => event.key === "Enter" && submitSearch()} />
+        </label>
+        <label>
+          <span>작업 유형</span>
+          <select value={workType} onChange={(event) => setWorkType(event.target.value)}><option>썬팅</option><option>PPF</option><option>블랙박스</option><option>유리막</option><option>기타</option></select>
+        </label>
+        <button className="primary ws-search-cta" onClick={submitSearch}><Search size={17} /> 시공점 찾기</button>
+      </div>
+      <div className="ws-search-hero-shortcuts">
+        <button className="button button-ghost" onClick={onNewRequest}><Plus size={16} aria-hidden="true" /> 새 시공 요청</button>
+        <button className="button button-ghost" onClick={onPriceGuide}><CircleDollarSign size={16} aria-hidden="true" /> 권장 패키지 확인</button>
+        {onShopSearchRequests && <button className="button button-ghost" onClick={onShopSearchRequests}><Search size={16} aria-hidden="true" /> 시공점 찾기 요청</button>}
+      </div>
+    </section>
 
-    {visibleActiveDeals.length > 0 && <section className="dealer-active-deals">
-      <div className="section-head"><p className="eyebrow">진행 중인 거래</p>{activeDeals.length > visibleActiveDeals.length && <button className="dealer-active-deals-more" onClick={() => onFilterDeals("전체")}>전체 보기</button>}</div>
-      <ul>{visibleActiveDeals.map((deal) => <li key={deal.id}><button onClick={() => onOpenTransaction(deal.id)}>
-        <span><b>{deal.vehicle.maker} {deal.vehicle.model}</b><small>{deal.installerName}</small></span>
-        <em className={`status-chip status-${deal.status.stage}`}>{dealerStageLabel(deal.status.stage)}</em>
-      </button></li>)}</ul>
-    </section>}
+    {hasAnyDeal ? <>
+      <div className="ws-summary-row">
+        <button className="ws-summary-card tone-red" onClick={() => onFilterDeals("견적")}><span className="ws-summary-icon"><TriangleAlert size={16} /></span><span><b>{waitingDeals.length}</b><small>확인 필요 거래</small></span></button>
+        <button className="ws-summary-card tone-blue" onClick={() => onFilterDeals("전체")}><span className="ws-summary-icon"><Building2 size={16} /></span><span><b>{activeDeals.length}</b><small>진행 중 거래</small></span></button>
+        <div className="ws-summary-card tone-green"><span className="ws-summary-icon"><CheckCircle2 size={16} /></span><span><b>{monthlyCompletedCount}</b><small>이번 달 완료</small></span></div>
+      </div>
 
-    <div className="dealer-secondary-actions">
-      <button className="button button-ghost" onClick={onNewRequest}><Plus size={16} aria-hidden="true" /> 새 시공 요청</button>
-      <button className="button button-ghost" onClick={onPriceGuide}><CircleDollarSign size={16} aria-hidden="true" /> 권장 패키지 확인</button>
-      {onShopSearchRequests && <button className="button button-ghost" onClick={onShopSearchRequests}><Search size={16} aria-hidden="true" /> 시공점 찾기 요청</button>}
-    </div>
-
-    {deals.length === 0 && <section className="empty-state dashboard-empty"><span>+</span><h2>아직 거래가 없습니다.</h2><p>가까운 시공점을 찾아 첫 시공 요청을 만들어 보세요.</p><button className="primary" onClick={onFindShop}>가까운 시공점 찾기</button></section>}
+      <div className="ws-work-grid">
+        <section className="ws-card ws-list-card">
+          <div className="ws-section-head"><h2>확인이 필요한 거래</h2>{waitingDeals.length > 0 && <button onClick={() => onFilterDeals("견적")}>전체 보기</button>}</div>
+          {visibleWaitingDeals.length > 0 ? visibleWaitingDeals.map((deal) => <DealRow key={deal.id} deal={deal} onOpenTransaction={onOpenTransaction} />) : <EmptyRow>확인이 필요한 거래가 없습니다.</EmptyRow>}
+        </section>
+        <section className="ws-card ws-list-card">
+          <div className="ws-section-head"><h2>진행 중인 거래</h2>{activeDeals.length > 0 && <button onClick={() => onFilterDeals("전체")}>전체 보기</button>}</div>
+          {visibleActiveDeals.length > 0 ? visibleActiveDeals.map((deal) => <DealRow key={deal.id} deal={deal} onOpenTransaction={onOpenTransaction} />) : <EmptyRow>진행 중인 거래가 없습니다.</EmptyRow>}
+        </section>
+      </div>
+    </> : <section className="empty-state dashboard-empty"><span>+</span><h2>아직 거래가 없습니다.</h2><p>가까운 시공점을 찾아 첫 시공 요청을 만들어 보세요.</p><button className="primary" onClick={onFindShop}>가까운 시공점 찾기</button></section>}
   </section>;
 }
