@@ -41,6 +41,14 @@ const screenTitles: Partial<Record<Screen, string>> = {
   requestSummary: "요청 최종 확인", dealerMap: "시공점 찾기", deals: "거래 관리", shopRequests: "거래 관리", messages: "메시지", dealerProfile: "마이페이지", ops: "운영 현황", adminShops: "시공점 관리", adminAccount: "계정", dealerHelp: "고객센터",
 };
 
+// Shop's sidebar labels ("거래방"/"시공점 관리") and the shared screenTitles
+// map (written for Dealer's "거래 관리"/"마이페이지") disagreed for the same
+// two screens — the topbar showed different words than the sidebar button
+// the Shop user just clicked. Dealer's nav has always had sidebar label ===
+// topbar title for every item; this makes Shop match that same convention
+// without touching the shared map Dealer still relies on.
+const shopScreenTitles: Partial<Record<Screen, string>> = { shopRequests: "거래방", dealerProfile: "시공점 관리" };
+
 const MOBILE_PRIMARY_COUNT = 4;
 
 function isActive(screen: Screen, target: Screen) {
@@ -92,7 +100,7 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
           messenger-focus-topbar's base rule is display:none, only overridden
           at desktop widths, so the existing mobile Inbox/chat header flow is
           untouched. */}
-      <header className="app-topbar app-topbar-default"><button className="mobile-sidebar-toggle" onClick={() => setMoreOpen(true)} aria-label="업무 메뉴 열기"><Menu size={20} /></button><div className="topbar-title"><small>Car-Master</small><b>{screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div></div></div></header>
+      <header className="app-topbar app-topbar-default"><button className="mobile-sidebar-toggle" onClick={() => setMoreOpen(true)} aria-label="업무 메뉴 열기"><Menu size={20} /></button><div className="topbar-title"><small>Car-Master</small><b>{(role === "shop" ? shopScreenTitles[screen] : undefined) ?? screenTitles[screen] ?? "워크스페이스"}</b></div><div className="topbar-actions"><span className="service-status"><i /> 서비스 정상</span><button className="topbar-icon-button" aria-label="알림"><Bell size={18} /></button>{role === "dealer" && <button className="primary" onClick={() => onNavigate("request")}><Plus size={17} /> 새 시공 요청</button>}<button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button><div className="topbar-account"><span>{account.name.slice(0, 1)}</span><div><b>{account.name}</b><small>{company ?? `${roleLabel} 계정`}</small></div></div></div></header>
       <header className="app-topbar messenger-focus-topbar"><button type="button" className="messenger-back-to-workspace" onClick={() => onNavigate(homeScreen)}><ArrowLeft size={17} aria-hidden="true" /> Car-Master</button><b>메시지</b><button className="mobile-logout-button" onClick={onLogout} aria-label="로그아웃"><LogOut size={18} /><span>로그아웃</span></button></header>
       {children}
     </main>
