@@ -68,9 +68,7 @@ export function ShopDashboard({ transactions, rooms, onOpenTransaction, onOpenMe
   };
 
   return <section className="installer-dashboard section role-home role-home-shop">
-    <header className="workspace-heading installer-heading">
-      <div><p className="eyebrow">오늘의 시공 업무</p><h1>오늘 뭐 해야 하는지 <br />바로 확인하세요.</h1><p>입고 예정, 작업 중인 차량, 새 요청을 우선순위로 정리했습니다.</p></div>
-    </header>
+    <header className="page-title"><div><p className="eyebrow">SHOP WORKSPACE</p><h1>홈</h1><p className="page-subtitle">입고 예정, 작업 중인 차량, 새 요청을 우선순위로 정리했습니다.</p></div></header>
 
     <div className="installer-priority-strip">{summary.map((item) => <div key={item.label} className={`installer-priority-item tone-${item.tone}`}><i><item.icon size={18} /></i><span>{item.label}</span><b>{item.value}</b></div>)}</div>
 
