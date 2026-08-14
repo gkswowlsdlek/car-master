@@ -646,17 +646,29 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 /* Phase 6: Dealer 거래관리 완성 (browse-and-find; no inline detail pane — click always hands off to the existing Room) */
 .dealer-deal-groups em { margin-left: 6px; border-radius: 999px; background: var(--color-line); color: var(--color-muted); padding: 1px 7px; font-size: 11px; font-style: normal; font-weight: 800; }
 .dealer-deal-groups button.active em { background: var(--color-primary); color: #fff; }
-.dealer-transaction-list { display: grid; gap: 10px; }
-.dealer-transaction-row { display: grid; gap: 8px; border: 1px solid var(--color-line); border-radius: var(--radius-lg); background: #fff; padding: 16px 18px; text-align: left; transition: border-color .15s ease, box-shadow .15s ease, background .15s ease; }
+/* Phase D: rows used to each be their own bordered/shadowed card (14px+
+   gap between them) — that read as a vertical feed rather than a scannable
+   work list. Now the list itself is the single surface, rows are divided
+   by a hairline + a per-stage accent bar (reusing the same stage colors as
+   .status-chip), so far more rows fit above the fold. */
+.dealer-transaction-list { display: block; border: 1px solid var(--color-line); border-radius: var(--radius-lg); background: #fff; box-shadow: var(--shadow-sm); overflow: hidden; }
+.dealer-transaction-row { position: relative; display: grid; gap: 2px; width: 100%; border: 0; border-bottom: 1px solid var(--color-line); background: #fff; padding: 7px 18px 7px 22px; text-align: left; line-height: 1.35; transition: background .15s ease; }
+.dealer-transaction-row:last-child { border-bottom: 0; }
+.dealer-transaction-row::before { content: ""; position: absolute; top: 0; left: 0; bottom: 0; width: 3px; background: var(--color-muted-soft); }
+.dealer-transaction-row[data-stage="견적"]::before { background: var(--color-warning); }
+.dealer-transaction-row[data-stage="시공예약"]::before,.dealer-transaction-row[data-stage="입고"]::before { background: var(--color-primary); }
+.dealer-transaction-row[data-stage="작업완료"]::before { background: var(--color-success); }
+.dealer-transaction-row[data-stage="출고"]::before { background: var(--color-ink); }
+.dealer-transaction-row[data-stage="취소"]::before,.dealer-transaction-row[data-stage="시공불가"]::before { background: var(--color-danger); }
 .dealer-transaction-row-main { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
-.dealer-transaction-row-main b { font-size: 15px; }
+.dealer-transaction-row-main b { font-size: 14.5px; }
 .dealer-transaction-row-main span { color: var(--color-muted); font-size: 12.5px; }
 .dealer-transaction-row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .dealer-transaction-row-meta small { color: var(--color-muted); font-size: 11.5px; }
 .dealer-transaction-row-activity { margin-left: auto; }
 .phone-confirm-flag { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; background: var(--color-warning-bg); color: var(--color-warning); padding: 2px 8px; font-weight: 700; }
 .dealer-transaction-row-lastmessage { display: block; overflow: hidden; color: var(--color-muted-soft); font-size: 11.5px; font-style: normal; text-overflow: ellipsis; white-space: nowrap; }
-@media (hover:hover) { .dealer-transaction-row:hover { border-color: var(--color-primary-border); box-shadow: var(--shadow-sm); background: var(--color-surface-soft); } }
+@media (hover:hover) { .dealer-transaction-row:hover { background: var(--color-surface-soft); } }
 @media (max-width:760px) { .dealer-deal-groups { display: flex; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; } .dealer-deal-groups button { flex: 0 0 auto; } .dealer-transaction-row-activity { margin-left: 0; } }
 
 /* Phase 7: Admin 운영센터 보강 (운영 큐 + 시공점 관리/Claim, vanity metric 없음) */

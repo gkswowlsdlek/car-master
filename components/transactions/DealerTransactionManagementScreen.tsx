@@ -125,7 +125,7 @@ export function DealerTransactionManagementScreen({ transactions, initialGroupFi
             const contactUnreachable = item.contactStatus === "unreachable";
             const scheduled = !terminal && item.status.stage !== "출고" ? shortDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt) : undefined;
             const price = won(item.pricing.finalPrice);
-            return <button key={item.id} data-testid={`transaction-card-${item.id}`} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} className="dealer-transaction-row" onClick={() => onOpenTransaction(item.id)}>
+            return <button key={item.id} data-testid={`transaction-card-${item.id}`} data-stage={item.status.stage} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} className="dealer-transaction-row" onClick={() => onOpenTransaction(item.id)}>
               <div className="dealer-transaction-row-main">
                 <b>{item.vehicle.maker} {item.vehicle.model}</b>
                 <span>{item.installerName} · {item.service.product ?? item.service.workDescription}</span>
