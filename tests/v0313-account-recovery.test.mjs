@@ -121,7 +121,7 @@ test("Real Dealer, Installer and Admin all wire the same shared PasswordChangeFo
   assert.match(page, /<DealerWorkspace[\s\S]*?onChangePassword={changePassword}/);
   assert.match(dealerWorkspace, /<ProfileEditor role="dealer"[\s\S]*?onChangePassword={onChangePassword}/);
   assert.match(page, /<InstallerWorkspace[\s\S]*?onChangePassword={changePassword}/);
-  assert.match(installerWorkspace, /<ProfileEditor role="shop"[\s\S]*?onChangePassword={onChangePassword}/);
+  assert.match(installerWorkspace, /<ShopManagementScreen userId={account\.id} onChangePassword={onChangePassword}/);
   assert.match(page, /<AdminWorkspace[\s\S]*?onChangePassword={changePassword}/);
   assert.match(adminWorkspace, /<AdminAccountScreen[\s\S]*?onChangePassword={onChangePassword}/);
   const profileEditor = await read("components/profile/ProfileEditor.tsx");
