@@ -5,7 +5,7 @@ where table_schema = 'public'
   and table_name in ('installer_shops', 'shop_memberships')
 order by table_name, ordinal_position;
 
-select table_name, row_security
+select tablename as table_name, rowsecurity as row_security
 from pg_catalog.pg_tables
 where schemaname = 'public'
   and tablename in ('installer_shops', 'shop_memberships');
