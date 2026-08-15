@@ -36,7 +36,7 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransa
   const quickWorkTypes = ["썬팅", "블랙박스", "PPF", "유리막", "기타"];
   const submitSearch = () => (area.trim() ? onSearchLocation(area.trim(), workType) : onFindShop());
 
-  return <section className="dealer-dashboard r3-dealer-dashboard">
+  return <section className="dealer-dashboard r3-dealer-dashboard r4-dealer-dashboard">
     <header className="ws-dashboard-header r3-dashboard-header"><div><h1>{dealerName} 딜러님</h1><p>오늘 필요한 차량 작업을 빠르게 시작하세요.</p></div><button className="r3-profile-chip" type="button" aria-label="프로필 메뉴"><span>{dealerName.slice(0, 1)}</span><small>Dealer</small></button></header>
     <section className="ws-search-hero r3-search-hero">
       <div className="r3-hero-title"><MapPin size={22} /><h2>어디에서 차량용품 작업이 필요하세요?</h2></div>

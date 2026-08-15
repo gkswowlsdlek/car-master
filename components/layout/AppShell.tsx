@@ -86,7 +86,7 @@ export function AppShell({ role, account, company, screen, unreadMessageCount = 
   const messengerFocus = screen === "messages";
   const homeScreen = navigation[role][0].screen ?? "dealerDashboard";
 
-  return <div className={`app-frame${mobileFullscreen ? " mobile-chat-fullscreen" : ""}${messengerFocus ? " messenger-focus" : ""}`}>
+  return <div className={`app-frame role-${role}${mobileFullscreen ? " mobile-chat-fullscreen" : ""}${messengerFocus ? " messenger-focus" : ""}`}>
     <aside className="app-sidebar">
       <button className="app-logo" onClick={() => onNavigate(homeScreen)}><img src="/carmaster-logo-transparent.png" alt="Car-Master" /><small>{roleLabel} 워크스페이스</small></button>
       <div className="sidebar-section-label">업무 메뉴</div>

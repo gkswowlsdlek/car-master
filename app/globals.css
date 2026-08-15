@@ -1,6 +1,47 @@
 @import "tailwindcss";
 @import "../styles/design-system.css";
 
+/* R4 reference-locked Dealer workspace presentation. */
+.role-dealer .app-sidebar { grid-template-rows: auto 1fr auto; background: #07142a; border-right: 1px solid #172845; padding: 24px 16px 18px; }
+.role-dealer .app-logo { padding: 0 12px 24px; }
+.role-dealer .app-logo img { width: 174px; filter: brightness(0) invert(1); }
+.role-dealer .app-logo small, .role-dealer .sidebar-section-label { color: rgba(255,255,255,.62); }
+.role-dealer .app-sidebar nav { gap: 3px; }
+.role-dealer .app-sidebar nav button { min-height: 48px; border-radius: 9px; color: rgba(255,255,255,.78); font-size: 15px; }
+.role-dealer .app-sidebar nav button:hover { background: rgba(255,255,255,.07); color: #fff; }
+.role-dealer .app-sidebar nav button.active { background: #5d5ce6; box-shadow: none; color: #fff; }
+.role-dealer .app-sidebar nav button.active i { background: transparent; color: #fff; }
+.role-dealer .sidebar-profile { border-top-color: #1b2b46; color: #fff; }
+.role-dealer .sidebar-profile small, .role-dealer .sidebar-profile > button { color: rgba(255,255,255,.62); }
+.role-dealer .sidebar-profile > span { background: #fff; color: #26345e; }
+.role-dealer .app-main { background: #fff; }
+.role-dealer .app-topbar-default { height: 72px; border-bottom: 0; background: #fff; padding-inline: 42px; }
+.role-dealer .app-topbar-default .topbar-title, .role-dealer .app-topbar-default .service-status, .role-dealer .app-topbar-default .topbar-icon-button, .role-dealer .app-topbar-default > .topbar-actions > .primary { display: none; }
+.role-dealer .app-topbar-default .topbar-actions { margin-left: auto; }
+.r4-dealer-dashboard { width: min(1280px, 100%); padding: 8px 36px 64px; }
+.r4-dealer-dashboard .r3-dashboard-header { margin-bottom: 46px; }
+.r4-dealer-dashboard .r3-dashboard-header h1 { font-size: 32px; }
+.r4-dealer-dashboard .r3-search-hero { border: 0; background: transparent; padding: 0; }
+.r4-dealer-dashboard .r3-hero-title { margin-bottom: 28px; }
+.r4-dealer-dashboard .r3-hero-title h2 { font-size: 36px; }
+.r4-dealer-dashboard .r3-search-form { max-width: 860px; grid-template-columns: minmax(0,1fr) auto; }
+.r4-dealer-dashboard .r3-search-form label:nth-child(2) { display: none; }
+.r4-dealer-dashboard .r3-search-form input { height: 54px; border-radius: 8px; background: #f8f9fc; border-color: #edf0f5; font-size: 15px; }
+.r4-dealer-dashboard .r3-search-hero .ws-search-cta { height: 54px; padding-inline: 28px; border-radius: 8px; }
+.r4-dealer-dashboard .r3-quick-work { margin-top: 22px; }
+.r4-dealer-dashboard .r3-secondary-actions { display: none; }
+.r4-dealer-dashboard .r3-recent-work { margin-top: 64px; border-color: #edf0f5; }
+.r4-dealer-dashboard .r3-recent-work .ws-section-head { padding: 20px 26px; }
+.r4-dealer-dashboard .r3-recent-work .ws-row-columns, .r4-dealer-dashboard .r3-recent-work .ws-row { padding-inline: 26px; }
+@media (max-width: 760px) {
+  .r4-dealer-dashboard { padding: 22px 16px 42px; }
+  .r4-dealer-dashboard .r3-dashboard-header { margin-bottom: 28px; }
+  .r4-dealer-dashboard .r3-hero-title h2 { font-size: 25px; }
+  .r4-dealer-dashboard .r3-search-form { grid-template-columns: 1fr; }
+  .r4-dealer-dashboard .r3-search-form input, .r4-dealer-dashboard .r3-search-hero .ws-search-cta { height: 48px; }
+  .r4-dealer-dashboard .r3-recent-work { margin-top: 34px; }
+}
+
 /* Product polish: standalone service help surface */
 .help-page { min-height: 100vh; background: #f7f9fc; padding: 48px 24px 80px; color: var(--color-ink); }
 .help-shell { width: min(960px,100%); margin: 0 auto; }
