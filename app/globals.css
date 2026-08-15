@@ -935,6 +935,52 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 }
 
 /* R2 final cascade: Shop transaction workspace operations layout. */
+
+/* R2 Dealer Core — Workshop Ledger structural primitives. */
+.dealer-dashboard .ws-work-grid { grid-template-columns: minmax(0,1.35fr) minmax(0,1fr); }
+.dealer-dashboard .ws-section-head { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.dealer-dashboard .ws-section-head > div { display:grid; gap:3px; }
+.dealer-dashboard .ws-section-head p { margin:0; color:var(--color-muted); font-size:11px; }
+.dealer-dashboard .ws-row-columns { display:grid; grid-template-columns:minmax(0,1fr) 72px 120px 90px; gap:14px; border-bottom:1px solid var(--color-line); color:var(--color-muted); padding:8px 16px; font-size:10px; font-weight:750; }
+.dealer-dashboard .ws-row { display:grid; grid-template-columns:minmax(0,1fr) 72px 120px 90px; align-items:center; gap:14px; width:100%; }
+.dealer-dashboard .ws-row-schedule { display:grid; gap:2px; }
+.dealer-dashboard .ws-row-schedule small { color:var(--color-muted); font-size:10px; }
+.dealer-dashboard .ws-row-schedule b { color:var(--color-text-soft); font-size:12px; }
+.dealer-dashboard .ws-row-next { color:var(--color-primary); font-size:11px; font-weight:750; text-align:right; }
+
+.dealer-transaction-management .dealer-transaction-table-head { display:grid; grid-template-columns:minmax(240px,1.2fr) minmax(150px,.7fr) minmax(220px,1fr) minmax(120px,.5fr); gap:20px; border-bottom:1px solid var(--color-line); background:var(--color-surface-soft); padding:9px 18px; color:var(--color-muted); font-size:10px; font-weight:750; }
+.dealer-transaction-management .dealer-transaction-row { grid-template-columns:minmax(240px,1.2fr) minmax(150px,.7fr) minmax(220px,1fr) minmax(120px,.5fr); }
+.dealer-transaction-management .dealer-transaction-row-schedule { display:grid; gap:3px; }
+.dealer-transaction-management .dealer-transaction-row-schedule b { color:var(--color-text-soft); font-size:12px; }
+.dealer-transaction-management .dealer-transaction-row-schedule small { color:var(--color-muted); font-size:10px; }
+.dealer-transaction-management .dealer-transaction-row-next { color:var(--color-primary); font-size:11px; text-align:right; white-space:nowrap; }
+.dealer-transaction-management .dealer-transaction-row-next span { margin-left:3px; font-size:14px; }
+
+.r2-job-context { display:grid; grid-template-columns:1.15fr 1.1fr .9fr 1.1fr; gap:0; border:1px solid var(--color-line); border-radius:10px; background:#fff; margin-bottom:14px; }
+.r2-job-context > div { display:grid; align-content:center; gap:4px; min-height:82px; border-right:1px solid var(--color-line); padding:14px 16px; }
+.r2-job-context > div:last-child { border-right:0; }
+.r2-context-label { color:var(--color-muted); font-size:10px; font-weight:750; }
+.r2-job-context strong { color:var(--color-ink); font-size:15px; letter-spacing:-.02em; }
+.r2-job-context small { color:var(--color-muted); font-size:11px; }
+.r2-job-next { background:var(--color-primary-soft); }
+.r2-job-next strong { color:var(--color-primary); }
+
+@media (max-width:760px) {
+  .dealer-dashboard .ws-work-grid { grid-template-columns:1fr; }
+  .dealer-dashboard .ws-row-columns { display:none; }
+  .dealer-dashboard .ws-row { grid-template-columns:minmax(0,1fr) auto; gap:8px; }
+  .dealer-dashboard .ws-row-schedule { display:none; }
+  .dealer-dashboard .ws-row-next { grid-column:2; grid-row:1; }
+  .dealer-dashboard .ws-row .status-chip,.dealer-dashboard .ws-row .ws-badge { grid-column:1/-1; justify-self:start; }
+  .dealer-transaction-management .dealer-transaction-table-head { display:none; }
+  .dealer-transaction-management .dealer-transaction-row { grid-template-columns:minmax(0,1fr) auto; gap:8px; }
+  .dealer-transaction-management .dealer-transaction-row-schedule { display:none; }
+  .dealer-transaction-management .dealer-transaction-row-meta { grid-column:1/-1; }
+  .dealer-transaction-management .dealer-transaction-row-next { grid-column:2; grid-row:1; }
+  .r2-job-context { grid-template-columns:1fr 1fr; }
+  .r2-job-context > div:nth-child(2) { border-right:0; }
+  .r2-job-context > div:nth-child(-n+2) { border-bottom:1px solid var(--color-line); }
+}
 .shop-transaction-management .transaction-summary-strip { display: flex; gap: 6px; margin: 0 0 12px; }
 .shop-transaction-management .transaction-summary-strip button { min-height: 38px; border: 0; border-radius: 8px; background: transparent; padding: 7px 12px; }
 .shop-transaction-management .transaction-summary-strip button span { color: var(--color-muted); font-size: 11px; }

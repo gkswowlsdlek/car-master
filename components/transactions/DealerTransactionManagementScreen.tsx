@@ -117,7 +117,8 @@ export function DealerTransactionManagementScreen({ transactions, initialGroupFi
           {empty.body && <p>{empty.body}</p>}
           {visible.length === 0 && !query.trim() && <button className="primary" onClick={onFindShop}>시공점 찾기</button>}
         </section>
-      : <div className="dealer-transaction-list">
+        : <div className="dealer-transaction-list" role="list" aria-label="거래 작업 목록">
+          <div className="dealer-transaction-table-head" aria-hidden="true"><span>차량 / Shop</span><span>일정</span><span>현재 단계</span><span>다음 행동</span></div>
           {filtered.map((item) => {
             const terminal = isTerminalOutcome(item.status.stage);
             const inPhoneConfirmWindow = item.status.stage === "견적" || item.status.stage === "시공예약";
@@ -125,11 +126,13 @@ export function DealerTransactionManagementScreen({ transactions, initialGroupFi
             const contactUnreachable = item.contactStatus === "unreachable";
             const scheduled = !terminal && item.status.stage !== "출고" ? shortDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt) : undefined;
             const price = won(item.pricing.finalPrice);
-            return <button key={item.id} data-testid={`transaction-card-${item.id}`} data-stage={item.status.stage} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} className="dealer-transaction-row" onClick={() => onOpenTransaction(item.id)}>
+            const nextAction = needsPhoneConfirm ? "전화 확인" : item.status.stage === "견적" ? "요청 확인" : item.status.stage === "출고" ? "완료" : terminal ? "기록 보기" : "거래방 열기";
+            return <button key={item.id} role="listitem" data-testid={`transaction-card-${item.id}`} data-stage={item.status.stage} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} className="dealer-transaction-row" onClick={() => onOpenTransaction(item.id)}>
               <div className="dealer-transaction-row-main">
                 <b>{item.vehicle.maker} {item.vehicle.model}</b>
                 <span>{item.installerName} · {item.service.product ?? item.service.workDescription}</span>
               </div>
+              <div className="dealer-transaction-row-schedule"><small>입고</small><b>{scheduled ?? "미정"}</b>{item.schedule.desiredReleaseAt && <small>출고 {shortDate(item.schedule.desiredReleaseAt)}</small>}</div>
               <div className="dealer-transaction-row-meta">
                 <em className={`status-chip status-${item.status.stage}`}>{dealerStageLabel(item.status.stage)}</em>
                 {needsPhoneConfirm && <small className="phone-confirm-flag"><Phone size={11} aria-hidden="true" /> 전화 확인 필요</small>}
@@ -138,6 +141,7 @@ export function DealerTransactionManagementScreen({ transactions, initialGroupFi
                 {price && <small>{price}</small>}
                 <small className="dealer-transaction-row-activity">{activityTime(item.status.updatedAt)}</small>
               </div>
+              <strong className="dealer-transaction-row-next">{nextAction} <span aria-hidden="true">→</span></strong>
               {item.lastMessage && <em className="dealer-transaction-row-lastmessage">{item.lastMessage}</em>}
             </button>;
           })}

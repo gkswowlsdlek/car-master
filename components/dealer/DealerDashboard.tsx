@@ -21,8 +21,10 @@ function DealRow({ deal, onOpenTransaction }: { deal: Transaction; onOpenTransac
       <b>{deal.vehicle.maker} {deal.vehicle.model}</b>
       <small>{deal.installerName} · {deal.service.workDescription || deal.service.product || "작업 내용 미정"}</small>
     </span>
+    <span className="ws-row-schedule"><small>입고</small><b>{deal.schedule.confirmedInboundAt ?? deal.schedule.requestedInboundAt ? new Date(deal.schedule.confirmedInboundAt ?? deal.schedule.requestedInboundAt!).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : "미정"}</b></span>
     {deal.contactStatus === undefined && <span className="ws-badge ws-badge-red"><Phone size={11} /> 전화 확인 필요</span>}
     <em className={`status-chip status-${deal.status.stage}`}>{dealerStageLabel(deal.status.stage)}</em>
+    <span className="ws-row-next">열어보기 →</span>
   </button>;
 }
 
@@ -95,11 +97,13 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransa
 
       <div className="ws-work-grid">
         <section className="ws-card ws-list-card">
-          <div className="ws-section-head"><h2>확인이 필요한 거래</h2>{waitingDeals.length > 0 && <button onClick={() => onFilterDeals("견적")}>전체 보기</button>}</div>
+          <div className="ws-section-head"><div><h2>지금 확인해야 할 작업</h2><p>전화 확인과 일정 조율이 필요한 차량입니다.</p></div>{waitingDeals.length > 0 && <button onClick={() => onFilterDeals("견적")}>전체 보기</button>}</div>
+          <div className="ws-row-columns" aria-hidden="true"><span>차량 / 작업</span><span>입고</span><span>상태</span><span>다음 행동</span></div>
           {visibleWaitingDeals.length > 0 ? visibleWaitingDeals.map((deal) => <DealRow key={deal.id} deal={deal} onOpenTransaction={onOpenTransaction} />) : <EmptyRow>확인이 필요한 거래가 없습니다.</EmptyRow>}
         </section>
         <section className="ws-card ws-list-card">
-          <div className="ws-section-head"><h2>진행 중인 거래</h2>{activeDeals.length > 0 && <button onClick={() => onFilterDeals("전체")}>전체 보기</button>}</div>
+          <div className="ws-section-head"><div><h2>진행 중인 차량</h2><p>현재 작업 단계와 일정을 확인하세요.</p></div>{activeDeals.length > 0 && <button onClick={() => onFilterDeals("전체")}>전체 보기</button>}</div>
+          <div className="ws-row-columns" aria-hidden="true"><span>차량 / 작업</span><span>입고</span><span>상태</span><span>다음 행동</span></div>
           {visibleActiveDeals.length > 0 ? visibleActiveDeals.map((deal) => <DealRow key={deal.id} deal={deal} onOpenTransaction={onOpenTransaction} />) : <EmptyRow>진행 중인 거래가 없습니다.</EmptyRow>}
         </section>
       </div>
