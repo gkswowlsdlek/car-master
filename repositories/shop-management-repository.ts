@@ -15,6 +15,16 @@ function map(row: ShopRow, membershipRole: ShopManagementRecord["membershipRole"
 }
 
 export class ShopManagementRepository {
+  async getActiveShopIdsForUser(userId: string): Promise<string[]> {
+    const { data, error } = await createSupabaseBrowserClient()
+      .from("shop_memberships")
+      .select("shop_id")
+      .eq("user_id", userId)
+      .eq("status", "active");
+    if (error) throw error;
+    return ((data ?? []) as { shop_id: string }[]).map((membership) => membership.shop_id).filter(Boolean);
+  }
+
   async getForUser(userId: string): Promise<ShopManagementRecord | null> {
     const client = createSupabaseBrowserClient();
     const { data: memberships, error: membershipError } = await client.from("shop_memberships").select("shop_id,membership_role,status").eq("user_id", userId).in("status", ["active", "suspended"]);

@@ -31,7 +31,8 @@ test("Legacy rows with null shop_id remain safe and runtime behavior stays legac
   assert.match(source, /shopId: row\.shop_id \?\? null/);
   const installer = normalize(await read("components/workspaces/InstallerWorkspace.tsx"));
   const dealer = normalize(await read("components/workspaces/DealerWorkspace.tsx"));
-  assert.match(installer, /item\.installerId === account\.shopId/);
+  assert.match(installer, /item\.shopId\) return activeShopIds\.includes\(item\.shopId\)/);
+  assert.match(installer, /item\.installerId === legacyInstallerId/);
   assert.doesNotMatch(installer, /item\.shopId === account\.shopId/);
   assert.match(dealer, /installerId: selectedShop\.id/);
 });

@@ -9,6 +9,8 @@ import { MessengerScreen } from "../messenger/MessengerScreen";
 import { ShopManagementScreen } from "../shop/ShopManagementScreen";
 import { ShopDashboard } from "../shop/ShopDashboard";
 import { TransactionManagementScreen } from "../transactions/TransactionManagementScreen";
+import { isDemoAccountId } from "../../data/demo-accounts";
+import { shopManagementRepository } from "../../repositories/shop-management-repository";
 
 type InstallerWorkspaceProps = {
   account: DemoAccount;
@@ -38,10 +40,31 @@ type InstallerWorkspaceProps = {
 export function InstallerWorkspace({ account, screen, transactions, rooms, installers, useRemoteAttachments, demoAttachmentProvider, isLoading, loadError, onNavigate, onSend, onHide, onUnhide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onMarkRead, onLoadContact, onChangePassword, onUnreadMessageCountChange, onMobileFullscreenChange }: InstallerWorkspaceProps) {
   const [selectedTransactionId, setSelectedTransactionId] = useState("");
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  const [activeShopIds, setActiveShopIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (isDemoAccountId(account.id)) {
+      return;
+    }
+    let cancelled = false;
+    void shopManagementRepository.getActiveShopIdsForUser(account.id).then((shopIds) => {
+      if (!cancelled) setActiveShopIds(shopIds);
+    }).catch(() => {
+      if (!cancelled) setActiveShopIds([]);
+    });
+    return () => { cancelled = true; };
+  }, [account.id]);
 
   const roleTransactions = useMemo(
-    () => transactions.filter((item) => item.installerId === account.shopId),
-    [transactions, account.shopId],
+    () => {
+      const demo = isDemoAccountId(account.id);
+      const legacyInstallerId = demo ? account.shopId : account.id;
+      return transactions.filter((item) => {
+        if (item.shopId) return activeShopIds.includes(item.shopId);
+        return Boolean(legacyInstallerId && item.installerId === legacyInstallerId);
+      });
+    },
+    [account.id, account.shopId, activeShopIds, transactions],
   );
   const activeTransactionId = selectedTransactionId || roleTransactions[0]?.id || "";
   const unreadMessageCount = useMemo(

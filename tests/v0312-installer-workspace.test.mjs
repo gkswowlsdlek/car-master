@@ -34,7 +34,9 @@ test("InstallerWorkspace owns Installer selection, derived transaction scope, Me
   const page = await read("app/page.tsx");
   assert.match(source, /const \[selectedTransactionId, setSelectedTransactionId\] = useState\(""\)/);
   assert.match(source, /const \[mobileChatOpen, setMobileChatOpen\] = useState\(false\)/);
-  assert.match(source, /transactions\.filter\(\(item\) => item\.installerId === account\.shopId\)/);
+  assert.match(source, /shopManagementRepository\.getActiveShopIdsForUser\(account\.id\)/);
+  assert.match(source, /if \(item\.shopId\) return activeShopIds\.includes\(item\.shopId\)/);
+  assert.match(source, /item\.installerId === legacyInstallerId/);
   assert.match(source, /const activeTransactionId = selectedTransactionId \|\| roleTransactions\[0\]\?\.id \|\| ""/);
   assert.match(source, /onMobileFullscreenChange\(mobileChatOpen\)/);
   for (const screen of ["shopDashboard", "shopRequests", "messages", "dealerProfile"]) assert.match(source, new RegExp(`screen === "${screen}"`));
