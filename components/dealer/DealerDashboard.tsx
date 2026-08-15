@@ -1,4 +1,4 @@
-import { CircleDollarSign, MapPin, Phone, Plus, Search } from "lucide-react";
+import { CircleDollarSign, Phone, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import type { Transaction, TransactionStage } from "../../types/transactions";
 import { dealerStageLabel } from "../../services/transaction-state-service";
@@ -39,7 +39,7 @@ export function DealerDashboard({ dealerName, deals, onFilterDeals, onOpenTransa
   return <section className="dealer-dashboard r3-dealer-dashboard r4-dealer-dashboard">
     <header className="ws-dashboard-header r3-dashboard-header"><div><h1>{dealerName} 딜러님</h1><p>오늘 필요한 차량 작업을 빠르게 시작하세요.</p></div></header>
     <section className="ws-search-hero r3-search-hero">
-      <div className="r3-hero-title"><MapPin size={22} /><h2>어디에서 차량용품 작업이 필요하세요?</h2></div>
+      <div className="r3-hero-title"><h2>어디에서 차량용품 작업이 필요하세요?</h2></div>
       <div className="ws-search-form r3-search-form">
         <label><span>지역 또는 시공점을 검색해보세요</span><input value={area} onChange={(event) => setArea(event.target.value)} placeholder="예: 서울 강남구" onKeyDown={(event) => event.key === "Enter" && submitSearch()} /></label>
         <label><span>작업 종류</span><select value={workType} onChange={(event) => setWorkType(event.target.value)}>{quickWorkTypes.map((type) => <option key={type}>{type}</option>)}</select></label>
