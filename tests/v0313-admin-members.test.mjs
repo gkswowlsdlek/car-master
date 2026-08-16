@@ -7,7 +7,7 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 test("Real getAllMembers() reuses the RLS-bound browser client — no service-role bypass, no new broad grant", async () => {
   const source = await read("repositories/membership-repository.ts");
   assert.match(source, /async getAllMembers\(\): Promise<AdminMember\[\]>/);
-  assert.match(source, /supabase\.from\("dealer_profiles"\)/);
+  assert.match(source, /supabase\s*\.from\s*\(\s*"dealer_profiles"\s*,?\s*\)/);
   // Reuses the already-RLS-gated installer query instead of a second bespoke one.
   assert.match(source, /installerApplications\].*await Promise\.all\(\[[\s\S]*?this\.getInstallerApplications\(\)/);
   assert.doesNotMatch(source, /service_role/i);
@@ -26,8 +26,8 @@ test("No new migration file was added for member listing — Real access relies 
 
 test("AdminMember mapping keeps Dealer and Installer role/approval fields separate (no fabricated approval status for dealers)", async () => {
   const source = await read("repositories/membership-repository.ts");
-  assert.match(source, /role: "dealer".*approvalStatus: null/);
-  assert.match(source, /role: "installer".*approvalStatus: item\.status/);
+  assert.match(source, /role:\s*"dealer"[\s\S]*?approvalStatus:\s*null/);
+  assert.match(source, /role:\s*"installer"[\s\S]*?approvalStatus:\s*item\.status/);
 });
 
 test("Demo member roster is a fixed, local mapping from demoAccounts — never calls the real repository or a live Supabase query", async () => {
@@ -62,7 +62,7 @@ test("AdminMemberPanel covers loading, error and empty states distinctly", async
 
 test("AdminMemberPanel calls the demo repository only when demoSession is true, and the real repository otherwise", async () => {
   const source = await read("components/admin/AdminMemberPanel.tsx");
-  assert.match(source, /demoSession \? await demoMembershipRepository\.getAllMembers\(\) : await membershipRepository\.getAllMembers\(\)/);
+  assert.match(source, /demoSession\s*\?\s*await demoMembershipRepository\.getAllMembers\(\)\s*:\s*await membershipRepository\.getAllMembers\(\)/);
 });
 
 test("AdminMemberPanel links a pending/rejected/suspended installer to the existing InstallerApprovalPanel instead of duplicating approve/reject actions", async () => {

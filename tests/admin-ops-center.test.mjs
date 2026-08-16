@@ -79,7 +79,7 @@ test("AdminOverview panel order puts the operational queue and open Shop Search 
 
 test("clicking the 취소·시공불가 Queue card drives AdminTransactionPanel's group filter (lifted/controlled state), not just a scroll — so the filtered view is actually applied, not merely visible", () => {
   assert.match(overviewSource, /setTransactionGroup\("종료"\)/);
-  assert.match(overviewSource, /<AdminTransactionPanel transactions=\{transactions\} rooms=\{rooms\} group=\{transactionGroup\} onGroupChange=\{setTransactionGroup\}/);
+  assert.match(overviewSource, /<AdminTransactionPanel\s+transactions=\{transactions\}\s+rooms=\{rooms\}\s+group=\{transactionGroup\}\s+onGroupChange=\{setTransactionGroup\}/);
 });
 
 test("get_admin_shop_search_requests already orders open requests (requested/in_progress/shop_proposed) oldest-first before closed ones — Phase 7 confirms this instead of re-implementing sort client-side", async () => {
@@ -89,8 +89,8 @@ test("get_admin_shop_search_requests already orders open requests (requested/in_
 
 test("AdminTransactionPanel supports 시공불가 in the stage filter (it was missing even though the underlying data already carries that outcome) and shows 최종 시공금액/종료 사유 when present", () => {
   assert.match(transactionPanelSource, /\[\.\.\.stageOrder, "취소" as const, "시공불가" as const\]/);
-  assert.match(transactionPanelSource, /selected\.pricing\.finalPrice != null && <div><dt>최종 시공금액<\/dt>/);
-  assert.match(transactionPanelSource, /selected\.outcomeNote && <div><dt>종료 사유<\/dt>/);
+  assert.match(transactionPanelSource, /selected\.pricing\.finalPrice != null\s*&&\s*(?:\(\s*)?<div>\s*<dt>최종 시공금액<\/dt>/);
+  assert.match(transactionPanelSource, /selected\.outcomeNote\s*&&\s*(?:\(\s*)?<div>\s*<dt>종료 사유<\/dt>/);
 });
 
 test("AdminTransactionPanel groups 진행중/완료/종료 the same way as Dealer's Phase 6 groupOf — isTerminalOutcome for 종료, 출고 for 완료, everything else 진행중", () => {
@@ -112,7 +112,7 @@ test("AdminMemberPanel and InstallerApprovalPanel now import the same shared lab
 test("admin-labels.ts keeps Shop exposure (approval_status) and Shop ownership (claimed/unclaimed) as two distinct label maps — never conflated, matching Phase 7 §10's explicit terminology requirement", () => {
   assert.match(adminLabelsSource, /export const SHOP_EXPOSURE_STATUS_LABEL/);
   assert.match(adminLabelsSource, /export const SHOP_OWNERSHIP_STATUS_LABEL: Record<"unclaimed" \| "claimed", string> = \{/);
-  assert.match(adminLabelsSource, /unclaimed: "미가입 업체", claimed: "운영자 연결됨"/);
+  assert.match(adminLabelsSource, /unclaimed:\s*"미가입 업체",\s*claimed:\s*"운영자 연결됨"/);
 });
 
 test("shop-claim-repository reuses the existing admin-gated review_shop_claim RPC for the mutation, and relies on shop_claim_requests' existing is_admin() SELECT policy for listing — no new RPC, no new table", () => {
@@ -135,29 +135,29 @@ test("admin-shop-repository.listAll is a direct RLS-scoped query (not a new RPC/
 
 test("pagination safety: the two highest-volume unbounded queries the Phase 7 research flagged (admin transaction list, admin membership lists) now carry an explicit cap", () => {
   assert.match(transactionRepoSource, /\.order\("updated_at", \{ ascending: false \}\)\s*\n\s*\.limit\(500\);/);
-  assert.match(membershipRepoSource, /installer_approvals!inner\(status,review_note\)"\)\.limit\(300\);/);
-  assert.match(membershipRepoSource, /dealer_profiles"\)\.select\("user_id,name,phone,company_name,profiles!inner\(email,created_at\)"\)\.limit\(300\)/);
+  assert.match(membershipRepoSource, /installer_approvals!inner\(status,review_note\)"\s*,?\s*\)\s*\.limit\(300\);/);
+  assert.match(membershipRepoSource, /dealer_profiles"\s*\)\s*\.select\s*\(\s*"user_id,name,phone,company_name,profiles!inner\(email,created_at\)"\s*,?\s*\)\s*\.limit\(300\)/);
 });
 
 test("new 시공점 관리 nav item added without touching Dealer/Shop navigation or removing the existing 운영 현황/계정 items", () => {
   assert.match(appShellSource, /\{ screen: "ops", label: "운영 현황", icon: UsersRound \},\s*\n\s*\{ screen: "adminShops", label: "시공점 관리", icon: Building2 \},\s*\n\s*\{ screen: "adminAccount", label: "계정", icon: UserRound \},/);
-  assert.match(dealerTypesSource, /"ops" \| "adminShops" \| "adminAccount"/);
+  assert.match(dealerTypesSource, /"ops"\s*\|\s*"adminShops"\s*\|\s*"adminAccount"/);
 });
 
 test("AdminWorkspace wires the new adminShops screen and threads onNavigate through so the Ops Queue's Shop Claim card can actually navigate there (not just scroll)", () => {
   assert.match(adminWorkspaceSource, /onNavigate: \(screen: Screen\) => void;/);
-  assert.match(adminWorkspaceSource, /\{screen === "adminShops" && <AdminShopManagementScreen \/>\}/);
+  assert.match(adminWorkspaceSource, /\{screen === "adminShops"\s*&&\s*(?:\(\s*)?<AdminShopManagementScreen\s*\/>/);
   assert.match(adminWorkspaceSource, /onOpenShopManagement=\{\(\) => onNavigate\("adminShops"\)\}/);
-  assert.match(pageSource, /<AdminWorkspace account=\{account\} screen=\{screen\} transactions=\{transactions\} rooms=\{rooms\} onNavigate=\{goToScreen\}/);
+  assert.match(pageSource, /<AdminWorkspace\s+account=\{account\}\s+screen=\{screen\}\s+transactions=\{transactions\}\s+rooms=\{rooms\}\s+onNavigate=\{goToScreen\}/);
 });
 
 test("AdminShopManagementScreen shows both Shop exposure status and ownership status as clearly separate fields (never one label standing in for both)", () => {
-  assert.match(shopManagementSource, /<dt>업체 노출 상태<\/dt><dd>\{SHOP_EXPOSURE_STATUS_LABEL\[selectedShop\.approvalStatus\]\}<\/dd>/);
-  assert.match(shopManagementSource, /<dt>업체 연결 상태<\/dt><dd>\{SHOP_OWNERSHIP_STATUS_LABEL\[selectedShop\.ownershipStatus\]\}<\/dd>/);
+  assert.match(shopManagementSource, /<dt>업체 노출 상태<\/dt>\s*<dd>\{SHOP_EXPOSURE_STATUS_LABEL\[selectedShop\.approvalStatus\]\}<\/dd>/);
+  assert.match(shopManagementSource, /<dt>업체 연결 상태<\/dt>\s*<dd>\{SHOP_OWNERSHIP_STATUS_LABEL\[selectedShop\.ownershipStatus\]\}<\/dd>/);
 });
 
 test("Shop Claim approve/reject buttons only render for a pending claim — no action offered on an already-decided claim", () => {
-  assert.match(shopManagementSource, /selectedClaim\.status === "pending" && <div className="approval-actions">/);
+  assert.match(shopManagementSource, /selectedClaim\.status === "pending"\s*&&\s*(?:\(\s*)?<div className="approval-actions">/);
 });
 
 test("Shop Claim reject asks for confirmation before calling the RPC (same guard pattern as 연결 어려움/시공 불가 elsewhere in this codebase)", () => {

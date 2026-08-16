@@ -143,7 +143,7 @@ test("installer-directory-repository calls get_approved_shop_directory (not the 
 
 test("supabase-transaction-repository exposes createWithShopRoom calling create_shop_transaction_with_room with shopId, alongside (not replacing) the legacy createWithRoom method", () => {
   assert.match(repoSource, /async createWithShopRoom\(shopId: string, value: Pick<Transaction, "vehicle" \| "service" \| "pricing" \| "schedule">\)/);
-  assert.match(repoSource, /rpc\("create_shop_transaction_with_room", \{ payload: \{\s*\n\s*shopId, vehicle: value\.vehicle, service: value\.service, pricing: value\.pricing, schedule: value\.schedule,/);
+  assert.match(repoSource, /rpc\s*\(\s*"create_shop_transaction_with_room",\s*\{\s*payload:\s*\{\s*shopId,\s*vehicle:\s*value\.vehicle,\s*service:\s*value\.service,\s*pricing:\s*value\.pricing,\s*schedule:\s*value\.schedule,/);
   assert.match(repoSource, /async createWithRoom\(value: Pick<Transaction, "installerId"/);
 });
 
@@ -158,7 +158,7 @@ test("MessengerScreen matches the selected installer listing against transaction
 });
 
 test("TransactionChatWorkspace shows a 전화 확인 필요 banner to the dealer only while pre-입고 (견적/시공예약), with a real tel: link when a phone is on file and a non-fabricated fallback otherwise", () => {
-  assert.match(chatWorkspaceSource, /role === "dealer" && \(transaction\.status\.stage === "견적" \|\| transaction\.status\.stage === "시공예약"\)/);
+  assert.match(chatWorkspaceSource, /role === "dealer"\s*&&\s*\(transaction\.status\.stage === "견적"\s*\|\|\s*transaction\.status\.stage === "시공예약"\)/);
   assert.match(chatWorkspaceSource, /이 시공점은 전화 확인이 필요합니다\. 시공 가능 여부와 입고 일정을 시공점에 직접 확인해주세요\./);
   assert.match(chatWorkspaceSource, /href=\{`tel:\$\{installer\.contactPhone\.replace\(\/\[\^0-9\+\]\/g, ""\)\}`\}/);
   assert.match(chatWorkspaceSource, /전화 또는 카카오톡 등으로 확인해주세요\./);

@@ -34,7 +34,7 @@ test("InstallerWorkspace owns Installer selection, derived transaction scope, Me
   const page = await read("app/page.tsx");
   assert.match(source, /const \[selectedTransactionId, setSelectedTransactionId\] = useState\(""\)/);
   assert.match(source, /const \[mobileChatOpen, setMobileChatOpen\] = useState\(false\)/);
-  assert.match(source, /shopManagementRepository\.getActiveShopIdsForUser\(account\.id\)/);
+  assert.match(source, /shopManagementRepository\s*\.getActiveShopIdsForUser\s*\(\s*account\.id\s*,?\s*\)/);
   assert.match(source, /if \(item\.shopId\) return activeShopIds\.includes\(item\.shopId\)/);
   assert.match(source, /item\.installerId === legacyInstallerId/);
   assert.match(source, /const activeTransactionId = selectedTransactionId \|\| roleTransactions\[0\]\?\.id \|\| ""/);
@@ -112,9 +112,9 @@ test("page delegates shared actions and DealerWorkspace owns createTransaction w
   // createWithShopRoom (works for Shops with no linked Installer Account) —
   // Demo is untouched, still createWithRoom, see the assertion above.
   assert.match(dealerWorkspace, /supabaseTransactionRepository\.createWithShopRoom/);
-  assert.match(dealerWorkspace, /transactionRepository\.create\(transaction\); chatRepository\.create\(room\)/);
+  assert.match(dealerWorkspace, /transactionRepository\.create\(transaction\);\s*chatRepository\.create\(room\)/);
   assert.match(dealerWorkspace, /await onRefresh\(\)/);
-  assert.match(dealerWorkspace, /notificationService\.notify\(\{ type: "new_service_request"/);
+  assert.match(dealerWorkspace, /notificationService\.notify\s*\(\s*\{\s*type:\s*"new_service_request"/);
 
   for (const mutation of ["transitionStage", "setFinalPrice", "transitionPayment", "setVisibility"]) {
     assert.match(actions, new RegExp(`demoTransactionRepository\\.${mutation}`));
@@ -132,9 +132,9 @@ test("page delegates shared actions and DealerWorkspace owns createTransaction w
   assert.doesNotMatch(store, /const markRoomRead/);
   assert.match(actions, /await refresh\(\)/);
   assert.match(actions, /notificationService\.notify/);
-  assert.match(actions, /const demoActorRole: "dealer" \| "shop" \| "admin" = role === "shop" \? "shop" : role === "admin" \? "admin" : "dealer"/);
-  assert.match(actions, /transitionStage\(transaction, stage, role === "shop" \? "shop" : "dealer"\)/);
-  assert.match(actions, /transitionPayment\(transaction, status, role === "admin" \? "admin" : role\)/);
+  assert.match(actions, /const demoActorRole:\s*"dealer"\s*\|\s*"shop"\s*\|\s*"admin"\s*=\s*role === "shop"\s*\?\s*"shop"\s*:\s*role === "admin"\s*\?\s*"admin"\s*:\s*"dealer"/);
+  assert.match(actions, /transitionStage\s*\(\s*transaction,\s*stage,\s*role === "shop"\s*\?\s*"shop"\s*:\s*"dealer"\s*,?\s*\)/);
+  assert.match(actions, /transitionPayment\s*\(\s*transaction,\s*status,\s*role === "admin"\s*\?\s*"admin"\s*:\s*role\s*,?\s*\)/);
   for (const message of ["메시지를 전송하지 못했습니다.", "거래를 숨길 수 없습니다.", "숨김을 해제할 수 없습니다.", "최종 금액을 저장할 수 없습니다.", "결제 상태를 변경할 수 없습니다."]) {
     assert.match(actions, new RegExp(message.replace(".", "\\.")));
   }

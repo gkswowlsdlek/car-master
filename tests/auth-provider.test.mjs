@@ -8,8 +8,8 @@ test("the Demo login route composes server credentials, signed sessions, and an 
   const route = await readFile(new URL("../app/api/demo-login/route.ts", import.meta.url), "utf8");
   assert.match(route, /getDemoCredentials\(\)\.find/);
   assert.match(route, /await createDemoSession\(matched\.role\)/);
-  assert.match(route, /response\.cookies\.set\(demoSessionCookie, session\.token, \{ httpOnly: true/);
-  assert.match(route, /if \(!matched\) return NextResponse\.json\(\{ matched: false \}, \{ status: 401 \}\)/);
+  assert.match(route, /response\.cookies\.set\s*\(\s*demoSessionCookie,\s*session\.token,\s*\{\s*httpOnly:\s*true/);
+  assert.match(route, /if\s*\(!matched\)\s*return\s+NextResponse\.json\s*\(\s*\{\s*matched:\s*false\s*,?\s*\},\s*\{\s*status:\s*401\s*,?\s*\}\s*,?\s*\)/);
 });
 
 test("server demo sessions are signed and reject tampering", async () => {

@@ -124,36 +124,36 @@ test("use-transaction-actions exposes a dedicated endOutcome (not routed through
   const fn = actionsHookSource.slice(actionsHookSource.indexOf("const endOutcome = useCallback"), actionsHookSource.indexOf("const changeFinalPrice"));
   assert.match(fn, /supabaseTransactionRepository\.endOutcome\(transaction\.id, outcome, note\)/);
   assert.match(fn, /transitionStage\(transaction, outcome, role === "shop" \? "shop" : "dealer"\)/);
-  assert.match(actionsHookSource, /return \{ sendMessage, markRoomRead, loadContact, hideTransaction, unhideTransaction, changeStage, endOutcome, setContactStatus, changeFinalPrice, changePayment \};/);
+  assert.match(actionsHookSource, /return\s*\{\s*sendMessage,\s*markRoomRead,\s*loadContact,\s*hideTransaction,\s*unhideTransaction,\s*changeStage,\s*endOutcome,\s*setContactStatus,\s*changeFinalPrice,\s*changePayment\s*,?\s*\};/);
 });
 
 test("TransactionChatWorkspace hides the normal stage-advance controls once a transaction is terminated and shows a distinct outcome banner with the reason, instead of silently leaving the old CTA visible", () => {
   assert.match(chatWorkspaceSource, /const terminalOutcome = isTerminalOutcome\(transaction\.status\.stage\);/);
-  assert.match(chatWorkspaceSource, /\{terminalOutcome \? <div className=\{`transaction-outcome-banner outcome-\$\{transaction\.status\.stage\}`\}>/);
-  assert.match(chatWorkspaceSource, /transaction\.outcomeNote && <p>\{transaction\.outcomeNote\}<\/p>/);
+  assert.match(chatWorkspaceSource, /\{terminalOutcome\s*\?\s*(?:\(\s*)?<div className=\{`transaction-outcome-banner outcome-\$\{transaction\.status\.stage\}`\}>/);
+  assert.match(chatWorkspaceSource, /transaction\.outcomeNote\s*&&\s*(?:\(\s*)?<p>\{transaction\.outcomeNote\}<\/p>/);
 });
 
 test("TransactionChatWorkspace only lets role === dealer trigger 거래 취소 / 시공 불가 처리, and only while the transaction is still open", () => {
-  assert.match(chatWorkspaceSource, /\{role === "dealer" && !terminalOutcome && <button onClick=\{\(\) => \{ setEndOutcomeModal\("취소"\); setMoreMenuOpen\(false\); \}\}>거래 취소<\/button>\}/);
-  assert.match(chatWorkspaceSource, /\{role === "dealer" && !terminalOutcome && <button onClick=\{\(\) => \{ setEndOutcomeModal\("시공불가"\); setMoreMenuOpen\(false\); \}\}>시공 불가 처리<\/button>\}/);
+  assert.match(chatWorkspaceSource, /\{role === "dealer"\s*&&\s*!terminalOutcome\s*&&\s*(?:\(\s*)?<button\s+onClick=\{\(\)\s*=>\s*\{\s*setEndOutcomeModal\("취소"\);\s*setMoreMenuOpen\(false\);\s*\}\}\s*>\s*거래 취소\s*<\/button>/);
+  assert.match(chatWorkspaceSource, /\{role === "dealer"\s*&&\s*!terminalOutcome\s*&&\s*(?:\(\s*)?<button\s+onClick=\{\(\)\s*=>\s*\{\s*setEndOutcomeModal\("시공불가"\);\s*setMoreMenuOpen\(false\);\s*\}\}\s*>\s*시공 불가 처리\s*<\/button>/);
 });
 
 test("최종 시공금액 input is available to both shop and dealer roles, unconditionally on stage, and is presented in its own clearly-labeled block separate from the pre-existing 결제 상태 flow (never conflated with payment/settlement)", () => {
   assert.match(chatWorkspaceSource, /<h4>최종 시공금액<\/h4>/);
-  assert.match(chatWorkspaceSource, /\{\(role === "shop" \|\| role === "dealer"\) && <div><input value=\{finalPrice\}/);
+  assert.match(chatWorkspaceSource, /\{\(role === "shop"\s*\|\|\s*role === "dealer"\)\s*&&\s*(?:\(\s*)?<div>\s*<input\s+value=\{finalPrice\}/);
   assert.match(chatWorkspaceSource, /<h4>결제 상태<\/h4>/);
   assert.doesNotMatch(chatWorkspaceSource, /<h4>결제 및 정산<\/h4>/);
 });
 
 test("advancing to 출고 with no final price nudges (not blocks) the dealer — both '나중에 입력' and '지금 입력' still let the transition proceed or open the price panel, never a hard stop", () => {
-  assert.match(chatWorkspaceSource, /if \(forwardStage === "출고" && !transaction\.pricing\.finalPrice\) \{ setConfirmDispatchOpen\(true\); return; \}/);
-  assert.match(chatWorkspaceSource, /confirmDispatch = \(\) => \{ setConfirmDispatchOpen\(false\); void runStageChange\("출고"\); \};/);
+  assert.match(chatWorkspaceSource, /if\s*\(forwardStage === "출고"\s*&&\s*!transaction\.pricing\.finalPrice\)\s*\{\s*setConfirmDispatchOpen\(true\);\s*return;\s*\}/);
+  assert.match(chatWorkspaceSource, /confirmDispatch = \(\)\s*=>\s*\{\s*setConfirmDispatchOpen\(false\);\s*void runStageChange\("출고"\);\s*\};/);
 });
 
 test("TransactionManagementScreen shows the same terminal-outcome banner, offers 거래 취소/시공 불가 for the dealer, and 다른 시공점 찾기 once terminated", () => {
   assert.match(managementScreenSource, /const selectedTerminalOutcome = selected \? isTerminalOutcome\(selected\.status\.stage\) : false;/);
-  assert.match(managementScreenSource, /selectedTerminalOutcome && <div className=\{`transaction-outcome-banner/);
-  assert.match(managementScreenSource, /role === "dealer" && selectedTerminalOutcome && onFindAnotherShop && <button className="primary" onClick=\{onFindAnotherShop\}>/);
+  assert.match(managementScreenSource, /selectedTerminalOutcome\s*&&\s*(?:\(\s*)?<div className=\{`transaction-outcome-banner/);
+  assert.match(managementScreenSource, /role === "dealer"\s*&&\s*selectedTerminalOutcome\s*&&\s*onFindAnotherShop\s*&&\s*(?:\(\s*)?<button\s+className="primary"\s+onClick=\{onFindAnotherShop\}>/);
 });
 
 test("EndTransactionOutcomeModal never silently retries — it surfaces the thrown error inline and keeps the dialog open on failure", () => {

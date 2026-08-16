@@ -16,7 +16,7 @@ test("Demo attachment migration creates an isolated private bucket, grants nothi
 
 test("Real SupabaseAttachmentProvider is unchanged — still browser-direct, still the real bucket, still authenticated-gated", async () => {
   const source = await read("services/attachments/supabase-attachment-provider.ts");
-  assert.match(source, /client\.storage\.from\("transaction-attachments"\)\.upload/);
+  assert.match(source, /client\.storage\s*\.from\s*\(\s*"transaction-attachments"\s*,?\s*\)\s*\.upload/);
   assert.match(source, /createSupabaseBrowserClient/);
   assert.doesNotMatch(source, /service-role|SERVICE_ROLE|demo-transaction-attachments/i);
 });
@@ -42,7 +42,7 @@ test("Demo attachment upload route rejects requests without a valid Demo session
 
 test("Demo attachment upload route rejects an arbitrary/unknown room id instead of trusting the client", async () => {
   const source = await read("app/api/demo-attachments/upload/route.ts");
-  assert.match(source, /from\("demo_chat_rooms"\)\.select\("id"\)\.eq\("id", roomId\)\.maybeSingle\(\)/);
+  assert.match(source, /from\s*\(\s*"demo_chat_rooms"\s*,?\s*\)\s*\.select\s*\(\s*"id"\s*,?\s*\)\s*\.eq\s*\(\s*"id",\s*roomId\s*,?\s*\)\s*\.maybeSingle\(\)/);
   assert.match(source, /if \(roomError \|\| !room\) return NextResponse\.json\(\{ error: "거래방을 확인할 수 없습니다\." \}, \{ status: 403 \}\)/);
 });
 
@@ -57,7 +57,7 @@ test("Demo attachment upload route validates the file (reuses the same allowlist
 test("Demo attachment upload writes only into the demo bucket at a demo/<roomId>/<uuid>/<name> path, never into the Real bucket", async () => {
   const source = await read("app/api/demo-attachments/upload/route.ts");
   assert.match(source, /const storagePath = `demo\/\$\{roomId\}\/\$\{id\}\/\$\{safeName\(file\.name\)\}`/);
-  assert.match(source, /client\.storage\.from\(DEMO_ATTACHMENTS_BUCKET\)\.upload/);
+  assert.match(source, /client\.storage\s*\.from\s*\(\s*DEMO_ATTACHMENTS_BUCKET\s*,?\s*\)\s*\.upload/);
   assert.doesNotMatch(source, /from\("transaction-attachments"\)/);
 });
 
@@ -72,7 +72,7 @@ test("Demo attachment routes degrade to a safe response (not a crash) when the s
   const upload = await read("app/api/demo-attachments/upload/route.ts");
   const sign = await read("app/api/demo-attachments/sign/route.ts");
   const ready = await read("app/api/demo-attachments/ready/route.ts");
-  assert.match(upload, /if \(!isServiceRoleConfigured\) return NextResponse\.json\(\{ error: "Demo 첨부 기능이 아직 설정되지 않았습니다\." \}, \{ status: 503 \}\)/);
+  assert.match(upload, /if\s*\(!isServiceRoleConfigured\)\s*return\s+NextResponse\.json\s*\(\s*\{\s*error:\s*"Demo 첨부 기능이 아직 설정되지 않았습니다\."\s*,?\s*\},\s*\{\s*status:\s*503\s*,?\s*\}\s*,?\s*\)/);
   assert.match(sign, /if \(!isServiceRoleConfigured\) return NextResponse\.json\(\{ urls: \{\} \}\)/);
   assert.match(ready, /if \(!isServiceRoleConfigured\) return NextResponse\.json\(\{ ready: false, reason: "service-role-missing" \}\)/);
 });
@@ -87,7 +87,7 @@ test("DemoAttachmentProvider mirrors AttachmentProvider shape and gates itself b
 
 test("TransactionChatWorkspace falls back to the session-only LocalAttachmentProvider unless a ready DemoAttachmentProvider is explicitly passed in — no behavior change for Real", async () => {
   const source = await read("components/transactions/TransactionChatWorkspace.tsx");
-  const occurrences = source.match(/useRemoteAttachments \? supabaseAttachmentProvider : \(demoAttachmentProvider \?\? attachmentProvider\)/g) ?? [];
+  const occurrences = source.match(/useRemoteAttachments\s*\?\s*supabaseAttachmentProvider\s*:\s*\(demoAttachmentProvider\s*\?\?\s*attachmentProvider\)/g) ?? [];
   assert.equal(occurrences.length, 4, "expected all 4 provider-selection sites to use the same fallback chain");
 });
 

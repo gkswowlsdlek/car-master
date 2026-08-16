@@ -107,19 +107,23 @@ test("the completion view uses an honest 'unclaimed / no linked operator' label,
 });
 
 test("submitting shows the server's duplicate candidates and requires an explicit second action before registering anyway — never a silent auto-retry", () => {
-  const submitFn = modalSource.slice(modalSource.indexOf("const submit = async"), modalSource.indexOf("return <div"));
+  const submitStart = modalSource.indexOf("const submit = async");
+  const renderBoundary = /\breturn\s*(?:\(\s*)?<div\b/.exec(modalSource.slice(submitStart));
+  assert.notEqual(submitStart, -1, "submit function start must exist");
+  assert.ok(renderBoundary, "component render boundary must exist after submit function");
+  const submitFn = modalSource.slice(submitStart, submitStart + renderBoundary.index);
   assert.match(submitFn, /DUPLICATE_CANDIDATE_ERROR/);
   assert.match(submitFn, /findDuplicateCandidates/);
   assert.doesNotMatch(submitFn, /void submit\(true\)/); // only the explicit "그래도 새로 등록" button click calls submit(true), not the catch block itself
 });
 
 test("AdminShopSearchRequestPanel offers the 시공점 빠른 등록 entry point only while no Shop has been registered yet for that request, and shows a note once one has", () => {
-  assert.match(panelSource, /\{!selected\.registeredShopId && <button onClick=\{\(\) => setRegistrationOpen\(true\)\}>/);
-  assert.match(panelSource, /\{selected\.registeredShopId && <p className="admin-quick-shop-registered-note">/);
+  assert.match(panelSource, /\{!selected\.registeredShopId\s*&&\s*(?:\(\s*)?<button\s+onClick=\{\(\)\s*=>\s*setRegistrationOpen\(true\)\}>/);
+  assert.match(panelSource, /\{selected\.registeredShopId\s*&&\s*(?:\(\s*)?<p className="admin-quick-shop-registered-note">/);
 });
 
 test("AdminShopSearchRequestPanel reloads the request list after the modal closes, so 등록됨 state reflects immediately and Admin lands back on the same request", () => {
-  assert.match(panelSource, /<AdminQuickShopRegistrationModal requestId=\{selected\.id\} onClose=\{\(\) => \{ setRegistrationOpen\(false\); void load\(\); \}\} onRegistered=\{\(\) => void load\(\)\} \/>/);
+  assert.match(panelSource, /<AdminQuickShopRegistrationModal\s+requestId=\{selected\.id\}\s+onClose=\{\(\)\s*=>\s*\{\s*setRegistrationOpen\(false\);\s*void load\(\);\s*\}\}\s+onRegistered=\{\(\)\s*=>\s*void load\(\)\}\s*\/>/);
 });
 
 test("types: QuickRegisterShopInput's required fields match the product minimum (shopName/address/phone/services/brands), everything else optional", () => {

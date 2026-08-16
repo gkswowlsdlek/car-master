@@ -263,14 +263,17 @@ test("types/auth.ts: UserRole includes 'pending', and onboarding input types req
   const types = await read("types/auth.ts");
   assert.match(types, /export type UserRole = "dealer" \| "installer" \| "admin" \| "pending";/);
   assert.match(types, /export type LegalAgreementInput = \{ termsVersion: string; privacyVersion: string \};/);
-  assert.match(types, /export type DealerOnboardingInput = \{ name: string; phone: string; companyName\?: string; activityRegion\?: string \} & LegalAgreementInput;/);
+  assert.match(
+    types,
+    /export type DealerOnboardingInput = \{\s*name:\s*string;\s*phone:\s*string;\s*companyName\?:\s*string;\s*activityRegion\?:\s*string;?\s*\}\s*&\s*LegalAgreementInput;/,
+  );
   assert.match(types, /export type InstallerOnboardingInput = \{/);
 });
 
 test("access-policy.ts: /onboarding is protected, /terms and /privacy are public, and a pending user's workspace path is /onboarding — never a dealer/installer/admin path", async () => {
   const policy = await read("services/auth/access-policy.ts");
   assert.match(policy, /export const protectedPaths = \["\/dealer", "\/shop", "\/admin", "\/account-status", "\/onboarding"\] as const;/);
-  assert.match(policy, /"\/forgot-password", "\/update-password", "\/auth\/callback", "\/terms", "\/privacy"\]/);
+  assert.match(policy, /"\/forgot-password",\s*"\/update-password",\s*"\/auth\/callback",\s*"\/terms",\s*"\/privacy"\s*,?\s*\]/);
   assert.match(policy, /if \(normalizedRole === "pending"\) return "\/onboarding" as const;/);
   assert.match(policy, /return workspacePathForRole\(user\.role, user\.approvalStatus\);/);
 });
@@ -282,7 +285,7 @@ test("access-policy.ts regression: an anonymous user is still rejected from ever
 
 test("proxy.ts (server-side route guard): /onboarding maps to protectedRole 'pending', profile type includes 'pending', and a role mismatch correctly redirects a pending user to /onboarding instead of the pre-existing /account-status fallback", async () => {
   const proxy = await read("lib/supabase/proxy.ts");
-  assert.match(proxy, /isProtectedPath, normalizeUserRole, resolveAuthenticatedDestination/);
+  assert.match(proxy, /isProtectedPath,\s*normalizeUserRole,\s*resolveAuthenticatedDestination/);
   assert.match(proxy, /single<\{ role: UserRole \}>\(\)/);
   assert.match(proxy, /resolveAuthenticatedDestination\(profile\.role, approvalStatus, pathname\)/);
 });
@@ -299,33 +302,33 @@ test("app/page.tsx: a pending user is routed straight to the onboarding screen a
 
 test("app/page.tsx: onboarding completion re-enters the normal authenticated-user flow (so a newly-dealer/installer user lands in their real workspace, not stuck on /onboarding)", async () => {
   const page = await read("app/page.tsx");
-  assert.match(page, /const completeDealerOnboarding = useCallback\(async \(input: DealerOnboardingInput\) => \{\s*const user = await authProvider\.completeDealerOnboarding\(input\);\s*enterAuthenticatedUser\(user, true\);/);
-  assert.match(page, /const completeInstallerOnboarding = useCallback\(async \(input: InstallerOnboardingInput\) => \{\s*const user = await authProvider\.completeInstallerOnboarding\(input\);\s*enterAuthenticatedUser\(user, true\);/);
-  assert.match(page, /<OnboardingScreen user=\{currentUser\} onCompleteDealer=\{completeDealerOnboarding\} onCompleteInstaller=\{completeInstallerOnboarding\} onLogout=\{\(\) => void logout\(\)\} \/>/);
+  assert.match(page, /const completeDealerOnboarding = useCallback\s*\(\s*async \(input: DealerOnboardingInput\)\s*=>\s*\{\s*const user = await authProvider\.completeDealerOnboarding\(input\);\s*enterAuthenticatedUser\(user, true\);/);
+  assert.match(page, /const completeInstallerOnboarding = useCallback\s*\(\s*async \(input: InstallerOnboardingInput\)\s*=>\s*\{\s*const user = await authProvider\.completeInstallerOnboarding\(input\);\s*enterAuthenticatedUser\(user, true\);/);
+  assert.match(page, /<OnboardingScreen\s+user=\{currentUser\}\s+onCompleteDealer=\{completeDealerOnboarding\}\s+onCompleteInstaller=\{completeInstallerOnboarding\}\s+onLogout=\{\(\)\s*=>\s*void logout\(\)\}\s*\/>/);
 });
 
 test("OnboardingScreen blocks submission without both required consent checkboxes, links to /terms and /privacy, and opens them in a new tab so in-progress form data is never lost", async () => {
   const source = await read("components/auth/OnboardingScreen.tsx");
   assert.match(source, /if \(!agreedTerms \|\| !agreedPrivacy\) return setError\("이용약관 동의와 개인정보처리방침 확인이 모두 필요해요\."\)/);
-  assert.match(source, /<a href="\/terms" target="_blank" rel="noopener noreferrer">이용약관<\/a>/);
-  assert.match(source, /<a href="\/privacy" target="_blank" rel="noopener noreferrer">개인정보처리방침<\/a>/);
+  assert.match(source, /<a\s+href="\/terms"\s+target="_blank"\s+rel="noopener noreferrer">\s*이용약관\s*<\/a>/);
+  assert.match(source, /<a\s+href="\/privacy"\s+target="_blank"\s+rel="noopener noreferrer">\s*개인정보처리방침\s*<\/a>/);
 });
 
 test("OnboardingScreen's privacy checkbox is framed as policy acknowledgment, not a separate collection/use consent — matching the contract-necessity legal basis PrivacyScreen documents (no duplicate '수집·이용 동의' wording)", async () => {
   const source = await read("components/auth/OnboardingScreen.tsx");
-  assert.match(source, /개인정보처리방침<\/a> 확인<\/span>/);
+  assert.match(source, /개인정보처리방침\s*<\/a>\s*(?:\{" "\}\s*)?확인\s*<\/span>/);
   assert.doesNotMatch(source, /수집·이용 동의/);
 });
 
 test("OnboardingScreen validates required fields per role before calling the provider (dealer: name/phone; installer: the full required set) — no empty-string submission reaches the RPC", async () => {
   const source = await read("components/auth/OnboardingScreen.tsx");
   assert.match(source, /if \(!form\.name\?\.trim\(\) \|\| !form\.phone\?\.trim\(\)\) throw new Error\("이름과 연락처를 입력해 주세요\."\)/);
-  assert.match(source, /const required = \[form\.shopName, form\.representativeName, form\.businessName, form\.businessRegistrationNumber, form\.address, form\.phone, form\.contactPhone\];/);
+  assert.match(source, /const required = \[\s*form\.shopName,\s*form\.representativeName,\s*form\.businessName,\s*form\.businessRegistrationNumber,\s*form\.address,\s*form\.phone,\s*form\.contactPhone\s*,?\s*\];/);
 });
 
 test("OnboardingScreen sends the current terms/privacy version constants with every onboarding submission — never a hardcoded or missing version", async () => {
   const source = await read("components/auth/OnboardingScreen.tsx");
-  const dealerCallCount = (source.match(/termsVersion: CURRENT_TERMS_VERSION, privacyVersion: CURRENT_PRIVACY_VERSION/g) ?? []).length;
+  const dealerCallCount = (source.match(/termsVersion:\s*CURRENT_TERMS_VERSION,\s*privacyVersion:\s*CURRENT_PRIVACY_VERSION/g) ?? []).length;
   assert.equal(dealerCallCount, 2, "both the dealer and installer onboarding calls must pass the current version constants");
 });
 
@@ -379,7 +382,7 @@ test("PrivacyScreen never claims a Vercel DPA is in place — Vercel is describe
   // JSX (the component body) must never expose that language.
   const renderedBody = privacy.slice(privacy.indexOf("export function PrivacyScreen"));
   assert.doesNotMatch(renderedBody, /DPA|Data Processing Agreement|데이터 처리 계약|Hobby|무료 플랜/);
-  assert.match(renderedBody, /<td>애플리케이션 호스팅<\/td><td>Vercel<\/td><td>웹 서비스 배포 및 접속 처리<\/td>/);
+  assert.match(renderedBody, /<td>애플리케이션 호스팅<\/td>\s*<td>Vercel<\/td>\s*<td>웹 서비스 배포 및 접속 처리<\/td>/);
   // The Hobby/DPA gap is real operational risk — it must be documented
   // somewhere for the developer, just not on the user-facing page itself.
   assert.match(privacy, /Vercel's Hobby plan/);
@@ -389,8 +392,8 @@ test("PrivacyScreen never claims a Vercel DPA is in place — Vercel is describe
 test("PrivacyScreen's Demo wording no longer overclaims 'no personal data collected' or 'physically separated' — it accurately describes application-level/table-level separation within the same database", async () => {
   const privacy = await read("components/legal/PrivacyScreen.tsx");
   assert.doesNotMatch(privacy, /물리적으로 분리/);
-  assert.match(privacy, /실제 개인정보를 입력하지 않으실 것을 권장합니다/);
-  assert.match(privacy, /이용자가 Demo의 메시지, 첨부파일,\s*입력 폼 등에 직접 입력한 내용은 서비스 체험을 위해 저장될 수 있습니다/);
+  assert.match(privacy, /실제\s*개인정보를\s*입력하지\s*않으실\s*것을\s*권장합니다/);
+  assert.match(privacy, /이용자가\s+Demo의\s+메시지,\s+첨부파일,\s+입력\s+폼\s+등에\s+직접\s+입력한\s+내용은\s+서비스\s+체험을\s+위해\s+저장될\s+수\s+있습니다/);
   assert.match(privacy, /별도의 데이터베이스 테이블 구조로 분리되어 관리/);
 });
 
@@ -398,9 +401,9 @@ test("PrivacyScreen documents a specific legal basis (PIPA Art. 15(1)(4), contra
   const privacy = await read("components/legal/PrivacyScreen.tsx");
   assert.match(privacy, /2\. 개인정보 처리의 법적 근거 및 동의/);
   assert.match(privacy, /개인정보 보호법\s*제15조제1항제4호/);
-  assert.match(privacy, /별도의 개인정보 수집·이용 동의를 받지 않으며/);
+  assert.match(privacy, /별도의\s*개인정보\s*수집·이용\s*동의를\s*받지\s*않으며/);
   assert.match(privacy, /선택 항목으로 표시된 정보.*입력하지 않아도 서비스 이용에 제한이 없습니다/s);
-  assert.match(privacy, /동의를 거부할 권리와 거부 시 불이익을\s*명확히 고지하고 별도로 동의를 받습니다/);
+  assert.match(privacy, /동의를\s+거부할\s+권리와\s+거부\s+시\s+불이익을\s+명확히\s+고지하고\s+별도로\s+동의를\s+받습니다/);
 });
 
 test("PrivacyScreen articles are sequentially renumbered 1-12 after inserting the new legal-basis section — no duplicate or skipped section numbers", async () => {
@@ -419,19 +422,19 @@ test("PrivacyScreen states the sourced Supabase facts (legal entity, Seoul/AWS r
 test("PrivacyScreen's international-transfer section does not oversimplify 'Seoul region = no data ever leaves Korea' — it explicitly acknowledges subprocessor-driven international processing while still stating the confirmed region fact", async () => {
   const privacy = await read("components/legal/PrivacyScreen.tsx");
   const section7 = privacy.slice(privacy.indexOf("<h2>7. 개인정보의 국외 이전"), privacy.indexOf("<h2>8. "));
-  assert.match(section7, /단정할 수 없으며/);
+  assert.match(section7, /단정할\s*수\s*없으며/);
   assert.match(section7, /국외 처리가 발생할 가능성이 있습니다/);
   assert.match(section7, /하위처리자/);
 });
 
 test("PrivacyScreen does not assert that Kakao login is currently active or that Kakao data is currently received — only future intent", async () => {
   const privacy = await read("components/legal/PrivacyScreen.tsx");
-  assert.match(privacy, /카카오 로그인 기능이\s*실제로 활성화되어 있지 않으며 카카오로부터 어떠한 정보도 제공받고 있지 않습니다/);
+  assert.match(privacy, /카카오\s*로그인\s*기능이\s*실제로\s*활성화되어\s*있지\s*않으며\s*카카오로부터\s*어떠한\s*정보도\s*제공받고\s*있지\s*않습니다/);
 });
 
 test("LandingPage footer links to /terms and /privacy without a large redesign — same footer structure, two new links added", async () => {
   const landing = await read("components/landing/LandingPage.tsx");
-  assert.match(landing, /<div className="footer-links"><a href="\/terms">이용약관<\/a><span aria-hidden="true">\|<\/span><a href="\/privacy">개인정보처리방침<\/a><\/div>/);
+  assert.match(landing, /<div className="footer-links">\s*<a href="\/terms">이용약관<\/a>\s*<span aria-hidden="true">\|<\/span>\s*<a href="\/privacy">개인정보처리방침<\/a>\s*<\/div>/);
   assert.match(landing, /footer-brand/);
   assert.match(landing, /footer-meta/);
 });
@@ -439,7 +442,7 @@ test("LandingPage footer links to /terms and /privacy without a large redesign �
 test("legal-page CSS defines a mobile breakpoint, matching this app's existing mobile-first responsive convention", async () => {
   const css = await read("app/globals.css");
   assert.match(css, /\.legal-page \{/);
-  assert.match(css, /@media \(max-width: 560px\) \{ \.legal-page \{/);
+  assert.match(css, /@media\s*\(max-width:\s*560px\)\s*\{\s*\.legal-page\s*\{/);
 });
 
 test("Real transaction/chat/attachment/auth code paths untouched: no changes to transaction RPCs, storage buckets, or the login/signup/logout methods themselves", async () => {

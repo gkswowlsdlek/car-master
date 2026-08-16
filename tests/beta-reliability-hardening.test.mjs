@@ -83,17 +83,17 @@ test("Transaction type and repository mapping carry contactStatus (undefined = �
 });
 
 test("useTransactionActions exposes setContactStatus, using the real RPC when Supabase-backed and a local-only fallback in Demo (no demo RPC exists for this field)", () => {
-  assert.match(actionsHookSource, /const setContactStatus = useCallback\(async \(transaction: Transaction, status: ContactStatus\) => \{/);
+  assert.match(actionsHookSource, /const setContactStatus = useCallback\s*\(\s*async \(transaction: Transaction, status: ContactStatus\)\s*=>\s*\{/);
   assert.match(actionsHookSource, /await supabaseTransactionRepository\.setContactStatus\(transaction\.id, status\)/);
-  assert.match(actionsHookSource, /transactionRepository\.update\(\{ \.\.\.transaction, contactStatus: status,/);
+  assert.match(actionsHookSource, /transactionRepository\.update\s*\(\s*\{\s*\.\.\.transaction,\s*contactStatus:\s*status,/);
 });
 
 test("TransactionChatWorkspace shows three distinct states for the phone-confirm area — unset (record-result buttons), contacted (quiet confirmation, no more nagging), unreachable (retry + find-another-shop, reusing the existing onFindAnotherShop prop)", () => {
-  assert.match(chatWorkspaceSource, /transaction\.contactStatus === "contacted" \? <div className="phone-confirm-banner phone-confirm-done"/);
-  assert.match(chatWorkspaceSource, /transaction\.contactStatus === "unreachable" \? <div className="phone-confirm-banner phone-confirm-unreachable"/);
-  assert.match(chatWorkspaceSource, /onClick=\{\(\) => void recordContactResult\("contacted"\)\}>연결됐어요/);
-  assert.match(chatWorkspaceSource, /onClick=\{\(\) => void recordContactResult\("unreachable"\)\}>연락이 안 돼요/);
-  assert.match(chatWorkspaceSource, /onFindAnotherShop && <button type="button" className="button button-secondary" onClick=\{onFindAnotherShop\}><Search size=\{16\} \/> 다른 시공점 찾기<\/button>/);
+  assert.match(chatWorkspaceSource, /transaction\.contactStatus === "contacted"\s*\?\s*(?:\(\s*)?<div className="phone-confirm-banner phone-confirm-done"/);
+  assert.match(chatWorkspaceSource, /transaction\.contactStatus === "unreachable"\s*\?\s*(?:\(\s*)?<div className="phone-confirm-banner phone-confirm-unreachable"/);
+  assert.match(chatWorkspaceSource, /onClick=\{\(\)\s*=>\s*void recordContactResult\("contacted"\)\}\s*>\s*연결됐어요/);
+  assert.match(chatWorkspaceSource, /onClick=\{\(\)\s*=>\s*void recordContactResult\("unreachable"\)\}\s*>\s*연락이 안 돼요/);
+  assert.match(chatWorkspaceSource, /onFindAnotherShop\s*&&\s*(?:\(\s*)?<button\s+type="button"\s+className="button button-secondary"\s+onClick=\{onFindAnotherShop\}>\s*<Search size=\{16\}\s*\/>\s*다른 시공점 찾기\s*<\/button>/);
 });
 
 test("TransactionChatWorkspace never auto-changes stage from a contact-result click — recordContactResult only calls onSetContactStatus, nothing stage-related", () => {
@@ -103,7 +103,7 @@ test("TransactionChatWorkspace never auto-changes stage from a contact-result cl
 });
 
 test("시공점에 보낼 내용 복사 button exists, dealer-only, uses the Clipboard API, and shows a transient '복사됨' state instead of a new toast system", () => {
-  assert.match(chatWorkspaceSource, /role === "dealer" && <div className="sidebar-settlement"><h4>시공점에 보낼 내용<\/h4><button type="button" className="button button-secondary" onClick=\{copyShopMessage\}>/);
+  assert.match(chatWorkspaceSource, /role === "dealer"\s*&&\s*(?:\(\s*)?<div className="sidebar-settlement">\s*<h4>시공점에 보낼 내용<\/h4>\s*<button\s+type="button"\s+className="button button-secondary"\s+onClick=\{copyShopMessage\}>/);
   assert.match(chatWorkspaceSource, /navigator\.clipboard\?\.writeText\(generateShopMessage\(transaction\)\)/);
   assert.match(chatWorkspaceSource, /setShopMessageCopied\(true\);/);
 });
@@ -138,18 +138,18 @@ test("generateShopMessage actually renders a complete real-data message with no 
 test("DealerTransactionManagementScreen swaps its 전화 확인 필요 flag to be contact-status-aware — suppressed once contacted, a distinct 연락 안 됨 chip when unreachable", () => {
   assert.match(dealerListSource, /const needsPhoneConfirm = inPhoneConfirmWindow && item\.contactStatus == null;/);
   assert.match(dealerListSource, /const contactUnreachable = item\.contactStatus === "unreachable";/);
-  assert.match(dealerListSource, /contactUnreachable && <small className="phone-confirm-flag phone-confirm-flag-unreachable">/);
+  assert.match(dealerListSource, /contactUnreachable\s*&&\s*(?:\(\s*)?<small className="phone-confirm-flag phone-confirm-flag-unreachable">/);
 });
 
 test("AdminOpsQueue adds a 연락 실패 거래 card computed locally from the transactions prop (no new query), hidden at zero like every other card", () => {
   assert.match(opsQueueSource, /const unreachableCount = transactions\.filter\(\(item\) => item\.contactStatus === "unreachable"\)\.length;/);
-  assert.match(opsQueueSource, /\{ key: "unreachable", count: unreachableCount, icon: PhoneOff, label: "연락 실패 거래", onClick: onOpenUnreachableTransactions \}/);
+  assert.match(opsQueueSource, /\{\s*key:\s*"unreachable",\s*count:\s*unreachableCount,\s*icon:\s*PhoneOff,\s*label:\s*"연락 실패 거래",\s*onClick:\s*onOpenUnreachableTransactions\s*,?\s*\}/);
 });
 
 test("AdminTransactionPanel adds a controlled 연락 실패만 filter (same lifted-state pattern as group) and shows 연락 상태 in the detail pane", () => {
-  assert.match(adminTxnPanelSource, /contactFilter: "전체" \| "연락실패"; onContactFilterChange: \(value: "전체" \| "연락실패"\) => void;/);
+  assert.match(adminTxnPanelSource, /contactFilter:\s*"전체"\s*\|\s*"연락실패";\s*onContactFilterChange:\s*\(value:\s*"전체"\s*\|\s*"연락실패"\)\s*=>\s*void;/);
   assert.match(adminTxnPanelSource, /\.filter\(\(item\) => contactFilter === "전체" \|\| item\.contactStatus === "unreachable"\)/);
-  assert.match(adminTxnPanelSource, /<dt>연락 상태<\/dt><dd>\{selected\.contactStatus \? CONTACT_STATUS_LABEL\[selected\.contactStatus\] : "확인 전"\}<\/dd>/);
+  assert.match(adminTxnPanelSource, /<dt>연락 상태<\/dt>\s*<dd>\{selected\.contactStatus\s*\?\s*CONTACT_STATUS_LABEL\[selected\.contactStatus\]\s*:\s*"확인 전"\}<\/dd>/);
 });
 
 test("translateTransactionError maps known RPC exception strings to Korean and detects an expired/invalid session separately from a generic permission error", () => {
@@ -169,7 +169,7 @@ test("every previously-raw alert(error.message) site (hide/unhide/setContactStat
 });
 
 test("a real, Supabase-authenticated Dealer's shop search no longer merges in the ~250-entry fictional demo directory — demoInstallerListings only feeds an actual Demo session", () => {
-  assert.match(dealerWorkspaceSource, /const availableShops = useMemo<InstallerListing\[\]>\(\(\) => useSupabaseData \? approvedInstallerShops : demoInstallerListings, \[approvedInstallerShops, useSupabaseData\]\);/);
+  assert.match(dealerWorkspaceSource, /const availableShops = useMemo<InstallerListing\[\]>\s*\(\s*\(\)\s*=>\s*(?:\(\s*)?useSupabaseData\s*\?\s*approvedInstallerShops\s*:\s*demoInstallerListings(?:\s*\))?,\s*\[approvedInstallerShops,\s*useSupabaseData\]\s*,?\s*\);/);
   assert.doesNotMatch(dealerWorkspaceSource, /\[\.\.\.approvedInstallerShops, \.\.\.demoInstallerListings\]/);
 });
 
@@ -181,8 +181,8 @@ test("Landing copy no longer claims real-time/GPS-based location matching, and n
 
 test("PrivacyScreen now discloses that Admin can view transaction-room messages for operational purposes, and TermsScreen instructs members not to enter unnecessary third-party personal data in chat", () => {
   assert.match(privacySource, /운영자\(관리자\)는 거래 중개, 문제 상황 확인, 서비스 오류 대응 등 운영 목적상 필요한 범위에서/);
-  assert.match(privacySource, /거래방의 메시지 내역을 열람할 수 있습니다/);
-  assert.match(termsSource, /거래와 무관한 제3자\(예: 최종 고객\)의 이름, 연락처, 주소 등 불필요한 개인정보는 입력하지 않아야/);
+  assert.match(privacySource, /거래방의\s+메시지\s+내역을\s+열람할\s+수\s+있습니다/);
+  assert.match(termsSource, /거래와\s+무관한\s+제3자\(예:\s+최종\s+고객\)의\s+이름,\s+연락처,\s+주소\s+등\s+불필요한\s+개인정보는\s+입력하지\s+않아야/);
 });
 
 test("최종 시공금액 label is now consistent across TransactionManagementScreen and ShopDashboard — no more '확정 금액'/'최종 금액' variants for the same pricing.finalPrice field", () => {

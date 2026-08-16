@@ -128,7 +128,7 @@ test("repository wires every new RPC and never calls a Transaction-creation RPC 
 });
 
 test("Dealer screen shows the proposal card only when a request is shop_proposed AND actually carries a proposedShop, with 이 시공점으로 진행 / 다른 시공점 찾아주세요 as the two decisions", () => {
-  assert.match(dealerScreenSource, /item\.status === "shop_proposed" && item\.proposedShop && <div className="shop-proposal-card">/);
+  assert.match(dealerScreenSource, /item\.status === "shop_proposed"\s*&&\s*item\.proposedShop\s*&&\s*(?:\(\s*)?<div className="shop-proposal-card">/);
   assert.match(dealerScreenSource, /이 시공점으로 진행/);
   assert.match(dealerScreenSource, /다른 시공점 찾아주세요/);
 });
@@ -147,16 +147,16 @@ test("declining never blocks on a required reason — the decline note input is 
 
 test("accepting a proposal calls onTransactionCreated, and DealerWorkspace wires it to refresh transactions then navigate straight into the room list (same pattern as the existing direct-search create flow)", () => {
   assert.match(dealerScreenSource, /onTransactionCreated\(transactionId\);/);
-  assert.match(dealerWorkspaceSource, /onTransactionCreated=\{\(id\) => \{ void onRefresh\(\)\.then\(\(\) => \{ setSelectedTransactionId\(id\); setDealFilter\("전체"\); onNavigate\("deals"\); \}\); \}\}/);
+  assert.match(dealerWorkspaceSource, /onTransactionCreated=\{\(id\)\s*=>\s*\{\s*void onRefresh\(\)\.then\(\(\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*setDealFilter\("전체"\);\s*onNavigate\("deals"\);\s*\}\);\s*\}\}/);
 });
 
 test("Admin panel only offers Dealer에게 제안 while the request is still open (requested/in_progress), and shows which shop is currently proposed", () => {
-  assert.match(adminPanelSource, /\(selected\.status === "requested" \|\| selected\.status === "in_progress"\) && <button onClick=\{\(\) => setProposalOpen\(true\)\}>/);
-  assert.match(adminPanelSource, /selected\.status === "shop_proposed" && selected\.proposedShopName && <p/);
+  assert.match(adminPanelSource, /\(selected\.status === "requested"\s*\|\|\s*selected\.status === "in_progress"\)\s*&&\s*(?:\(\s*)?<button\s+onClick=\{\(\)\s*=>\s*setProposalOpen\(true\)\}>/);
+  assert.match(adminPanelSource, /selected\.status === "shop_proposed"\s*&&\s*selected\.proposedShopName\s*&&\s*(?:\(\s*)?<p/);
 });
 
 test("Admin propose modal offers a one-click shortcut for the Phase 3 registeredShopId and a real search fallback — no fabricated shop list", () => {
-  assert.match(proposeModalSource, /registeredShopId && <button type="button" className="button button-primary admin-propose-quick-pick"/);
+  assert.match(proposeModalSource, /registeredShopId\s*&&\s*(?:\(\s*)?<button\s+type="button"\s+className="button button-primary admin-propose-quick-pick"/);
   assert.match(proposeModalSource, /adminShopRepository\.searchShops\(query\.trim\(\)\)/);
 });
 

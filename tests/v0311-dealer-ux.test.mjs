@@ -58,9 +58,15 @@ test("responsive rules cover requested desktop and mobile workspace behavior", a
   const css = await read("app/globals.css");
   assert.match(css, /@media \(min-width: 1024px\)/);
   assert.match(css, /height: calc\(100dvh - 126px\)/);
-  assert.match(css, /\.messenger-layout \{[^}]*grid-template-columns: 60px minmax\(0,1fr\)/s);
-  assert.match(css, /\.messenger-layout\.list-open \{[^}]*grid-template-columns: 60px clamp\(230px,20vw,280px\) minmax\(0,1fr\)/s);
-  assert.match(css, /\.messenger-chat-pane > \.messenger-workspace[^}]+grid-template-columns: minmax\(0,1fr\)/s);
+  assert.match(css, /\.messenger-layout\s*\{[^}]*grid-template-columns:\s*60px\s+minmax\(0,\s*1fr\)/s);
+  assert.match(
+    css,
+    /\.messenger-layout\.list-open\s*\{[^}]*grid-template-columns:\s*60px\s+clamp\(230px,\s*20vw,\s*280px\)\s+minmax\(0,\s*1fr\)/s,
+  );
+  assert.match(
+    css,
+    /\.messenger-chat-pane\s*>\s*\.messenger-workspace[^}]+grid-template-columns:\s*minmax\(0,\s*1fr\)/s,
+  );
   assert.match(css, /\.messenger-chat-pane \.messenger-sidebar\.mobile-open/);
   assert.match(css, /\.app-frame\.mobile-chat-fullscreen \.messenger-workspace/);
   assert.match(css, /@media \(max-width: 390px\)/);

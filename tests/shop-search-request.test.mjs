@@ -118,14 +118,14 @@ test("types: ShopSearchRequest (dealer view) has no adminNote field; AdminShopSe
 
 test("Dealer directory screen surfaces the '시공점 찾기 요청' CTA only in the empty (0-result) state, and only when the Real-mode handler is passed in", () => {
   const emptyState = directoryScreenSource.slice(directoryScreenSource.indexOf("installer-empty-state\">"), directoryScreenSource.indexOf("installer-empty-state\">") + 900);
-  assert.match(emptyState, /onShopSearchRequest && <div className="installer-empty-state-shop-search">/);
+  assert.match(emptyState, /onShopSearchRequest\s*&&\s*(?:\(\s*)?<div className="installer-empty-state-shop-search">/);
   assert.match(emptyState, /원하는 시공점을 찾지 못하셨나요\?/);
 });
 
 test("DealerWorkspace only passes the shop-search-request entry points (directory CTA, dashboard button, screen render) in Real/Supabase mode — never for Demo/local", () => {
   assert.match(dealerWorkspaceSource, /onShopSearchRequest=\{useSupabaseData \? \(\) => onNavigate\("shopSearchRequests"\) : undefined\}/);
   assert.match(dealerWorkspaceSource, /onShopSearchRequests=\{useSupabaseData \? \(\) => onNavigate\("shopSearchRequests"\) : undefined\}/);
-  assert.match(dealerWorkspaceSource, /\{screen === "shopSearchRequests" && useSupabaseData && <ShopSearchRequestScreen /);
+  assert.match(dealerWorkspaceSource, /\{screen === "shopSearchRequests"\s*&&\s*useSupabaseData\s*&&\s*(?:\(\s*)?<ShopSearchRequestScreen\s/);
 });
 
 test("ShopSearchRequestScreen's create form collects every required field (region/workType/vehicle/desiredInboundDate/dateFlexible/optional note) and saves through the repository, never localStorage", () => {
@@ -137,20 +137,24 @@ test("ShopSearchRequestScreen's create form collects every required field (regio
 });
 
 test("ShopSearchRequestScreen only offers '요청 취소' for requested/in_progress rows, and cancelling calls the repository (never a local mutation)", () => {
-  assert.match(dealerScreenSource, /\(item\.status === "requested" \|\| item\.status === "in_progress"\) && <button className="button button-secondary" onClick=\{\(\) => void cancel\(item\.id\)\}>요청 취소<\/button>/);
-  const cancelFn = dealerScreenSource.slice(dealerScreenSource.indexOf("const cancel = async"), dealerScreenSource.indexOf("return <section"));
+  assert.match(dealerScreenSource, /\(item\.status === "requested"\s*\|\|\s*item\.status === "in_progress"\)\s*&&\s*(?:\(\s*)?<button\s+className="button button-secondary"\s+onClick=\{\(\)\s*=>\s*void cancel\(item\.id\)\}>\s*요청 취소\s*<\/button>/);
+  const cancelStart = dealerScreenSource.indexOf("const cancel = async");
+  const renderBoundary = /\breturn\s*(?:\(\s*)?<section\b/.exec(dealerScreenSource.slice(cancelStart));
+  assert.notEqual(cancelStart, -1, "cancel function start must exist");
+  assert.ok(renderBoundary, "component render boundary must exist after cancel function");
+  const cancelFn = dealerScreenSource.slice(cancelStart, cancelStart + renderBoundary.index);
   assert.match(cancelFn, /shopSearchRequestRepository\.cancel\(id\)/);
 });
 
 test("DealerDashboard's shop-search-request entry point only renders when the Real-mode handler is provided", () => {
-  assert.match(dealerDashboardSource, /\{onShopSearchRequests && <button className="button button-ghost" onClick=\{onShopSearchRequests\}>/);
+  assert.match(dealerDashboardSource, /\{onShopSearchRequests\s*&&\s*(?:\(\s*)?<button\s+className="button button-ghost"\s+onClick=\{onShopSearchRequests\}>/);
 });
 
 test("AdminOverview wires AdminShopSearchRequestPanel in alongside the other operational panels, unchanged existing panels still present", () => {
-  assert.match(adminOverviewSource, /<AdminShopSearchRequestPanel demoSession=\{demoSession\} \/>/);
-  assert.match(adminOverviewSource, /<AdminTransactionPanel /);
-  assert.match(adminOverviewSource, /<InstallerApprovalPanel /);
-  assert.match(adminOverviewSource, /<AdminMemberPanel /);
+  assert.match(adminOverviewSource, /<AdminShopSearchRequestPanel\s+demoSession=\{demoSession\}\s*\/>/);
+  assert.match(adminOverviewSource, /<AdminTransactionPanel\s/);
+  assert.match(adminOverviewSource, /<InstallerApprovalPanel\s/);
+  assert.match(adminOverviewSource, /<AdminMemberPanel\s/);
 });
 
 test("AdminShopSearchRequestPanel shows Dealer name/phone/region/work/vehicle/desired date/date-flexibility/dealer note, a labeled 'Dealer에게 노출되지 않음' admin-only note field, and gates 확인 시작/연결 어려움 by current status", () => {
@@ -158,8 +162,8 @@ test("AdminShopSearchRequestPanel shows Dealer name/phone/region/work/vehicle/de
     assert.match(adminPanelSource, new RegExp(field.replace(".", "\\.")));
   }
   assert.match(adminPanelSource, /Dealer에게 노출되지 않음/);
-  assert.match(adminPanelSource, /selected\.status === "requested" && <button className="approve" onClick=\{\(\) => void startProcessing\(selected\.id\)\}>/);
-  assert.match(adminPanelSource, /selected\.status === "shop_proposed"\) && <button className="reject" onClick=\{\(\) => void markUnable\(selected\.id\)\}>/);
+  assert.match(adminPanelSource, /selected\.status === "requested"\s*&&\s*(?:\(\s*)?<button\s+className="approve"\s+onClick=\{\(\)\s*=>\s*void startProcessing\(selected\.id\)\}>/);
+  assert.match(adminPanelSource, /selected\.status === "shop_proposed"\)\s*&&\s*(?:\(\s*)?<button\s+className="reject"\s+onClick=\{\(\)\s*=>\s*void markUnable\(selected\.id\)\}>/);
 });
 
 test("AdminShopSearchRequestPanel default order relies on get_admin_shop_search_requests' own oldest-open-first sort — it does not re-sort client-side", () => {

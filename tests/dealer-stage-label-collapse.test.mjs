@@ -28,12 +28,12 @@ test("DealerDashboard's deal-card status chip shows dealerStageLabel, not the ra
 test("TransactionChatWorkspace shows the collapsed dealer label only for role === dealer, and leaves the shop/installer view showing the real granular stage", async () => {
   const source = normalize(await read("components/transactions/TransactionChatWorkspace.tsx"));
   assert.match(source, /<b>\{role === "dealer" \? dealerStageLabel\(transaction\.status\.stage\) : transaction\.status\.stage\}<\/b>/);
-  assert.match(source, /role === "dealer" \? DEALER_STAGE_LABELS\.map/);
+  assert.match(source, /role === "dealer"\s*\?\s*DEALER_STAGE_LABELS\.map/);
 });
 
 test("TransactionManagementScreen's status chip, progress list, and list-row label all respect role === dealer for the collapsed view", async () => {
   const source = normalize(await read("components/transactions/TransactionManagementScreen.tsx"));
   assert.match(source, /role === "dealer" \? dealerStageLabel\(item\.status\.stage\) : item\.status\.stage/);
   assert.match(source, /role === "dealer" \? dealerStageLabel\(selected\.status\.stage\) : selected\.status\.stage/);
-  assert.match(source, /role === "dealer" \? DEALER_STAGE_LABELS\.map/);
+  assert.match(source, /role === "dealer"\s*\?\s*DEALER_STAGE_LABELS\.map/);
 });

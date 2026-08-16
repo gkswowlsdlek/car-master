@@ -79,7 +79,7 @@ test("hidden-by-dealer transactions are excluded from both counts and the list �
 
 test("empty states are distinct for zero-transactions (with a 시공점 찾기 CTA into the existing Shop Search flow), empty search, and empty group — no ERP-style bare table", () => {
   assert.match(screenSource, /아직 진행 중인 거래가 없습니다\./);
-  assert.match(screenSource, /onClick=\{onFindShop\}>시공점 찾기</);
+  assert.match(screenSource, /onClick=\{onFindShop\}>\s*시공점 찾기\s*</);
   assert.match(screenSource, /검색 결과가 없습니다\./);
 });
 
@@ -91,11 +91,11 @@ test("DealerWorkspace wires the new screen for role dealer's 거래관리 tab, a
   assert.match(workspaceSource, /import \{ DealerTransactionManagementScreen \} from "\.\.\/transactions\/DealerTransactionManagementScreen";/);
   assert.doesNotMatch(workspaceSource, /\{ TransactionManagementScreen \}/);
   assert.doesNotMatch(workspaceSource, /<TransactionManagementScreen /);
-  assert.match(workspaceSource, /screen === "deals" && <DealerTransactionManagementScreen transactions=\{transactions\} initialGroupFilter=\{dealFilter\} onOpenTransaction=\{\(id\) => \{ setSelectedTransactionId\(id\); onNavigate\("messages"\); \}\} onNewRequest=\{\(\) => onNavigate\("request"\)\} onFindShop=\{\(\) => onNavigate\("dealerMap"\)\} \/>\}/);
-  assert.match(workspaceSource, /<DealerDashboard[\s\S]*?onOpenTransaction=\{\(id\) => \{ setSelectedTransactionId\(id\); onNavigate\("messages"\); \}\}/);
+  assert.match(workspaceSource, /screen === "deals"\s*&&\s*(?:\(\s*)?<DealerTransactionManagementScreen\s+transactions=\{transactions\}\s+initialGroupFilter=\{dealFilter\}\s+onOpenTransaction=\{\(id\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*onNavigate\("messages"\);\s*\}\}\s+onNewRequest=\{\(\)\s*=>\s*onNavigate\("request"\)\}\s+onFindShop=\{\(\)\s*=>\s*onNavigate\("dealerMap"\)\}\s*\/>/);
+  assert.match(workspaceSource, /<DealerDashboard[\s\S]*?onOpenTransaction=\{\(id\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*onNavigate\("messages"\);\s*\}\}/);
 });
 
 test("InstallerWorkspace (shop role) is untouched — TransactionManagementScreen keeps serving the Shop's own transaction management unchanged", async () => {
   const installerSource = normalize(await read("components/workspaces/InstallerWorkspace.tsx"));
-  assert.match(installerSource, /<TransactionManagementScreen role="shop"/);
+  assert.match(installerSource, /<TransactionManagementScreen\s+role="shop"/);
 });
