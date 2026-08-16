@@ -2453,10 +2453,11 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .prototype-only-label { display: block; margin-top: 8px; color: #94a3b8; font-size: 10px; text-align: right; }
 .dealer-home-frame .app-sidebar { background: var(--prototype-navy); }
 .dealer-home-frame .sidebar-primary-nav button.active { background: var(--prototype-primary); }
-.dealer-home-frame .app-logo { position: relative; overflow: visible; }
+.dealer-home-frame .app-logo { position: relative; min-height: 108px; overflow: visible; }
 .dealer-home-frame .app-logo img { visibility: hidden; height: 28px; }
 .dealer-home-frame .app-logo::before { content: ""; position: absolute; top: 9px; left: 5px; width: 42px; height: 17px; border: 3px solid #2770ff; border-bottom: 0; border-radius: 28px 28px 0 0; transform: skewX(-8deg); }
-.dealer-home-frame .app-logo::after { content: "Car-Master"; display: block; margin-top: -4px; color: #fff; font-size: 20px; font-weight: 800; letter-spacing: -.045em; }
+.dealer-home-frame .app-logo::after { content: "Car-Master"; position: absolute; top: 39px; left: 5px; color: #fff; font-size: 21px; font-weight: 800; letter-spacing: -.045em; }
+.dealer-home-frame .app-logo small { position: absolute; top: 70px; left: 5px; margin: 0; }
 .dealer-home-frame .reference-utility > button b { display: none; }
 .reference-prototype-dashboard.has-deals .reference-module-grid { grid-template-columns: 1fr 1fr; }
 .reference-prototype-dashboard.has-deals .getting-started { display: none; }
@@ -2482,9 +2483,10 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .reference-recent-work .ws-row-schedule b { color: var(--prototype-text); font-size: 12px; }
 
 /* Reference lock: local dashboard composition calibrated to the supplied 1680px frame. */
-.dealer-home-frame .app-sidebar { width: 304px; flex-basis: 304px; padding: 34px 22px 24px; }
-.dealer-home-frame .app-main { margin-left: 304px; background: #f7f9fc; }
-.dealer-home-frame .sidebar-section-label { margin: 43px 14px 20px; color: rgba(255,255,255,.62); font-size: 12px; }
+.dealer-home-frame { grid-template-columns: 304px minmax(0,1fr); }
+.dealer-home-frame .app-sidebar { width: 304px; flex-basis: 304px; box-sizing: border-box; padding: 34px 22px 24px; }
+.dealer-home-frame .app-main { margin-left: 0; background: #f7f9fc; }
+.dealer-home-frame .sidebar-section-label { margin: 20px 14px 20px; color: rgba(255,255,255,.62); font-size: 12px; }
 .dealer-home-frame .sidebar-primary-nav { gap: 7px; }
 .dealer-home-frame .sidebar-primary-nav button { min-height: 54px; border-radius: 8px; padding: 0 16px; font-size: 16px; }
 .dealer-home-frame .sidebar-primary-nav button i { width: 25px; }
