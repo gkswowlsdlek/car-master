@@ -2480,6 +2480,49 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .reference-recent-work .ws-row-schedule { display: grid; min-width: 58px; gap: 2px; }
 .reference-recent-work .ws-row-schedule small { color: var(--prototype-muted); font-size: 10px; }
 .reference-recent-work .ws-row-schedule b { color: var(--prototype-text); font-size: 12px; }
+
+/* Reference lock: local dashboard composition calibrated to the supplied 1680px frame. */
+.dealer-home-frame .app-sidebar { width: 304px; flex-basis: 304px; padding: 34px 22px 24px; }
+.dealer-home-frame .app-main { margin-left: 304px; background: #f7f9fc; }
+.dealer-home-frame .sidebar-section-label { margin: 43px 14px 20px; color: rgba(255,255,255,.62); font-size: 12px; }
+.dealer-home-frame .sidebar-primary-nav { gap: 7px; }
+.dealer-home-frame .sidebar-primary-nav button { min-height: 54px; border-radius: 8px; padding: 0 16px; font-size: 16px; }
+.dealer-home-frame .sidebar-primary-nav button i { width: 25px; }
+.dealer-home-frame .sidebar-primary-nav button.active { background: #1f5bd8; box-shadow: none; }
+.dealer-home-frame .sidebar-profile { margin-top: auto; border-top: 1px solid rgba(255,255,255,.14); border-radius: 0; background: transparent; padding: 22px 8px 0; }
+.dealer-home-frame .reference-prototype-dashboard { max-width: none; padding: 34px 44px 54px; }
+.dealer-home-frame .reference-dashboard-top { min-height: 55px; margin-bottom: 25px; }
+.dealer-home-frame .reference-dashboard-top h1 { font-size: 28px; }
+.dealer-home-frame .reference-dashboard-top p { font-size: 15px; }
+.dealer-home-frame .reference-search-panel { margin-bottom: 20px; border: 1px solid #e0e7f0; border-radius: 14px; background: #fff; padding: 34px 28px 24px; }
+.dealer-home-frame .reference-search-panel .r3-hero-title h2 { margin-bottom: 27px; font-size: 32px; }
+.dealer-home-frame .reference-search-panel .ws-search-form { max-width: 996px; grid-template-columns: minmax(0,1fr) 204px; }
+.dealer-home-frame .reference-search-panel .ws-search-form input { height: 56px; font-size: 14px; }
+.dealer-home-frame .reference-search-panel .ws-search-cta { height: 56px; font-size: 16px; }
+.dealer-home-frame .reference-quick-work { display: flex; margin-top: 22px; gap: 20px; }
+.dealer-home-frame .reference-quick-work button { min-width: 112px; height: 43px; border-radius: 999px; font-size: 14px; }
+.dealer-home-frame .reference-module-grid { grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+.dealer-home-frame .reference-module { min-height: 204px; border-radius: 12px; padding: 18px 22px; }
+.dealer-home-frame .reference-module h2 { font-size: 17px; }
+.dealer-home-frame .reference-module li { min-height: 34px; font-size: 14px; }
+.dealer-home-frame .reference-module li small { font-size: 12px; }
+.dealer-home-frame .reference-module.getting-started { display: none; }
+.dealer-home-frame .reference-recent-work { border-radius: 12px; }
+.dealer-home-frame .reference-recent-work .ws-section-head { padding: 19px 22px 14px; }
+.dealer-home-frame .reference-recent-work .ws-section-head h2 { font-size: 18px; }
+.dealer-home-frame .reference-recent-work .ws-section-head p { font-size: 13px; }
+.dealer-home-frame .reference-recent-work .ws-row { min-height: 76px; padding: 13px 22px; }
+.dealer-home-frame .reference-recent-work .ws-row-main b { font-size: 14px; }
+.dealer-home-frame .reference-recent-work .ws-row-main small { font-size: 12px; }
+.dealer-home-frame .reference-recent-work .ws-row-schedule b { font-size: 13px; }
+@media (max-width: 900px) {
+  .dealer-home-frame .app-sidebar { width: 304px; flex-basis: 304px; }
+  .dealer-home-frame .app-main { margin-left: 0; }
+  .dealer-home-frame .reference-prototype-dashboard { padding: 22px 16px 36px; }
+  .dealer-home-frame .reference-module-grid { grid-template-columns: 1fr; }
+  .dealer-home-frame .reference-quick-work { gap: 8px; overflow-x: auto; justify-content: flex-start; }
+  .dealer-home-frame .reference-quick-work button { min-width: 90px; }
+}
 @media (max-width: 900px) {
   .dealer-home-frame .app-topbar-default { display: flex; }
   .reference-prototype-dashboard { padding: 22px 16px 36px; }
