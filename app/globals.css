@@ -1064,6 +1064,36 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
   .r4-dealer-dashboard .r3-search-hero .ws-search-cta { height: 48px !important; }
 }
 
+/* Final reference foundation: preserve real flows, calibrate the shared workspace surface. */
+:root {
+  --cm-navy: #061328;
+  --cm-primary: #4d5fc7;
+  --cm-background: #f5f7fb;
+  --cm-surface: #fff;
+  --cm-border: #e4e9f1;
+  --cm-text: #13213a;
+  --cm-muted: #6b7890;
+}
+.role-dealer .app-topbar .topbar-icon-button { display: grid !important; width: 36px; height: 36px; border: 0; background: transparent; color: var(--cm-text); }
+.role-dealer .app-topbar .topbar-icon-button:hover { background: #f0f3fb; box-shadow: none; }
+.role-dealer .app-topbar .service-status { display: none !important; }
+.role-dealer .app-main { background: var(--cm-background) !important; }
+.role-dealer .app-topbar-default { margin: 12px 14px 0 0; border: 1px solid var(--cm-border); border-radius: 11px 11px 0 0; }
+.r4-dealer-dashboard { margin-right: 14px !important; padding: 0 36px 48px !important; background: var(--cm-surface); border: 1px solid var(--cm-border); border-top: 0; border-radius: 0 0 11px 11px; }
+.r4-dealer-dashboard .r3-dashboard-header { padding-top: 26px !important; margin-bottom: 30px !important; }
+.r4-dealer-dashboard .r3-dashboard-header h1 { font-size: 25px !important; color: var(--cm-text) !important; }
+.r4-dealer-dashboard .r3-dashboard-header p { color: var(--cm-muted) !important; }
+.r4-dealer-dashboard .r3-hero-title h2 { color: var(--cm-text) !important; font-size: 33px !important; }
+.r4-dealer-dashboard .r3-search-form input { color: var(--cm-text) !important; background: #fbfcfe !important; border-color: #d9e0ec !important; }
+.r4-dealer-dashboard .r3-search-form input:focus { outline: 2px solid rgba(77,95,199,.2); border-color: var(--cm-primary) !important; }
+.r4-dealer-dashboard .r3-search-hero .ws-search-cta { background: var(--cm-primary) !important; }
+.r4-dealer-dashboard .r3-quick-work button { color: var(--cm-text) !important; border-color: var(--cm-border) !important; box-shadow: 0 1px 2px rgba(20,35,65,.03); }
+.r4-dealer-dashboard .r3-recent-work { background: var(--cm-surface) !important; border-color: var(--cm-border) !important; }
+@media (max-width: 760px) {
+  .role-dealer .app-topbar-default { margin: 0; border: 0; border-radius: 0; }
+  .r4-dealer-dashboard { margin-right: 0 !important; border: 0; border-radius: 0; }
+}
+
 /* R1 final desktop hierarchy. */
 @media (min-width:1200px) {
   .dealer-dashboard { width:min(1480px,100%); padding:34px 48px 56px; }
