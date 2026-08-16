@@ -2483,15 +2483,19 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .reference-recent-work .ws-row-schedule b { color: var(--prototype-text); font-size: 12px; }
 
 /* Reference lock: local dashboard composition calibrated to the supplied 1680px frame. */
-.dealer-home-frame { grid-template-columns: 304px minmax(0,1fr); }
-.dealer-home-frame .app-sidebar { width: 304px; flex-basis: 304px; box-sizing: border-box; padding: 34px 22px 24px; }
+.dealer-home-frame { grid-template-columns: 320px minmax(0,1fr); }
+.dealer-home-frame .app-sidebar { width: 320px; flex-basis: 320px; box-sizing: border-box; padding: 34px 24px 24px; }
 .dealer-home-frame .app-main { margin-left: 0; background: #f7f9fc; }
 .dealer-home-frame .sidebar-section-label { margin: 20px 14px 20px; color: rgba(255,255,255,.62); font-size: 12px; }
 .dealer-home-frame .sidebar-primary-nav { gap: 7px; }
-.dealer-home-frame .sidebar-primary-nav button { min-height: 54px; border-radius: 8px; padding: 0 16px; font-size: 16px; }
-.dealer-home-frame .sidebar-primary-nav button i { width: 25px; }
+.dealer-home-frame .sidebar-primary-nav button { min-height: 58px; border-radius: 8px; padding: 0 18px; font-size: 17px; }
+.dealer-home-frame .sidebar-primary-nav button i { width: 28px; height: 28px; }
+.dealer-home-frame .sidebar-primary-nav button i svg { width: 24px; height: 24px; }
 .dealer-home-frame .sidebar-primary-nav button.active { background: #1f5bd8; box-shadow: none; }
-.dealer-home-frame .sidebar-profile { margin-top: auto; border-top: 1px solid rgba(255,255,255,.14); border-radius: 0; background: transparent; padding: 22px 8px 0; }
+.dealer-home-frame .sidebar-profile { margin-top: auto; border-top: 1px solid rgba(255,255,255,.14); border-radius: 0; background: transparent; padding: 24px 10px 0; }
+.dealer-home-frame .sidebar-profile > span { width: 42px; height: 42px; font-size: 15px; }
+.dealer-home-frame .sidebar-profile b { font-size: 15px; }
+.dealer-home-frame .sidebar-profile small { font-size: 12px; }
 .dealer-home-frame .reference-prototype-dashboard { max-width: none; padding: 34px 44px 54px; }
 .dealer-home-frame .reference-dashboard-top { min-height: 55px; margin-bottom: 25px; }
 .dealer-home-frame .reference-dashboard-top h1 { font-size: 28px; }
@@ -2518,7 +2522,7 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .dealer-home-frame .reference-recent-work .ws-row-main small { font-size: 12px; }
 .dealer-home-frame .reference-recent-work .ws-row-schedule b { font-size: 13px; }
 @media (max-width: 900px) {
-  .dealer-home-frame .app-sidebar { width: 304px; flex-basis: 304px; }
+  .dealer-home-frame .app-sidebar { width: 320px; flex-basis: 320px; }
   .dealer-home-frame .app-main { margin-left: 0; }
   .dealer-home-frame .reference-prototype-dashboard { padding: 22px 16px 36px; }
   .dealer-home-frame .reference-module-grid { grid-template-columns: 1fr; }
