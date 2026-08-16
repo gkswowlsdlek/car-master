@@ -31,8 +31,20 @@ export type Transaction = {
   installerName: string;
   vehicle: { maker: string; model: string; class: VehicleClass | "" };
   service: { brand?: string; product?: string; workDescription: string; extraRequest?: string };
-  pricing: { baseGuidePrice?: number; surcharge?: number; finalPrice?: number; paymentStatus: PaymentStatus; paymentAt?: string; settlementDueAt?: string };
-  schedule: { requestedInboundAt?: string; confirmedInboundAt?: string; desiredReleaseAt?: string; completedAt?: string };
+  pricing: {
+    baseGuidePrice?: number;
+    surcharge?: number;
+    finalPrice?: number;
+    paymentStatus: PaymentStatus;
+    paymentAt?: string;
+    settlementDueAt?: string;
+  };
+  schedule: {
+    requestedInboundAt?: string;
+    confirmedInboundAt?: string;
+    desiredReleaseAt?: string;
+    completedAt?: string;
+  };
   status: { stage: TransactionStage; createdAt: string; updatedAt: string };
   /** Short reason for the current 취소/시공불가 outcome, if any — never shown as a payment/settlement field. */
   outcomeNote?: string;
@@ -44,8 +56,14 @@ export type Transaction = {
 };
 
 export type TransactionChatMessage = {
-  id: string; roomId: string; senderId: string; senderRole: "dealer" | "shop" | "admin" | "system";
-  text: string; createdAt: string; readBy: string[]; attachments?: ChatAttachment[];
+  id: string;
+  roomId: string;
+  senderId: string;
+  senderRole: "dealer" | "shop" | "admin" | "system";
+  text: string;
+  createdAt: string;
+  readBy: string[];
+  attachments?: ChatAttachment[];
 };
 
 export type ChatAttachment = {
@@ -60,11 +78,31 @@ export type ChatAttachment = {
   createdAt: string;
 };
 
-export type ChatRoom = { id: string; transactionId: string; messages: TransactionChatMessage[]; createdAt: string; updatedAt: string; unreadCount: number };
+export type ChatRoom = {
+  id: string;
+  transactionId: string;
+  messages: TransactionChatMessage[];
+  createdAt: string;
+  updatedAt: string;
+  unreadCount: number;
+};
 
 export type UserProfile = {
-  id: string; role: "dealer" | "shop"; name: string; companyName?: string; representativeName?: string;
-  phone: string; email: string; activityArea?: string; address?: string; detailAddress?: string; brands?: string[]; works?: string[]; hours?: string; introduction?: string;
-  closedDays?: string; emergencyAvailable?: boolean;
+  id: string;
+  role: "dealer" | "shop";
+  name: string;
+  companyName?: string;
+  representativeName?: string;
+  phone: string;
+  email: string;
+  activityArea?: string;
+  address?: string;
+  detailAddress?: string;
+  brands?: string[];
+  works?: string[];
+  hours?: string;
+  introduction?: string;
+  closedDays?: string;
+  emergencyAvailable?: boolean;
   notifications: { request: boolean; chat: boolean; schedule: boolean; marketing: boolean };
 };

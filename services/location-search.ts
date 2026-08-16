@@ -1,5 +1,9 @@
 import { districtCenters } from "../data/district-centers";
-import { administrativeRegionFullNames, administrativeRegionNames, administrativeRegions } from "../data/administrative-regions";
+import {
+  administrativeRegionFullNames,
+  administrativeRegionNames,
+  administrativeRegions,
+} from "../data/administrative-regions";
 import type { SearchLocation } from "../types/location";
 
 export interface LocationSearchProvider {
@@ -7,15 +11,31 @@ export interface LocationSearchProvider {
 }
 
 export function normalizeLocationQuery(value: string) {
-  return value.trim().toLowerCase().replace(/서울특별시|서울시/g, "서울").replace(/경기도/g, "경기").replace(/\s+/g, "").trim();
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/서울특별시|서울시/g, "서울")
+    .replace(/경기도/g, "경기")
+    .replace(/\s+/g, "")
+    .trim();
 }
 
 export class LocalDistrictSearchProvider implements LocationSearchProvider {
   async search(query: string): Promise<SearchLocation | null> {
     const normalized = normalizeLocationQuery(query);
     if (normalized.length < 2) return null;
-    const center = districtCenters.find((item) => item.aliases.some((alias) => normalizeLocationQuery(alias) === normalized));
-    if (center) return { id: center.id, city: center.city, district: center.district, label: center.label, latitude: center.latitude, longitude: center.longitude };
+    const center = districtCenters.find((item) =>
+      item.aliases.some((alias) => normalizeLocationQuery(alias) === normalized),
+    );
+    if (center)
+      return {
+        id: center.id,
+        city: center.city,
+        district: center.district,
+        label: center.label,
+        latitude: center.latitude,
+        longitude: center.longitude,
+      };
 
     const region = administrativeRegionNames.find((name) => normalized.includes(normalizeLocationQuery(name)));
     if (!region) return null;

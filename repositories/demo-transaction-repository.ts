@@ -20,29 +20,59 @@ import type { PaymentStatus, Transaction, TransactionStage, TransactionStageEven
 export type DemoActorRole = "dealer" | "shop" | "admin";
 
 type StageEventRow = {
-  id: number; transaction_id: string; from_stage: TransactionStageEvent["fromStage"]; to_stage: TransactionStageEvent["toStage"];
-  actor_role: TransactionStageEvent["actorRole"]; direction: TransactionStageEvent["direction"]; created_at: string;
+  id: number;
+  transaction_id: string;
+  from_stage: TransactionStageEvent["fromStage"];
+  to_stage: TransactionStageEvent["toStage"];
+  actor_role: TransactionStageEvent["actorRole"];
+  direction: TransactionStageEvent["direction"];
+  created_at: string;
 };
 
 type TransactionRow = {
-  id: string; dealer_id: string; installer_id: string; installer_name: string;
-  vehicle: Transaction["vehicle"]; service: Transaction["service"]; pricing: Transaction["pricing"];
-  schedule: Transaction["schedule"]; stage: Transaction["status"]["stage"];
-  hidden_by_dealer: boolean; hidden_by_installer: boolean; last_message: string;
-  chat_room_id: string; created_at: string; updated_at: string;
+  id: string;
+  dealer_id: string;
+  installer_id: string;
+  installer_name: string;
+  vehicle: Transaction["vehicle"];
+  service: Transaction["service"];
+  pricing: Transaction["pricing"];
+  schedule: Transaction["schedule"];
+  stage: Transaction["status"]["stage"];
+  hidden_by_dealer: boolean;
+  hidden_by_installer: boolean;
+  last_message: string;
+  chat_room_id: string;
+  created_at: string;
+  updated_at: string;
   demo_transaction_stage_events: StageEventRow[] | null;
 };
 
 function mapTransaction(row: TransactionRow): Transaction {
   const stageLog: TransactionStageEvent[] = (row.demo_transaction_stage_events ?? [])
-    .map((event) => ({ id: `EVT-${event.id}`, fromStage: event.from_stage, toStage: event.to_stage, actorRole: event.actor_role, direction: event.direction, createdAt: event.created_at }))
+    .map((event) => ({
+      id: `EVT-${event.id}`,
+      fromStage: event.from_stage,
+      toStage: event.to_stage,
+      actorRole: event.actor_role,
+      direction: event.direction,
+      createdAt: event.created_at,
+    }))
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   return {
-    id: row.id, dealerId: row.dealer_id, installerId: row.installer_id, installerName: row.installer_name,
-    vehicle: row.vehicle, service: row.service, pricing: row.pricing, schedule: row.schedule,
+    id: row.id,
+    dealerId: row.dealer_id,
+    installerId: row.installer_id,
+    installerName: row.installer_name,
+    vehicle: row.vehicle,
+    service: row.service,
+    pricing: row.pricing,
+    schedule: row.schedule,
     status: { stage: row.stage, createdAt: row.created_at, updatedAt: row.updated_at },
     visibility: { hiddenByDealer: row.hidden_by_dealer, hiddenByInstaller: row.hidden_by_installer },
-    chatRoomId: row.chat_room_id, lastMessage: row.last_message, stageLog,
+    chatRoomId: row.chat_room_id,
+    lastMessage: row.last_message,
+    stageLog,
   };
 }
 
@@ -70,50 +100,80 @@ export class DemoTransactionRepository {
 
   async getAll(): Promise<Transaction[]> {
     if (!isSupabaseConfigured) return [];
-    const { data, error } = await createSupabaseBrowserClient().from("demo_transactions")
-      .select("id,dealer_id,installer_id,installer_name,vehicle,service,pricing,schedule,stage,hidden_by_dealer,hidden_by_installer,last_message,chat_room_id,created_at,updated_at,demo_transaction_stage_events(id,transaction_id,from_stage,to_stage,actor_role,direction,created_at)")
+    const { data, error } = await createSupabaseBrowserClient()
+      .from("demo_transactions")
+      .select(
+        "id,dealer_id,installer_id,installer_name,vehicle,service,pricing,schedule,stage,hidden_by_dealer,hidden_by_installer,last_message,chat_room_id,created_at,updated_at,demo_transaction_stage_events(id,transaction_id,from_stage,to_stage,actor_role,direction,created_at)",
+      )
       .order("updated_at", { ascending: false });
     if (error) throw error;
     return ((data ?? []) as unknown as TransactionRow[]).map(mapTransaction);
   }
 
-  async createWithRoom(value: Pick<Transaction, "installerId" | "installerName" | "vehicle" | "service" | "pricing" | "schedule">, dealerId: string) {
+  async createWithRoom(
+    value: Pick<Transaction, "installerId" | "installerName" | "vehicle" | "service" | "pricing" | "schedule">,
+    dealerId: string,
+  ) {
     const { data, error } = await createSupabaseBrowserClient().rpc("demo_create_transaction_with_room", {
-      p_dealer_id: dealerId, p_installer_id: value.installerId, p_installer_name: value.installerName,
-      p_vehicle: value.vehicle, p_service: value.service, p_pricing: value.pricing, p_schedule: value.schedule,
+      p_dealer_id: dealerId,
+      p_installer_id: value.installerId,
+      p_installer_name: value.installerName,
+      p_vehicle: value.vehicle,
+      p_service: value.service,
+      p_pricing: value.pricing,
+      p_schedule: value.schedule,
     });
     if (error) throw error;
     return data as { transactionId: string; roomId: string; messageId: string };
   }
 
   async setVisibility(transactionId: string, hidden: boolean, role: "dealer" | "shop") {
-    const { error } = await createSupabaseBrowserClient().rpc("demo_set_transaction_visibility", { p_transaction_id: transactionId, p_hidden: hidden, p_role: role });
+    const { error } = await createSupabaseBrowserClient().rpc("demo_set_transaction_visibility", {
+      p_transaction_id: transactionId,
+      p_hidden: hidden,
+      p_role: role,
+    });
     if (error) throw error;
   }
 
   async setFinalPrice(transactionId: string, finalPrice: number, role: DemoActorRole) {
-    const { error } = await createSupabaseBrowserClient().rpc("demo_set_transaction_final_price", { p_transaction_id: transactionId, p_final_price: finalPrice, p_actor_role: role });
+    const { error } = await createSupabaseBrowserClient().rpc("demo_set_transaction_final_price", {
+      p_transaction_id: transactionId,
+      p_final_price: finalPrice,
+      p_actor_role: role,
+    });
     if (error) throw error;
   }
 
   async transitionPayment(transactionId: string, nextStatus: PaymentStatus, role: DemoActorRole) {
-    const { error } = await createSupabaseBrowserClient().rpc("demo_transition_transaction_payment", { p_transaction_id: transactionId, p_next_status: nextStatus, p_actor_role: role });
+    const { error } = await createSupabaseBrowserClient().rpc("demo_transition_transaction_payment", {
+      p_transaction_id: transactionId,
+      p_next_status: nextStatus,
+      p_actor_role: role,
+    });
     if (error) throw error;
   }
 
   async transitionStage(transactionId: string, nextStage: TransactionStage, role: DemoActorRole) {
-    const { error } = await createSupabaseBrowserClient().rpc("demo_transition_transaction_stage", { p_transaction_id: transactionId, p_next_stage: nextStage, p_actor_role: role });
+    const { error } = await createSupabaseBrowserClient().rpc("demo_transition_transaction_stage", {
+      p_transaction_id: transactionId,
+      p_next_stage: nextStage,
+      p_actor_role: role,
+    });
     if (error) throw error;
   }
 
   subscribe(listener: () => void) {
     if (!isSupabaseConfigured) return () => {};
     const client = createSupabaseBrowserClient();
-    const channel = client.channel("car-master-demo-transactions")
+    const channel = client
+      .channel("car-master-demo-transactions")
       .on("postgres_changes", { event: "*", schema: "public", table: "demo_transactions" }, listener)
       .on("postgres_changes", { event: "*", schema: "public", table: "demo_transaction_stage_events" }, listener)
       .subscribe();
-    return () => { void client.removeChannel(channel); };
+    return () => {
+      void client.removeChannel(channel);
+    };
   }
 }
 

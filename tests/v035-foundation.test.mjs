@@ -4,7 +4,8 @@ import test from "node:test";
 
 test("the recommended package guide keeps the supported brand catalog", async () => {
   const source = await readFile(new URL("../data/pricePackages.ts", import.meta.url), "utf8");
-  for (const brand of ["버텍스", "브이쿨", "솔라가드", "후퍼옵틱", "글라스틴트", "기타"]) assert.match(source, new RegExp(brand));
+  for (const brand of ["버텍스", "브이쿨", "솔라가드", "후퍼옵틱", "글라스틴트", "기타"])
+    assert.match(source, new RegExp(brand));
   assert.match(source, /installationPriceGuide\.flatMap/);
 });
 
@@ -16,7 +17,10 @@ test("installer search retains coordinate-free shops and sorts them after locate
 });
 
 test("the foundation migration contains participant RLS, private storage and realtime", async () => {
-  const source = await readFile(new URL("../supabase/migrations/202607210001_v035_foundation.sql", import.meta.url), "utf8");
+  const source = await readFile(
+    new URL("../supabase/migrations/202607210001_v035_foundation.sql", import.meta.url),
+    "utf8",
+  );
   assert.match(source, /create table public\.transactions/);
   assert.match(source, /create table public\.transaction_rooms/);
   assert.match(source, /create table public\.chat_messages/);

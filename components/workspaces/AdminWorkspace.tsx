@@ -16,12 +16,30 @@ type AdminWorkspaceProps = {
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 };
 
-export function AdminWorkspace({ account, screen, transactions, rooms, onNavigate, onChangePassword }: AdminWorkspaceProps) {
+export function AdminWorkspace({
+  account,
+  screen,
+  transactions,
+  rooms,
+  onNavigate,
+  onChangePassword,
+}: AdminWorkspaceProps) {
   const demoSession = demoAccounts.some((item) => item.id === account.id);
 
-  return <>
-    {screen === "ops" && <AdminOverview transactions={transactions} rooms={rooms} demoSession={demoSession} onOpenShopManagement={() => onNavigate("adminShops")} />}
-    {screen === "adminShops" && <AdminShopManagementScreen />}
-    {screen === "adminAccount" && <AdminAccountScreen demoSession={demoSession} onChangePassword={onChangePassword} />}
-  </>;
+  return (
+    <>
+      {screen === "ops" && (
+        <AdminOverview
+          transactions={transactions}
+          rooms={rooms}
+          demoSession={demoSession}
+          onOpenShopManagement={() => onNavigate("adminShops")}
+        />
+      )}
+      {screen === "adminShops" && <AdminShopManagementScreen />}
+      {screen === "adminAccount" && (
+        <AdminAccountScreen demoSession={demoSession} onChangePassword={onChangePassword} />
+      )}
+    </>
+  );
 }

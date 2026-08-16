@@ -18,10 +18,20 @@ const shopFaq = [
   ["계정 정보를 수정할 수 있나요?", "시공점 관리에서 고객에게 보이는 업체 정보와 요청 수신 설정을 관리하세요."],
 ];
 
-export function HelpCenterScreen({ role = "dealer", embedded = false }: { role?: "dealer" | "shop"; embedded?: boolean }) {
+export function HelpCenterScreen({
+  role = "dealer",
+  embedded = false,
+}: {
+  role?: "dealer" | "shop";
+  embedded?: boolean;
+}) {
   const items = role === "shop" ? shopFaq : dealerFaq;
   const [query, setQuery] = useState("");
-  const filteredItems = useMemo(() => items.filter(([question, answer]) => `${question} ${answer}`.toLowerCase().includes(query.trim().toLowerCase())), [items, query]);
+  const filteredItems = useMemo(
+    () =>
+      items.filter(([question, answer]) => `${question} ${answer}`.toLowerCase().includes(query.trim().toLowerCase())),
+    [items, query],
+  );
 
   // Embedded (inside a Workspace, Sidebar already visible) gets the same
   // left-aligned page-title header every other Workspace screen uses, and
@@ -29,20 +39,111 @@ export function HelpCenterScreen({ role = "dealer", embedded = false }: { role?:
   // landing), which was actually wrong once the Sidebar is always present.
   // Standalone /help and /help/shop keep the original hero + back link
   // unchanged.
-  const header = embedded
-    ? <header className="page-title"><div><p className="eyebrow">SUPPORT</p><h1>고객센터</h1><p className="page-subtitle">서비스 이용 중 필요한 도움말을 확인하세요.</p></div></header>
-    : <header className="help-hero"><div className="help-hero-icon"><CircleHelp size={28} /></div><p className="eyebrow">CAR-MASTER HELP CENTER</p><h1>무엇을 도와드릴까요?</h1><p>거래와 시공 업무를 더 쉽게 시작할 수 있도록 필요한 안내를 모았습니다.</p></header>;
+  const header = embedded ? (
+    <header className="page-title">
+      <div>
+        <p className="eyebrow">SUPPORT</p>
+        <h1>고객센터</h1>
+        <p className="page-subtitle">서비스 이용 중 필요한 도움말을 확인하세요.</p>
+      </div>
+    </header>
+  ) : (
+    <header className="help-hero">
+      <div className="help-hero-icon">
+        <CircleHelp size={28} />
+      </div>
+      <p className="eyebrow">CAR-MASTER HELP CENTER</p>
+      <h1>무엇을 도와드릴까요?</h1>
+      <p>거래와 시공 업무를 더 쉽게 시작할 수 있도록 필요한 안내를 모았습니다.</p>
+    </header>
+  );
 
-  const body = <>
-    {header}
-    <section className="help-quick-grid"><Link href="/help?section=faq"><BookOpen size={20} /><span><b>자주 찾는 도움말</b><small>처음 이용할 때 필요한 안내</small></span><ChevronRight size={17} /></Link><div className="help-quick-disabled"><MessageCircle size={20} /><span><b>문의 채널 준비 중</b><small>문의 접수 채널을 준비하고 있습니다.</small></span></div><Link href="/terms"><ShieldCheck size={20} /><span><b>서비스 이용 안내</b><small>약관과 개인정보처리방침</small></span><ChevronRight size={17} /></Link></section>
-    <section className="help-section"><div className="help-section-head"><div><p className="eyebrow">FAQ</p><h2>{role === "shop" ? "시공점 이용 안내" : "딜러 이용 안내"}</h2></div><span className="help-role-badge">{role === "shop" ? "시공점" : "딜러"}</span></div><label className="help-search"><CircleHelp size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="도움말 검색" aria-label="도움말 검색" /></label><div className="help-category-row"><span>계정·로그인</span><span>{role === "shop" ? "가입·승인" : "시공점 찾기"}</span><span>거래·메시지</span></div><div className="help-faq-list">{filteredItems.map(([question, answer]) => <details key={question}><summary>{question}<ChevronRight size={17} /></summary><p>{answer}</p></details>)}{filteredItems.length === 0 && <div className="help-no-results">검색 결과가 없습니다. 다른 키워드로 다시 검색해 주세요.</div>}</div></section>
-    <section className="help-contact"><div><b>원하는 답을 찾지 못하셨나요?</b><p>문의 접수 채널을 준비하고 있습니다. 서비스 이용 안내를 먼저 확인해 주세요.</p></div><Link className="secondary" href="/terms">이용 안내 보기</Link></section>
-  </>;
+  const body = (
+    <>
+      {header}
+      <section className="help-quick-grid">
+        <Link href="/help?section=faq">
+          <BookOpen size={20} />
+          <span>
+            <b>자주 찾는 도움말</b>
+            <small>처음 이용할 때 필요한 안내</small>
+          </span>
+          <ChevronRight size={17} />
+        </Link>
+        <div className="help-quick-disabled">
+          <MessageCircle size={20} />
+          <span>
+            <b>문의 채널 준비 중</b>
+            <small>문의 접수 채널을 준비하고 있습니다.</small>
+          </span>
+        </div>
+        <Link href="/terms">
+          <ShieldCheck size={20} />
+          <span>
+            <b>서비스 이용 안내</b>
+            <small>약관과 개인정보처리방침</small>
+          </span>
+          <ChevronRight size={17} />
+        </Link>
+      </section>
+      <section className="help-section">
+        <div className="help-section-head">
+          <div>
+            <p className="eyebrow">FAQ</p>
+            <h2>{role === "shop" ? "시공점 이용 안내" : "딜러 이용 안내"}</h2>
+          </div>
+          <span className="help-role-badge">{role === "shop" ? "시공점" : "딜러"}</span>
+        </div>
+        <label className="help-search">
+          <CircleHelp size={17} />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="도움말 검색"
+            aria-label="도움말 검색"
+          />
+        </label>
+        <div className="help-category-row">
+          <span>계정·로그인</span>
+          <span>{role === "shop" ? "가입·승인" : "시공점 찾기"}</span>
+          <span>거래·메시지</span>
+        </div>
+        <div className="help-faq-list">
+          {filteredItems.map(([question, answer]) => (
+            <details key={question}>
+              <summary>
+                {question}
+                <ChevronRight size={17} />
+              </summary>
+              <p>{answer}</p>
+            </details>
+          ))}
+          {filteredItems.length === 0 && (
+            <div className="help-no-results">검색 결과가 없습니다. 다른 키워드로 다시 검색해 주세요.</div>
+          )}
+        </div>
+      </section>
+      <section className="help-contact">
+        <div>
+          <b>원하는 답을 찾지 못하셨나요?</b>
+          <p>문의 접수 채널을 준비하고 있습니다. 서비스 이용 안내를 먼저 확인해 주세요.</p>
+        </div>
+        <Link className="secondary" href="/terms">
+          이용 안내 보기
+        </Link>
+      </section>
+    </>
+  );
 
   if (embedded) return <section className="dealer-screen help-embedded">{body}</section>;
-  return <main className="help-page"><div className="help-shell">
-    <Link className="help-back" href="/"><ArrowLeft size={16} /> 워크스페이스로 돌아가기</Link>
-    {body}
-  </div></main>;
+  return (
+    <main className="help-page">
+      <div className="help-shell">
+        <Link className="help-back" href="/">
+          <ArrowLeft size={16} /> 워크스페이스로 돌아가기
+        </Link>
+        {body}
+      </div>
+    </main>
+  );
 }

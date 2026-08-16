@@ -25,4 +25,3 @@
 ## 실제 환경에서만 가능한 테스트
 
 Supabase가 연결된 Preview에서 서로 다른 딜러·시공점 계정과 두 기기로 `SUPABASE_V0.3.6_CHECKLIST.md`를 수행한다.
-

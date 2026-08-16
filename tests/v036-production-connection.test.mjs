@@ -20,7 +20,10 @@ test("documented demo credentials remain available when overrides are configured
 });
 
 test("v0.3.6 migration hardens durable chat, stage transitions and orphan cleanup", async () => {
-  const source = await readFile(new URL("../supabase/migrations/202607220001_v036_production_connection.sql", import.meta.url), "utf8");
+  const source = await readFile(
+    new URL("../supabase/migrations/202607220001_v036_production_connection.sql", import.meta.url),
+    "utf8",
+  );
   assert.match(source, /client_message_id/);
   assert.match(source, /guard_transaction_insert/);
   assert.match(source, /set_transaction_visibility/);
@@ -28,7 +31,10 @@ test("v0.3.6 migration hardens durable chat, stage transitions and orphan cleanu
   assert.match(source, /transition_transaction_payment/);
   assert.match(source, /transition_transaction_stage/);
   assert.match(source, /revoke update on public\.transactions from authenticated/);
-  assert.match(source, /revoke update \(vehicle, service, pricing, schedule, stage, hidden_by_dealer, hidden_by_installer, last_message, updated_at\)/);
+  assert.match(
+    source,
+    /revoke update \(vehicle, service, pricing, schedule, stage, hidden_by_dealer, hidden_by_installer, last_message, updated_at\)/,
+  );
   assert.match(source, /drop policy if exists "transaction participants update"/);
   assert.match(source, /coalesce\(client_message_id, ''\) <> ''/);
   assert.match(source, /split_part\(attachment ->> 'storagePath', '\/', 1\) <> check_room_id::text/);
@@ -39,8 +45,17 @@ test("v0.3.6 migration hardens durable chat, stage transitions and orphan cleanu
 });
 
 test("Supabase transaction writes use role-aware RPCs instead of direct table updates", async () => {
-  const repository = await readFile(new URL("../repositories/supabase-transaction-repository.ts", import.meta.url), "utf8");
-  for (const rpc of ["set_transaction_visibility", "set_transaction_final_price", "transition_transaction_payment", "transition_transaction_stage"]) assert.match(repository, new RegExp(rpc));
+  const repository = await readFile(
+    new URL("../repositories/supabase-transaction-repository.ts", import.meta.url),
+    "utf8",
+  );
+  for (const rpc of [
+    "set_transaction_visibility",
+    "set_transaction_final_price",
+    "transition_transaction_payment",
+    "transition_transaction_stage",
+  ])
+    assert.match(repository, new RegExp(rpc));
   assert.doesNotMatch(repository, /from\("transactions"\)\.update/);
 });
 
@@ -49,15 +64,32 @@ test("remote pending attachments are discarded when removed or send fails", asyn
   // MAX_ATTACHMENTS), so there's no longer a "replace the previous pending
   // attachment" step to discard — instead each individual removal discards
   // its own item, and a failed send discards the whole pending batch.
-  const chat = await readFile(new URL("../components/transactions/TransactionChatWorkspace.tsx", import.meta.url), "utf8");
+  const chat = await readFile(
+    new URL("../components/transactions/TransactionChatWorkspace.tsx", import.meta.url),
+    "utf8",
+  );
   assert.match(chat, /Promise\.allSettled\(pending\.map/);
   assert.match(chat, /provider\.discard\?\.\(item\)/);
   assert.match(chat, /pendingRef\.current = \[\]/);
 });
 
 test("transaction and chat controls expose stable E2E selectors", async () => {
-  const management = await readFile(new URL("../components/transactions/TransactionManagementScreen.tsx", import.meta.url), "utf8");
-  const chat = await readFile(new URL("../components/transactions/TransactionChatWorkspace.tsx", import.meta.url), "utf8");
+  const management = await readFile(
+    new URL("../components/transactions/TransactionManagementScreen.tsx", import.meta.url),
+    "utf8",
+  );
+  const chat = await readFile(
+    new URL("../components/transactions/TransactionChatWorkspace.tsx", import.meta.url),
+    "utf8",
+  );
   assert.match(management, /transaction-card-/);
-  for (const testId of ["transaction-detail-", "chat-input", "chat-send-button", "file-upload-input", "start-work-button", "complete-work-button"]) assert.match(chat, new RegExp(testId));
+  for (const testId of [
+    "transaction-detail-",
+    "chat-input",
+    "chat-send-button",
+    "file-upload-input",
+    "start-work-button",
+    "complete-work-button",
+  ])
+    assert.match(chat, new RegExp(testId));
 });

@@ -17,11 +17,23 @@ test("Real getAllMembers() reuses the RLS-bound browser client — no service-ro
 test("No new migration file was added for member listing — Real access relies entirely on the existing is_admin() RLS policy", async () => {
   const { readdir } = await import("node:fs/promises");
   const files = await readdir(new URL("../supabase/migrations", import.meta.url));
-  const memberListingFiles = files.filter((name) => name.includes("v0313") && /member/i.test(name) && !name.includes("demo_installer_membership"));
-  assert.deepEqual(memberListingFiles, [], "expected no dedicated migration for the Admin member-listing feature itself");
+  const memberListingFiles = files.filter(
+    (name) => name.includes("v0313") && /member/i.test(name) && !name.includes("demo_installer_membership"),
+  );
+  assert.deepEqual(
+    memberListingFiles,
+    [],
+    "expected no dedicated migration for the Admin member-listing feature itself",
+  );
   const membershipMigration = await read("supabase/migrations/202607190001_v034_membership.sql");
-  assert.match(membershipMigration, /"profiles select own or admin"[\s\S]*?using \(id = auth\.uid\(\) or public\.is_admin\(\)\)/);
-  assert.match(membershipMigration, /"dealer profiles select own or admin"[\s\S]*?using \(user_id = auth\.uid\(\) or public\.is_admin\(\)\)/);
+  assert.match(
+    membershipMigration,
+    /"profiles select own or admin"[\s\S]*?using \(id = auth\.uid\(\) or public\.is_admin\(\)\)/,
+  );
+  assert.match(
+    membershipMigration,
+    /"dealer profiles select own or admin"[\s\S]*?using \(user_id = auth\.uid\(\) or public\.is_admin\(\)\)/,
+  );
 });
 
 test("AdminMember mapping keeps Dealer and Installer role/approval fields separate (no fabricated approval status for dealers)", async () => {
@@ -50,7 +62,10 @@ test("AdminMemberPanel wires search, role filter and approval filter as client-s
   const source = await read("components/admin/AdminMemberPanel.tsx");
   assert.match(source, /role === "전체" \|\| item\.role === role/);
   assert.match(source, /approval === "전체" \|\| item\.approvalStatus === approval/);
-  assert.match(source, /`\$\{item\.name\} \$\{item\.companyName\} \$\{item\.email\}`\.toLowerCase\(\)\.includes\(query\.trim\(\)\.toLowerCase\(\)\)/);
+  assert.match(
+    source,
+    /`\$\{item\.name\} \$\{item\.companyName\} \$\{item\.email\}`\.toLowerCase\(\)\.includes\(query\.trim\(\)\.toLowerCase\(\)\)/,
+  );
 });
 
 test("AdminMemberPanel covers loading, error and empty states distinctly", async () => {
@@ -62,7 +77,10 @@ test("AdminMemberPanel covers loading, error and empty states distinctly", async
 
 test("AdminMemberPanel calls the demo repository only when demoSession is true, and the real repository otherwise", async () => {
   const source = await read("components/admin/AdminMemberPanel.tsx");
-  assert.match(source, /demoSession\s*\?\s*await demoMembershipRepository\.getAllMembers\(\)\s*:\s*await membershipRepository\.getAllMembers\(\)/);
+  assert.match(
+    source,
+    /demoSession\s*\?\s*await demoMembershipRepository\.getAllMembers\(\)\s*:\s*await membershipRepository\.getAllMembers\(\)/,
+  );
 });
 
 test("AdminMemberPanel links a pending/rejected/suspended installer to the existing InstallerApprovalPanel instead of duplicating approve/reject actions", async () => {

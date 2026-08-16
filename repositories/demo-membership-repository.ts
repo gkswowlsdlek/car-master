@@ -18,17 +18,37 @@ import type { AdminMember, InstallerApplication } from "./membership-repository"
 // same graceful-degrade pattern as demo-transaction-repository.ts.
 
 type ApplicationRow = {
-  id: string; shop_name: string; representative_name: string; business_name: string; business_registration_number: string;
-  address: string; detail_address: string; phone: string; contact_phone: string;
-  supported_services: string[]; supported_brands: string[]; status: InstallerApprovalStatus; review_note: string;
+  id: string;
+  shop_name: string;
+  representative_name: string;
+  business_name: string;
+  business_registration_number: string;
+  address: string;
+  detail_address: string;
+  phone: string;
+  contact_phone: string;
+  supported_services: string[];
+  supported_brands: string[];
+  status: InstallerApprovalStatus;
+  review_note: string;
 };
 
 function mapApplication(row: ApplicationRow): InstallerApplication {
   return {
-    userId: row.id, email: "", shopName: row.shop_name, representativeName: row.representative_name, businessName: row.business_name,
-    businessRegistrationNumber: row.business_registration_number, address: row.address, detailAddress: row.detail_address || undefined,
-    phone: row.phone, contactPhone: row.contact_phone, supportedServices: row.supported_services ?? [], supportedBrands: row.supported_brands ?? [],
-    status: row.status, reviewNote: row.review_note || undefined,
+    userId: row.id,
+    email: "",
+    shopName: row.shop_name,
+    representativeName: row.representative_name,
+    businessName: row.business_name,
+    businessRegistrationNumber: row.business_registration_number,
+    address: row.address,
+    detailAddress: row.detail_address || undefined,
+    phone: row.phone,
+    contactPhone: row.contact_phone,
+    supportedServices: row.supported_services ?? [],
+    supportedBrands: row.supported_brands ?? [],
+    status: row.status,
+    reviewNote: row.review_note || undefined,
   };
 }
 
@@ -43,7 +63,10 @@ export class DemoMembershipRepository {
     if (!this.schemaReadyPromise) {
       this.schemaReadyPromise = (async () => {
         try {
-          const { error } = await createSupabaseBrowserClient().from("demo_installer_applications").select("id").limit(1);
+          const { error } = await createSupabaseBrowserClient()
+            .from("demo_installer_applications")
+            .select("id")
+            .limit(1);
           return !error || !SCHEMA_MISSING_CODES.has(error.code ?? "");
         } catch {
           return false;
@@ -55,8 +78,11 @@ export class DemoMembershipRepository {
 
   async getInstallerApplications(): Promise<InstallerApplication[]> {
     if (!isSupabaseConfigured) return [];
-    const { data, error } = await createSupabaseBrowserClient().from("demo_installer_applications")
-      .select("id,shop_name,representative_name,business_name,business_registration_number,address,detail_address,phone,contact_phone,supported_services,supported_brands,status,review_note")
+    const { data, error } = await createSupabaseBrowserClient()
+      .from("demo_installer_applications")
+      .select(
+        "id,shop_name,representative_name,business_name,business_registration_number,address,detail_address,phone,contact_phone,supported_services,supported_brands,status,review_note",
+      )
       .order("created_at", { ascending: true });
     if (error) throw error;
     return ((data ?? []) as ApplicationRow[]).map(mapApplication);
@@ -64,7 +90,10 @@ export class DemoMembershipRepository {
 
   async reviewInstaller(applicationId: string, status: InstallerApprovalStatus, reviewNote = "") {
     const { error } = await createSupabaseBrowserClient().rpc("demo_review_installer_application", {
-      p_application_id: applicationId, p_status: status, p_review_note: reviewNote, p_actor_role: "admin",
+      p_application_id: applicationId,
+      p_status: status,
+      p_review_note: reviewNote,
+      p_actor_role: "admin",
     });
     if (error) throw error;
   }
@@ -79,7 +108,10 @@ export class DemoMembershipRepository {
    */
   async getAllMembers(): Promise<AdminMember[]> {
     return demoAccounts
-      .filter((account): account is typeof account & { role: "dealer" | "shop" } => account.role === "dealer" || account.role === "shop")
+      .filter(
+        (account): account is typeof account & { role: "dealer" | "shop" } =>
+          account.role === "dealer" || account.role === "shop",
+      )
       .map((account) => ({
         userId: account.id,
         email: account.email || "-",
@@ -95,10 +127,13 @@ export class DemoMembershipRepository {
   subscribe(listener: () => void) {
     if (!isSupabaseConfigured) return () => {};
     const client = createSupabaseBrowserClient();
-    const channel = client.channel("car-master-demo-installer-applications")
+    const channel = client
+      .channel("car-master-demo-installer-applications")
       .on("postgres_changes", { event: "*", schema: "public", table: "demo_installer_applications" }, listener)
       .subscribe();
-    return () => { void client.removeChannel(channel); };
+    return () => {
+      void client.removeChannel(channel);
+    };
   }
 }
 

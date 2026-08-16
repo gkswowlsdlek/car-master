@@ -15,27 +15,33 @@ export const defaultDemoCredentials: DemoCredential[] = [
 ];
 
 export function getDemoCredentials(): DemoCredential[] {
-  const overrides = ([
-    {
-      role: "dealer",
-      username: process.env.CARMASTER_DEMO_DEALER_ID?.trim() || defaultDemoCredentials[0].username,
-      password: process.env.CARMASTER_DEMO_DEALER_PASSWORD || defaultDemoCredentials[0].password,
-    },
-    {
-      role: "shop",
-      username: process.env.CARMASTER_DEMO_SHOP_ID?.trim() || defaultDemoCredentials[1].username,
-      password: process.env.CARMASTER_DEMO_SHOP_PASSWORD || defaultDemoCredentials[1].password,
-    },
-    {
-      role: "admin",
-      username: process.env.CARMASTER_DEMO_ADMIN_ID?.trim() || defaultDemoCredentials[2].username,
-      password: process.env.CARMASTER_DEMO_ADMIN_PASSWORD || defaultDemoCredentials[2].password,
-    },
-  ] satisfies DemoCredential[]).filter((item) => item.username && item.password);
+  const overrides = (
+    [
+      {
+        role: "dealer",
+        username: process.env.CARMASTER_DEMO_DEALER_ID?.trim() || defaultDemoCredentials[0].username,
+        password: process.env.CARMASTER_DEMO_DEALER_PASSWORD || defaultDemoCredentials[0].password,
+      },
+      {
+        role: "shop",
+        username: process.env.CARMASTER_DEMO_SHOP_ID?.trim() || defaultDemoCredentials[1].username,
+        password: process.env.CARMASTER_DEMO_SHOP_PASSWORD || defaultDemoCredentials[1].password,
+      },
+      {
+        role: "admin",
+        username: process.env.CARMASTER_DEMO_ADMIN_ID?.trim() || defaultDemoCredentials[2].username,
+        password: process.env.CARMASTER_DEMO_ADMIN_PASSWORD || defaultDemoCredentials[2].password,
+      },
+    ] satisfies DemoCredential[]
+  ).filter((item) => item.username && item.password);
 
   // Documented QA credentials remain deterministic. Server-only overrides add
   // credentials instead of silently replacing 1/1, 2/2 and 3/3.
-  return [...defaultDemoCredentials, ...overrides].filter((item, index, items) =>
-    items.findIndex((candidate) => candidate.role === item.role && candidate.username === item.username && candidate.password === item.password) === index,
+  return [...defaultDemoCredentials, ...overrides].filter(
+    (item, index, items) =>
+      items.findIndex(
+        (candidate) =>
+          candidate.role === item.role && candidate.username === item.username && candidate.password === item.password,
+      ) === index,
   );
 }

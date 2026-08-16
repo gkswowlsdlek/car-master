@@ -2,14 +2,47 @@
 
 import { useMemo, useState } from "react";
 import { ArrowRight, MessageCircle, Search } from "lucide-react";
-import type { ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
-import { canTransitionStage, dealerStageIndex, dealerStageLabel, DEALER_STAGE_LABELS, isTerminalOutcome, nextForwardStage, stageOrder, STAGE_ACTION_LABEL } from "../../services/transaction-state-service";
+import type {
+  ChatRoom,
+  PaymentStatus,
+  Transaction,
+  TransactionChatMessage,
+  TransactionStage,
+} from "../../types/transactions";
+import {
+  canTransitionStage,
+  dealerStageIndex,
+  dealerStageLabel,
+  DEALER_STAGE_LABELS,
+  isTerminalOutcome,
+  nextForwardStage,
+  stageOrder,
+  STAGE_ACTION_LABEL,
+} from "../../services/transaction-state-service";
 import { EndTransactionOutcomeModal } from "./EndTransactionOutcomeModal";
 
-const won = (value?: number) => value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`;
-const scheduleDate = (value?: string) => value ? new Date(value).toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric", weekday: "short" }) : "미정";
+const won = (value?: number) => (value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`);
+const scheduleDate = (value?: string) =>
+  value
+    ? new Date(value).toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric", weekday: "short" })
+    : "미정";
 
-export function TransactionManagementScreen({ role, transactions, selectedId, initialStageFilter, onSelect, onHide, onUnhide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onFindAnotherShop, onNewRequest, onOpenMessages }: {
+export function TransactionManagementScreen({
+  role,
+  transactions,
+  selectedId,
+  initialStageFilter,
+  onSelect,
+  onHide,
+  onUnhide,
+  onFinalPriceChange,
+  onStageChange,
+  onPaymentChange,
+  onEndOutcome,
+  onFindAnotherShop,
+  onNewRequest,
+  onOpenMessages,
+}: {
   role: "dealer" | "shop";
   userId: string;
   transactions: Transaction[];
@@ -42,10 +75,26 @@ export function TransactionManagementScreen({ role, transactions, selectedId, in
   const [finalPriceDraft, setFinalPriceDraft] = useState("");
   const [endOutcomeModal, setEndOutcomeModal] = useState<"취소" | "시공불가" | null>(null);
 
-  const visible = useMemo(() => transactions
-    .filter((item) => showHidden || !(role === "dealer" ? item.visibility.hiddenByDealer : item.visibility.hiddenByInstaller))
-    .filter((item) => stageFilter === "전체" || stageFilter === "진행중" && ["시공예약", "입고"].includes(item.status.stage) || item.status.stage === stageFilter)
-    .filter((item) => `${item.id} ${item.vehicle.maker} ${item.vehicle.model} ${item.installerName} ${item.status.stage}`.toLowerCase().includes(query.toLowerCase())), [transactions, showHidden, role, query, stageFilter]);
+  const visible = useMemo(
+    () =>
+      transactions
+        .filter(
+          (item) =>
+            showHidden || !(role === "dealer" ? item.visibility.hiddenByDealer : item.visibility.hiddenByInstaller),
+        )
+        .filter(
+          (item) =>
+            stageFilter === "전체" ||
+            (stageFilter === "진행중" && ["시공예약", "입고"].includes(item.status.stage)) ||
+            item.status.stage === stageFilter,
+        )
+        .filter((item) =>
+          `${item.id} ${item.vehicle.maker} ${item.vehicle.model} ${item.installerName} ${item.status.stage}`
+            .toLowerCase()
+            .includes(query.toLowerCase()),
+        ),
+    [transactions, showHidden, role, query, stageFilter],
+  );
   const selected = visible.find((item) => item.id === selectedId) ?? visible[0];
   const selectedTerminalOutcome = selected ? isTerminalOutcome(selected.status.stage) : false;
   const activeCount = transactions.filter((item) => ["시공예약", "입고"].includes(item.status.stage)).length;
@@ -71,29 +120,305 @@ export function TransactionManagementScreen({ role, transactions, selectedId, in
   };
   const hideSelected = () => {
     if (!selected) return;
-    const warning = !["작업완료", "출고", "취소", "시공불가"].includes(selected.status.stage) && role === "shop" ? "진행 중인 거래입니다. 그래도 숨기시겠습니까?\n" : "";
-    if (confirm(`${warning}이 거래방은 목록에서 숨겨집니다. 거래 기록은 카마스터에 보관됩니다.`)) onHide(selected.id, role);
+    const warning =
+      !["작업완료", "출고", "취소", "시공불가"].includes(selected.status.stage) && role === "shop"
+        ? "진행 중인 거래입니다. 그래도 숨기시겠습니까?\n"
+        : "";
+    if (confirm(`${warning}이 거래방은 목록에서 숨겨집니다. 거래 기록은 카마스터에 보관됩니다.`))
+      onHide(selected.id, role);
   };
 
-  return <section className={`transaction-management-screen ${role === "shop" ? "shop-transaction-management" : "dealer-transaction-management"}`}>
-    <div className="page-title transaction-page-title"><div><p className="eyebrow">{role === "dealer" ? "거래 관리" : "시공 거래 운영"}</p><h1>{role === "dealer" ? "거래 관리" : "시공 거래 관리"}</h1><p className="page-subtitle">{role === "dealer" ? "진행 중인 차량과 거래를 빠르게 찾아 거래방으로 이동하세요." : "입고 예정, 진행 중인 차량과 Dealer 요청을 업무 순서대로 처리하세요."}</p></div>{role === "dealer" && <button className="primary" onClick={onNewRequest}>+ 새 시공 요청</button>}</div>
-    <div className={`transaction-summary-strip ${role === "shop" ? "shop-operation-strip" : ""}`}><button className={stageFilter === "전체" ? "active" : ""} onClick={() => setStageFilter("전체")}><span>{role === "shop" ? "전체" : "전체 거래"}</span><b>{transactions.length}</b></button><button className={stageFilter === "견적" ? "active" : ""} onClick={() => setStageFilter("견적")}><span>{role === "shop" ? "확인 필요" : "확인 대기"}</span><b>{transactions.filter((item) => item.status.stage === "견적").length}</b></button><button className={stageFilter === "진행중" ? "active" : ""} onClick={() => setStageFilter("진행중")}><span>{role === "shop" ? "작업 중" : "진행 중"}</span><b>{activeCount}</b></button><button className={stageFilter === "작업완료" ? "active" : ""} onClick={() => setStageFilter("작업완료")}><span>완료</span><b>{transactions.filter((item) => item.status.stage === "작업완료").length}</b></button></div>
-    <div className="transaction-tabs"><button className={tab === "거래내역" ? "active" : ""} onClick={() => setTab("거래내역")}>거래내역</button><button className={tab === "결제 및 정산" ? "active" : ""} onClick={() => setTab("결제 및 정산")}>결제 및 정산</button></div>
-    <div className="transaction-filters"><label className="search-field"><Search size={18} aria-hidden="true" /><input aria-label="거래 검색" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="거래번호, 차량, 시공점 검색" /></label><select value={stageFilter} onChange={(event) => setStageFilter(event.target.value as TransactionStage | "전체" | "진행중")}><option value="전체">전체 상태</option><option value="진행중">진행 중</option>{[...stageOrder, "취소" as const, "시공불가" as const].map((stage) => <option key={stage} value={stage}>{stage}</option>)}</select><label className="compact-control"><input type="checkbox" checked={showHidden} onChange={(event) => setShowHidden(event.target.checked)} /><span>숨긴 거래 보기</span></label></div>
-    {visible.length === 0 ? <section className="empty-state transaction-empty"><span>↗</span><h2>{query ? "검색 결과가 없습니다." : "아직 진행 중인 거래가 없습니다."}</h2><p>{query ? "검색어나 숨긴 거래 설정을 확인해 주세요." : "가격 확인부터 시작해 첫 시공 요청을 만들어 보세요."}</p>{role === "dealer" && !query && <button className="primary" onClick={onNewRequest}>새 시공 요청 만들기</button>}</section>
-      : tab === "결제 및 정산" ? <div className="transaction-payment-table">{visible.map((item) => <button data-testid={`transaction-card-${item.id}`} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} key={item.id} onClick={() => onSelect(item.id)}><b>{item.id}</b><span>{won(item.pricing.finalPrice)}</span><span>{item.pricing.paymentStatus}</span><span>{item.schedule.completedAt ?? "시공일 미정"}</span></button>)}</div>
-        : <div className="transaction-room-layout transaction-workspace-layout"><aside className="transaction-list">{visible.map((item) => <button data-testid={`transaction-card-${item.id}`} aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`} className={item.id === selected?.id ? "selected" : ""} key={item.id} onClick={() => onSelect(item.id)}><b>{item.id}</b><span>{item.vehicle.maker} {item.vehicle.model}</span><small>{role === "shop" ? "Dealer 요청" : item.installerName} · {role === "dealer" ? dealerStageLabel(item.status.stage) : item.status.stage}</small><small className="transaction-list-schedule">입고 {scheduleDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt)}{item.schedule.desiredReleaseAt ? ` · 출고 ${scheduleDate(item.schedule.desiredReleaseAt)}` : ""}</small><em>{item.lastMessage}</em></button>)}</aside>
-          {selected && <article className="transaction-operations-detail" data-testid={`transaction-detail-${selected.id}`}>
-            <header><div><small>{selected.id}</small><h2>{selected.vehicle.maker} {selected.vehicle.model}</h2><p>{selected.installerName} · {selected.service.product ?? selected.service.workDescription}</p></div><div className="transaction-detail-status"><span>현재 상태</span><em className={`status-chip status-${selected.status.stage}`}>{role === "dealer" ? dealerStageLabel(selected.status.stage) : selected.status.stage}</em></div></header>
-            <section className="transaction-progress-card"><div><span>거래 진행 단계</span><b>{role === "dealer" ? dealerStageLabel(selected.status.stage) : selected.status.stage}</b></div><ol>{role === "dealer" ? DEALER_STAGE_LABELS.map((label, index) => { const dealerIndex = dealerStageIndex(selected.status.stage); return <li className={index < dealerIndex ? "complete" : index === dealerIndex ? "active" : ""} key={label}><i>{index < dealerIndex ? "✓" : index + 1}</i><span>{label}</span></li>; }) : stageOrder.map((stage, index) => <li className={index < selectedStageIndex ? "complete" : index === selectedStageIndex ? "active" : ""} key={stage}><i>{index < selectedStageIndex ? "✓" : index + 1}</i><span>{stage}</span></li>)}</ol></section>
-            {role === "shop" && canAdvance && <div className="shop-next-action"><span>다음 처리</span><b>{STAGE_ACTION_LABEL[nextStage!]}</b><button className="primary" onClick={() => void advance()} disabled={stagePending}>{stagePending ? "처리 중…" : STAGE_ACTION_LABEL[nextStage!] } <ArrowRight size={17} /></button></div>}
-            <dl className="transaction-core-info"><div><dt>시공 품목</dt><dd>{selected.service.workDescription}</dd></div><div><dt>다음 일정</dt><dd>{scheduleDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt)}</dd></div><div><dt>최종 시공금액</dt><dd>{won(selected.pricing.finalPrice)}</dd></div><div><dt>결제 상태</dt><dd>{selected.pricing.paymentStatus}</dd></div></dl>
-            {selectedTerminalOutcome && <div className={`transaction-outcome-banner outcome-${selected.status.stage}`}><b>{selected.status.stage === "취소" ? "이 거래는 취소되었습니다." : "이 거래는 시공 불가로 종료되었습니다."}</b>{selected.outcomeNote && <p>{selected.outcomeNote}</p>}</div>}
-            {(role === "shop" || role === "dealer") && <div className="transaction-price-editor"><span>최종 시공금액 입력</span><div><input value={finalPriceDraft} onChange={(event) => setFinalPriceDraft(event.target.value)} placeholder="예: 450000" inputMode="numeric" /><button className="secondary" onClick={saveFinalPrice} disabled={!finalPriceDraft}>저장</button></div></div>}
-            {role === "dealer" && selected.pricing.finalPrice != null && selected.pricing.paymentStatus === "미결제" && <div className="transaction-price-editor"><span>시공점이 확정한 금액이에요</span><button className="primary" onClick={() => onPaymentChange(selected, "결제대기")}>금액 확인</button></div>}
-            <footer><button className="secondary" onClick={() => onOpenMessages(selected.id)}><MessageCircle size={17} /> 메시지 열기</button>{(role === "dealer" ? selected.visibility.hiddenByDealer : selected.visibility.hiddenByInstaller) ? <button className="secondary" onClick={() => onUnhide(selected.id, role)}>숨김 해제</button> : <button className="secondary" onClick={hideSelected}>거래 숨기기</button>}{role === "dealer" && !selectedTerminalOutcome && <button className="secondary" onClick={() => setEndOutcomeModal("취소")}>거래 취소</button>}{role === "dealer" && !selectedTerminalOutcome && <button className="secondary" onClick={() => setEndOutcomeModal("시공불가")}>시공 불가</button>}{role === "dealer" && selectedTerminalOutcome && onFindAnotherShop && <button className="primary" onClick={onFindAnotherShop}><Search size={17} /> 다른 시공점 찾기</button>}{role === "dealer" && canAdvance && <button className="primary" onClick={() => void advance()} disabled={stagePending}>{stagePending ? "처리 중…" : STAGE_ACTION_LABEL[nextStage!] } <ArrowRight size={17} /></button>}</footer>
-          </article>}
-        </div>}
-    {endOutcomeModal && selected && <EndTransactionOutcomeModal outcome={endOutcomeModal} onClose={() => setEndOutcomeModal(null)} onConfirm={async (note) => { await onEndOutcome(selected, endOutcomeModal, note); setEndOutcomeModal(null); }} />}
-  </section>;
+  return (
+    <section
+      className={`transaction-management-screen ${role === "shop" ? "shop-transaction-management" : "dealer-transaction-management"}`}
+    >
+      <div className="page-title transaction-page-title">
+        <div>
+          <p className="eyebrow">{role === "dealer" ? "거래 관리" : "시공 거래 운영"}</p>
+          <h1>{role === "dealer" ? "거래 관리" : "시공 거래 관리"}</h1>
+          <p className="page-subtitle">
+            {role === "dealer"
+              ? "진행 중인 차량과 거래를 빠르게 찾아 거래방으로 이동하세요."
+              : "입고 예정, 진행 중인 차량과 Dealer 요청을 업무 순서대로 처리하세요."}
+          </p>
+        </div>
+        {role === "dealer" && (
+          <button className="primary" onClick={onNewRequest}>
+            + 새 시공 요청
+          </button>
+        )}
+      </div>
+      <div className={`transaction-summary-strip ${role === "shop" ? "shop-operation-strip" : ""}`}>
+        <button className={stageFilter === "전체" ? "active" : ""} onClick={() => setStageFilter("전체")}>
+          <span>{role === "shop" ? "전체" : "전체 거래"}</span>
+          <b>{transactions.length}</b>
+        </button>
+        <button className={stageFilter === "견적" ? "active" : ""} onClick={() => setStageFilter("견적")}>
+          <span>{role === "shop" ? "확인 필요" : "확인 대기"}</span>
+          <b>{transactions.filter((item) => item.status.stage === "견적").length}</b>
+        </button>
+        <button className={stageFilter === "진행중" ? "active" : ""} onClick={() => setStageFilter("진행중")}>
+          <span>{role === "shop" ? "작업 중" : "진행 중"}</span>
+          <b>{activeCount}</b>
+        </button>
+        <button className={stageFilter === "작업완료" ? "active" : ""} onClick={() => setStageFilter("작업완료")}>
+          <span>완료</span>
+          <b>{transactions.filter((item) => item.status.stage === "작업완료").length}</b>
+        </button>
+      </div>
+      <div className="transaction-tabs">
+        <button className={tab === "거래내역" ? "active" : ""} onClick={() => setTab("거래내역")}>
+          거래내역
+        </button>
+        <button className={tab === "결제 및 정산" ? "active" : ""} onClick={() => setTab("결제 및 정산")}>
+          결제 및 정산
+        </button>
+      </div>
+      <div className="transaction-filters">
+        <label className="search-field">
+          <Search size={18} aria-hidden="true" />
+          <input
+            aria-label="거래 검색"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="거래번호, 차량, 시공점 검색"
+          />
+        </label>
+        <select
+          value={stageFilter}
+          onChange={(event) => setStageFilter(event.target.value as TransactionStage | "전체" | "진행중")}
+        >
+          <option value="전체">전체 상태</option>
+          <option value="진행중">진행 중</option>
+          {[...stageOrder, "취소" as const, "시공불가" as const].map((stage) => (
+            <option key={stage} value={stage}>
+              {stage}
+            </option>
+          ))}
+        </select>
+        <label className="compact-control">
+          <input type="checkbox" checked={showHidden} onChange={(event) => setShowHidden(event.target.checked)} />
+          <span>숨긴 거래 보기</span>
+        </label>
+      </div>
+      {visible.length === 0 ? (
+        <section className="empty-state transaction-empty">
+          <span>↗</span>
+          <h2>{query ? "검색 결과가 없습니다." : "아직 진행 중인 거래가 없습니다."}</h2>
+          <p>
+            {query ? "검색어나 숨긴 거래 설정을 확인해 주세요." : "가격 확인부터 시작해 첫 시공 요청을 만들어 보세요."}
+          </p>
+          {role === "dealer" && !query && (
+            <button className="primary" onClick={onNewRequest}>
+              새 시공 요청 만들기
+            </button>
+          )}
+        </section>
+      ) : tab === "결제 및 정산" ? (
+        <div className="transaction-payment-table">
+          {visible.map((item) => (
+            <button
+              data-testid={`transaction-card-${item.id}`}
+              aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`}
+              key={item.id}
+              onClick={() => onSelect(item.id)}
+            >
+              <b>{item.id}</b>
+              <span>{won(item.pricing.finalPrice)}</span>
+              <span>{item.pricing.paymentStatus}</span>
+              <span>{item.schedule.completedAt ?? "시공일 미정"}</span>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="transaction-room-layout transaction-workspace-layout">
+          <aside className="transaction-list">
+            {visible.map((item) => (
+              <button
+                data-testid={`transaction-card-${item.id}`}
+                aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`}
+                className={item.id === selected?.id ? "selected" : ""}
+                key={item.id}
+                onClick={() => onSelect(item.id)}
+              >
+                <b>{item.id}</b>
+                <span>
+                  {item.vehicle.maker} {item.vehicle.model}
+                </span>
+                <small>
+                  {role === "shop" ? "Dealer 요청" : item.installerName} ·{" "}
+                  {role === "dealer" ? dealerStageLabel(item.status.stage) : item.status.stage}
+                </small>
+                <small className="transaction-list-schedule">
+                  입고 {scheduleDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt)}
+                  {item.schedule.desiredReleaseAt ? ` · 출고 ${scheduleDate(item.schedule.desiredReleaseAt)}` : ""}
+                </small>
+                <em>{item.lastMessage}</em>
+              </button>
+            ))}
+          </aside>
+          {selected && (
+            <article className="transaction-operations-detail" data-testid={`transaction-detail-${selected.id}`}>
+              <header>
+                <div>
+                  <small>{selected.id}</small>
+                  <h2>
+                    {selected.vehicle.maker} {selected.vehicle.model}
+                  </h2>
+                  <p>
+                    {selected.installerName} · {selected.service.product ?? selected.service.workDescription}
+                  </p>
+                </div>
+                <div className="transaction-detail-status">
+                  <span>현재 상태</span>
+                  <em className={`status-chip status-${selected.status.stage}`}>
+                    {role === "dealer" ? dealerStageLabel(selected.status.stage) : selected.status.stage}
+                  </em>
+                </div>
+              </header>
+              <section className="transaction-progress-card">
+                <div>
+                  <span>거래 진행 단계</span>
+                  <b>{role === "dealer" ? dealerStageLabel(selected.status.stage) : selected.status.stage}</b>
+                </div>
+                <ol>
+                  {role === "dealer"
+                    ? DEALER_STAGE_LABELS.map((label, index) => {
+                        const dealerIndex = dealerStageIndex(selected.status.stage);
+                        return (
+                          <li
+                            className={index < dealerIndex ? "complete" : index === dealerIndex ? "active" : ""}
+                            key={label}
+                          >
+                            <i>{index < dealerIndex ? "✓" : index + 1}</i>
+                            <span>{label}</span>
+                          </li>
+                        );
+                      })
+                    : stageOrder.map((stage, index) => (
+                        <li
+                          className={
+                            index < selectedStageIndex ? "complete" : index === selectedStageIndex ? "active" : ""
+                          }
+                          key={stage}
+                        >
+                          <i>{index < selectedStageIndex ? "✓" : index + 1}</i>
+                          <span>{stage}</span>
+                        </li>
+                      ))}
+                </ol>
+              </section>
+              {role === "shop" && canAdvance && (
+                <div className="shop-next-action">
+                  <span>다음 처리</span>
+                  <b>{STAGE_ACTION_LABEL[nextStage!]}</b>
+                  <button className="primary" onClick={() => void advance()} disabled={stagePending}>
+                    {stagePending ? "처리 중…" : STAGE_ACTION_LABEL[nextStage!]} <ArrowRight size={17} />
+                  </button>
+                </div>
+              )}
+              <dl className="transaction-core-info">
+                <div>
+                  <dt>시공 품목</dt>
+                  <dd>{selected.service.workDescription}</dd>
+                </div>
+                <div>
+                  <dt>다음 일정</dt>
+                  <dd>{scheduleDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt)}</dd>
+                </div>
+                <div>
+                  <dt>최종 시공금액</dt>
+                  <dd>{won(selected.pricing.finalPrice)}</dd>
+                </div>
+                <div>
+                  <dt>결제 상태</dt>
+                  <dd>{selected.pricing.paymentStatus}</dd>
+                </div>
+              </dl>
+              {selectedTerminalOutcome && (
+                <div className={`transaction-outcome-banner outcome-${selected.status.stage}`}>
+                  <b>
+                    {selected.status.stage === "취소"
+                      ? "이 거래는 취소되었습니다."
+                      : "이 거래는 시공 불가로 종료되었습니다."}
+                  </b>
+                  {selected.outcomeNote && <p>{selected.outcomeNote}</p>}
+                </div>
+              )}
+              {(role === "shop" || role === "dealer") && (
+                <div className="transaction-price-editor">
+                  <span>최종 시공금액 입력</span>
+                  <div>
+                    <input
+                      value={finalPriceDraft}
+                      onChange={(event) => setFinalPriceDraft(event.target.value)}
+                      placeholder="예: 450000"
+                      inputMode="numeric"
+                    />
+                    <button className="secondary" onClick={saveFinalPrice} disabled={!finalPriceDraft}>
+                      저장
+                    </button>
+                  </div>
+                </div>
+              )}
+              {role === "dealer" &&
+                selected.pricing.finalPrice != null &&
+                selected.pricing.paymentStatus === "미결제" && (
+                  <div className="transaction-price-editor">
+                    <span>시공점이 확정한 금액이에요</span>
+                    <button className="primary" onClick={() => onPaymentChange(selected, "결제대기")}>
+                      금액 확인
+                    </button>
+                  </div>
+                )}
+              <footer>
+                <button className="secondary" onClick={() => onOpenMessages(selected.id)}>
+                  <MessageCircle size={17} /> 메시지 열기
+                </button>
+                {(role === "dealer" ? selected.visibility.hiddenByDealer : selected.visibility.hiddenByInstaller) ? (
+                  <button className="secondary" onClick={() => onUnhide(selected.id, role)}>
+                    숨김 해제
+                  </button>
+                ) : (
+                  <button className="secondary" onClick={hideSelected}>
+                    거래 숨기기
+                  </button>
+                )}
+                {role === "dealer" && !selectedTerminalOutcome && (
+                  <button className="secondary" onClick={() => setEndOutcomeModal("취소")}>
+                    거래 취소
+                  </button>
+                )}
+                {role === "dealer" && !selectedTerminalOutcome && (
+                  <button className="secondary" onClick={() => setEndOutcomeModal("시공불가")}>
+                    시공 불가
+                  </button>
+                )}
+                {role === "dealer" && selectedTerminalOutcome && onFindAnotherShop && (
+                  <button className="primary" onClick={onFindAnotherShop}>
+                    <Search size={17} /> 다른 시공점 찾기
+                  </button>
+                )}
+                {role === "dealer" && canAdvance && (
+                  <button className="primary" onClick={() => void advance()} disabled={stagePending}>
+                    {stagePending ? "처리 중…" : STAGE_ACTION_LABEL[nextStage!]} <ArrowRight size={17} />
+                  </button>
+                )}
+              </footer>
+            </article>
+          )}
+        </div>
+      )}
+      {endOutcomeModal && selected && (
+        <EndTransactionOutcomeModal
+          outcome={endOutcomeModal}
+          onClose={() => setEndOutcomeModal(null)}
+          onConfirm={async (note) => {
+            await onEndOutcome(selected, endOutcomeModal, note);
+            setEndOutcomeModal(null);
+          }}
+        />
+      )}
+    </section>
+  );
 }

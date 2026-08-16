@@ -41,15 +41,27 @@ test("transactions.installer_id is relaxed to nullable, with a check that at lea
 });
 
 test("create_shop_transaction_with_room creates the transaction and its room in one statement — no acceptance gate, no separate accept/reject step", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.create_shop_transaction_with_room"), migrationSource.indexOf("revoke all on function public.create_shop_transaction_with_room"));
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.create_shop_transaction_with_room"),
+    migrationSource.indexOf("revoke all on function public.create_shop_transaction_with_room"),
+  );
   assert.match(fn, /insert into public\.transactions \(/);
-  assert.match(fn, /insert into public\.transaction_rooms \(transaction_id\) values \(transaction_id\) returning id into room_id;/);
+  assert.match(
+    fn,
+    /insert into public\.transaction_rooms \(transaction_id\) values \(transaction_id\) returning id into room_id;/,
+  );
   assert.doesNotMatch(fn, /reject|pending_approval|awaiting_installer|accept\(/i);
 });
 
 test("create_shop_transaction_with_room only requires the Shop to be approved + accepting_requests — it does not require installer_shops.legacy_installer_user_id to be set", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.create_shop_transaction_with_room"), migrationSource.indexOf("revoke all on function public.create_shop_transaction_with_room"));
-  assert.match(fn, /where shop\.id = target_shop_id\s*\n\s*and shop\.approval_status = 'approved'::public\.installer_approval_status\s*\n\s*and shop\.accepting_requests = true;/);
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.create_shop_transaction_with_room"),
+    migrationSource.indexOf("revoke all on function public.create_shop_transaction_with_room"),
+  );
+  assert.match(
+    fn,
+    /where shop\.id = target_shop_id\s*\n\s*and shop\.approval_status = 'approved'::public\.installer_approval_status\s*\n\s*and shop\.accepting_requests = true;/,
+  );
   assert.doesNotMatch(fn, /legacy_installer_user_id is not null/);
   // installer_id is populated FROM the shop (nullable when the shop has none), never required
   assert.match(fn, /target_installer uuid;/);
@@ -57,7 +69,10 @@ test("create_shop_transaction_with_room only requires the Shop to be approved + 
 });
 
 test("guard_transaction_insert validates shop_id-only inserts against installer_shops, not installer_profiles, and rejects a transaction with neither id set", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.guard_transaction_insert"), migrationSource.indexOf("-- 5. create_shop_transaction_with_room"));
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.guard_transaction_insert"),
+    migrationSource.indexOf("-- 5. create_shop_transaction_with_room"),
+  );
   assert.match(fn, /if new\.installer_id is not null then/);
   assert.match(fn, /elsif new\.shop_id is not null then/);
   assert.match(fn, /from public\.installer_shops shop\s*\n\s*where shop\.id = new\.shop_id/);
@@ -65,37 +80,67 @@ test("guard_transaction_insert validates shop_id-only inserts against installer_
 });
 
 test("get_approved_shop_directory reads from installer_shops (not installer_profiles) and returns phone for the call-CTA", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.get_approved_shop_directory"), migrationSource.indexOf("revoke all on function public.get_approved_shop_directory"));
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.get_approved_shop_directory"),
+    migrationSource.indexOf("revoke all on function public.get_approved_shop_directory"),
+  );
   assert.match(fn, /from public\.installer_shops shop/);
   assert.doesNotMatch(fn, /from public\.installer_profiles/);
-  assert.match(fn, /id uuid, name text, address text, brands text\[\], works text\[\], hours text,\s*\n\s*available boolean, latitude double precision, longitude double precision, phone text/);
+  assert.match(
+    fn,
+    /id uuid, name text, address text, brands text\[\], works text\[\], hours text,\s*\n\s*available boolean, latitude double precision, longitude double precision, phone text/,
+  );
 });
 
 test("get_transaction_contact falls back to installer_shops when the transaction has no installer_id, and never fabricates a phone number", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.get_transaction_contact"), migrationSource.indexOf("revoke all on function public.get_transaction_contact"));
-  assert.match(fn, /elsif txn\.shop_id is not null then\s*\n\s*return query select shop\.shop_name, coalesce\(nullif\(shop\.contact_phone, ''\), shop\.phone\)\s*\n\s*from public\.installer_shops shop where shop\.id = txn\.shop_id;/);
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.get_transaction_contact"),
+    migrationSource.indexOf("revoke all on function public.get_transaction_contact"),
+  );
+  assert.match(
+    fn,
+    /elsif txn\.shop_id is not null then\s*\n\s*return query select shop\.shop_name, coalesce\(nullif\(shop\.contact_phone, ''\), shop\.phone\)\s*\n\s*from public\.installer_shops shop where shop\.id = txn\.shop_id;/,
+  );
   assert.doesNotMatch(fn, /'010-|fake|placeholder|dummy/i);
 });
 
 test("transition_transaction_stage adds a terminal 출고 stage after 작업완료 and lets the dealer drive forward/back transitions on their own transaction", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.transition_transaction_stage"), migrationSource.indexOf("revoke all on function public.transition_transaction_stage"));
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.transition_transaction_stage"),
+    migrationSource.indexOf("revoke all on function public.transition_transaction_stage"),
+  );
   assert.match(fn, /stage_order text\[\] := array\['견적', '시공예약', '입고', '작업완료', '출고'\];/);
-  assert.match(fn, /elsif caller_role = 'dealer'::public\.user_role then\s*\n\s*if current_transaction\.dealer_id <> auth\.uid\(\) then/);
+  assert.match(
+    fn,
+    /elsif caller_role = 'dealer'::public\.user_role then\s*\n\s*if current_transaction\.dealer_id <> auth\.uid\(\) then/,
+  );
 });
 
 test("transition_transaction_stage's installer-side authorization also accepts a shop-membership-connected operator, not only the legacy installer_id match", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.transition_transaction_stage"), migrationSource.indexOf("revoke all on function public.transition_transaction_stage"));
-  assert.match(fn, /elsif caller_role = 'installer'::public\.user_role then\s*\n\s*if current_transaction\.installer_id <> auth\.uid\(\)\s*\n\s*and not \(current_transaction\.shop_id is not null and public\.has_active_shop_membership\(current_transaction\.shop_id\)\) then/);
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.transition_transaction_stage"),
+    migrationSource.indexOf("revoke all on function public.transition_transaction_stage"),
+  );
+  assert.match(
+    fn,
+    /elsif caller_role = 'installer'::public\.user_role then\s*\n\s*if current_transaction\.installer_id <> auth\.uid\(\)\s*\n\s*and not \(current_transaction\.shop_id is not null and public\.has_active_shop_membership\(current_transaction\.shop_id\)\) then/,
+  );
 });
 
 test("transition_transaction_stage's completedAt write is direction-aware — it only clears completedAt when reversing away from 작업완료, not on every stage change with old_stage = 작업완료", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.transition_transaction_stage"), migrationSource.indexOf("revoke all on function public.transition_transaction_stage"));
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.transition_transaction_stage"),
+    migrationSource.indexOf("revoke all on function public.transition_transaction_stage"),
+  );
   assert.match(fn, /when event_direction = 'backward' and old_stage = '작업완료' then schedule - 'completedAt'/);
 });
 
 test("has_active_shop_membership and can_access_transaction/RLS select policy are extended additively — no existing dealer_id/installer_id/is_admin branch is removed", () => {
   assert.match(migrationSource, /create or replace function public\.has_active_shop_membership/);
-  const canAccess = migrationSource.slice(migrationSource.indexOf("create or replace function public.can_access_transaction"), migrationSource.indexOf("drop policy if exists \"transaction participants select\""));
+  const canAccess = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.can_access_transaction"),
+    migrationSource.indexOf('drop policy if exists "transaction participants select"'),
+  );
   assert.match(canAccess, /transaction\.dealer_id = check_user_id/);
   assert.match(canAccess, /transaction\.installer_id = check_user_id/);
   assert.match(canAccess, /public\.has_active_shop_membership\(transaction\.shop_id, check_user_id\)/);
@@ -103,7 +148,15 @@ test("has_active_shop_membership and can_access_transaction/RLS select policy ar
 });
 
 test("every new/replaced function keeps the SECURITY DEFINER + empty search_path + revoke-then-grant convention used across the schema", () => {
-  for (const name of ["has_active_shop_membership", "can_access_transaction", "guard_transaction_insert", "create_shop_transaction_with_room", "get_approved_shop_directory", "get_transaction_contact", "transition_transaction_stage"]) {
+  for (const name of [
+    "has_active_shop_membership",
+    "can_access_transaction",
+    "guard_transaction_insert",
+    "create_shop_transaction_with_room",
+    "get_approved_shop_directory",
+    "get_transaction_contact",
+    "transition_transaction_stage",
+  ]) {
     const start = migrationSource.indexOf(`create or replace function public.${name}`);
     assert.ok(start >= 0, `expected public.${name} to be defined`);
     const body = migrationSource.slice(start, start + 400);
@@ -114,15 +167,26 @@ test("every new/replaced function keeps the SECURITY DEFINER + empty search_path
 
 test("TransactionStage/stageOrder/label maps all learn 출고 as the terminal stage after 작업완료", () => {
   assert.match(transactionsTypesSource, /"견적" \| "시공예약" \| "입고" \| "작업완료" \| "출고" \| "취소"/);
-  assert.match(stateServiceSource, /stageOrder: TransactionStage\[\] = \["견적", "시공예약", "입고", "작업완료", "출고"\];/);
+  assert.match(
+    stateServiceSource,
+    /stageOrder: TransactionStage\[\] = \["견적", "시공예약", "입고", "작업완료", "출고"\];/,
+  );
   for (const map of ["STAGE_ACTION_LABEL", "STAGE_REVERT_LABEL", "STAGE_REVERT_LOG_LABEL"]) {
-    const line = stateServiceSource.split("\n").find((l) => l.includes(`export const ${map}`)) ? stateServiceSource.slice(stateServiceSource.indexOf(`export const ${map}`), stateServiceSource.indexOf(";", stateServiceSource.indexOf(`export const ${map}`))) : "";
+    const line = stateServiceSource.split("\n").find((l) => l.includes(`export const ${map}`))
+      ? stateServiceSource.slice(
+          stateServiceSource.indexOf(`export const ${map}`),
+          stateServiceSource.indexOf(";", stateServiceSource.indexOf(`export const ${map}`)),
+        )
+      : "";
     assert.match(line, /출고:/, `${map} should have a 출고 entry`);
   }
 });
 
 test("canTransitionStage no longer gates forward/backward moves to role === shop|admin only — the dealer can drive their own transaction's stage too, server-side ownership is what actually enforces access", () => {
-  const fn = stateServiceSource.slice(stateServiceSource.indexOf("export function canTransitionStage"), stateServiceSource.indexOf("export function transitionStage"));
+  const fn = stateServiceSource.slice(
+    stateServiceSource.indexOf("export function canTransitionStage"),
+    stateServiceSource.indexOf("export function transitionStage"),
+  );
   assert.doesNotMatch(fn, /role !== "shop" && role !== "admin"/);
   assert.match(fn, /if \(next === "취소" \|\| next === "시공불가"\) return role === "dealer" \|\| role === "admin";/);
 });
@@ -142,32 +206,56 @@ test("installer-directory-repository calls get_approved_shop_directory (not the 
 });
 
 test("supabase-transaction-repository exposes createWithShopRoom calling create_shop_transaction_with_room with shopId, alongside (not replacing) the legacy createWithRoom method", () => {
-  assert.match(repoSource, /async createWithShopRoom\(shopId: string, value: Pick<Transaction, "vehicle" \| "service" \| "pricing" \| "schedule">\)/);
-  assert.match(repoSource, /rpc\s*\(\s*"create_shop_transaction_with_room",\s*\{\s*payload:\s*\{\s*shopId,\s*vehicle:\s*value\.vehicle,\s*service:\s*value\.service,\s*pricing:\s*value\.pricing,\s*schedule:\s*value\.schedule,/);
+  assert.match(
+    repoSource,
+    /async createWithShopRoom\(shopId: string, value: Pick<Transaction, "vehicle" \| "service" \| "pricing" \| "schedule">\)/,
+  );
+  assert.match(
+    repoSource,
+    /rpc\s*\(\s*"create_shop_transaction_with_room",\s*\{\s*payload:\s*\{\s*shopId,\s*vehicle:\s*value\.vehicle,\s*service:\s*value\.service,\s*pricing:\s*value\.pricing,\s*schedule:\s*value\.schedule,/,
+  );
   assert.match(repoSource, /async createWithRoom\(value: Pick<Transaction, "installerId"/);
 });
 
 test("DealerWorkspace's real-mode creation calls createWithShopRoom(selectedShop.id, ...) — the Real/Supabase path no longer sends installerId", () => {
-  const fn = dealerWorkspaceSource.slice(dealerWorkspaceSource.indexOf("const createTransaction ="), dealerWorkspaceSource.indexOf("if (useDemoSharedBackend)"));
+  const fn = dealerWorkspaceSource.slice(
+    dealerWorkspaceSource.indexOf("const createTransaction ="),
+    dealerWorkspaceSource.indexOf("if (useDemoSharedBackend)"),
+  );
   assert.match(fn, /supabaseTransactionRepository\.createWithShopRoom\(selectedShop\.id, \{/);
   assert.doesNotMatch(fn, /supabaseTransactionRepository\.createWithRoom\(/);
 });
 
 test("MessengerScreen matches the selected installer listing against transaction.shopId, not the legacy installerId, so a no-installer-account Shop still resolves in the room sidebar", () => {
-  assert.match(messengerScreenSource, /const selectedInstaller = installers\?\.find\(\(item\) => item\.id === selected\?\.transaction\.shopId\);/);
+  assert.match(
+    messengerScreenSource,
+    /const selectedInstaller = installers\?\.find\(\(item\) => item\.id === selected\?\.transaction\.shopId\);/,
+  );
 });
 
 test("TransactionChatWorkspace shows a 전화 확인 필요 banner to the dealer only while pre-입고 (견적/시공예약), with a real tel: link when a phone is on file and a non-fabricated fallback otherwise", () => {
-  assert.match(chatWorkspaceSource, /role === "dealer"\s*&&\s*\(transaction\.status\.stage === "견적"\s*\|\|\s*transaction\.status\.stage === "시공예약"\)/);
-  assert.match(chatWorkspaceSource, /이 시공점은 전화 확인이 필요합니다\. 시공 가능 여부와 입고 일정을 시공점에 직접 확인해주세요\./);
+  assert.match(
+    chatWorkspaceSource,
+    /role === "dealer"\s*&&\s*\(transaction\.status\.stage === "견적"\s*\|\|\s*transaction\.status\.stage === "시공예약"\)/,
+  );
+  assert.match(
+    chatWorkspaceSource,
+    /이 시공점은 전화 확인이 필요합니다\. 시공 가능 여부와 입고 일정을 시공점에 직접 확인해주세요\./,
+  );
   assert.match(chatWorkspaceSource, /href=\{`tel:\$\{installer\.contactPhone\.replace\(\/\[\^0-9\+\]\/g, ""\)\}`\}/);
   assert.match(chatWorkspaceSource, /전화 또는 카카오톡 등으로 확인해주세요\./);
   assert.doesNotMatch(chatWorkspaceSource, /카카오톡.*버튼|kakao.*button/i);
 });
 
 test("hide-transaction terminal-stage checks treat 출고/취소/시공불가 the same as 작업완료 (all past the point where a shop still needs to touch the transaction)", () => {
-  assert.match(chatWorkspaceSource, /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(transaction\.status\.stage\) && role === "shop"/);
-  assert.match(managementScreenSource, /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(selected\.status\.stage\) && role === "shop"/);
+  assert.match(
+    chatWorkspaceSource,
+    /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(transaction\.status\.stage\) && role === "shop"/,
+  );
+  assert.match(
+    managementScreenSource,
+    /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(selected\.status\.stage\) && role === "shop"/,
+  );
 });
 
 // Phase 7 moved the "what counts as still in progress" logic out of

@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { canAccessWorkspacePath, isProtectedPath, isPublicPath, legacyRoleForUserRole, normalizeUserRole, publicScreenForPath, resolveAuthenticatedDestination, workspacePathForUser } from "../services/auth/access-policy.ts";
+import {
+  canAccessWorkspacePath,
+  isProtectedPath,
+  isPublicPath,
+  legacyRoleForUserRole,
+  normalizeUserRole,
+  publicScreenForPath,
+  resolveAuthenticatedDestination,
+  workspacePathForUser,
+} from "../services/auth/access-policy.ts";
 
 const dealer = { id: "d", email: "d@example.com", name: "딜러", role: "dealer" };
 const admin = { id: "a", email: "a@example.com", name: "관리자", role: "admin" };

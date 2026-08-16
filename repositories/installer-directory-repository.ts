@@ -3,8 +3,16 @@ import type { Brand, RegionKey, WorkType } from "../lib/dealer-flow-data";
 import type { InstallerListing } from "../types/installer";
 
 type DirectoryRow = {
-  id: string; name: string; address: string; brands: string[]; works: string[];
-  hours: string | null; available: boolean; latitude: number | null; longitude: number | null; phone: string | null;
+  id: string;
+  name: string;
+  address: string;
+  brands: string[];
+  works: string[];
+  hours: string | null;
+  available: boolean;
+  latitude: number | null;
+  longitude: number | null;
+  phone: string | null;
 };
 
 // Real installer addresses are free text entered at sign-up (types/auth.ts
@@ -26,11 +34,26 @@ export class InstallerDirectoryRepository {
     return ((data ?? []) as DirectoryRow[]).map((item) => {
       const { province, city } = splitAddress(item.address);
       return {
-        id: item.id, name: item.name, address: item.address, district: item.address,
-        province, city, region: "metro" as RegionKey, lat: item.latitude ?? undefined, lng: item.longitude ?? undefined,
-        brands: item.brands as Brand[], works: item.works as WorkType[], hours: item.hours ?? "영업시간 확인 필요",
-        available: item.available, approved: true, rating: 0, reviewCount: 0, responseTime: "응답 정보 없음",
-        recentTransactionCount: 0, nextAvailableDate: "일정 확인 필요", isDemo: false,
+        id: item.id,
+        name: item.name,
+        address: item.address,
+        district: item.address,
+        province,
+        city,
+        region: "metro" as RegionKey,
+        lat: item.latitude ?? undefined,
+        lng: item.longitude ?? undefined,
+        brands: item.brands as Brand[],
+        works: item.works as WorkType[],
+        hours: item.hours ?? "영업시간 확인 필요",
+        available: item.available,
+        approved: true,
+        rating: 0,
+        reviewCount: 0,
+        responseTime: "응답 정보 없음",
+        recentTransactionCount: 0,
+        nextAvailableDate: "일정 확인 필요",
+        isDemo: false,
         contactPhone: item.phone ?? undefined,
       };
     });

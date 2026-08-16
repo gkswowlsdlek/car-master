@@ -42,39 +42,75 @@ test("outcome_note is additive and nullable — no existing row is affected", ()
 });
 
 test("end_transaction_outcome only accepts 취소/시공불가, never deletes anything, and shares the same dealer/shop-membership/admin authorization shape as the rest of the schema", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.end_transaction_outcome"), migrationSource.indexOf("revoke all on function public.end_transaction_outcome"));
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.end_transaction_outcome"),
+    migrationSource.indexOf("revoke all on function public.end_transaction_outcome"),
+  );
   assert.match(fn, /if p_outcome not in \('취소', '시공불가'\) then/);
-  assert.match(fn, /if current_transaction\.dealer_id <> auth\.uid\(\) then raise exception 'Transaction access denied';/);
-  assert.match(fn, /\(current_transaction\.installer_id is not null and current_transaction\.installer_id = auth\.uid\(\)\)\s*\n\s*or \(current_transaction\.shop_id is not null and public\.has_active_shop_membership\(current_transaction\.shop_id\)\)/);
+  assert.match(
+    fn,
+    /if current_transaction\.dealer_id <> auth\.uid\(\) then raise exception 'Transaction access denied';/,
+  );
+  assert.match(
+    fn,
+    /\(current_transaction\.installer_id is not null and current_transaction\.installer_id = auth\.uid\(\)\)\s*\n\s*or \(current_transaction\.shop_id is not null and public\.has_active_shop_membership\(current_transaction\.shop_id\)\)/,
+  );
   assert.doesNotMatch(fn, /delete from/i);
 });
 
 test("end_transaction_outcome refuses to re-end an already-terminated transaction, and writes a system chat message recording the outcome + note", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.end_transaction_outcome"), migrationSource.indexOf("revoke all on function public.end_transaction_outcome"));
-  assert.match(fn, /if current_transaction\.stage in \('취소', '시공불가'\) then\s*\n\s*raise exception 'Transaction has already ended';/);
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.end_transaction_outcome"),
+    migrationSource.indexOf("revoke all on function public.end_transaction_outcome"),
+  );
+  assert.match(
+    fn,
+    /if current_transaction\.stage in \('취소', '시공불가'\) then\s*\n\s*raise exception 'Transaction has already ended';/,
+  );
   assert.match(fn, /insert into public\.chat_messages \(room_id, sender_role, text\)/);
   assert.match(fn, /거래가 "' \|\| p_outcome \|\| '"로 종료되었습니다\./);
 });
 
 test("set_transaction_final_price now also allows the dealer (own transaction) and a shop-membership-connected operator, not just the legacy installer_id match", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.set_transaction_final_price"), migrationSource.indexOf("revoke all on function public.set_transaction_final_price"));
-  assert.match(fn, /elsif caller_role = 'dealer'::public\.user_role then\s*\n\s*if target\.dealer_id <> auth\.uid\(\) then raise exception 'Transaction access denied';/);
-  assert.match(fn, /elsif caller_role = 'installer'::public\.user_role then\s*\n\s*if not \(\s*\n\s*\(target\.installer_id is not null and target\.installer_id = auth\.uid\(\)\)\s*\n\s*or \(target\.shop_id is not null and public\.has_active_shop_membership\(target\.shop_id\)\)/);
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.set_transaction_final_price"),
+    migrationSource.indexOf("revoke all on function public.set_transaction_final_price"),
+  );
+  assert.match(
+    fn,
+    /elsif caller_role = 'dealer'::public\.user_role then\s*\n\s*if target\.dealer_id <> auth\.uid\(\) then raise exception 'Transaction access denied';/,
+  );
+  assert.match(
+    fn,
+    /elsif caller_role = 'installer'::public\.user_role then\s*\n\s*if not \(\s*\n\s*\(target\.installer_id is not null and target\.installer_id = auth\.uid\(\)\)\s*\n\s*or \(target\.shop_id is not null and public\.has_active_shop_membership\(target\.shop_id\)\)/,
+  );
 });
 
 test("set_transaction_final_price no longer force-blocks on stage — Product decision: never require the amount to unblock 출고, observe real omission rate first", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.set_transaction_final_price"), migrationSource.indexOf("revoke all on function public.set_transaction_final_price"));
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.set_transaction_final_price"),
+    migrationSource.indexOf("revoke all on function public.set_transaction_final_price"),
+  );
   assert.doesNotMatch(fn, /Closed transactions cannot change price/);
   assert.doesNotMatch(fn, /target\.stage in \('작업완료', '취소'\)/);
 });
 
 test("set_transaction_final_price validates a positive integer-won amount within a sane ceiling — no NaN, no fractional won, no fabricated default", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.set_transaction_final_price"), migrationSource.indexOf("revoke all on function public.set_transaction_final_price"));
-  assert.match(fn, /p_final_price is null or p_final_price <= 0 or p_final_price > 100000000 or p_final_price <> trunc\(p_final_price\)/);
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.set_transaction_final_price"),
+    migrationSource.indexOf("revoke all on function public.set_transaction_final_price"),
+  );
+  assert.match(
+    fn,
+    /p_final_price is null or p_final_price <= 0 or p_final_price > 100000000 or p_final_price <> trunc\(p_final_price\)/,
+  );
 });
 
 test("set_transaction_final_price records a system message with the formatted amount, matching the room's existing audit-trail convention", () => {
-  const fn = migrationSource.slice(migrationSource.indexOf("create or replace function public.set_transaction_final_price"), migrationSource.indexOf("revoke all on function public.set_transaction_final_price"));
+  const fn = migrationSource.slice(
+    migrationSource.indexOf("create or replace function public.set_transaction_final_price"),
+    migrationSource.indexOf("revoke all on function public.set_transaction_final_price"),
+  );
   assert.match(fn, /최종 시공금액이 ' \|\| to_char\(p_final_price, 'FM999,999,999'\) \|\| '원으로 기록되었습니다\./);
 });
 
@@ -105,12 +141,21 @@ test("TransactionStage adds 시공불가 alongside the pre-existing 취소 — b
 
 test("dealerStageLabel and dealerStageIndex explicitly handle 시공불가 — it must never silently fall through to the 출고 label", () => {
   assert.match(stateServiceSource, /if \(stage === "시공불가"\) return "시공 불가";/);
-  assert.match(stateServiceSource, /export const TERMINAL_OUTCOME_STAGES: TransactionStage\[\] = \["취소", "시공불가"\];/);
-  assert.match(stateServiceSource, /export function isTerminalOutcome\(stage: TransactionStage\): boolean \{\s*\n\s*return TERMINAL_OUTCOME_STAGES\.includes\(stage\);/);
+  assert.match(
+    stateServiceSource,
+    /export const TERMINAL_OUTCOME_STAGES: TransactionStage\[\] = \["취소", "시공불가"\];/,
+  );
+  assert.match(
+    stateServiceSource,
+    /export function isTerminalOutcome\(stage: TransactionStage\): boolean \{\s*\n\s*return TERMINAL_OUTCOME_STAGES\.includes\(stage\);/,
+  );
 });
 
 test("canTransitionStage treats 시공불가 the same as 취소 (dealer/admin only) — this is what lets the Demo/local fallback path reuse the existing transitionStage machinery", () => {
-  assert.match(stateServiceSource, /if \(next === "취소" \|\| next === "시공불가"\) return role === "dealer" \|\| role === "admin";/);
+  assert.match(
+    stateServiceSource,
+    /if \(next === "취소" \|\| next === "시공불가"\) return role === "dealer" \|\| role === "admin";/,
+  );
 });
 
 test("supabase-transaction-repository maps outcome_note and exposes endOutcome calling end_transaction_outcome, distinct from the untouched transitionStage/transition_transaction_stage call", () => {
@@ -121,46 +166,88 @@ test("supabase-transaction-repository maps outcome_note and exposes endOutcome c
 });
 
 test("use-transaction-actions exposes a dedicated endOutcome (not routed through changeStage/transition_transaction_stage) across Real/Demo/local", () => {
-  const fn = actionsHookSource.slice(actionsHookSource.indexOf("const endOutcome = useCallback"), actionsHookSource.indexOf("const changeFinalPrice"));
+  const fn = actionsHookSource.slice(
+    actionsHookSource.indexOf("const endOutcome = useCallback"),
+    actionsHookSource.indexOf("const changeFinalPrice"),
+  );
   assert.match(fn, /supabaseTransactionRepository\.endOutcome\(transaction\.id, outcome, note\)/);
   assert.match(fn, /transitionStage\(transaction, outcome, role === "shop" \? "shop" : "dealer"\)/);
-  assert.match(actionsHookSource, /return\s*\{\s*sendMessage,\s*markRoomRead,\s*loadContact,\s*hideTransaction,\s*unhideTransaction,\s*changeStage,\s*endOutcome,\s*setContactStatus,\s*changeFinalPrice,\s*changePayment\s*,?\s*\};/);
+  assert.match(
+    actionsHookSource,
+    /return\s*\{\s*sendMessage,\s*markRoomRead,\s*loadContact,\s*hideTransaction,\s*unhideTransaction,\s*changeStage,\s*endOutcome,\s*setContactStatus,\s*changeFinalPrice,\s*changePayment\s*,?\s*\};/,
+  );
 });
 
 test("TransactionChatWorkspace hides the normal stage-advance controls once a transaction is terminated and shows a distinct outcome banner with the reason, instead of silently leaving the old CTA visible", () => {
   assert.match(chatWorkspaceSource, /const terminalOutcome = isTerminalOutcome\(transaction\.status\.stage\);/);
-  assert.match(chatWorkspaceSource, /\{terminalOutcome\s*\?\s*(?:\(\s*)?<div className=\{`transaction-outcome-banner outcome-\$\{transaction\.status\.stage\}`\}>/);
+  assert.match(
+    chatWorkspaceSource,
+    /\{terminalOutcome\s*\?\s*(?:\(\s*)?<div className=\{`transaction-outcome-banner outcome-\$\{transaction\.status\.stage\}`\}>/,
+  );
   assert.match(chatWorkspaceSource, /transaction\.outcomeNote\s*&&\s*(?:\(\s*)?<p>\{transaction\.outcomeNote\}<\/p>/);
 });
 
 test("TransactionChatWorkspace only lets role === dealer trigger 거래 취소 / 시공 불가 처리, and only while the transaction is still open", () => {
-  assert.match(chatWorkspaceSource, /\{role === "dealer"\s*&&\s*!terminalOutcome\s*&&\s*(?:\(\s*)?<button\s+onClick=\{\(\)\s*=>\s*\{\s*setEndOutcomeModal\("취소"\);\s*setMoreMenuOpen\(false\);\s*\}\}\s*>\s*거래 취소\s*<\/button>/);
-  assert.match(chatWorkspaceSource, /\{role === "dealer"\s*&&\s*!terminalOutcome\s*&&\s*(?:\(\s*)?<button\s+onClick=\{\(\)\s*=>\s*\{\s*setEndOutcomeModal\("시공불가"\);\s*setMoreMenuOpen\(false\);\s*\}\}\s*>\s*시공 불가 처리\s*<\/button>/);
+  assert.match(
+    chatWorkspaceSource,
+    /\{role === "dealer"\s*&&\s*!terminalOutcome\s*&&\s*(?:\(\s*)?<button\s+onClick=\{\(\)\s*=>\s*\{\s*setEndOutcomeModal\("취소"\);\s*setMoreMenuOpen\(false\);\s*\}\}\s*>\s*거래 취소\s*<\/button>/,
+  );
+  assert.match(
+    chatWorkspaceSource,
+    /\{role === "dealer"\s*&&\s*!terminalOutcome\s*&&\s*(?:\(\s*)?<button\s+onClick=\{\(\)\s*=>\s*\{\s*setEndOutcomeModal\("시공불가"\);\s*setMoreMenuOpen\(false\);\s*\}\}\s*>\s*시공 불가 처리\s*<\/button>/,
+  );
 });
 
 test("최종 시공금액 input is available to both shop and dealer roles, unconditionally on stage, and is presented in its own clearly-labeled block separate from the pre-existing 결제 상태 flow (never conflated with payment/settlement)", () => {
   assert.match(chatWorkspaceSource, /<h4>최종 시공금액<\/h4>/);
-  assert.match(chatWorkspaceSource, /\{\(role === "shop"\s*\|\|\s*role === "dealer"\)\s*&&\s*(?:\(\s*)?<div>\s*<input\s+value=\{finalPrice\}/);
+  assert.match(
+    chatWorkspaceSource,
+    /\{\(role === "shop"\s*\|\|\s*role === "dealer"\)\s*&&\s*(?:\(\s*)?<div>\s*<input\s+value=\{finalPrice\}/,
+  );
   assert.match(chatWorkspaceSource, /<h4>결제 상태<\/h4>/);
   assert.doesNotMatch(chatWorkspaceSource, /<h4>결제 및 정산<\/h4>/);
 });
 
 test("advancing to 출고 with no final price nudges (not blocks) the dealer — both '나중에 입력' and '지금 입력' still let the transition proceed or open the price panel, never a hard stop", () => {
-  assert.match(chatWorkspaceSource, /if\s*\(forwardStage === "출고"\s*&&\s*!transaction\.pricing\.finalPrice\)\s*\{\s*setConfirmDispatchOpen\(true\);\s*return;\s*\}/);
-  assert.match(chatWorkspaceSource, /confirmDispatch = \(\)\s*=>\s*\{\s*setConfirmDispatchOpen\(false\);\s*void runStageChange\("출고"\);\s*\};/);
+  assert.match(
+    chatWorkspaceSource,
+    /if\s*\(forwardStage === "출고"\s*&&\s*!transaction\.pricing\.finalPrice\)\s*\{\s*setConfirmDispatchOpen\(true\);\s*return;\s*\}/,
+  );
+  assert.match(
+    chatWorkspaceSource,
+    /confirmDispatch = \(\)\s*=>\s*\{\s*setConfirmDispatchOpen\(false\);\s*void runStageChange\("출고"\);\s*\};/,
+  );
 });
 
 test("TransactionManagementScreen shows the same terminal-outcome banner, offers 거래 취소/시공 불가 for the dealer, and 다른 시공점 찾기 once terminated", () => {
-  assert.match(managementScreenSource, /const selectedTerminalOutcome = selected \? isTerminalOutcome\(selected\.status\.stage\) : false;/);
-  assert.match(managementScreenSource, /selectedTerminalOutcome\s*&&\s*(?:\(\s*)?<div className=\{`transaction-outcome-banner/);
-  assert.match(managementScreenSource, /role === "dealer"\s*&&\s*selectedTerminalOutcome\s*&&\s*onFindAnotherShop\s*&&\s*(?:\(\s*)?<button\s+className="primary"\s+onClick=\{onFindAnotherShop\}>/);
+  assert.match(
+    managementScreenSource,
+    /const selectedTerminalOutcome = selected \? isTerminalOutcome\(selected\.status\.stage\) : false;/,
+  );
+  assert.match(
+    managementScreenSource,
+    /selectedTerminalOutcome\s*&&\s*(?:\(\s*)?<div className=\{`transaction-outcome-banner/,
+  );
+  assert.match(
+    managementScreenSource,
+    /role === "dealer"\s*&&\s*selectedTerminalOutcome\s*&&\s*onFindAnotherShop\s*&&\s*(?:\(\s*)?<button\s+className="primary"\s+onClick=\{onFindAnotherShop\}>/,
+  );
 });
 
 test("EndTransactionOutcomeModal never silently retries — it surfaces the thrown error inline and keeps the dialog open on failure", () => {
-  assert.match(outcomeModalSource, /catch \(err\) \{\s*\n\s*setError\(err instanceof Error \? err\.message : "처리하지 못했습니다\. 다시 시도해 주세요\."\);/);
+  assert.match(
+    outcomeModalSource,
+    /catch \(err\) \{\s*\n\s*setError\(err instanceof Error \? err\.message : "처리하지 못했습니다\. 다시 시도해 주세요\."\);/,
+  );
 });
 
 test("regression: hide-transaction warnings across both room components now treat 시공불가 the same as 작업완료/출고/취소 (already-settled, not 진행 중)", () => {
-  assert.match(chatWorkspaceSource, /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(transaction\.status\.stage\)/);
-  assert.match(managementScreenSource, /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(selected\.status\.stage\)/);
+  assert.match(
+    chatWorkspaceSource,
+    /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(transaction\.status\.stage\)/,
+  );
+  assert.match(
+    managementScreenSource,
+    /!\["작업완료", "출고", "취소", "시공불가"\]\.includes\(selected\.status\.stage\)/,
+  );
 });

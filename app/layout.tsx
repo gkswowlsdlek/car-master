@@ -3,7 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Car-Master | 가까운 시공점을 가장 빠르게",
-  description: "전국 어디로 출고해도 가까운 시공점을 바로 찾고, 견적 요청부터 거래·채팅까지 한 곳에서 연결하는 딜러용 차량 시공 업무 플랫폼입니다.",
+  description:
+    "전국 어디로 출고해도 가까운 시공점을 바로 찾고, 견적 요청부터 거래·채팅까지 한 곳에서 연결하는 딜러용 차량 시공 업무 플랫폼입니다.",
 };
 
 // iOS Safari's default (resizes-visual) keeps 100dvh layouts pinned to their

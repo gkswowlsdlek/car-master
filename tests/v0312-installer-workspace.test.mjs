@@ -9,7 +9,8 @@ test("Installer Dashboard follows the 오늘 입고 -> 작업 중 -> 새 요청 
   const order = ["오늘 입고", "작업 중", "새 요청", "확인 필요", "오늘 완료"];
   const positions = order.map((label) => source.indexOf(`<p className="eyebrow">${label}</p>`));
   for (const position of positions) assert.ok(position >= 0, "expected each priority section to be present");
-  for (let i = 1; i < positions.length; i++) assert.ok(positions[i] > positions[i - 1], `${order[i]} should render after ${order[i - 1]}`);
+  for (let i = 1; i < positions.length; i++)
+    assert.ok(positions[i] > positions[i - 1], `${order[i]} should render after ${order[i - 1]}`);
   assert.doesNotMatch(source, /TransactionChatWorkspace/);
   assert.match(source, /onOpenMessage/);
   assert.match(source, /STAGE_ACTION_LABEL\["입고"\]/);
@@ -39,9 +40,21 @@ test("InstallerWorkspace owns Installer selection, derived transaction scope, Me
   assert.match(source, /item\.installerId === legacyInstallerId/);
   assert.match(source, /const activeTransactionId = selectedTransactionId \|\| roleTransactions\[0\]\?\.id \|\| ""/);
   assert.match(source, /onMobileFullscreenChange\(mobileChatOpen\)/);
-  for (const screen of ["shopDashboard", "shopRequests", "messages", "dealerProfile"]) assert.match(source, new RegExp(`screen === "${screen}"`));
-  for (const component of ["ShopDashboard", "TransactionManagementScreen", "MessengerScreen", "ShopManagementScreen"]) assert.match(source, new RegExp(`<${component}`));
-  for (const action of ["onSend", "onHide", "onUnhide", "onFinalPriceChange", "onStageChange", "onPaymentChange", "onMarkRead", "onLoadContact"]) assert.match(source, new RegExp(`${action}=`));
+  for (const screen of ["shopDashboard", "shopRequests", "messages", "dealerProfile"])
+    assert.match(source, new RegExp(`screen === "${screen}"`));
+  for (const component of ["ShopDashboard", "TransactionManagementScreen", "MessengerScreen", "ShopManagementScreen"])
+    assert.match(source, new RegExp(`<${component}`));
+  for (const action of [
+    "onSend",
+    "onHide",
+    "onUnhide",
+    "onFinalPriceChange",
+    "onStageChange",
+    "onPaymentChange",
+    "onMarkRead",
+    "onLoadContact",
+  ])
+    assert.match(source, new RegExp(`${action}=`));
   assert.match(page, /<InstallerWorkspace/);
   assert.doesNotMatch(page, /import \{ ShopDashboard \}/);
   assert.doesNotMatch(page, /<ShopDashboard/);
@@ -67,7 +80,13 @@ test("page delegates each role's detailed screen composition to its workspace", 
 
 test("Demo transaction backend mirrors the real RPC surface and stays actor-role gated", async () => {
   const migration = await read("supabase/migrations/202608010001_v0312_installer_workspace.sql");
-  for (const fn of ["demo_create_transaction_with_room", "demo_transition_transaction_stage", "demo_set_transaction_final_price", "demo_transition_transaction_payment", "demo_set_transaction_visibility"]) {
+  for (const fn of [
+    "demo_create_transaction_with_room",
+    "demo_transition_transaction_stage",
+    "demo_set_transaction_final_price",
+    "demo_transition_transaction_payment",
+    "demo_set_transaction_visibility",
+  ]) {
     assert.match(migration, new RegExp(`function public\\.${fn}`));
   }
   // Dealer cannot progress the work stage (mirrors transaction-state-service.ts's canTransitionStage).
@@ -102,7 +121,10 @@ test("page delegates shared actions and DealerWorkspace owns createTransaction w
   const actions = await read("hooks/use-transaction-actions.ts");
   const store = await read("hooks/use-transaction-store.ts");
   assert.match(page, /const useDemoSharedBackend = !useSupabaseData && demoSchemaReady === true;/);
-  assert.match(page, /useTransactionActions\(\{ useSupabaseData, transactions, sharedRoomIds, demoActorId: account\.id, role, refresh \}\)/);
+  assert.match(
+    page,
+    /useTransactionActions\(\{ useSupabaseData, transactions, sharedRoomIds, demoActorId: account\.id, role, refresh \}\)/,
+  );
   assert.match(page, /<DealerWorkspace/);
   assert.doesNotMatch(page, /import \{ DealerDashboard \}/);
   assert.doesNotMatch(page, /<DealerDashboard/);
@@ -132,13 +154,37 @@ test("page delegates shared actions and DealerWorkspace owns createTransaction w
   assert.doesNotMatch(store, /const markRoomRead/);
   assert.match(actions, /await refresh\(\)/);
   assert.match(actions, /notificationService\.notify/);
-  assert.match(actions, /const demoActorRole:\s*"dealer"\s*\|\s*"shop"\s*\|\s*"admin"\s*=\s*role === "shop"\s*\?\s*"shop"\s*:\s*role === "admin"\s*\?\s*"admin"\s*:\s*"dealer"/);
-  assert.match(actions, /transitionStage\s*\(\s*transaction,\s*stage,\s*role === "shop"\s*\?\s*"shop"\s*:\s*"dealer"\s*,?\s*\)/);
-  assert.match(actions, /transitionPayment\s*\(\s*transaction,\s*status,\s*role === "admin"\s*\?\s*"admin"\s*:\s*role\s*,?\s*\)/);
-  for (const message of ["메시지를 전송하지 못했습니다.", "거래를 숨길 수 없습니다.", "숨김을 해제할 수 없습니다.", "최종 금액을 저장할 수 없습니다.", "결제 상태를 변경할 수 없습니다."]) {
+  assert.match(
+    actions,
+    /const demoActorRole:\s*"dealer"\s*\|\s*"shop"\s*\|\s*"admin"\s*=\s*role === "shop"\s*\?\s*"shop"\s*:\s*role === "admin"\s*\?\s*"admin"\s*:\s*"dealer"/,
+  );
+  assert.match(
+    actions,
+    /transitionStage\s*\(\s*transaction,\s*stage,\s*role === "shop"\s*\?\s*"shop"\s*:\s*"dealer"\s*,?\s*\)/,
+  );
+  assert.match(
+    actions,
+    /transitionPayment\s*\(\s*transaction,\s*status,\s*role === "admin"\s*\?\s*"admin"\s*:\s*role\s*,?\s*\)/,
+  );
+  for (const message of [
+    "메시지를 전송하지 못했습니다.",
+    "거래를 숨길 수 없습니다.",
+    "숨김을 해제할 수 없습니다.",
+    "최종 금액을 저장할 수 없습니다.",
+    "결제 상태를 변경할 수 없습니다.",
+  ]) {
     assert.match(actions, new RegExp(message.replace(".", "\\.")));
   }
-  for (const action of ["sendMessage", "markRoomRead", "loadContact", "hideTransaction", "unhideTransaction", "changeStage", "changeFinalPrice", "changePayment"]) {
+  for (const action of [
+    "sendMessage",
+    "markRoomRead",
+    "loadContact",
+    "hideTransaction",
+    "unhideTransaction",
+    "changeStage",
+    "changeFinalPrice",
+    "changePayment",
+  ]) {
     assert.match(actions, new RegExp(`const ${action} = useCallback`));
   }
 });

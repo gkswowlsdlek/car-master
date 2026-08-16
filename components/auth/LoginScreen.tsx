@@ -4,7 +4,17 @@ import { useRef, useState } from "react";
 import { ArrowRight, LockKeyhole, ShieldCheck, UserRound } from "lucide-react";
 import { LoginServiceIntro, LoginWorkspaceBenefits } from "../landing/LoginServiceIntro";
 
-export function LoginScreen({ onLogin, onExplore, onSignUp, onForgotPassword }: { onLogin: (email: string, password: string) => Promise<void>; onExplore: () => void; onSignUp: () => void; onForgotPassword: () => void }) {
+export function LoginScreen({
+  onLogin,
+  onExplore,
+  onSignUp,
+  onForgotPassword,
+}: {
+  onLogin: (email: string, password: string) => Promise<void>;
+  onExplore: () => void;
+  onSignUp: () => void;
+  onForgotPassword: () => void;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -33,16 +43,73 @@ export function LoginScreen({ onLogin, onExplore, onSignUp, onForgotPassword }: 
       <div className="login-ad-layout">
         <LoginServiceIntro onExplore={onExplore} onPriceGuide={focusLogin} />
         <section className="login-card compact-login-card" ref={loginCardRef}>
-          <div className="login-card-icon"><LockKeyhole size={21} /></div><h2>로그인</h2>
+          <div className="login-card-icon">
+            <LockKeyhole size={21} />
+          </div>
+          <h2>로그인</h2>
           <p className="login-note">이메일 회원 계정 또는 발급받은 아이디로 워크스페이스를 시작하세요.</p>
-          <label>이메일 또는 아이디<span className="login-input-wrap"><UserRound size={17} /><input ref={emailInputRef} id="login-email" type="text" inputMode="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="이메일 또는 발급받은 아이디" /></span></label>
-          <label>비밀번호<span className="login-input-wrap"><LockKeyhole size={17} /><input autoComplete="current-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" && void submit()} placeholder="비밀번호" /></span></label>
-          <button type="button" className="login-forgot-password-link" onClick={onForgotPassword}>비밀번호를 잊으셨나요?</button>
+          <label>
+            이메일 또는 아이디
+            <span className="login-input-wrap">
+              <UserRound size={17} />
+              <input
+                ref={emailInputRef}
+                id="login-email"
+                type="text"
+                inputMode="email"
+                autoComplete="username"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="이메일 또는 발급받은 아이디"
+              />
+            </span>
+          </label>
+          <label>
+            비밀번호
+            <span className="login-input-wrap">
+              <LockKeyhole size={17} />
+              <input
+                autoComplete="current-password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                onKeyDown={(event) => event.key === "Enter" && void submit()}
+                placeholder="비밀번호"
+              />
+            </span>
+          </label>
+          <button type="button" className="login-forgot-password-link" onClick={onForgotPassword}>
+            비밀번호를 잊으셨나요?
+          </button>
           {error && <p className="login-error">{error}</p>}
-          <button className="primary full" onClick={() => void submit()} disabled={isSubmitting} aria-busy={isSubmitting}>{isSubmitting ? "로그인 중..." : "워크스페이스 로그인"} {!isSubmitting && <ArrowRight size={17} />}</button>
-          <button className="login-signup-link" onClick={onSignUp}>처음이신가요? <b>회원가입</b></button>
-          <div className="login-security-note"><ShieldCheck size={19} /><span><b>안전한 회원 워크스페이스</b><small>회원 역할과 시공점 승인 상태에 따라 접근 권한을 확인합니다.</small></span></div>
-          <p className="login-support-note">계정 발급이나 로그인에 문제가 있나요? <button onClick={() => { window.location.href = "/help"; }}>도움말 보기</button></p>
+          <button
+            className="primary full"
+            onClick={() => void submit()}
+            disabled={isSubmitting}
+            aria-busy={isSubmitting}
+          >
+            {isSubmitting ? "로그인 중..." : "워크스페이스 로그인"} {!isSubmitting && <ArrowRight size={17} />}
+          </button>
+          <button className="login-signup-link" onClick={onSignUp}>
+            처음이신가요? <b>회원가입</b>
+          </button>
+          <div className="login-security-note">
+            <ShieldCheck size={19} />
+            <span>
+              <b>안전한 회원 워크스페이스</b>
+              <small>회원 역할과 시공점 승인 상태에 따라 접근 권한을 확인합니다.</small>
+            </span>
+          </div>
+          <p className="login-support-note">
+            계정 발급이나 로그인에 문제가 있나요?{" "}
+            <button
+              onClick={() => {
+                window.location.href = "/help";
+              }}
+            >
+              도움말 보기
+            </button>
+          </p>
         </section>
         <LoginWorkspaceBenefits className="login-benefits-mobile" />
       </div>

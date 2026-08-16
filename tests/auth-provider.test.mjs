@@ -9,7 +9,10 @@ test("the Demo login route composes server credentials, signed sessions, and an 
   assert.match(route, /getDemoCredentials\(\)\.find/);
   assert.match(route, /await createDemoSession\(matched\.role\)/);
   assert.match(route, /response\.cookies\.set\s*\(\s*demoSessionCookie,\s*session\.token,\s*\{\s*httpOnly:\s*true/);
-  assert.match(route, /if\s*\(!matched\)\s*return\s+NextResponse\.json\s*\(\s*\{\s*matched:\s*false\s*,?\s*\},\s*\{\s*status:\s*401\s*,?\s*\}\s*,?\s*\)/);
+  assert.match(
+    route,
+    /if\s*\(!matched\)\s*return\s+NextResponse\.json\s*\(\s*\{\s*matched:\s*false\s*,?\s*\},\s*\{\s*status:\s*401\s*,?\s*\}\s*,?\s*\)/,
+  );
 });
 
 test("server demo sessions are signed and reject tampering", async () => {

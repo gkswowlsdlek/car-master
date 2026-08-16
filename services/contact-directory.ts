@@ -11,8 +11,9 @@ export type TransactionContact = { name: string; phone: string };
  * on file) rather than inventing a number.
  */
 export function resolveDemoContact(transaction: Transaction, viewerRole: "dealer" | "shop"): TransactionContact | null {
-  const account = viewerRole === "dealer"
-    ? demoAccounts.find((item) => item.role === "shop" && item.shopId === transaction.installerId)
-    : demoAccounts.find((item) => item.role === "dealer" && item.id === transaction.dealerId);
+  const account =
+    viewerRole === "dealer"
+      ? demoAccounts.find((item) => item.role === "shop" && item.shopId === transaction.installerId)
+      : demoAccounts.find((item) => item.role === "dealer" && item.id === transaction.dealerId);
   return account?.phone ? { name: account.name, phone: account.phone } : null;
 }

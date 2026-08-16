@@ -28,8 +28,12 @@ const child = spawn(process.execPath, [nextBin, "start", "-H", "127.0.0.1", "-p"
   stdio: ["ignore", "pipe", "pipe"],
 });
 
-child.stdout.on("data", (chunk) => { serverOutput += chunk; });
-child.stderr.on("data", (chunk) => { serverOutput += chunk; });
+child.stdout.on("data", (chunk) => {
+  serverOutput += chunk;
+});
+child.stderr.on("data", (chunk) => {
+  serverOutput += chunk;
+});
 
 try {
   await waitForServer(child, `${baseUrl}/`);

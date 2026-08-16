@@ -1,4 +1,5 @@
-export type ShopSearchRequestStatus = "requested" | "in_progress" | "shop_proposed" | "transaction_linked" | "cancelled" | "unable_to_connect";
+export type ShopSearchRequestStatus =
+  "requested" | "in_progress" | "shop_proposed" | "transaction_linked" | "cancelled" | "unable_to_connect";
 
 /** The Shop currently proposed to the dealer for a request (status === "shop_proposed"). */
 export type ProposedShop = {

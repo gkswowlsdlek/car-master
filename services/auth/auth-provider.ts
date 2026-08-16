@@ -1,4 +1,10 @@
-import type { CurrentUser, DealerOnboardingInput, InstallerOnboardingInput, SignUpInput, SignUpResult } from "../../types/auth";
+import type {
+  CurrentUser,
+  DealerOnboardingInput,
+  InstallerOnboardingInput,
+  SignUpInput,
+  SignUpResult,
+} from "../../types/auth";
 
 export type AuthCredentials = { email: string; password: string };
 

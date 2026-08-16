@@ -36,7 +36,10 @@ test("Dashboard's raw internal stage deep-link (e.g. 견적 for 확인 대기) i
 });
 
 test("작업 상태 filter shows only dealer-facing labels (입고 전/작업 중/작업 완료/출고/취소/시공 불가) — no raw DB stage key (견적/시공예약/입고) reaches the dropdown text", () => {
-  assert.match(screenSource, /const STATUS_FILTER_OPTIONS = \["전체", "입고 전", "작업 중", "작업 완료", "출고", "취소", "시공 불가"\] as const;/);
+  assert.match(
+    screenSource,
+    /const STATUS_FILTER_OPTIONS = \["전체", "입고 전", "작업 중", "작업 완료", "출고", "취소", "시공 불가"\] as const;/,
+  );
   assert.doesNotMatch(screenSource, />견적</);
   assert.doesNotMatch(screenSource, />시공예약</);
 });
@@ -88,11 +91,20 @@ test("list rows keep the established transaction-card- E2E testid convention", (
 });
 
 test("DealerWorkspace wires the new screen for role dealer's 거래관리 tab, and Dashboard's own open-transaction action now hands off straight to the Room (messages), not a detail pane", () => {
-  assert.match(workspaceSource, /import \{ DealerTransactionManagementScreen \} from "\.\.\/transactions\/DealerTransactionManagementScreen";/);
+  assert.match(
+    workspaceSource,
+    /import \{ DealerTransactionManagementScreen \} from "\.\.\/transactions\/DealerTransactionManagementScreen";/,
+  );
   assert.doesNotMatch(workspaceSource, /\{ TransactionManagementScreen \}/);
   assert.doesNotMatch(workspaceSource, /<TransactionManagementScreen /);
-  assert.match(workspaceSource, /screen === "deals"\s*&&\s*(?:\(\s*)?<DealerTransactionManagementScreen\s+transactions=\{transactions\}\s+initialGroupFilter=\{dealFilter\}\s+onOpenTransaction=\{\(id\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*onNavigate\("messages"\);\s*\}\}\s+onNewRequest=\{\(\)\s*=>\s*onNavigate\("request"\)\}\s+onFindShop=\{\(\)\s*=>\s*onNavigate\("dealerMap"\)\}\s*\/>/);
-  assert.match(workspaceSource, /<DealerDashboard[\s\S]*?onOpenTransaction=\{\(id\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*onNavigate\("messages"\);\s*\}\}/);
+  assert.match(
+    workspaceSource,
+    /screen === "deals"\s*&&\s*(?:\(\s*)?<DealerTransactionManagementScreen\s+transactions=\{transactions\}\s+initialGroupFilter=\{dealFilter\}\s+onOpenTransaction=\{\(id\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*onNavigate\("messages"\);\s*\}\}\s+onNewRequest=\{\(\)\s*=>\s*onNavigate\("request"\)\}\s+onFindShop=\{\(\)\s*=>\s*onNavigate\("dealerMap"\)\}\s*\/>/,
+  );
+  assert.match(
+    workspaceSource,
+    /<DealerDashboard[\s\S]*?onOpenTransaction=\{\(id\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*onNavigate\("messages"\);\s*\}\}/,
+  );
 });
 
 test("InstallerWorkspace (shop role) is untouched — TransactionManagementScreen keeps serving the Shop's own transaction management unchanged", async () => {

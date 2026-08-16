@@ -76,8 +76,18 @@ export const installationPriceGuide: InstallationPriceBrand[] = [
       { id: "huper-optik-kbr", name: "KBR", guidePrice: 400000 },
       { id: "huper-optik-classic", name: "클래식", guidePrice: 600000 },
       { id: "huper-optik-re", name: "RE", guidePrice: 700000 },
-      { id: "huper-optik-prenace-classic-a", name: "프나세 + 클래식 A", guidePrice: 800000, note: "세부 구성 확인 필요" },
-      { id: "huper-optik-prenace-classic-b", name: "프나세 + 클래식 B", guidePrice: 1000000, note: "세부 구성 확인 필요" },
+      {
+        id: "huper-optik-prenace-classic-a",
+        name: "프나세 + 클래식 A",
+        guidePrice: 800000,
+        note: "세부 구성 확인 필요",
+      },
+      {
+        id: "huper-optik-prenace-classic-b",
+        name: "프나세 + 클래식 B",
+        guidePrice: 1000000,
+        note: "세부 구성 확인 필요",
+      },
     ],
   },
   {

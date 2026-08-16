@@ -2,9 +2,18 @@ import { createSupabaseBrowserClient } from "../lib/supabase/client";
 import type { AdminShopClaimRequest, ShopClaimRequestStatus } from "../types/shop-claim";
 
 type ShopClaimRow = {
-  id: string; shop_id: string; requester_id: string; status: ShopClaimRequestStatus; note: string;
-  review_note: string | null; created_at: string; updated_at: string;
-  installer_shops: { shop_name: string; address: string; phone: string } | { shop_name: string; address: string; phone: string }[] | null;
+  id: string;
+  shop_id: string;
+  requester_id: string;
+  status: ShopClaimRequestStatus;
+  note: string;
+  review_note: string | null;
+  created_at: string;
+  updated_at: string;
+  installer_shops:
+    | { shop_name: string; address: string; phone: string }
+    | { shop_name: string; address: string; phone: string }[]
+    | null;
   profiles: { email: string } | { email: string }[] | null;
 };
 
@@ -12,10 +21,18 @@ function mapRow(row: ShopClaimRow): AdminShopClaimRequest {
   const shop = Array.isArray(row.installer_shops) ? row.installer_shops[0] : row.installer_shops;
   const requester = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
   return {
-    id: row.id, shopId: row.shop_id, shopName: shop?.shop_name ?? "-", shopAddress: shop?.address ?? "", shopPhone: shop?.phone ?? "",
-    requesterId: row.requester_id, requesterEmail: requester?.email ?? "-",
-    status: row.status, note: row.note, reviewNote: row.review_note ?? undefined,
-    createdAt: row.created_at, updatedAt: row.updated_at,
+    id: row.id,
+    shopId: row.shop_id,
+    shopName: shop?.shop_name ?? "-",
+    shopAddress: shop?.address ?? "",
+    shopPhone: shop?.phone ?? "",
+    requesterId: row.requester_id,
+    requesterEmail: requester?.email ?? "-",
+    status: row.status,
+    note: row.note,
+    reviewNote: row.review_note ?? undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -31,8 +48,11 @@ export class ShopClaimRepository {
    * unclaimed Shop at most), but every new admin list gets a limit from the start.
    */
   async getAllForAdmin(): Promise<AdminShopClaimRequest[]> {
-    const { data, error } = await createSupabaseBrowserClient().from("shop_claim_requests")
-      .select("id,shop_id,requester_id,status,note,review_note,created_at,updated_at,installer_shops(shop_name,address,phone),profiles!requester_id(email)")
+    const { data, error } = await createSupabaseBrowserClient()
+      .from("shop_claim_requests")
+      .select(
+        "id,shop_id,requester_id,status,note,review_note,created_at,updated_at,installer_shops(shop_name,address,phone),profiles!requester_id(email)",
+      )
       .order("created_at", { ascending: true })
       .limit(200);
     if (error) throw error;
@@ -46,7 +66,9 @@ export class ShopClaimRepository {
    * records the decision) — no new business logic, no new RPC. */
   async review(requestId: string, approve: boolean, note = ""): Promise<void> {
     const { error } = await createSupabaseBrowserClient().rpc("review_shop_claim", {
-      p_request_id: requestId, p_approve: approve, p_note: note || null,
+      p_request_id: requestId,
+      p_approve: approve,
+      p_note: note || null,
     });
     if (error) throw error;
   }

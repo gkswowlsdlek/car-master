@@ -9,10 +9,22 @@ import type { InstallerListing } from "../../types/installer";
  * 그대로 — 표시 크기만 축소).
  */
 function CardPhoto() {
-  return <div className="installer-card-photo" aria-hidden="true"><Building2 size={18} /></div>;
+  return (
+    <div className="installer-card-photo" aria-hidden="true">
+      <Building2 size={18} />
+    </div>
+  );
 }
 
-export function InstallerCard({ installer, distanceLabel, selected, favorite, onToggleFavorite, onOpenDetail, onRequest }: {
+export function InstallerCard({
+  installer,
+  distanceLabel,
+  selected,
+  favorite,
+  onToggleFavorite,
+  onOpenDetail,
+  onRequest,
+}: {
   installer: InstallerListing;
   distanceLabel: string;
   selected: boolean;
@@ -21,25 +33,49 @@ export function InstallerCard({ installer, distanceLabel, selected, favorite, on
   onOpenDetail: () => void;
   onRequest: () => void;
 }) {
-  return <div id={`installer-card-${installer.id}`} className={`installer-card ${selected ? "selected" : ""}`}>
-    <button type="button" className={`favorite-star ${favorite ? "active" : ""}`} onClick={onToggleFavorite} aria-label={`${installer.name} 즐겨찾기`}>★</button>
-    <button type="button" className="installer-card-body" onClick={onOpenDetail}>
-      <CardPhoto />
-      <div className="installer-card-main">
-        <div className="installer-card-top">
-          <b className="installer-card-name">{installer.name}</b>
-          <span>{distanceLabel}</span>
+  return (
+    <div id={`installer-card-${installer.id}`} className={`installer-card ${selected ? "selected" : ""}`}>
+      <button
+        type="button"
+        className={`favorite-star ${favorite ? "active" : ""}`}
+        onClick={onToggleFavorite}
+        aria-label={`${installer.name} 즐겨찾기`}
+      >
+        ★
+      </button>
+      <button type="button" className="installer-card-body" onClick={onOpenDetail}>
+        <CardPhoto />
+        <div className="installer-card-main">
+          <div className="installer-card-top">
+            <b className="installer-card-name">{installer.name}</b>
+            <span>{distanceLabel}</span>
+          </div>
+          <p className="installer-card-location">
+            {installer.province} {installer.city}
+          </p>
+          <div className="installer-card-heading">
+            {installer.isDemo ? (
+              <>
+                <span className="demo-badge">데모 시공점</span>
+                <span className="demo-location-badge">
+                  <Check size={14} strokeWidth={3.2} /> 위치
+                </span>
+              </>
+            ) : (
+              <span className="verified-badge">카마스터 등록 시공점</span>
+            )}
+            <span className={`installer-availability ${installer.available ? "open" : "closed"}`}>
+              {installer.available ? "요청 가능" : "마감"}
+            </span>
+          </div>
+          <p className="installer-card-works">{installer.works.slice(0, 3).join(", ")}</p>
         </div>
-        <p className="installer-card-location">{installer.province} {installer.city}</p>
-        <div className="installer-card-heading">
-          {installer.isDemo ? <><span className="demo-badge">데모 시공점</span><span className="demo-location-badge"><Check size={14} strokeWidth={3.2} /> 위치</span></> : <span className="verified-badge">카마스터 등록 시공점</span>}
-          <span className={`installer-availability ${installer.available ? "open" : "closed"}`}>{installer.available ? "요청 가능" : "마감"}</span>
-        </div>
-        <p className="installer-card-works">{installer.works.slice(0, 3).join(", ")}</p>
+      </button>
+      <div className="installer-card-actions">
+        <button type="button" className="button button-primary" onClick={onRequest}>
+          시공 요청
+        </button>
       </div>
-    </button>
-    <div className="installer-card-actions">
-      <button type="button" className="button button-primary" onClick={onRequest}>시공 요청</button>
     </div>
-  </div>;
+  );
 }

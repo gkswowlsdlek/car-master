@@ -18,8 +18,14 @@ test("202608050001 adds 'pending' to public.user_role as a standalone, additive 
 
 test("handle_new_user(): OAuth/social sign-in (no recognized signup_role) creates only a minimal pending profile — no dealer_profiles/installer_profiles/installer_approvals, no guessed default role", async () => {
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
-  assert.match(migration, /if coalesce\(new\.raw_user_meta_data ->> 'signup_role', ''\) not in \('dealer', 'installer'\) then/);
-  const pendingBranch = migration.slice(migration.indexOf("not in ('dealer', 'installer') then"), migration.indexOf("return new;\n  end if;"));
+  assert.match(
+    migration,
+    /if coalesce\(new\.raw_user_meta_data ->> 'signup_role', ''\) not in \('dealer', 'installer'\) then/,
+  );
+  const pendingBranch = migration.slice(
+    migration.indexOf("not in ('dealer', 'installer') then"),
+    migration.indexOf("return new;\n  end if;"),
+  );
   assert.match(pendingBranch, /values \(new\.id, coalesce\(new\.email, ''\), 'pending'::public\.user_role\)/);
   assert.doesNotMatch(pendingBranch, /dealer_profiles|installer_profiles|installer_approvals/);
 });
@@ -31,29 +37,54 @@ test("handle_new_user() NULL-safety fix: the bare (un-coalesced) 'NOT IN' guard 
   // comparison in the file is wrapped in coalesce — there is no bare
   // `new.raw_user_meta_data ->> 'signup_role' not in (...)` left anywhere.
   const bareGuardPattern = /(?<!coalesce\(new\.raw_user_meta_data )->> 'signup_role' not in \(/g;
-  assert.equal([...migration.matchAll(bareGuardPattern)].length, 0, "a bare, un-coalesced NOT IN guard must not exist anywhere in the file");
+  assert.equal(
+    [...migration.matchAll(bareGuardPattern)].length,
+    0,
+    "a bare, un-coalesced NOT IN guard must not exist anywhere in the file",
+  );
 });
 
 test("handle_new_user() preserves dealer and installer membership creation contracts", async () => {
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
-  const triggerFunction = migration.slice(migration.indexOf("create or replace function public.handle_new_user"), migration.indexOf("create or replace function public.complete_dealer_onboarding"));
-  assert.match(triggerFunction, /requested_role := case[\s\S]*when new\.raw_user_meta_data ->> 'signup_role' = 'installer' then 'installer'::public\.user_role[\s\S]*else 'dealer'::public\.user_role/);
+  const triggerFunction = migration.slice(
+    migration.indexOf("create or replace function public.handle_new_user"),
+    migration.indexOf("create or replace function public.complete_dealer_onboarding"),
+  );
+  assert.match(
+    triggerFunction,
+    /requested_role := case[\s\S]*when new\.raw_user_meta_data ->> 'signup_role' = 'installer' then 'installer'::public\.user_role[\s\S]*else 'dealer'::public\.user_role/,
+  );
   assert.match(triggerFunction, /insert into public\.profiles \(id, email, role\)/);
   assert.match(triggerFunction, /if requested_role = 'dealer' then[\s\S]*insert into public\.dealer_profiles/);
-  assert.match(triggerFunction, /else[\s\S]*insert into public\.installer_profiles[\s\S]*insert into public\.installer_approvals/);
+  assert.match(
+    triggerFunction,
+    /else[\s\S]*insert into public\.installer_profiles[\s\S]*insert into public\.installer_approvals/,
+  );
 });
 
 test("complete_dealer_onboarding: only runs for the caller's own row, only from role='pending', and is fully additive (dealer_profiles + legal_agreements in the same function)", async () => {
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
-  const fn = migration.slice(migration.indexOf("create or replace function public.complete_dealer_onboarding"), migration.indexOf("create or replace function public.complete_installer_onboarding"));
+  const fn = migration.slice(
+    migration.indexOf("create or replace function public.complete_dealer_onboarding"),
+    migration.indexOf("create or replace function public.complete_installer_onboarding"),
+  );
   assert.match(fn, /caller_id uuid := auth\.uid\(\);/);
   assert.doesNotMatch(fn, /payload ->> 'userId'|payload ->> 'user_id'/);
   assert.match(fn, /select role into caller_role from public\.profiles where id = caller_id for update;/);
-  assert.match(fn, /if caller_role is distinct from 'pending'::public\.user_role then\s*raise exception 'Onboarding already completed';/);
-  assert.match(fn, /update public\.profiles set role = 'dealer'::public\.user_role, updated_at = now\(\) where id = caller_id;/);
+  assert.match(
+    fn,
+    /if caller_role is distinct from 'pending'::public\.user_role then\s*raise exception 'Onboarding already completed';/,
+  );
+  assert.match(
+    fn,
+    /update public\.profiles set role = 'dealer'::public\.user_role, updated_at = now\(\) where id = caller_id;/,
+  );
   assert.match(fn, /insert into public\.dealer_profiles/);
   assert.match(fn, /insert into public\.legal_agreements \(user_id, terms_version, privacy_version\)/);
-  assert.match(fn, /if input_terms_version = '' or input_privacy_version = '' then\s*raise exception 'Terms and privacy agreement is required';/);
+  assert.match(
+    fn,
+    /if input_terms_version = '' or input_privacy_version = '' then\s*raise exception 'Terms and privacy agreement is required';/,
+  );
 });
 
 test("complete_installer_onboarding: only runs for the caller's own row, only from role='pending', creates installer_profiles + installer_approvals (default pending) + legal_agreements", async () => {
@@ -61,13 +92,22 @@ test("complete_installer_onboarding: only runs for the caller's own row, only fr
   const fn = migration.slice(migration.indexOf("create or replace function public.complete_installer_onboarding"));
   assert.match(fn, /caller_id uuid := auth\.uid\(\);/);
   assert.doesNotMatch(fn, /payload ->> 'userId'|payload ->> 'user_id'/);
-  assert.match(fn, /if caller_role is distinct from 'pending'::public\.user_role then\s*raise exception 'Onboarding already completed';/);
-  assert.match(fn, /update public\.profiles set role = 'installer'::public\.user_role, updated_at = now\(\) where id = caller_id;/);
+  assert.match(
+    fn,
+    /if caller_role is distinct from 'pending'::public\.user_role then\s*raise exception 'Onboarding already completed';/,
+  );
+  assert.match(
+    fn,
+    /update public\.profiles set role = 'installer'::public\.user_role, updated_at = now\(\) where id = caller_id;/,
+  );
   assert.match(fn, /insert into public\.installer_profiles \(/);
   // No explicit status column passed — relies on installer_approvals' own `default 'pending'`, exactly like the original signup trigger.
   assert.match(fn, /insert into public\.installer_approvals \(user_id\) values \(caller_id\);/);
   assert.match(fn, /insert into public\.legal_agreements \(user_id, terms_version, privacy_version\)/);
-  assert.match(fn, /if input_terms_version = '' or input_privacy_version = '' then\s*raise exception 'Terms and privacy agreement is required';/);
+  assert.match(
+    fn,
+    /if input_terms_version = '' or input_privacy_version = '' then\s*raise exception 'Terms and privacy agreement is required';/,
+  );
 });
 
 test("Legal consent version trust: both onboarding RPCs' hardcoded version literals match data/legal-versions.ts's CURRENT_TERMS_VERSION/CURRENT_PRIVACY_VERSION exactly — never guessed, always cross-checked against the actual repo source of truth", async () => {
@@ -79,17 +119,34 @@ test("Legal consent version trust: both onboarding RPCs' hardcoded version liter
   const [, privacyVersion] = privacyVersionMatch;
 
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
-  const termsChecks = [...migration.matchAll(/if input_terms_version <> '([^']+)' then\s*raise exception 'Terms version mismatch';/g)];
-  const privacyChecks = [...migration.matchAll(/if input_privacy_version <> '([^']+)' then\s*raise exception 'Privacy version mismatch';/g)];
+  const termsChecks = [
+    ...migration.matchAll(/if input_terms_version <> '([^']+)' then\s*raise exception 'Terms version mismatch';/g),
+  ];
+  const privacyChecks = [
+    ...migration.matchAll(/if input_privacy_version <> '([^']+)' then\s*raise exception 'Privacy version mismatch';/g),
+  ];
   assert.equal(termsChecks.length, 2, "both RPCs must check the terms version");
   assert.equal(privacyChecks.length, 2, "both RPCs must check the privacy version");
-  for (const [, literal] of termsChecks) assert.equal(literal, termsVersion, "RPC's hardcoded terms-version literal must match data/legal-versions.ts exactly");
-  for (const [, literal] of privacyChecks) assert.equal(literal, privacyVersion, "RPC's hardcoded privacy-version literal must match data/legal-versions.ts exactly");
+  for (const [, literal] of termsChecks)
+    assert.equal(
+      literal,
+      termsVersion,
+      "RPC's hardcoded terms-version literal must match data/legal-versions.ts exactly",
+    );
+  for (const [, literal] of privacyChecks)
+    assert.equal(
+      literal,
+      privacyVersion,
+      "RPC's hardcoded privacy-version literal must match data/legal-versions.ts exactly",
+    );
 });
 
 test("Legal consent version trust: the version-mismatch checks run BEFORE any write (role update, profile-table insert, or legal_agreements insert) in both RPCs — a rejected call leaves zero partial data, and the caller's role stays 'pending'", async () => {
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
-  for (const [fnName, tableName, roleLiteral] of [["complete_dealer_onboarding", "dealer_profiles", "'dealer'"], ["complete_installer_onboarding", "installer_profiles", "'installer'"]]) {
+  for (const [fnName, tableName, roleLiteral] of [
+    ["complete_dealer_onboarding", "dealer_profiles", "'dealer'"],
+    ["complete_installer_onboarding", "installer_profiles", "'installer'"],
+  ]) {
     const start = migration.indexOf(`create or replace function public.${fnName}`);
     const nextFnStart = migration.indexOf("create or replace function public.", start + 1);
     const fn = migration.slice(start, nextFnStart === -1 ? undefined : nextFnStart);
@@ -98,10 +155,22 @@ test("Legal consent version trust: the version-mismatch checks run BEFORE any wr
     const roleUpdateIndex = fn.indexOf(`update public.profiles set role = ${roleLiteral}`);
     const profileInsertIndex = fn.indexOf(`insert into public.${tableName}`);
     const legalAgreementsInsertIndex = fn.indexOf("insert into public.legal_agreements");
-    assert.ok(termsCheckIndex > 0 && privacyCheckIndex > termsCheckIndex, `${fnName}: terms check must precede privacy check`);
-    assert.ok(roleUpdateIndex > privacyCheckIndex, `${fnName}: role update must happen only after both version checks pass`);
-    assert.ok(profileInsertIndex > privacyCheckIndex, `${fnName}: ${tableName} insert must happen only after both version checks pass`);
-    assert.ok(legalAgreementsInsertIndex > privacyCheckIndex, `${fnName}: legal_agreements insert must happen only after both version checks pass`);
+    assert.ok(
+      termsCheckIndex > 0 && privacyCheckIndex > termsCheckIndex,
+      `${fnName}: terms check must precede privacy check`,
+    );
+    assert.ok(
+      roleUpdateIndex > privacyCheckIndex,
+      `${fnName}: role update must happen only after both version checks pass`,
+    );
+    assert.ok(
+      profileInsertIndex > privacyCheckIndex,
+      `${fnName}: ${tableName} insert must happen only after both version checks pass`,
+    );
+    assert.ok(
+      legalAgreementsInsertIndex > privacyCheckIndex,
+      `${fnName}: legal_agreements insert must happen only after both version checks pass`,
+    );
   }
   // Postgres/PL-pgSQL note (not independently executable in this
   // environment — no local Postgres/Docker, see the prior NULL-semantics
@@ -119,7 +188,11 @@ test("Legal consent version trust: the version-mismatch checks run BEFORE any wr
 test("Role-switch guard: both onboarding RPCs check profiles.role = 'pending' before doing anything, so an already-onboarded dealer/installer/admin can never re-run onboarding into a different role — the SAME guard clause rejects all three cases (dealer→installer, installer→dealer, admin→either)", async () => {
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
   const guardOccurrences = migration.match(/if caller_role is distinct from 'pending'::public\.user_role then/g) ?? [];
-  assert.equal(guardOccurrences.length, 2, "both complete_dealer_onboarding and complete_installer_onboarding must have the pending-only guard");
+  assert.equal(
+    guardOccurrences.length,
+    2,
+    "both complete_dealer_onboarding and complete_installer_onboarding must have the pending-only guard",
+  );
 });
 
 test("Onboarding RPCs are executable by authenticated only, revoked from public/anon — no arbitrary invocation", async () => {
@@ -143,8 +216,14 @@ test("Both onboarding RPCs use SECURITY DEFINER with search_path locked to '' �
 
 test("legal_agreements is an append-only consent history table (one row per agreement event, not overwritten columns) — RLS: select own or admin, no client insert/update/delete grant", async () => {
   const migration = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
-  assert.match(migration, /create table public\.legal_agreements \(\s*id bigint generated always as identity primary key,\s*user_id uuid references public\.profiles\(id\) on delete set null,\s*terms_version text not null,\s*privacy_version text not null,\s*agreed_at timestamptz not null default now\(\)\s*\);/);
-  assert.match(migration, /create policy "legal agreements select own or admin" on public\.legal_agreements\s*for select to authenticated\s*using \(user_id = auth\.uid\(\) or public\.is_admin\(\)\);/);
+  assert.match(
+    migration,
+    /create table public\.legal_agreements \(\s*id bigint generated always as identity primary key,\s*user_id uuid references public\.profiles\(id\) on delete set null,\s*terms_version text not null,\s*privacy_version text not null,\s*agreed_at timestamptz not null default now\(\)\s*\);/,
+  );
+  assert.match(
+    migration,
+    /create policy "legal agreements select own or admin" on public\.legal_agreements\s*for select to authenticated\s*using \(user_id = auth\.uid\(\) or public\.is_admin\(\)\);/,
+  );
 });
 
 test("legal_agreements.user_id is ON DELETE SET NULL (not CASCADE) and nullable — deleting a profile/auth.users row anonymizes the consent record instead of erasing it, so the append-only audit trail actually survives account deletion", async () => {
@@ -174,14 +253,22 @@ test("Audit trail regression guard: no self-service or admin-facing account/prof
   // git ls-files is the source of truth for "what's actually in the repo"
   // (mirrors the grep-based audit performed before this fix was written).
   const { execFileSync } = await import("node:child_process");
-  const trackedFiles = execFileSync("git", ["ls-files", "*.ts", "*.tsx"], { cwd: new URL("../", import.meta.url), encoding: "utf8" })
-    .split("\n").filter(Boolean);
+  const trackedFiles = execFileSync("git", ["ls-files", "*.ts", "*.tsx"], {
+    cwd: new URL("../", import.meta.url),
+    encoding: "utf8",
+  })
+    .split("\n")
+    .filter(Boolean);
   let deletionCodeFound = false;
   for (const file of trackedFiles) {
     const contents = await read(file);
     if (/auth\.admin\.deleteUser|deleteUser\(/.test(contents)) deletionCodeFound = true;
   }
-  assert.equal(deletionCodeFound, false, "no account-deletion code exists yet — if this now fails, a deletion feature was added and the legal_agreements ON DELETE SET NULL design must be re-reviewed against it");
+  assert.equal(
+    deletionCodeFound,
+    false,
+    "no account-deletion code exists yet — if this now fails, a deletion feature was added and the legal_agreements ON DELETE SET NULL design must be re-reviewed against it",
+  );
 });
 
 test("Grant hardening: legal_agreements privileges are set with `revoke all` (not just insert/update/delete), so anon/authenticated table access never depends on ambient default privileges on the public schema", async () => {
@@ -230,7 +317,10 @@ test("pending installer directory non-exposure: get_approved_installer_directory
 test("Demo login and is_admin()/admin bootstrap are untouched by this migration — no demo_ table/RPC and no is_admin() redefinition appears in the new files", async () => {
   const migration1 = await read("supabase/migrations/202608050001_v0314_user_role_pending.sql");
   const migration2 = await read("supabase/migrations/202608050002_v0314_legal_onboarding_foundation.sql");
-  assert.doesNotMatch(migration1 + migration2, /demo_|is_admin\(\)\s*\nreturns|create or replace function public\.is_admin/);
+  assert.doesNotMatch(
+    migration1 + migration2,
+    /demo_|is_admin\(\)\s*\nreturns|create or replace function public\.is_admin/,
+  );
   const demoLoginRoute = await read("app/api/demo-login/route.ts");
   assert.doesNotMatch(demoLoginRoute, /pending|legal_agreements|onboarding/i);
 });
@@ -238,7 +328,10 @@ test("Demo login and is_admin()/admin bootstrap are untouched by this migration 
 test("AuthProvider interface gains completeDealerOnboarding/completeInstallerOnboarding; both runtime implementations (Supabase, Unconfigured) implement them", async () => {
   const providerInterface = await read("services/auth/auth-provider.ts");
   assert.match(providerInterface, /completeDealerOnboarding\(input: DealerOnboardingInput\): Promise<CurrentUser>/);
-  assert.match(providerInterface, /completeInstallerOnboarding\(input: InstallerOnboardingInput\): Promise<CurrentUser>/);
+  assert.match(
+    providerInterface,
+    /completeInstallerOnboarding\(input: InstallerOnboardingInput\): Promise<CurrentUser>/,
+  );
   for (const file of ["services/auth/supabase-auth-provider.ts", "services/auth/unconfigured-auth-provider.ts"]) {
     const source = await read(file);
     assert.match(source, /completeDealerOnboarding/, `${file} missing completeDealerOnboarding`);
@@ -272,15 +365,24 @@ test("types/auth.ts: UserRole includes 'pending', and onboarding input types req
 
 test("access-policy.ts: /onboarding is protected, /terms and /privacy are public, and a pending user's workspace path is /onboarding — never a dealer/installer/admin path", async () => {
   const policy = await read("services/auth/access-policy.ts");
-  assert.match(policy, /export const protectedPaths = \["\/dealer", "\/shop", "\/admin", "\/account-status", "\/onboarding"\] as const;/);
-  assert.match(policy, /"\/forgot-password",\s*"\/update-password",\s*"\/auth\/callback",\s*"\/terms",\s*"\/privacy"\s*,?\s*\]/);
+  assert.match(
+    policy,
+    /export const protectedPaths = \["\/dealer", "\/shop", "\/admin", "\/account-status", "\/onboarding"\] as const;/,
+  );
+  assert.match(
+    policy,
+    /"\/forgot-password",\s*"\/update-password",\s*"\/auth\/callback",\s*"\/terms",\s*"\/privacy"\s*,?\s*\]/,
+  );
   assert.match(policy, /if \(normalizedRole === "pending"\) return "\/onboarding" as const;/);
   assert.match(policy, /return workspacePathForRole\(user\.role, user\.approvalStatus\);/);
 });
 
 test("access-policy.ts regression: an anonymous user is still rejected from every protected path including the new /onboarding path", async () => {
   const policy = await read("services/auth/access-policy.ts");
-  assert.match(policy, /export function canAccessWorkspacePath\(user: CurrentUser \| null, pathname: string\) \{\s*if \(!user\) return !isProtectedPath\(pathname\);/);
+  assert.match(
+    policy,
+    /export function canAccessWorkspacePath\(user: CurrentUser \| null, pathname: string\) \{\s*if \(!user\) return !isProtectedPath\(pathname\);/,
+  );
 });
 
 test("proxy.ts (server-side route guard): /onboarding maps to protectedRole 'pending', profile type includes 'pending', and a role mismatch correctly redirects a pending user to /onboarding instead of the pre-existing /account-status fallback", async () => {
@@ -293,25 +395,49 @@ test("proxy.ts (server-side route guard): /onboarding maps to protectedRole 'pen
 test("app/page.tsx: a pending user is routed straight to the onboarding screen and never reaches accountForUser (which has no Role mapping for 'pending')", async () => {
   const page = await read("app/page.tsx");
   assert.match(page, /if \(user\.role === "pending"\) \{[\s\S]*?setScreen\("onboarding"\);/);
-  assert.match(page, /if \(user\.role === "pending"\) throw new Error\("accountForUser called with a pending-onboarding user"\);/);
-  const enterAuthBlock = page.slice(page.indexOf("const enterAuthenticatedUser = useCallback"), page.indexOf("const authenticate = useCallback"));
+  assert.match(
+    page,
+    /if \(user\.role === "pending"\) throw new Error\("accountForUser called with a pending-onboarding user"\);/,
+  );
+  const enterAuthBlock = page.slice(
+    page.indexOf("const enterAuthenticatedUser = useCallback"),
+    page.indexOf("const authenticate = useCallback"),
+  );
   const pendingCheckIndex = enterAuthBlock.indexOf('user.role === "pending"');
   const accountForUserCallIndex = enterAuthBlock.indexOf("accountForUser(user)");
-  assert.ok(pendingCheckIndex >= 0 && accountForUserCallIndex > pendingCheckIndex, "the pending short-circuit must run before accountForUser is called");
+  assert.ok(
+    pendingCheckIndex >= 0 && accountForUserCallIndex > pendingCheckIndex,
+    "the pending short-circuit must run before accountForUser is called",
+  );
 });
 
 test("app/page.tsx: onboarding completion re-enters the normal authenticated-user flow (so a newly-dealer/installer user lands in their real workspace, not stuck on /onboarding)", async () => {
   const page = await read("app/page.tsx");
-  assert.match(page, /const completeDealerOnboarding = useCallback\s*\(\s*async \(input: DealerOnboardingInput\)\s*=>\s*\{\s*const user = await authProvider\.completeDealerOnboarding\(input\);\s*enterAuthenticatedUser\(user, true\);/);
-  assert.match(page, /const completeInstallerOnboarding = useCallback\s*\(\s*async \(input: InstallerOnboardingInput\)\s*=>\s*\{\s*const user = await authProvider\.completeInstallerOnboarding\(input\);\s*enterAuthenticatedUser\(user, true\);/);
-  assert.match(page, /<OnboardingScreen\s+user=\{currentUser\}\s+onCompleteDealer=\{completeDealerOnboarding\}\s+onCompleteInstaller=\{completeInstallerOnboarding\}\s+onLogout=\{\(\)\s*=>\s*void logout\(\)\}\s*\/>/);
+  assert.match(
+    page,
+    /const completeDealerOnboarding = useCallback\s*\(\s*async \(input: DealerOnboardingInput\)\s*=>\s*\{\s*const user = await authProvider\.completeDealerOnboarding\(input\);\s*enterAuthenticatedUser\(user, true\);/,
+  );
+  assert.match(
+    page,
+    /const completeInstallerOnboarding = useCallback\s*\(\s*async \(input: InstallerOnboardingInput\)\s*=>\s*\{\s*const user = await authProvider\.completeInstallerOnboarding\(input\);\s*enterAuthenticatedUser\(user, true\);/,
+  );
+  assert.match(
+    page,
+    /<OnboardingScreen\s+user=\{currentUser\}\s+onCompleteDealer=\{completeDealerOnboarding\}\s+onCompleteInstaller=\{completeInstallerOnboarding\}\s+onLogout=\{\(\)\s*=>\s*void logout\(\)\}\s*\/>/,
+  );
 });
 
 test("OnboardingScreen blocks submission without both required consent checkboxes, links to /terms and /privacy, and opens them in a new tab so in-progress form data is never lost", async () => {
   const source = await read("components/auth/OnboardingScreen.tsx");
-  assert.match(source, /if \(!agreedTerms \|\| !agreedPrivacy\) return setError\("이용약관 동의와 개인정보처리방침 확인이 모두 필요해요\."\)/);
+  assert.match(
+    source,
+    /if \(!agreedTerms \|\| !agreedPrivacy\) return setError\("이용약관 동의와 개인정보처리방침 확인이 모두 필요해요\."\)/,
+  );
   assert.match(source, /<a\s+href="\/terms"\s+target="_blank"\s+rel="noopener noreferrer">\s*이용약관\s*<\/a>/);
-  assert.match(source, /<a\s+href="\/privacy"\s+target="_blank"\s+rel="noopener noreferrer">\s*개인정보처리방침\s*<\/a>/);
+  assert.match(
+    source,
+    /<a\s+href="\/privacy"\s+target="_blank"\s+rel="noopener noreferrer">\s*개인정보처리방침\s*<\/a>/,
+  );
 });
 
 test("OnboardingScreen's privacy checkbox is framed as policy acknowledgment, not a separate collection/use consent — matching the contract-necessity legal basis PrivacyScreen documents (no duplicate '수집·이용 동의' wording)", async () => {
@@ -322,18 +448,34 @@ test("OnboardingScreen's privacy checkbox is framed as policy acknowledgment, no
 
 test("OnboardingScreen validates required fields per role before calling the provider (dealer: name/phone; installer: the full required set) — no empty-string submission reaches the RPC", async () => {
   const source = await read("components/auth/OnboardingScreen.tsx");
-  assert.match(source, /if \(!form\.name\?\.trim\(\) \|\| !form\.phone\?\.trim\(\)\) throw new Error\("이름과 연락처를 입력해 주세요\."\)/);
-  assert.match(source, /const required = \[\s*form\.shopName,\s*form\.representativeName,\s*form\.businessName,\s*form\.businessRegistrationNumber,\s*form\.address,\s*form\.phone,\s*form\.contactPhone\s*,?\s*\];/);
+  assert.match(
+    source,
+    /if \(!form\.name\?\.trim\(\) \|\| !form\.phone\?\.trim\(\)\) throw new Error\("이름과 연락처를 입력해 주세요\."\)/,
+  );
+  assert.match(
+    source,
+    /const required = \[\s*form\.shopName,\s*form\.representativeName,\s*form\.businessName,\s*form\.businessRegistrationNumber,\s*form\.address,\s*form\.phone,\s*form\.contactPhone\s*,?\s*\];/,
+  );
 });
 
 test("OnboardingScreen sends the current terms/privacy version constants with every onboarding submission — never a hardcoded or missing version", async () => {
   const source = await read("components/auth/OnboardingScreen.tsx");
-  const dealerCallCount = (source.match(/termsVersion:\s*CURRENT_TERMS_VERSION,\s*privacyVersion:\s*CURRENT_PRIVACY_VERSION/g) ?? []).length;
-  assert.equal(dealerCallCount, 2, "both the dealer and installer onboarding calls must pass the current version constants");
+  const dealerCallCount = (
+    source.match(/termsVersion:\s*CURRENT_TERMS_VERSION,\s*privacyVersion:\s*CURRENT_PRIVACY_VERSION/g) ?? []
+  ).length;
+  assert.equal(
+    dealerCallCount,
+    2,
+    "both the dealer and installer onboarding calls must pass the current version constants",
+  );
 });
 
 test("/terms and /privacy are real Next.js routes (re-export pattern, matching every other public route) and /onboarding is a real protected route", async () => {
-  for (const [path, screenComponent] of [["app/terms/page.tsx", null], ["app/privacy/page.tsx", null], ["app/onboarding/page.tsx", null]]) {
+  for (const [path, screenComponent] of [
+    ["app/terms/page.tsx", null],
+    ["app/privacy/page.tsx", null],
+    ["app/onboarding/page.tsx", null],
+  ]) {
     const source = await read(path);
     assert.match(source, /export \{ default \} from "\.\.\/page";/);
     void screenComponent;
@@ -356,7 +498,11 @@ test("TermsScreen and PrivacyScreen render real, non-placeholder legal content �
   // confirmation label) rather than a literal "TODO:" dev-memo prefix.
   assert.match(privacy, /확인 예정/);
   const todoBadgeCount = (privacy.match(/<b>확인 예정<\/b>/g) ?? []).length;
-  assert.equal(todoBadgeCount, 3, "retention period, vendor details, and international transfer must each carry the pending-confirmation badge");
+  assert.equal(
+    todoBadgeCount,
+    3,
+    "retention period, vendor details, and international transfer must each carry the pending-confirmation badge",
+  );
   // Resend/custom SMTP aren't operated yet — the policy may name them only
   // to say so explicitly, but must never list them as an active processor
   // inside the vendor table itself.
@@ -382,7 +528,10 @@ test("PrivacyScreen never claims a Vercel DPA is in place — Vercel is describe
   // JSX (the component body) must never expose that language.
   const renderedBody = privacy.slice(privacy.indexOf("export function PrivacyScreen"));
   assert.doesNotMatch(renderedBody, /DPA|Data Processing Agreement|데이터 처리 계약|Hobby|무료 플랜/);
-  assert.match(renderedBody, /<td>애플리케이션 호스팅<\/td>\s*<td>Vercel<\/td>\s*<td>웹 서비스 배포 및 접속 처리<\/td>/);
+  assert.match(
+    renderedBody,
+    /<td>애플리케이션 호스팅<\/td>\s*<td>Vercel<\/td>\s*<td>웹 서비스 배포 및 접속 처리<\/td>/,
+  );
   // The Hobby/DPA gap is real operational risk — it must be documented
   // somewhere for the developer, just not on the user-facing page itself.
   assert.match(privacy, /Vercel's Hobby plan/);
@@ -393,7 +542,10 @@ test("PrivacyScreen's Demo wording no longer overclaims 'no personal data collec
   const privacy = await read("components/legal/PrivacyScreen.tsx");
   assert.doesNotMatch(privacy, /물리적으로 분리/);
   assert.match(privacy, /실제\s*개인정보를\s*입력하지\s*않으실\s*것을\s*권장합니다/);
-  assert.match(privacy, /이용자가\s+Demo의\s+메시지,\s+첨부파일,\s+입력\s+폼\s+등에\s+직접\s+입력한\s+내용은\s+서비스\s+체험을\s+위해\s+저장될\s+수\s+있습니다/);
+  assert.match(
+    privacy,
+    /이용자가\s+Demo의\s+메시지,\s+첨부파일,\s+입력\s+폼\s+등에\s+직접\s+입력한\s+내용은\s+서비스\s+체험을\s+위해\s+저장될\s+수\s+있습니다/,
+  );
   assert.match(privacy, /별도의 데이터베이스 테이블 구조로 분리되어 관리/);
 });
 
@@ -403,7 +555,10 @@ test("PrivacyScreen documents a specific legal basis (PIPA Art. 15(1)(4), contra
   assert.match(privacy, /개인정보 보호법\s*제15조제1항제4호/);
   assert.match(privacy, /별도의\s*개인정보\s*수집·이용\s*동의를\s*받지\s*않으며/);
   assert.match(privacy, /선택 항목으로 표시된 정보.*입력하지 않아도 서비스 이용에 제한이 없습니다/s);
-  assert.match(privacy, /동의를\s+거부할\s+권리와\s+거부\s+시\s+불이익을\s+명확히\s+고지하고\s+별도로\s+동의를\s+받습니다/);
+  assert.match(
+    privacy,
+    /동의를\s+거부할\s+권리와\s+거부\s+시\s+불이익을\s+명확히\s+고지하고\s+별도로\s+동의를\s+받습니다/,
+  );
 });
 
 test("PrivacyScreen articles are sequentially renumbered 1-12 after inserting the new legal-basis section — no duplicate or skipped section numbers", async () => {
@@ -429,12 +584,18 @@ test("PrivacyScreen's international-transfer section does not oversimplify 'Seou
 
 test("PrivacyScreen does not assert that Kakao login is currently active or that Kakao data is currently received — only future intent", async () => {
   const privacy = await read("components/legal/PrivacyScreen.tsx");
-  assert.match(privacy, /카카오\s*로그인\s*기능이\s*실제로\s*활성화되어\s*있지\s*않으며\s*카카오로부터\s*어떠한\s*정보도\s*제공받고\s*있지\s*않습니다/);
+  assert.match(
+    privacy,
+    /카카오\s*로그인\s*기능이\s*실제로\s*활성화되어\s*있지\s*않으며\s*카카오로부터\s*어떠한\s*정보도\s*제공받고\s*있지\s*않습니다/,
+  );
 });
 
 test("LandingPage footer links to /terms and /privacy without a large redesign — same footer structure, two new links added", async () => {
   const landing = await read("components/landing/LandingPage.tsx");
-  assert.match(landing, /<div className="footer-links">\s*<a href="\/terms">이용약관<\/a>\s*<span aria-hidden="true">\|<\/span>\s*<a href="\/privacy">개인정보처리방침<\/a>\s*<\/div>/);
+  assert.match(
+    landing,
+    /<div className="footer-links">\s*<a href="\/terms">이용약관<\/a>\s*<span aria-hidden="true">\|<\/span>\s*<a href="\/privacy">개인정보처리방침<\/a>\s*<\/div>/,
+  );
   assert.match(landing, /footer-brand/);
   assert.match(landing, /footer-meta/);
 });

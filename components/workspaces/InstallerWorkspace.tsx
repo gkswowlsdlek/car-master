@@ -4,7 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import type { DemoAccount, Screen } from "../../types/dealer";
 import type { InstallerListing } from "../../types/installer";
 import type { AttachmentProvider } from "../../services/attachments";
-import type { ChatRoom, PaymentStatus, Transaction, TransactionChatMessage, TransactionStage } from "../../types/transactions";
+import type {
+  ChatRoom,
+  PaymentStatus,
+  Transaction,
+  TransactionChatMessage,
+  TransactionStage,
+} from "../../types/transactions";
 import { MessengerScreen } from "../messenger/MessengerScreen";
 import { ShopManagementScreen } from "../shop/ShopManagementScreen";
 import { ShopDashboard } from "../shop/ShopDashboard";
@@ -37,7 +43,30 @@ type InstallerWorkspaceProps = {
   onMobileFullscreenChange: (open: boolean) => void;
 };
 
-export function InstallerWorkspace({ account, screen, transactions, rooms, installers, useRemoteAttachments, demoAttachmentProvider, isLoading, loadError, onNavigate, onSend, onHide, onUnhide, onFinalPriceChange, onStageChange, onPaymentChange, onEndOutcome, onMarkRead, onLoadContact, onChangePassword, onUnreadMessageCountChange, onMobileFullscreenChange }: InstallerWorkspaceProps) {
+export function InstallerWorkspace({
+  account,
+  screen,
+  transactions,
+  rooms,
+  installers,
+  useRemoteAttachments,
+  demoAttachmentProvider,
+  isLoading,
+  loadError,
+  onNavigate,
+  onSend,
+  onHide,
+  onUnhide,
+  onFinalPriceChange,
+  onStageChange,
+  onPaymentChange,
+  onEndOutcome,
+  onMarkRead,
+  onLoadContact,
+  onChangePassword,
+  onUnreadMessageCountChange,
+  onMobileFullscreenChange,
+}: InstallerWorkspaceProps) {
   const [selectedTransactionId, setSelectedTransactionId] = useState("");
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
   const [activeShopIds, setActiveShopIds] = useState<string[]>([]);
@@ -47,28 +76,33 @@ export function InstallerWorkspace({ account, screen, transactions, rooms, insta
       return;
     }
     let cancelled = false;
-    void shopManagementRepository.getActiveShopIdsForUser(account.id).then((shopIds) => {
-      if (!cancelled) setActiveShopIds(shopIds);
-    }).catch(() => {
-      if (!cancelled) setActiveShopIds([]);
-    });
-    return () => { cancelled = true; };
+    void shopManagementRepository
+      .getActiveShopIdsForUser(account.id)
+      .then((shopIds) => {
+        if (!cancelled) setActiveShopIds(shopIds);
+      })
+      .catch(() => {
+        if (!cancelled) setActiveShopIds([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [account.id]);
 
-  const roleTransactions = useMemo(
-    () => {
-      const demo = isDemoAccountId(account.id);
-      const legacyInstallerId = demo ? account.shopId : account.id;
-      return transactions.filter((item) => {
-        if (item.shopId) return activeShopIds.includes(item.shopId);
-        return Boolean(legacyInstallerId && item.installerId === legacyInstallerId);
-      });
-    },
-    [account.id, account.shopId, activeShopIds, transactions],
-  );
+  const roleTransactions = useMemo(() => {
+    const demo = isDemoAccountId(account.id);
+    const legacyInstallerId = demo ? account.shopId : account.id;
+    return transactions.filter((item) => {
+      if (item.shopId) return activeShopIds.includes(item.shopId);
+      return Boolean(legacyInstallerId && item.installerId === legacyInstallerId);
+    });
+  }, [account.id, account.shopId, activeShopIds, transactions]);
   const activeTransactionId = selectedTransactionId || roleTransactions[0]?.id || "";
   const unreadMessageCount = useMemo(
-    () => rooms.filter((room) => roleTransactions.some((item) => item.chatRoomId === room.id)).reduce((sum, room) => sum + room.unreadCount, 0),
+    () =>
+      rooms
+        .filter((room) => roleTransactions.some((item) => item.chatRoomId === room.id))
+        .reduce((sum, room) => sum + room.unreadCount, 0),
     [rooms, roleTransactions],
   );
   const profileActivity = useMemo(() => {
@@ -80,7 +114,8 @@ export function InstallerWorkspace({ account, screen, transactions, rooms, insta
     return {
       total: roleTransactions.length,
       monthly,
-      completed: roleTransactions.filter((item) => item.status.stage === "작업완료" || item.status.stage === "출고").length,
+      completed: roleTransactions.filter((item) => item.status.stage === "작업완료" || item.status.stage === "출고")
+        .length,
       favorites: 0,
     };
   }, [roleTransactions]);
@@ -100,10 +135,64 @@ export function InstallerWorkspace({ account, screen, transactions, rooms, insta
     onNavigate("messages");
   };
 
-  return <>
-    {screen === "shopDashboard" && <ShopDashboard transactions={roleTransactions} rooms={rooms} onOpenTransaction={openTransaction} onOpenMessage={openMessages} onStageChange={onStageChange} />}
-    {screen === "shopRequests" && <TransactionManagementScreen role="shop" userId={account.id} transactions={roleTransactions} rooms={rooms} selectedId={activeTransactionId} useRemoteAttachments={useRemoteAttachments} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onUnhide={onUnhide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onNewRequest={() => onNavigate("request")} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onOpenMessages={openMessages} />}
-    {screen === "messages" && <MessengerScreen role="shop" userId={account.id} transactions={roleTransactions} rooms={rooms} installers={installers} selectedId={activeTransactionId} useRemoteAttachments={useRemoteAttachments} demoAttachmentProvider={demoAttachmentProvider} isLoading={isLoading} loadError={loadError} onSelect={setSelectedTransactionId} onSend={onSend} onHide={onHide} onFinalPriceChange={onFinalPriceChange} onStageChange={onStageChange} onPaymentChange={onPaymentChange} onEndOutcome={onEndOutcome} onMarkRead={onMarkRead} onLoadContact={onLoadContact} onMobileChatOpenChange={setMobileChatOpen} />}
-    {screen === "dealerProfile" && <ShopManagementScreen userId={account.id} onChangePassword={onChangePassword} />}
-  </>;
+  return (
+    <>
+      {screen === "shopDashboard" && (
+        <ShopDashboard
+          transactions={roleTransactions}
+          rooms={rooms}
+          onOpenTransaction={openTransaction}
+          onOpenMessage={openMessages}
+          onStageChange={onStageChange}
+        />
+      )}
+      {screen === "shopRequests" && (
+        <TransactionManagementScreen
+          role="shop"
+          userId={account.id}
+          transactions={roleTransactions}
+          rooms={rooms}
+          selectedId={activeTransactionId}
+          useRemoteAttachments={useRemoteAttachments}
+          onSelect={setSelectedTransactionId}
+          onSend={onSend}
+          onHide={onHide}
+          onUnhide={onUnhide}
+          onFinalPriceChange={onFinalPriceChange}
+          onStageChange={onStageChange}
+          onPaymentChange={onPaymentChange}
+          onEndOutcome={onEndOutcome}
+          onNewRequest={() => onNavigate("request")}
+          onMarkRead={onMarkRead}
+          onLoadContact={onLoadContact}
+          onOpenMessages={openMessages}
+        />
+      )}
+      {screen === "messages" && (
+        <MessengerScreen
+          role="shop"
+          userId={account.id}
+          transactions={roleTransactions}
+          rooms={rooms}
+          installers={installers}
+          selectedId={activeTransactionId}
+          useRemoteAttachments={useRemoteAttachments}
+          demoAttachmentProvider={demoAttachmentProvider}
+          isLoading={isLoading}
+          loadError={loadError}
+          onSelect={setSelectedTransactionId}
+          onSend={onSend}
+          onHide={onHide}
+          onFinalPriceChange={onFinalPriceChange}
+          onStageChange={onStageChange}
+          onPaymentChange={onPaymentChange}
+          onEndOutcome={onEndOutcome}
+          onMarkRead={onMarkRead}
+          onLoadContact={onLoadContact}
+          onMobileChatOpenChange={setMobileChatOpen}
+        />
+      )}
+      {screen === "dealerProfile" && <ShopManagementScreen userId={account.id} onChangePassword={onChangePassword} />}
+    </>
+  );
 }
