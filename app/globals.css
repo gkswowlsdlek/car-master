@@ -2455,7 +2455,8 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
 .dealer-home-frame .app-logo::before { content: ""; position: absolute; top: 9px; left: 5px; width: 42px; height: 17px; border: 3px solid #2770ff; border-bottom: 0; border-radius: 28px 28px 0 0; transform: skewX(-8deg); }
 .dealer-home-frame .app-logo::after { content: "Car-Master"; display: block; margin-top: -4px; color: #fff; font-size: 20px; font-weight: 800; letter-spacing: -.045em; }
 .dealer-home-frame .reference-utility > button b { display: none; }
-.reference-prototype-dashboard.has-deals .reference-module-grid { display: none; }
+.reference-prototype-dashboard.has-deals .reference-module-grid { grid-template-columns: 1fr 1fr; }
+.reference-prototype-dashboard.has-deals .getting-started { display: none; }
 .reference-prototype-dashboard.new-dealer .reference-module-grid { grid-template-columns: minmax(0, 1fr); }
 .reference-prototype-dashboard.new-dealer .reference-module:not(.getting-started) { display: none; }
 .reference-prototype-dashboard.new-dealer .getting-started { min-height: 136px; }
