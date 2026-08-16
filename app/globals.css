@@ -1094,6 +1094,63 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
   .r4-dealer-dashboard { margin-right: 0 !important; border: 0; border-radius: 0; }
 }
 
+/* DESIGN_PROTOTYPE_ONLY dashboard composition. */
+.reference-prototype-dashboard { padding-top: 0 !important; }
+.reference-dashboard-top { display: flex; align-items: center; justify-content: space-between; padding: 24px 0 18px; }
+.reference-dashboard-top h1 { margin: 0; color: #142440; font-size: 25px; font-weight: 700; letter-spacing: -.04em; }
+.reference-dashboard-top p { margin: 7px 0 0; color: #718099; font-size: 13px; }
+.reference-utility { display: flex; align-items: center; gap: 14px; }
+.reference-utility button { position: relative; display: grid; place-items: center; width: 36px; height: 36px; border: 0; background: transparent; color: #142440; }
+.reference-utility button b { position: absolute; top: 0; right: -1px; display: grid; min-width: 16px; height: 16px; place-items: center; border-radius: 999px; background: #4d5fc7; color: #fff; font-size: 9px; }
+.reference-avatar { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: #e8edff; color: #4d5fc7; font-weight: 800; }
+.reference-search-panel { padding: 30px 22px 26px; border: 1px solid #dfe5ee; border-radius: 10px; background: #fff; }
+.reference-search-panel .r3-hero-title { margin: 0 0 24px; }
+.reference-search-panel .r3-hero-title h2 { font-size: 33px !important; }
+.reference-search-panel .r3-search-form { max-width: 840px !important; grid-template-columns: minmax(0, 1fr) 174px !important; }
+.reference-search-panel .r3-search-form input, .reference-search-panel .r3-search-hero .ws-search-cta { height: 56px !important; }
+.reference-search-panel .r3-search-form input { border: 2px solid #4d68e6 !important; background: #fff !important; }
+.reference-search-panel .r3-search-form .ws-search-cta { border-radius: 7px !important; background: #315ce8 !important; }
+.reference-quick-work { display: flex; justify-content: center; gap: 14px; margin-top: 20px; }
+.reference-quick-work button { min-width: 90px; min-height: 38px; border: 1px solid #e1e5ec; border-radius: 9px; background: #fff; color: #17243c; font-size: 12px; font-weight: 650; }
+.reference-module-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+.reference-module { min-height: 166px; border: 1px solid #e1e6ee; border-radius: 9px; background: #fff; padding: 16px 18px; }
+.reference-module header, .prototype-recent-work > header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #edf0f4; padding-bottom: 11px; }
+.reference-module header h2, .prototype-recent-work > header h2 { display: flex; align-items: center; gap: 8px; margin: 0; color: #142440; font-size: 16px; }
+.reference-module header button, .prototype-recent-work > header button { display: inline-flex; align-items: center; gap: 2px; border: 0; background: transparent; color: #728099; font-size: 11px; }
+.reference-module ul, .reference-module ol { display: grid; gap: 12px; margin: 15px 0 0; padding: 0; list-style: none; }
+.reference-module li { display: flex; align-items: center; gap: 9px; color: #263652; font-size: 12px; }
+.reference-module li i { width: 7px; height: 7px; border-radius: 50%; background: #3769ee; }
+.reference-module li small { margin-left: auto; color: #8490a5; font-size: 11px; }
+.reference-module li div { display: grid; gap: 3px; min-width: 0; }
+.reference-module li div span { color: #758198; font-size: 11px; }
+.reference-module li em { display: grid; width: 17px; height: 17px; place-items: center; border-radius: 50%; background: #3569ec; color: #fff; font-size: 10px; font-style: normal; }
+.getting-started ol { gap: 10px; }
+.getting-started li b { display: grid; width: 23px; height: 23px; place-items: center; border: 1px solid #8490a5; border-radius: 50%; color: #44526a; font-size: 11px; }
+.getting-started li span { flex: 1; }
+.getting-started li em { display: inline-flex; align-items: center; gap: 3px; color: #4d5fc7; font-size: 11px; font-style: normal; }
+.getting-started li em.done { color: #47a080; }
+.getting-started li em.pending { color: #e68a53; }
+.prototype-recent-work { margin-top: 22px; overflow: hidden; border: 1px solid #e1e6ee; border-radius: 9px; background: #fff; }
+.prototype-recent-work > header { padding: 16px 20px 13px; }
+.prototype-job-head, .prototype-job-row { display: grid; grid-template-columns: 1.15fr 1fr 1.15fr .8fr 1.1fr 1.2fr .85fr; align-items: center; column-gap: 14px; padding: 0 20px; }
+.prototype-job-head { min-height: 38px; border-bottom: 1px solid #edf0f4; color: #7b879b; font-size: 11px; }
+.prototype-job-row { min-height: 70px; border-bottom: 1px solid #edf0f4; color: #33425d; font-size: 12px; }
+.prototype-job-row:last-child { border-bottom: 0; }
+.prototype-job-vehicle { display: grid; gap: 4px; color: #17243c; }
+.prototype-job-vehicle small { color: #8490a5; }
+.prototype-job-row button { display: inline-flex; align-items: center; justify-content: center; gap: 2px; min-height: 34px; border: 1px solid #dfe5ee; border-radius: 7px; background: #fff; color: #17243c; font-size: 11px; }
+.prototype-status { justify-self: start; border-radius: 6px; padding: 6px 8px; font-size: 11px; font-style: normal; }
+.prototype-status.blue { background: #eaf0ff; color: #3565df; }
+.prototype-status.green { background: #e5f6ef; color: #32936f; }
+.prototype-status.purple { background: #f0ebff; color: #7658d9; }
+.prototype-only-label { display: block; margin: 9px 0 0; color: #9aa5b7; font-size: 10px; text-align: right; }
+@media (max-width: 900px) {
+  .reference-module-grid { grid-template-columns: 1fr; }
+  .prototype-job-head { display: none; }
+  .prototype-job-row { grid-template-columns: 1fr auto; row-gap: 6px; padding-block: 14px; }
+  .prototype-job-row > span, .prototype-job-row > em { display: none; }
+}
+
 /* R1 final desktop hierarchy. */
 @media (min-width:1200px) {
   .dealer-dashboard { width:min(1480px,100%); padding:34px 48px 56px; }
@@ -2312,3 +2369,5 @@ button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select
   .shop-transaction-management .shop-next-action { grid-template-columns: 1fr auto; }
   .shop-transaction-management .shop-next-action > span { grid-column: 1/-1; }
 }
+
+.prototype-legacy-actions{display:none!important}
