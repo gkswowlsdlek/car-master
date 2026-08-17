@@ -37,7 +37,7 @@
   color: #fff;
 }
 .role-dealer .sidebar-profile {
-  border-top-color: #1b2b46;
+  border-top-color: #1c2b28;
   color: #fff;
 }
 .role-dealer .sidebar-profile small,
@@ -46,7 +46,7 @@
 }
 .role-dealer .sidebar-profile > span {
   background: #fff;
-  color: #26345e;
+  color: #2a3a37;
 }
 .role-dealer .app-main {
   background: #fff;
@@ -550,7 +550,7 @@
 }
 /* R7 hybrid calibration: Production navigation usability + Local main composition. */
 .role-dealer .app-sidebar {
-  background: #061328 !important;
+  background: #0f1b19 !important;
 }
 .role-dealer .app-sidebar nav button {
   font-size: 14px !important;
@@ -560,7 +560,7 @@
   font-size: 16px !important;
 }
 .role-dealer .app-sidebar .sidebar-profile > span {
-  background: #182743 !important;
+  background: #1c2b28 !important;
 }
 .role-dealer .app-topbar .topbar-icon-button {
   display: grid !important;
@@ -636,8 +636,8 @@
 }
 .app-sidebar {
   grid-template-rows: auto auto 1fr auto;
-  background: linear-gradient(175deg, #3b4a63 0%, #31404f 100%);
-  border-right: 1px solid rgba(15, 23, 42, 0.14);
+  background: linear-gradient(175deg, #1c2b28 0%, #0f1b19 100%);
+  border-right: 1px solid rgba(15, 27, 25, 0.14);
   padding: 24px 18px 20px;
 }
 .app-logo {

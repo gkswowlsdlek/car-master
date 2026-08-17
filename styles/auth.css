@@ -292,8 +292,8 @@
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
   box-shadow:
-    0 0 0 4px rgba(37, 99, 235, 0.11),
-    0 8px 20px rgba(37, 99, 235, 0.06);
+    0 0 0 4px rgba(14, 122, 108, 0.11),
+    0 8px 20px rgba(14, 122, 108, 0.06);
 }
 .login-input-wrap:focus-within > svg {
   color: var(--color-primary);
@@ -302,11 +302,11 @@
 .login-card .full {
   min-height: 52px;
   margin-top: 26px;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+  box-shadow: 0 8px 20px rgba(14, 122, 108, 0.22);
 }
 .login-card .full:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.28);
+  box-shadow: 0 14px 28px rgba(14, 122, 108, 0.28);
 }
 .login-card .full[aria-busy="true"] {
   position: relative;
@@ -358,7 +358,7 @@
   .login-service-intro li:hover {
     border-color: var(--color-primary-border);
     background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.09);
+    box-shadow: 0 14px 32px rgba(14, 122, 108, 0.09);
     transform: translateY(-3px);
   }
 }
@@ -437,7 +437,7 @@
 .account-status-page {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 10%, rgba(147, 197, 253, 0.22), transparent 34%),
+    radial-gradient(circle at 12% 10%, rgba(150, 214, 206, 0.22), transparent 34%),
     linear-gradient(135deg, var(--color-surface-soft), #fff 52%, var(--color-primary-soft));
   padding: 48px 24px 72px;
 }
@@ -481,7 +481,7 @@
   background: #fff;
   padding: 20px;
   text-align: left;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 8px 24px rgba(15, 27, 25, 0.05);
 }
 .signup-role-picker > button > svg {
   width: 42px;
@@ -506,8 +506,8 @@
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
   box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.1),
-    0 12px 30px rgba(37, 99, 235, 0.08);
+    0 0 0 3px rgba(14, 122, 108, 0.1),
+    0 12px 30px rgba(14, 122, 108, 0.08);
 }
 .signup-role-picker > button.active > svg {
   background: var(--color-primary-soft);
@@ -714,7 +714,7 @@
   border-radius: 16px;
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
   padding: 20px;
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.055);
+  box-shadow: 0 10px 26px rgba(15, 27, 25, 0.055);
 }
 .login-workspace-benefits li > i {
   display: grid;
@@ -724,7 +724,7 @@
   border-radius: 14px;
   background: linear-gradient(145deg, var(--color-primary-soft), var(--color-primary-soft));
   color: var(--color-primary);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 8px 20px rgba(14, 122, 108, 0.12);
 }
 .login-workspace-benefits li span {
   display: grid;
@@ -749,7 +749,7 @@
   .login-workspace-benefits li:hover {
     border-color: var(--color-primary-border);
     background: #fff;
-    box-shadow: 0 16px 36px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 16px 36px rgba(14, 122, 108, 0.1);
     transform: translateY(-3px);
   }
 }

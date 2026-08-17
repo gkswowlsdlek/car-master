@@ -184,7 +184,7 @@
 .request-shop-list button.selected {
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
-  box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.08);
+  box-shadow: 0 0 0 3px rgba(14, 122, 108, 0.08);
 }
 .request-shop-list button strong {
   position: absolute;
