@@ -7,6 +7,7 @@ import type { Brand, WorkType } from "../../lib/dealer-flow-data";
 import { brands, workTypes } from "../../lib/dealer-flow-data";
 import { getCurrentPosition, type GeoPosition } from "../../services/geolocation";
 import type { InstallerListing } from "../../types/installer";
+import type { SearchLocation } from "../../types/location";
 import { NaverMapView } from "../map/NaverMapView";
 import { InstallerCard } from "./InstallerCard";
 import { InstallerDetailPanel } from "./InstallerDetailPanel";
@@ -56,6 +57,7 @@ export function InstallerDirectoryScreen({
   isOtherBrand,
   onRequest,
   onShopSearchRequest,
+  searchOrigin = null,
 }: {
   installers: InstallerListing[];
   loading?: boolean;
@@ -68,6 +70,12 @@ export function InstallerDirectoryScreen({
   onRequest: () => void;
   /** Only passed in Real (Supabase) mode — surfaces the "원하는 시공점을 찾지 못하셨나요?" CTA when the filtered list is empty. */
   onShopSearchRequest?: () => void;
+  /** The address the dealer actually searched for, already resolved to
+   * coordinates. When present this is the distance reference point — a dealer
+   * looks up shops near the CUSTOMER's car, which is rarely where the dealer
+   * is standing, so their own GPS is only a fallback for when nothing has
+   * been searched yet. Null until the dealer runs a search. */
+  searchOrigin?: SearchLocation | null;
 }) {
   const [search, setSearch] = useState("");
   const [province, setProvince] = useState("전체");
@@ -104,12 +112,16 @@ export function InstallerDirectoryScreen({
   const cityOptions =
     province === "전체" ? ["전체"] : ["전체", ...administrativeRegions[province as AdministrativeRegion]];
 
+  // Searched address wins over the dealer's own GPS: the dealer is looking for
+  // shops near the customer's vehicle, not near their desk.
+  const distanceOrigin = searchOrigin ?? userLocation;
+
   const withDistance = useMemo(
     () =>
       installers.map((installer) => {
         const km =
-          userLocation && installer.lat != null && installer.lng != null
-            ? distanceKm(userLocation, { lat: installer.lat, lng: installer.lng })
+          distanceOrigin && installer.lat != null && installer.lng != null
+            ? distanceKm(distanceOrigin, { lat: installer.lat, lng: installer.lng })
             : null;
         return {
           installer,
@@ -117,7 +129,7 @@ export function InstallerDirectoryScreen({
           distanceLabel: km == null ? "거리 정보 없음" : `${km.toFixed(km < 10 ? 1 : 0)}km`,
         };
       }),
-    [installers, userLocation],
+    [installers, distanceOrigin],
   );
 
   const filtered = useMemo(
@@ -269,7 +281,10 @@ export function InstallerDirectoryScreen({
         </div>
         <div className="ws-shop-search-filters">{filterControls}</div>
       </div>
-      {locationStatus === "unavailable" && sortKey === "distance" && (
+      {sortKey === "distance" && searchOrigin && (
+        <p className="installer-location-note">{searchOrigin.label} 기준으로 가까운 순서입니다.</p>
+      )}
+      {sortKey === "distance" && !searchOrigin && locationStatus === "unavailable" && (
         <p className="installer-location-note">
           현재 위치를 사용할 수 없어 정확한 거리 대신 기본 지역 기준으로 표시됩니다.
         </p>

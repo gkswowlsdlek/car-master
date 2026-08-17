@@ -116,6 +116,11 @@ export function DealerWorkspace({
 }: DealerWorkspaceProps) {
   const [query, setQuery] = useState("하남시");
   const [location, setLocation] = useState<SearchLocation>(initialLocation);
+  // `location` starts at a default district, so it cannot tell "the dealer
+  // searched 하남시" from "nothing has been searched yet". This holds only a
+  // real, dealer-initiated search result and is what the directory screen
+  // sorts by; null means fall back to the dealer's own GPS.
+  const [searchOrigin, setSearchOrigin] = useState<SearchLocation | null>(null);
   const [locationError, setLocationError] = useState("");
   const [selectedShopId, setSelectedShopId] = useState("SHOP-MISA-001");
   const [favoriteShopIds, setFavoriteShopIds] = useState<string[]>(["SHOP-MISA-001"]);
@@ -221,6 +226,7 @@ export function DealerWorkspace({
     }
     setLocationError("");
     setLocation(result);
+    setSearchOrigin(result);
     setQuery(result.district);
     setRequest((current) => ({ ...current, deliveryArea: `${result.city} ${result.district}` }));
     const nearest = searchNearbyInstallers(result, availableShops).find(
@@ -405,6 +411,7 @@ export function DealerWorkspace({
             )
           }
           isOtherBrand={false}
+          searchOrigin={searchOrigin}
           onRequest={() => onNavigate("request")}
           onShopSearchRequest={useSupabaseData ? () => onNavigate("shopSearchRequests") : undefined}
         />
