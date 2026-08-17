@@ -601,7 +601,7 @@ test("LandingPage footer links to /terms and /privacy without a large redesign â
 });
 
 test("legal-page CSS defines a mobile breakpoint, matching this app's existing mobile-first responsive convention", async () => {
-  const css = await read("app/globals.css");
+  const css = await read("styles/legal.css");
   assert.match(css, /\.legal-page \{/);
   assert.match(css, /@media\s*\(max-width:\s*560px\)\s*\{\s*\.legal-page\s*\{/);
 });
