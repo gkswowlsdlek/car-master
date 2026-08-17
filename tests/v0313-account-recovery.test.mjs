@@ -169,6 +169,6 @@ test("Login screen exposes a forgot-password entry point without changing the ex
 test("Password fields support show/hide with a touch-safe (>=44px) target", async () => {
   const source = await read("components/auth/PasswordField.tsx");
   assert.match(source, /aria-label={visible \? "비밀번호 숨기기" : "비밀번호 표시"}/);
-  const css = await read("app/globals.css");
+  const css = await read("styles/auth.css");
   assert.match(css, /\.password-toggle-button\s*\{[^}]*width:\s*44px;\s*height:\s*44px/);
 });
