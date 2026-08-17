@@ -489,7 +489,9 @@
 }
 .role-dealer .app-sidebar nav button {
   grid-template-columns: 28px 1fr auto !important;
-  min-height: 44px !important;
+  /* Primary navigation: a comfortable 50px row, and no !important — the two
+     stacked overrides that used to force 44px then 42px are gone. */
+  min-height: 50px;
   border-radius: var(--radius-sm) !important;
   padding: 7px 10px !important;
   color: rgba(255, 255, 255, 0.74) !important;
@@ -532,9 +534,6 @@
 .role-dealer .app-logo small {
   margin: 7px 4px 18px !important;
   color: rgba(255, 255, 255, 0.55) !important;
-}
-.role-dealer .app-sidebar nav button {
-  min-height: 42px !important;
 }
 .role-dealer .sidebar-support {
   margin-top: 20px !important;

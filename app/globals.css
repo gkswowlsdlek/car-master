@@ -6731,18 +6731,8 @@ textarea:focus-visible {
   visibility: hidden;
   height: 28px;
 }
-.dealer-home-frame .app-logo::before {
-  content: "";
-  position: absolute;
-  top: 9px;
-  left: 5px;
-  width: 42px;
-  height: 17px;
-  border: 3px solid var(--color-primary);
-  border-bottom: 0;
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  transform: skewX(-8deg);
-}
+/* The skewed arc that used to sit above the wordmark is gone — it read as a
+   stray line rather than a mark, and the wordmark carries the brand alone. */
 .dealer-home-frame .app-logo::after {
   content: "Car-Master";
   position: absolute;
@@ -6844,22 +6834,42 @@ textarea:focus-visible {
 
 /* Reference lock: local dashboard composition calibrated to the supplied 1680px frame. */
 .dealer-home-frame {
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: 236px minmax(0, 1fr);
 }
 .dealer-home-frame .app-sidebar {
-  width: 320px;
-  flex-basis: 320px;
+  width: 236px;
+  flex-basis: 236px;
   box-sizing: border-box;
-  padding: 34px 24px 24px;
+  padding: 28px 16px 22px;
+}
+/* Sidebar nav is primary navigation, not caption text. The type-scale pass
+   rounded these labels from 14px down to --font-sm (13px), which is the same
+   step as field hints, so the nav read as secondary. 15px sits between the
+   scale's sm and body on purpose — a deliberate sidebar-only exception. */
+.dealer-home-frame .app-sidebar nav button span {
+  font-size: 15px;
+  font-weight: 700;
+}
+.dealer-home-frame .app-sidebar nav button {
+  min-height: 50px;
+  padding: 0 12px;
+}
+/* Section label reads quieter than the items it introduces, so the hierarchy
+   is label < item rather than the flat 13px/13px it had. */
+.dealer-home-frame .sidebar-section-label {
+  font-size: var(--font-xs);
+  letter-spacing: 0.1em;
+}
+.dealer-home-frame .app-logo small {
+  font-size: 12px;
 }
 .dealer-home-frame .app-main {
   margin-left: 0;
   background: var(--color-surface-soft);
 }
 .dealer-home-frame .sidebar-section-label {
-  margin: 20px 14px 20px;
+  margin: 18px 12px 10px;
   color: rgba(255, 255, 255, 0.62);
-  font-size: var(--font-sm);
 }
 .dealer-home-frame .sidebar-primary-nav {
   gap: 7px;
@@ -6998,8 +7008,8 @@ textarea:focus-visible {
 }
 @media (max-width: 900px) {
   .dealer-home-frame .app-sidebar {
-    width: 320px;
-    flex-basis: 320px;
+    width: 236px;
+    flex-basis: 236px;
   }
   .dealer-home-frame .app-main {
     margin-left: 0;
