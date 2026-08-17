@@ -105,7 +105,11 @@ test("demo installers are deterministically offset from administrative reference
 });
 
 test("responsive rules cover requested desktop and mobile workspace behavior", async () => {
-  const css = await read("app/globals.css");
+  // Messenger's Inbox-pane rules moved to styles/messenger.css; the chat-pane rules asserted
+  // below stayed in app/globals.css because they're shared with the embedded Transaction-room
+  // chat (TransactionChatWorkspace.tsx) — read both so the assertions still cover the union of
+  // what used to be one file.
+  const css = (await read("app/globals.css")) + (await read("styles/messenger.css"));
   assert.match(css, /@media \(min-width: 1024px\)/);
   assert.match(css, /height: calc\(100dvh - 126px\)/);
   assert.match(css, /\.messenger-layout\s*\{[^}]*grid-template-columns:\s*60px\s+minmax\(0,\s*1fr\)/s);

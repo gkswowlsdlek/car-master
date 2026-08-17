@@ -1,0 +1,300 @@
+/* Extracted from app/globals.css — the standalone Messenger screen's Inbox pane and its
+   layout wrapper only (components/messenger/MessengerScreen.tsx). Values unchanged, position
+   only. The actual chat UI (message bubbles, composer, contact sheet, attachments,
+   .messenger-workspace/-center/-header/-messages/-composer/-avatar/-call-button/-more-menu)
+   is rendered by components/transactions/TransactionChatWorkspace.tsx, which is shared
+   between this screen and the embedded chat inside a Transaction room — deliberately left in
+   app/globals.css (genuine cross-screen coupling), same for nav-unread-badge (shared with
+   AppShell's sidebar nav) and .messenger-focus/-focus-topbar/-back-to-workspace (shell-scoped,
+   AppShell's desktop focus-mode chrome). */
+.messenger-screen {
+  width: min(1380px, 100%);
+  margin: 0 auto;
+  padding: 32px;
+}
+.messenger-layout {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: 16px;
+}
+.messenger-rail {
+  display: none;
+}
+.inbox-pane {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  padding: 14px;
+}
+.inbox-pane-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.inbox-pane-head .inbox-search {
+  flex: 1;
+  min-width: 0;
+}
+.inbox-collapse-button {
+  display: none;
+}
+.inbox-search {
+  width: 100%;
+}
+.inbox-state {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 40px 14px;
+  color: var(--color-muted);
+  text-align: center;
+  font-size: 13px;
+}
+.inbox-state.inbox-empty b {
+  color: var(--color-text-soft);
+  font-size: 14px;
+}
+.inbox-state.inbox-empty span {
+  color: var(--color-muted-soft);
+  font-size: 12px;
+}
+.inbox-state-error {
+  color: var(--color-danger);
+}
+.inbox-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.inbox-list > li > button {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 10px;
+  width: 100%;
+  border-radius: 12px;
+  background: #fff;
+  padding: 11px 9px;
+  text-align: left;
+}
+.inbox-list > li > button:hover {
+  background: var(--color-surface-soft);
+}
+.inbox-list > li > button.selected {
+  background: var(--color-primary-soft);
+  box-shadow: inset 3px 0 var(--color-primary);
+}
+.inbox-row-avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--color-primary), var(--color-primary-hover));
+  color: #fff;
+  font-size: 13px;
+  font-weight: 850;
+}
+.inbox-row-body {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+.inbox-row-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.inbox-row-top b {
+  overflow: hidden;
+  font-size: 13.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.inbox-row-top time {
+  flex: 0 0 auto;
+  color: var(--color-muted-soft);
+  font-size: 10.5px;
+}
+.inbox-row-meta {
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 11.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.inbox-row-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.inbox-row-preview {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--color-muted-soft);
+  font-size: 12px;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.inbox-unread-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 19px;
+  height: 19px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  padding: 0 5px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.messenger-no-selection {
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  padding: 60px 20px;
+  color: var(--color-muted);
+  text-align: center;
+}
+.messenger-no-selection b {
+  color: var(--color-text-soft);
+  font-size: 15px;
+}
+@media (max-width: 1100px) {
+  .messenger-layout {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+}
+/* Mobile Messenger: Inbox and chat are two separate full-height screens, not
+   two panes squeezed into one viewport. Entering a room hides the Inbox and
+   gives .messenger-chat-pane the whole screen; AppShell's
+   .mobile-chat-fullscreen class (driven by MessengerScreen's
+   onMobileChatOpenChange) hides the app topbar/beta-bar/bottom-nav for the
+   same reason a native app hides its tab bar inside a conversation — no
+   pixel budget to guess, because there's no shared chrome left to budget
+   around. dvh (not vh) is what keeps the composer above the keyboard: it
+   tracks the browser's actual visible viewport, which shrinks when the
+   on-screen keyboard opens, where vh would stay pinned to the layout
+   viewport and let the keyboard cover the input. */
+.messenger-chat-pane {
+  display: contents;
+}
+@media (min-width: 1024px) {
+  .messenger-screen {
+    height: calc(100dvh - 126px);
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+  .messenger-layout {
+    min-height: 0;
+    height: 100%;
+    grid-template-columns: 60px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .messenger-layout.list-open {
+    grid-template-columns: 60px clamp(230px, 20vw, 280px) minmax(0, 1fr);
+  }
+  .messenger-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-top: 2px;
+  }
+  .messenger-rail-toggle {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--color-line);
+    background: #fff;
+    color: var(--color-muted);
+  }
+  .messenger-rail-toggle[aria-expanded="true"] {
+    border-color: var(--color-primary-border);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+  .messenger-rail-toggle .nav-unread-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+  }
+  .inbox-pane.desktop-collapsed {
+    display: none;
+  }
+  .inbox-collapse-button {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    color: var(--color-muted);
+  }
+  .inbox-collapse-button:hover {
+    background: var(--color-surface-soft);
+  }
+  .inbox-pane {
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .messenger-chat-pane {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+  }
+  .messenger-chat-pane > .messenger-workspace {
+    position: relative;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+  }
+  .messenger-chat-pane .messenger-center {
+    min-height: 0;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+  .messenger-chat-pane .messenger-messages {
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .messenger-chat-pane .messenger-sidebar {
+    position: absolute;
+    z-index: 30;
+    inset: 0 0 0 auto;
+    width: min(360px, 92%);
+    transform: translateX(105%);
+    box-shadow: -18px 0 45px rgba(15, 23, 42, 0.16);
+    overflow-y: auto;
+    padding: 22px;
+    transition: transform 0.22s ease-out;
+  }
+  .messenger-chat-pane .messenger-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  .messenger-chat-pane .sidebar-close {
+    display: grid;
+  }
+}
