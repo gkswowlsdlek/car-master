@@ -16,8 +16,8 @@
 /* R4 reference-locked Dealer workspace presentation. */
 .role-dealer .app-sidebar {
   grid-template-rows: auto 1fr auto;
-  background: #0f1b19;
-  border-right: 1px solid #1c2b28;
+  background: #0d1a23;
+  border-right: 1px solid #1a2a33;
   padding: 24px 16px 18px;
 }
 .role-dealer .app-sidebar nav button.active {
@@ -566,7 +566,7 @@
 }
 
 .price-brand-tabs button.active {
-  box-shadow: 0 0 0 3px rgba(14, 122, 108, 0.1);
+  box-shadow: 0 0 0 3px rgba(21, 94, 117, 0.1);
 }
 .price-package-row.selected {
   position: relative;
@@ -581,7 +581,7 @@
 .vehicle-class-picker button.active {
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
-  box-shadow: 0 0 0 3px rgba(14, 122, 108, 0.1);
+  box-shadow: 0 0 0 3px rgba(21, 94, 117, 0.1);
 }
 .vehicle-class-detail-options button.active b,
 .vehicle-class-picker button.active b {
@@ -610,7 +610,7 @@
   border-color: var(--color-primary);
   background: var(--color-primary);
   color: #fff;
-  box-shadow: 0 0 0 5px rgba(14, 122, 108, 0.12);
+  box-shadow: 0 0 0 5px rgba(21, 94, 117, 0.12);
 }
 .transaction-stage-flow button.active span {
   color: var(--color-primary);
@@ -853,7 +853,7 @@ button:active:not(:disabled) {
 .transaction-summary-strip button.active {
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
-  box-shadow: 0 0 0 3px rgba(14, 122, 108, 0.09);
+  box-shadow: 0 0 0 3px rgba(21, 94, 117, 0.09);
 }
 .transaction-list {
   max-height: calc(100vh - 310px);
@@ -1488,8 +1488,8 @@ button:active:not(:disabled) {
     border-color: var(--color-primary);
     background: var(--color-text);
     box-shadow:
-      0 16px 34px rgba(6, 14, 12, 0.3),
-      0 0 0 1px rgba(14, 122, 108, 0.2);
+      0 16px 34px rgba(5, 12, 18, 0.3),
+      0 0 0 1px rgba(21, 94, 117, 0.2);
     transform: translateY(-4px);
   }
   .workflow-story li:last-child:hover {
@@ -1499,20 +1499,20 @@ button:active:not(:disabled) {
     border-color: var(--color-primary-border);
     background: var(--color-primary-soft);
     color: var(--color-primary-hover);
-    box-shadow: 0 10px 24px rgba(14, 122, 108, 0.1);
+    box-shadow: 0 10px 24px rgba(21, 94, 117, 0.1);
     transform: translateY(-2px);
   }
   .service-steps article:hover {
     border-color: var(--color-primary);
     background: #fff;
-    box-shadow: 0 18px 44px rgba(14, 122, 108, 0.12);
+    box-shadow: 0 18px 44px rgba(21, 94, 117, 0.12);
     transform: translateY(-5px);
   }
   .product-preview:hover {
     border-color: var(--color-primary-border);
     box-shadow:
-      0 50px 110px rgba(15, 27, 25, 0.2),
-      0 22px 56px rgba(14, 122, 108, 0.18),
+      0 50px 110px rgba(13, 26, 35, 0.2),
+      0 22px 56px rgba(21, 94, 117, 0.18),
       0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   }
 }
@@ -2168,7 +2168,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(14, 122, 108, 0.24);
+  outline: 3px solid rgba(21, 94, 117, 0.24);
   outline-offset: 2px;
 }
 .app-main
@@ -2326,7 +2326,7 @@ textarea:focus-visible {
     right: 0;
     bottom: 0;
     width: min(360px, 92%);
-    box-shadow: -18px 0 45px rgba(15, 27, 25, 0.16);
+    box-shadow: -18px 0 45px rgba(13, 26, 35, 0.16);
     transform: translateX(105%);
     transition: transform 0.22s ease-out;
   }
@@ -2870,8 +2870,8 @@ textarea:focus-visible {
 .role-dealer .app-sidebar {
   grid-template-rows: auto auto 1fr auto auto !important;
   align-content: start;
-  background: #0f1b19 !important;
-  border-right-color: #1c2b28 !important;
+  background: #0d1a23 !important;
+  border-right-color: #1a2a33 !important;
   padding: 22px 16px 16px !important;
 }
 .role-dealer .app-sidebar nav button.active {
@@ -3096,7 +3096,7 @@ textarea:focus-visible {
 
 /* Final reference foundation: preserve real flows, calibrate the shared workspace surface. */
 :root {
-  --cm-navy: #0f1b19;
+  --cm-navy: #0d1a23;
   --cm-primary: var(--color-primary);
   --cm-background: var(--color-bg);
   --cm-surface: #fff;
@@ -4196,7 +4196,7 @@ textarea:focus-visible {
   background: #fff;
   padding: 4px;
   text-align: left;
-  box-shadow: 0 7px 20px rgba(15, 27, 25, 0.08);
+  box-shadow: 0 7px 20px rgba(13, 26, 35, 0.08);
 }
 .image-message img {
   display: block;
@@ -4351,7 +4351,7 @@ textarea:focus-visible {
   inset: 0;
   display: grid;
   place-items: center;
-  background: rgba(6, 14, 12, 0.78);
+  background: rgba(5, 12, 18, 0.78);
   padding: 32px;
   backdrop-filter: blur(8px);
 }
@@ -4763,7 +4763,7 @@ textarea:focus-visible {
     border-top: 1px solid var(--color-line);
     background: rgba(255, 255, 255, 0.98);
     padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
-    box-shadow: 0 -12px 32px rgba(15, 27, 25, 0.1);
+    box-shadow: 0 -12px 32px rgba(13, 26, 35, 0.1);
     backdrop-filter: blur(18px);
   }
   .app-mobile-nav button {
@@ -4807,7 +4807,7 @@ textarea:focus-visible {
     width: 100%;
     height: 100%;
     border: 0;
-    background: rgba(15, 27, 25, 0.45);
+    background: rgba(13, 26, 35, 0.45);
   }
   .app-mobile-more-sheet {
     position: absolute;
@@ -4817,7 +4817,7 @@ textarea:focus-visible {
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     background: #fff;
     padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
-    box-shadow: 0 -20px 48px rgba(15, 27, 25, 0.22);
+    box-shadow: 0 -20px 48px rgba(13, 26, 35, 0.22);
   }
   .app-mobile-more-head {
     display: flex;
@@ -5115,7 +5115,7 @@ textarea:focus-visible {
   width: 100%;
   height: 100%;
   border: 0;
-  background: rgba(15, 27, 25, 0.5);
+  background: rgba(13, 26, 35, 0.5);
 }
 .stage-confirm-card {
   position: relative;
@@ -5454,7 +5454,7 @@ textarea:focus-visible {
   border: 3px solid #fff;
   border-radius: 999px;
   background: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(14, 122, 108, 0.25);
+  box-shadow: 0 0 0 4px rgba(21, 94, 117, 0.25);
 }
 
 
@@ -5497,7 +5497,7 @@ textarea:focus-visible {
 .message-system span {
   max-width: 80%;
   border-radius: 999px;
-  background: rgba(15, 27, 25, 0.05);
+  background: rgba(13, 26, 35, 0.05);
   padding: 7px 14px;
   color: var(--color-muted);
   text-align: center;
@@ -5580,7 +5580,7 @@ textarea:focus-visible {
   width: 100%;
   height: 100%;
   border: 0;
-  background: rgba(15, 27, 25, 0.5);
+  background: rgba(13, 26, 35, 0.5);
 }
 .contact-sheet-card {
   position: relative;
@@ -5918,7 +5918,7 @@ textarea:focus-visible {
   grid-template-columns: 312px minmax(0, 1fr);
 }
 .app-sidebar nav button.active {
-  background: rgba(14, 122, 108, 0.24);
+  background: rgba(21, 94, 117, 0.24);
   box-shadow: inset 3px 0 0 var(--color-primary);
   color: #fff;
   font-weight: 800;
@@ -6134,7 +6134,7 @@ textarea:focus-visible {
   height: 16px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(15, 27, 25, 0.25);
+  box-shadow: 0 1px 4px rgba(13, 26, 35, 0.25);
   transition: transform 0.2s ease-out;
 }
 .compact-control input:checked {
@@ -6358,7 +6358,7 @@ textarea:focus-visible {
   padding-top: 0;
 }
 .reference-prototype-dashboard {
-  --prototype-navy: #0f1b19;
+  --prototype-navy: #0d1a23;
   --prototype-primary: var(--color-primary);
   --prototype-text: var(--color-text);
   --prototype-muted: var(--color-muted);
@@ -6459,7 +6459,7 @@ textarea:focus-visible {
 }
 .reference-search-panel .ws-search-form input:focus {
   border-color: var(--prototype-primary);
-  outline: 3px solid rgba(14, 122, 108, 0.12);
+  outline: 3px solid rgba(21, 94, 117, 0.12);
   box-shadow: none;
 }
 .reference-search-panel .ws-search-cta {
@@ -6803,7 +6803,7 @@ textarea:focus-visible {
 .reference-recent-work .ws-row:focus-visible,
 .prototype-job-row > button:focus-visible,
 .reference-module > header button:focus-visible {
-  outline: 3px solid rgba(14, 122, 108, 0.18);
+  outline: 3px solid rgba(21, 94, 117, 0.18);
   outline-offset: 2px;
 }
 .reference-recent-work .ws-row-next {

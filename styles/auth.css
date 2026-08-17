@@ -292,8 +292,8 @@
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
   box-shadow:
-    0 0 0 4px rgba(14, 122, 108, 0.11),
-    0 8px 20px rgba(14, 122, 108, 0.06);
+    0 0 0 4px rgba(21, 94, 117, 0.11),
+    0 8px 20px rgba(21, 94, 117, 0.06);
 }
 .login-input-wrap:focus-within > svg {
   color: var(--color-primary);
@@ -305,7 +305,7 @@
 }
 .login-card .full:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(14, 122, 108, 0.28);
+  box-shadow: 0 14px 28px rgba(21, 94, 117, 0.28);
 }
 .login-card .full[aria-busy="true"] {
   position: relative;
@@ -357,7 +357,7 @@
   .login-service-intro li:hover {
     border-color: var(--color-primary-border);
     background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 14px 32px rgba(14, 122, 108, 0.09);
+    box-shadow: 0 14px 32px rgba(21, 94, 117, 0.09);
     transform: translateY(-3px);
   }
 }
@@ -436,7 +436,7 @@
 .account-status-page {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 10%, rgba(150, 214, 206, 0.22), transparent 34%),
+    radial-gradient(circle at 12% 10%, rgba(150, 200, 214, 0.22), transparent 34%),
     linear-gradient(135deg, var(--color-surface-soft), #fff 52%, var(--color-primary-soft));
   padding: 48px 24px 72px;
 }
@@ -480,7 +480,7 @@
   background: #fff;
   padding: 20px;
   text-align: left;
-  box-shadow: 0 8px 24px rgba(15, 27, 25, 0.05);
+  box-shadow: 0 8px 24px rgba(13, 26, 35, 0.05);
 }
 .signup-role-picker > button > svg {
   width: 42px;
@@ -505,8 +505,8 @@
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
   box-shadow:
-    0 0 0 3px rgba(14, 122, 108, 0.1),
-    0 12px 30px rgba(14, 122, 108, 0.08);
+    0 0 0 3px rgba(21, 94, 117, 0.1),
+    0 12px 30px rgba(21, 94, 117, 0.08);
 }
 .signup-role-picker > button.active > svg {
   background: var(--color-primary-soft);
@@ -746,7 +746,7 @@
   .login-workspace-benefits li:hover {
     border-color: var(--color-primary-border);
     background: #fff;
-    box-shadow: 0 16px 36px rgba(14, 122, 108, 0.1);
+    box-shadow: 0 16px 36px rgba(21, 94, 117, 0.1);
     transform: translateY(-3px);
   }
 }
