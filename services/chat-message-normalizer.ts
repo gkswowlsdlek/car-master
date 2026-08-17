@@ -24,7 +24,12 @@ export function normalizeChatMessages(rows: StoredChatMessage[], reads: ReadCurs
     .sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id))
     .map((row) => {
       const senderId = row.sender_id ?? "system";
-      const readBy = [senderId, ...reads.filter((read) => read.reader_id !== senderId && read.last_read_at >= row.created_at).map((read) => read.reader_id)];
+      const readBy = [
+        senderId,
+        ...reads
+          .filter((read) => read.reader_id !== senderId && read.last_read_at >= row.created_at)
+          .map((read) => read.reader_id),
+      ];
       return {
         id: row.id,
         roomId: row.room_id,

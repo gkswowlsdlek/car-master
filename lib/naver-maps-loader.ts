@@ -12,7 +12,9 @@ let authFailed = false;
 function registerAuthFailureHandler() {
   if (typeof window === "undefined" || authFailureRegistered) return;
   authFailureRegistered = true;
-  window.navermap_authFailure = () => { authFailed = true; };
+  window.navermap_authFailure = () => {
+    authFailed = true;
+  };
 }
 
 // A truthy `window.naver.maps` is not proof the SDK actually initialized —
@@ -21,7 +23,9 @@ function registerAuthFailureHandler() {
 // file itself downloaded fine. Requiring the `Map` constructor to exist (and
 // that no authFailure was reported) confirms the SDK is really usable.
 function isUsable(maps: unknown): maps is typeof naver.maps {
-  return !authFailed && typeof maps === "object" && maps !== null && typeof (maps as { Map?: unknown }).Map === "function";
+  return (
+    !authFailed && typeof maps === "object" && maps !== null && typeof (maps as { Map?: unknown }).Map === "function"
+  );
 }
 
 /**
@@ -31,7 +35,8 @@ function isUsable(maps: unknown): maps is typeof naver.maps {
  * https://navermaps.github.io/maps.js.en/docs/tutorial-2-Getting-Started.html
  */
 export function loadNaverMaps(clientId: string): Promise<typeof naver.maps> {
-  if (typeof window === "undefined") return Promise.reject(new Error("NAVER Maps는 브라우저에서만 로드할 수 있습니다."));
+  if (typeof window === "undefined")
+    return Promise.reject(new Error("NAVER Maps는 브라우저에서만 로드할 수 있습니다."));
   registerAuthFailureHandler();
 
   if (isUsable(window.naver?.maps)) return Promise.resolve(window.naver!.maps);
@@ -53,7 +58,9 @@ export function loadNaverMaps(clientId: string): Promise<typeof naver.maps> {
     if (!existing) document.head.appendChild(script);
   });
 
-  promise.catch(() => { loaderPromise = null; });
+  promise.catch(() => {
+    loaderPromise = null;
+  });
   loaderPromise = promise;
   return promise;
 }

@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { nextForwardStage, revertStage, transitionPayment, transitionStage } from "../services/transaction-state-service.ts";
+import {
+  nextForwardStage,
+  revertStage,
+  transitionPayment,
+  transitionStage,
+} from "../services/transaction-state-service.ts";
 
 function makeTransaction(stage = "견적") {
   return {
@@ -25,7 +30,14 @@ test("시공점은 거래 단계를 한 단계씩 순서대로 진행할 수 있
   assert.equal(updated.status.stage, "시공예약");
   assert.equal(updated.status.updatedAt, "2026-07-17T01:00:00.000Z");
   assert.equal(updated.stageLog.length, 1);
-  assert.deepEqual(updated.stageLog[0], { id: updated.stageLog[0].id, fromStage: "견적", toStage: "시공예약", actorRole: "shop", direction: "forward", createdAt: "2026-07-17T01:00:00.000Z" });
+  assert.deepEqual(updated.stageLog[0], {
+    id: updated.stageLog[0].id,
+    fromStage: "견적",
+    toStage: "시공예약",
+    actorRole: "shop",
+    direction: "forward",
+    createdAt: "2026-07-17T01:00:00.000Z",
+  });
 });
 
 // Dealer immediate-transaction Phase 1: the flow must never stall waiting on

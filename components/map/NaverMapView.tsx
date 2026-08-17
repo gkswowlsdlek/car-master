@@ -31,7 +31,13 @@ function markerIcon(selected: boolean, isDemo: boolean, ns: typeof naver.maps): 
   };
 }
 
-export function NaverMapView({ installers, selectedId, onSelect, userLocation, onBoundsChanged }: {
+export function NaverMapView({
+  installers,
+  selectedId,
+  onSelect,
+  userLocation,
+  onBoundsChanged,
+}: {
   installers: InstallerListing[];
   selectedId: string | null;
   onSelect: (id: string) => void;
@@ -73,41 +79,50 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
     if (!clientId || !containerRef.current) return;
     let cancelled = false;
 
-    loadNaverMaps(clientId).then((ns) => {
-      if (cancelled || !containerRef.current) return;
-      nsRef.current = ns;
-      const selectedTarget = installersRef.current.find((item) => item.id === selectedIdRef.current);
-      const initialCenter = selectedTarget?.lat != null && selectedTarget?.lng != null
-        ? { lat: selectedTarget.lat, lng: selectedTarget.lng }
-        : userLocation;
-      const map = new ns.Map(containerRef.current, {
-        center: new ns.LatLng(initialCenter?.lat ?? SEOUL_CENTER.lat, initialCenter?.lng ?? SEOUL_CENTER.lng),
-        zoom: initialCenter ? FOCUS_ZOOM : 10,
-        minZoom: 6,
-        maxZoom: 19,
-        zoomControl: true,
-        zoomControlOptions: { position: ns.Position.TOP_RIGHT },
-        scaleControl: false,
-        logoControl: true,
-        mapDataControl: false,
-      });
-      mapRef.current = map;
-      setStatus("ready");
-
-      if (onBoundsChanged) {
-        ns.Event.addListener(map, "idle", () => {
-          const bounds = map.getBounds();
-          const visible = installers.filter((item) => item.lat != null && item.lng != null && bounds.hasLatLng(new ns.LatLng(item.lat!, item.lng!))).map((item) => item.id);
-          onBoundsChanged(visible);
+    loadNaverMaps(clientId)
+      .then((ns) => {
+        if (cancelled || !containerRef.current) return;
+        nsRef.current = ns;
+        const selectedTarget = installersRef.current.find((item) => item.id === selectedIdRef.current);
+        const initialCenter =
+          selectedTarget?.lat != null && selectedTarget?.lng != null
+            ? { lat: selectedTarget.lat, lng: selectedTarget.lng }
+            : userLocation;
+        const map = new ns.Map(containerRef.current, {
+          center: new ns.LatLng(initialCenter?.lat ?? SEOUL_CENTER.lat, initialCenter?.lng ?? SEOUL_CENTER.lng),
+          zoom: initialCenter ? FOCUS_ZOOM : 10,
+          minZoom: 6,
+          maxZoom: 19,
+          zoomControl: true,
+          zoomControlOptions: { position: ns.Position.TOP_RIGHT },
+          scaleControl: false,
+          logoControl: true,
+          mapDataControl: false,
         });
-      }
-    }).catch((error: unknown) => {
-      if (cancelled) return;
-      setStatus("unavailable");
-      setErrorMessage(error instanceof Error ? error.message : "지도를 불러오지 못했습니다.");
-    });
+        mapRef.current = map;
+        setStatus("ready");
 
-    return () => { cancelled = true; };
+        if (onBoundsChanged) {
+          ns.Event.addListener(map, "idle", () => {
+            const bounds = map.getBounds();
+            const visible = installers
+              .filter(
+                (item) => item.lat != null && item.lng != null && bounds.hasLatLng(new ns.LatLng(item.lat!, item.lng!)),
+              )
+              .map((item) => item.id);
+            onBoundsChanged(visible);
+          });
+        }
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setStatus("unavailable");
+        setErrorMessage(error instanceof Error ? error.message : "지도를 불러오지 못했습니다.");
+      });
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
 
@@ -118,7 +133,10 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
     const markers = markersRef.current;
 
     for (const [id, marker] of markers) {
-      if (!installers.some((item) => item.id === id)) { marker.setMap(null); markers.delete(id); }
+      if (!installers.some((item) => item.id === id)) {
+        marker.setMap(null);
+        markers.delete(id);
+      }
     }
     installers.forEach((item) => {
       if (item.lat == null || item.lng == null) return;
@@ -129,7 +147,13 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
         existing.setZIndex(selected ? 200 : 100);
         return;
       }
-      const marker = new ns.Marker({ position: new ns.LatLng(item.lat, item.lng), map, title: item.name, icon: markerIcon(selected, item.isDemo, ns), zIndex: selected ? 200 : 100 });
+      const marker = new ns.Marker({
+        position: new ns.LatLng(item.lat, item.lng),
+        map,
+        title: item.name,
+        icon: markerIcon(selected, item.isDemo, ns),
+        zIndex: selected ? 200 : 100,
+      });
       ns.Event.addListener(marker, "click", () => onSelect(item.id));
       markers.set(item.id, marker);
     });
@@ -140,10 +164,25 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
     const map = mapRef.current;
     const ns = nsRef.current;
     if (!map || !ns || status !== "ready") return;
-    if (!userLocation) { userMarkerRef.current?.setMap(null); userMarkerRef.current = null; return; }
+    if (!userLocation) {
+      userMarkerRef.current?.setMap(null);
+      userMarkerRef.current = null;
+      return;
+    }
     const position = new ns.LatLng(userLocation.lat, userLocation.lng);
     if (userMarkerRef.current) userMarkerRef.current.setPosition(position);
-    else userMarkerRef.current = new ns.Marker({ position, map, title: "현재 위치", icon: { content: '<div class="naver-marker-user"></div>', size: new ns.Size(18, 18), anchor: new ns.Point(9, 9) }, zIndex: 300 });
+    else
+      userMarkerRef.current = new ns.Marker({
+        position,
+        map,
+        title: "현재 위치",
+        icon: {
+          content: '<div class="naver-marker-user"></div>',
+          size: new ns.Size(18, 18),
+          anchor: new ns.Point(9, 9),
+        },
+        zIndex: 300,
+      });
   }, [userLocation, status]);
 
   useEffect(() => {
@@ -164,14 +203,27 @@ export function NaverMapView({ installers, selectedId, onSelect, userLocation, o
   }, [selectedId, status]);
 
   if (status === "unavailable") {
-    return <div className="naver-map-fallback">
-      <p className="naver-map-fallback-title">지도를 불러올 수 없습니다.</p>
-      <p className="naver-map-fallback-body">{errorMessage || "NAVER 지도를 사용할 수 없습니다."}<br />시공점 목록에서 계속 비교하고 선택할 수 있습니다.</p>
-    </div>;
+    return (
+      <div className="naver-map-fallback">
+        <p className="naver-map-fallback-title">지도를 불러올 수 없습니다.</p>
+        <p className="naver-map-fallback-body">
+          {errorMessage || "NAVER 지도를 사용할 수 없습니다."}
+          <br />
+          시공점 목록에서 계속 비교하고 선택할 수 있습니다.
+        </p>
+      </div>
+    );
   }
 
-  return <div className="naver-map-shell">
-    {status === "loading" && <div className="naver-map-loading" role="status"><span className="naver-map-spinner" />지도를 불러오는 중입니다…</div>}
-    <div ref={containerRef} className="naver-map-canvas" aria-label="시공점 지도" />
-  </div>;
+  return (
+    <div className="naver-map-shell">
+      {status === "loading" && (
+        <div className="naver-map-loading" role="status">
+          <span className="naver-map-spinner" />
+          지도를 불러오는 중입니다…
+        </div>
+      )}
+      <div ref={containerRef} className="naver-map-canvas" aria-label="시공점 지도" />
+    </div>
+  );
 }

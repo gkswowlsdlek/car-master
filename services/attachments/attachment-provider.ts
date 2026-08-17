@@ -8,18 +8,37 @@ export interface AttachmentProvider {
 
 export const CHAT_ATTACHMENT_MAX_BYTES = 10 * 1024 * 1024;
 export const CHAT_ATTACHMENT_TYPES = [
-  "image/jpeg", "image/png", "image/webp", "application/pdf", "text/plain", "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.ms-excel",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+  "text/plain",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ] as const;
-export const CHAT_ATTACHMENT_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "pdf", "txt", "doc", "docx", "xls", "xlsx"] as const;
+export const CHAT_ATTACHMENT_EXTENSIONS = [
+  "jpg",
+  "jpeg",
+  "png",
+  "webp",
+  "pdf",
+  "txt",
+  "doc",
+  "docx",
+  "xls",
+  "xlsx",
+] as const;
 
 export function validateChatAttachment(file: Pick<File, "name" | "size" | "type">) {
   if (file.size <= 0) throw new Error("내용이 없는 파일은 첨부할 수 없습니다.");
   if (file.size > CHAT_ATTACHMENT_MAX_BYTES) throw new Error("첨부파일은 10MB 이하만 업로드할 수 있습니다.");
   const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
-  const allowedType = CHAT_ATTACHMENT_TYPES.includes(file.type as typeof CHAT_ATTACHMENT_TYPES[number]);
-  const allowedExtension = CHAT_ATTACHMENT_EXTENSIONS.includes(extension as typeof CHAT_ATTACHMENT_EXTENSIONS[number]);
+  const allowedType = CHAT_ATTACHMENT_TYPES.includes(file.type as (typeof CHAT_ATTACHMENT_TYPES)[number]);
+  const allowedExtension = CHAT_ATTACHMENT_EXTENSIONS.includes(
+    extension as (typeof CHAT_ATTACHMENT_EXTENSIONS)[number],
+  );
   if (!allowedType || !allowedExtension) {
     throw new Error("JPG, PNG, WEBP, PDF, TXT, DOC, DOCX, XLS, XLSX 파일만 첨부할 수 있습니다.");
   }
@@ -48,5 +67,7 @@ export class LocalAttachmentProvider implements AttachmentProvider {
     if (attachment.persistence === "session") URL.revokeObjectURL(attachment.url);
   }
 
-  async discard(attachment: ChatAttachment) { this.release(attachment); }
+  async discard(attachment: ChatAttachment) {
+    this.release(attachment);
+  }
 }

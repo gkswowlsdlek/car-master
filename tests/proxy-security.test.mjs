@@ -22,9 +22,10 @@ const configuredAnonymousRuntime = {
   },
 };
 
-const requestFor = (pathname, cookie) => new NextRequest(`https://car-master.example${pathname}`, {
-  headers: cookie ? { cookie } : undefined,
-});
+const requestFor = (pathname, cookie) =>
+  new NextRequest(`https://car-master.example${pathname}`, {
+    headers: cookie ? { cookie } : undefined,
+  });
 
 function assertPasses(response) {
   assert.equal(response.headers.get("x-middleware-next"), "1");
@@ -76,9 +77,15 @@ test("valid Demo sessions still enter their matching workspace without Supabase 
   const previousSecret = process.env.CARMASTER_DEMO_SESSION_SECRET;
   try {
     process.env.CARMASTER_DEMO_SESSION_SECRET = crypto.randomUUID();
-    for (const [role, pathname] of [["dealer", "/dealer"], ["shop", "/shop"], ["admin", "/admin"]]) {
+    for (const [role, pathname] of [
+      ["dealer", "/dealer"],
+      ["shop", "/shop"],
+      ["admin", "/admin"],
+    ]) {
       const { token } = await createDemoSession(role);
-      assertPasses(await updateSupabaseSession(requestFor(pathname, `${demoSessionCookie}=${token}`), unavailableRuntime));
+      assertPasses(
+        await updateSupabaseSession(requestFor(pathname, `${demoSessionCookie}=${token}`), unavailableRuntime),
+      );
     }
   } finally {
     if (previousSecret === undefined) delete process.env.CARMASTER_DEMO_SESSION_SECRET;

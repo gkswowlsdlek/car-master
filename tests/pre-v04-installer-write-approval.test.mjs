@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const migrationUrl = new URL("../supabase/migrations/202608070001_pre_v04_installer_write_approval.sql", import.meta.url);
+const migrationUrl = new URL(
+  "../supabase/migrations/202608070001_pre_v04_installer_write_approval.sql",
+  import.meta.url,
+);
 const readMigration = async () => (await readFile(migrationUrl, "utf8")).replace(/\r\n?/g, "\n");
 
 function functionBody(source, name) {
@@ -20,7 +23,10 @@ test("the approval helper is server-side, role-aware, and not directly executabl
   assert.match(helper, /set search_path = ''/);
   assert.match(helper, /profile\.role = 'installer'::public\.user_role/);
   assert.match(helper, /approval\.status = 'approved'::public\.installer_approval_status/);
-  assert.match(source, /revoke all on function public\.is_installer_approved\(uuid\) from public, anon, authenticated;/);
+  assert.match(
+    source,
+    /revoke all on function public\.is_installer_approved\(uuid\) from public, anon, authenticated;/,
+  );
   assert.doesNotMatch(source, /grant execute on function public\.is_installer_approved/);
 });
 
@@ -52,7 +58,10 @@ test("assignment checks and existing Dealer/Admin paths remain intact", async ()
   assert.match(visibility, /target\.installer_id = auth\.uid\(\)/);
   assert.match(price, /caller_role = 'admin'::public\.user_role/);
   assert.match(price, /target\.installer_id = auth\.uid\(\)/);
-  assert.match(payment, /target\.dealer_id = auth\.uid\(\) or target\.installer_id = auth\.uid\(\) or caller_role = 'admin'/);
+  assert.match(
+    payment,
+    /target\.dealer_id = auth\.uid\(\) or target\.installer_id = auth\.uid\(\) or caller_role = 'admin'/,
+  );
   assert.match(stage, /current_transaction\.installer_id <> auth\.uid\(\)/);
   assert.match(stage, /caller_role not in \('dealer'::public\.user_role, 'admin'::public\.user_role\)/);
   assert.match(stage, /insert into public\.transaction_stage_events/);
@@ -70,14 +79,22 @@ test("the approval-state decision matrix allows only an approved assigned Instal
 test("approval rejection occurs before each Installer-owned transaction update path", async () => {
   const source = await readMigration();
   const visibility = functionBody(source, "set_transaction_visibility");
-  assert.match(visibility, /public\.is_installer_approved\(auth\.uid\(\)\) then\s+update public\.transactions set hidden_by_installer/s);
+  assert.match(
+    visibility,
+    /public\.is_installer_approved\(auth\.uid\(\)\) then\s+update public\.transactions set hidden_by_installer/s,
+  );
 
-  for (const name of ["set_transaction_final_price", "transition_transaction_payment", "transition_transaction_stage"]) {
+  for (const name of [
+    "set_transaction_final_price",
+    "transition_transaction_payment",
+    "transition_transaction_stage",
+  ]) {
     const body = functionBody(source, name);
     const approvalCheck = body.indexOf("public.is_installer_approved(auth.uid())");
-    const protectedUpdate = name === "transition_transaction_stage"
-      ? body.indexOf("update public.transactions\n  set stage")
-      : body.lastIndexOf("update public.transactions");
+    const protectedUpdate =
+      name === "transition_transaction_stage"
+        ? body.indexOf("update public.transactions\n  set stage")
+        : body.lastIndexOf("update public.transactions");
     assert.ok(approvalCheck >= 0 && protectedUpdate > approvalCheck, `${name} must reject before its Installer write`);
   }
 });

@@ -6,7 +6,10 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("Dealer Dashboard quick-action filters actually reach the 거래 관리 screen instead of being dropped on the floor", async () => {
   const workspace = await read("components/workspaces/DealerWorkspace.tsx");
-  assert.match(workspace, /onFilterDeals=\{\(filter\) => \{ setDealFilter\(filter\); onNavigate\("deals"\); \}\}/);
+  assert.match(
+    workspace,
+    /onFilterDeals=\{\(filter\)\s*=>\s*\{\s*setDealFilter\(filter\);\s*onNavigate\("deals"\);\s*\}\}/,
+  );
   assert.match(workspace, /screen === "deals"[\s\S]*?initialGroupFilter=\{dealFilter\}/);
   assert.doesNotMatch(workspace, /onOpenDeal/);
   const dashboard = await read("components/dealer/DealerDashboard.tsx");

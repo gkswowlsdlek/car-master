@@ -36,17 +36,35 @@ export function isTerminalOutcome(stage: TransactionStage): boolean {
 
 /** Button label for moving forward INTO this stage (the "다음 행동" CTA). */
 export const STAGE_ACTION_LABEL: Record<TransactionStage, string> = {
-  견적: "견적 확정", 시공예약: "시공예약 확정", 입고: "입고 처리", 작업완료: "작업완료", 출고: "출고 처리", 취소: "취소 처리", 시공불가: "시공 불가 처리",
+  견적: "견적 확정",
+  시공예약: "시공예약 확정",
+  입고: "입고 처리",
+  작업완료: "작업완료",
+  출고: "출고 처리",
+  취소: "취소 처리",
+  시공불가: "시공 불가 처리",
 };
 
 /** Label for the small "이전 단계로" link when reverting back to this stage. */
 export const STAGE_REVERT_LABEL: Record<TransactionStage, string> = {
-  견적: "견적으로 되돌리기", 시공예약: "시공예약으로 되돌리기", 입고: "입고 상태로 되돌리기", 작업완료: "작업완료로 되돌리기", 출고: "출고로 되돌리기", 취소: "취소로 되돌리기", 시공불가: "시공불가로 되돌리기",
+  견적: "견적으로 되돌리기",
+  시공예약: "시공예약으로 되돌리기",
+  입고: "입고 상태로 되돌리기",
+  작업완료: "작업완료로 되돌리기",
+  출고: "출고로 되돌리기",
+  취소: "취소로 되돌리기",
+  시공불가: "시공불가로 되돌리기",
 };
 
 /** Past-tense form of the same label, used in the 거래 로그 list. */
 export const STAGE_REVERT_LOG_LABEL: Record<TransactionStage, string> = {
-  견적: "견적으로 되돌림", 시공예약: "시공예약으로 되돌림", 입고: "입고로 되돌림", 작업완료: "작업완료로 되돌림", 출고: "출고로 되돌림", 취소: "취소로 되돌림", 시공불가: "시공불가로 되돌림",
+  견적: "견적으로 되돌림",
+  시공예약: "시공예약으로 되돌림",
+  입고: "입고로 되돌림",
+  작업완료: "작업완료로 되돌림",
+  출고: "출고로 되돌림",
+  취소: "취소로 되돌림",
+  시공불가: "시공불가로 되돌림",
 };
 
 export function stageLogLabel(event: TransactionStageEvent): string {
@@ -82,26 +100,63 @@ export function canTransitionStage(current: TransactionStage, next: TransactionS
   return Math.abs(nextIndex - currentIndex) === 1;
 }
 
-export function transitionStage(transaction: Transaction, next: TransactionStage, role: TransactionActorRole, now = new Date().toISOString()): Transaction {
+export function transitionStage(
+  transaction: Transaction,
+  next: TransactionStage,
+  role: TransactionActorRole,
+  now = new Date().toISOString(),
+): Transaction {
   const current = transaction.status.stage;
   if (!canTransitionStage(current, next, role)) throw new Error(`${role} cannot transition ${current} to ${next}.`);
   const currentIndex = stageOrder.indexOf(current);
   const nextIndex = stageOrder.indexOf(next);
   const direction: TransactionStageEvent["direction"] = nextIndex > currentIndex ? "forward" : "backward";
-  const event: TransactionStageEvent = { id: `EVT-${now}-${Math.round(Math.random() * 1e6)}`, fromStage: current, toStage: next, actorRole: role, direction, createdAt: now };
+  const event: TransactionStageEvent = {
+    id: `EVT-${now}-${Math.round(Math.random() * 1e6)}`,
+    fromStage: current,
+    toStage: next,
+    actorRole: role,
+    direction,
+    createdAt: now,
+  };
   return {
     ...transaction,
-    schedule: { ...transaction.schedule, completedAt: next === "작업완료" ? now : direction === "backward" && current === "작업완료" ? undefined : transaction.schedule.completedAt },
+    schedule: {
+      ...transaction.schedule,
+      completedAt:
+        next === "작업완료"
+          ? now
+          : direction === "backward" && current === "작업완료"
+            ? undefined
+            : transaction.schedule.completedAt,
+    },
     status: { ...transaction.status, stage: next, updatedAt: now },
     stageLog: [...(transaction.stageLog ?? []), event],
   };
 }
 
-export function transitionPayment(transaction: Transaction, next: PaymentStatus, role: TransactionActorRole, now = new Date().toISOString()): Transaction {
+export function transitionPayment(
+  transaction: Transaction,
+  next: PaymentStatus,
+  role: TransactionActorRole,
+  now = new Date().toISOString(),
+): Transaction {
   const allowed: Record<PaymentStatus, Partial<Record<TransactionActorRole, PaymentStatus[]>>> = {
-    미결제: { dealer: ["결제대기"], shop: ["결제대기"] }, 결제대기: { dealer: ["결제완료"], admin: ["결제완료"] },
-    결제완료: { admin: ["정산대기"] }, 정산대기: { admin: ["정산완료"] }, 정산완료: {},
+    미결제: { dealer: ["결제대기"], shop: ["결제대기"] },
+    결제대기: { dealer: ["결제완료"], admin: ["결제완료"] },
+    결제완료: { admin: ["정산대기"] },
+    정산대기: { admin: ["정산완료"] },
+    정산완료: {},
   };
-  if (!allowed[transaction.pricing.paymentStatus][role]?.includes(next)) throw new Error(`${role} cannot transition payment to ${next}.`);
-  return { ...transaction, pricing: { ...transaction.pricing, paymentStatus: next, paymentAt: next === "결제완료" ? now : transaction.pricing.paymentAt }, status: { ...transaction.status, updatedAt: now } };
+  if (!allowed[transaction.pricing.paymentStatus][role]?.includes(next))
+    throw new Error(`${role} cannot transition payment to ${next}.`);
+  return {
+    ...transaction,
+    pricing: {
+      ...transaction.pricing,
+      paymentStatus: next,
+      paymentAt: next === "결제완료" ? now : transaction.pricing.paymentAt,
+    },
+    status: { ...transaction.status, updatedAt: now },
+  };
 }

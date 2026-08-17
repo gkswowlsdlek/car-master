@@ -6,7 +6,10 @@ const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("ForgotPasswordScreen validates email format client-side before calling the reset API", async () => {
   const source = await read("components/auth/ForgotPasswordScreen.tsx");
-  assert.match(source, /if \(!\/\^\[\^\\s@\]\+@\[\^\\s@\]\+\\\.\[\^\\s@\]\+\$\/\.test\(email\)\) return setError\("올바른 이메일 주소를 입력해 주세요\."\)/);
+  assert.match(
+    source,
+    /if \(!\/\^\[\^\\s@\]\+@\[\^\\s@\]\+\\\.\[\^\\s@\]\+\$\/\.test\(email\)\) return setError\("올바른 이메일 주소를 입력해 주세요\."\)/,
+  );
 });
 
 test("ForgotPasswordScreen shows a generic success message that does not reveal whether the account exists", async () => {
@@ -18,7 +21,10 @@ test("ForgotPasswordScreen shows a generic success message that does not reveal 
 test("SupabaseAuthProvider.requestPasswordReset calls the official resetPasswordForEmail API with a redirectTo pointing at /update-password — no custom token system", async () => {
   const source = await read("services/auth/supabase-auth-provider.ts");
   assert.match(source, /async requestPasswordReset\(email: string\)/);
-  assert.match(source, /\.auth\.resetPasswordForEmail\(email, \{ redirectTo: `\$\{origin\}\/update-password` \}\)/);
+  assert.match(
+    source,
+    /\.auth\.resetPasswordForEmail\s*\(\s*email,\s*\{\s*redirectTo:\s*`\$\{origin\}\/update-password`\s*,?\s*\}\s*,?\s*\)/,
+  );
   assert.doesNotMatch(source, /jwt\.sign|crypto\.randomBytes|custom.*token/i);
 });
 
@@ -38,11 +44,11 @@ test("SupabaseAuthProvider.exchangeRecoveryCode uses the official exchangeCodeFo
 
 test("UpdatePasswordScreen blocks the password form entirely without a valid recovery session — no code, or a failed exchange, both land on the invalid state with no form rendered", async () => {
   const source = await read("components/auth/UpdatePasswordScreen.tsx");
-  assert.match(source, /status === "invalid" && <>/);
-  assert.match(source, /status === "ready" && <>/);
+  assert.match(source, /status === "invalid"\s*&&\s*(?:\(\s*)?<>/);
+  assert.match(source, /status === "ready"\s*&&\s*(?:\(\s*)?<>/);
   // The password fields must only exist inside the "ready" branch, not unconditionally rendered.
   const readyBranch = source.slice(source.indexOf('status === "ready"'), source.indexOf('status === "success"'));
-  assert.match(readyBranch, /PasswordField label="새 비밀번호"/);
+  assert.match(readyBranch, /PasswordField\s+label="새 비밀번호"/);
   const invalidBranch = source.slice(source.indexOf('status === "invalid"'), source.indexOf('status === "ready"'));
   assert.doesNotMatch(invalidBranch, /PasswordField/);
 });
@@ -55,7 +61,10 @@ test("UpdatePasswordScreen validates password length and mismatch before calling
 
 test("A successful recovery password update signs the session out afterward, instead of silently landing the user in their dashboard", async () => {
   const source = await read("app/page.tsx");
-  assert.match(source, /const updatePasswordFromRecovery = useCallback\(async \(newPassword: string\) => \{\s*await authProvider\.updatePassword\(newPassword\);\s*await authProvider\.logout\(\)\.catch/);
+  assert.match(
+    source,
+    /const updatePasswordFromRecovery = useCallback\(async \(newPassword: string\) => \{\s*await authProvider\.updatePassword\(newPassword\);\s*await authProvider\.logout\(\)\.catch/,
+  );
 });
 
 test("PasswordChangeForm requires current password, validates new password length and confirmation match before calling onChangePassword", async () => {
@@ -66,11 +75,16 @@ test("PasswordChangeForm requires current password, validates new password lengt
 });
 
 test("Authenticated password change passes current_password to Supabase's officially-typed updateUser field — verified against the installed supabase-js type definitions, not guessed", async () => {
-  const authTypes = await read("node_modules/.pnpm/@supabase+auth-js@2.110.7/node_modules/@supabase/auth-js/dist/module/lib/types.d.ts");
+  const authTypes = await read(
+    "node_modules/.pnpm/@supabase+auth-js@2.110.7/node_modules/@supabase/auth-js/dist/module/lib/types.d.ts",
+  );
   assert.match(authTypes, /current_password\?: string;/);
   const provider = await read("services/auth/supabase-auth-provider.ts");
   assert.match(provider, /async updatePassword\(newPassword: string, currentPassword\?: string\)/);
-  assert.match(provider, /\.auth\.updateUser\(\{\s*password: newPassword,\s*\.\.\.\(currentPassword \? \{ current_password: currentPassword \} : \{\}\),?\s*\}\)/);
+  assert.match(
+    provider,
+    /\.auth\.updateUser\(\{\s*password: newPassword,\s*\.\.\.\(currentPassword \? \{ current_password: currentPassword \} : \{\}\),?\s*\}\)/,
+  );
 });
 
 test("Wrong-current-password and other Supabase Auth errors are translated to short Korean copy, never left as raw English or logged", async () => {
@@ -83,7 +97,7 @@ test("Wrong-current-password and other Supabase Auth errors are translated to sh
 
 test("Demo accounts (1/1, 2/2, 3/3) never reach password reset/change — ProfileEditor and AdminAccountScreen both gate on the Real/Demo split, and Demo login itself is untouched", async () => {
   const profileEditor = await read("components/profile/ProfileEditor.tsx");
-  assert.match(profileEditor, /useMemberDatabase \? <PasswordChangeForm/);
+  assert.match(profileEditor, /useMemberDatabase\s*\?\s*(?:\(\s*)?<PasswordChangeForm/);
   assert.match(profileEditor, /Demo 계정에서는 비밀번호를 변경하지 않아요\./);
   const adminAccount = await read("components/admin/AdminAccountScreen.tsx");
   assert.match(adminAccount, /demoSession\s*\?[\s\S]*?Demo 계정에서는 비밀번호를 변경하지 않아요\./);
@@ -117,11 +131,17 @@ test("Real Dealer, Installer and Admin all wire the same shared PasswordChangeFo
   const dealerWorkspace = await read("components/workspaces/DealerWorkspace.tsx");
   const installerWorkspace = await read("components/workspaces/InstallerWorkspace.tsx");
   const adminWorkspace = await read("components/workspaces/AdminWorkspace.tsx");
-  assert.match(page, /const changePassword = useCallback\(\(currentPassword: string, newPassword: string\) => authProvider\.updatePassword\(newPassword, currentPassword\), \[\]\)/);
+  assert.match(
+    page,
+    /const changePassword = useCallback\s*\(\s*\(currentPassword: string, newPassword: string\)\s*=>\s*authProvider\.updatePassword\(newPassword, currentPassword\),\s*\[\]\s*,?\s*\)/,
+  );
   assert.match(page, /<DealerWorkspace[\s\S]*?onChangePassword={changePassword}/);
-  assert.match(dealerWorkspace, /<ProfileEditor role="dealer"[\s\S]*?onChangePassword={onChangePassword}/);
+  assert.match(dealerWorkspace, /<ProfileEditor\s+role="dealer"[\s\S]*?onChangePassword={onChangePassword}/);
   assert.match(page, /<InstallerWorkspace[\s\S]*?onChangePassword={changePassword}/);
-  assert.match(installerWorkspace, /<ShopManagementScreen userId={account\.id} onChangePassword={onChangePassword}/);
+  assert.match(
+    installerWorkspace,
+    /<ShopManagementScreen\s+userId={account\.id}\s+onChangePassword={onChangePassword}/,
+  );
   assert.match(page, /<AdminWorkspace[\s\S]*?onChangePassword={changePassword}/);
   assert.match(adminWorkspace, /<AdminAccountScreen[\s\S]*?onChangePassword={onChangePassword}/);
   const profileEditor = await read("components/profile/ProfileEditor.tsx");
@@ -132,7 +152,7 @@ test("Real Dealer, Installer and Admin all wire the same shared PasswordChangeFo
 
 test("New routes are public (not gated behind the protected-path login wall) so a signed-out user with a fresh recovery link can always reach them", async () => {
   const policy = await read("services/auth/access-policy.ts");
-  assert.match(policy, /"\/forgot-password", "\/update-password"/);
+  assert.match(policy, /"\/forgot-password",\s*"\/update-password"/);
   assert.doesNotMatch(policy, /protectedPaths = \[[^\]]*update-password/);
   assert.match(policy, /if \(pathname === "\/forgot-password"\) return "forgotPassword" as const;/);
   assert.match(policy, /if \(pathname === "\/update-password"\) return "updatePassword" as const;/);
@@ -150,5 +170,5 @@ test("Password fields support show/hide with a touch-safe (>=44px) target", asyn
   const source = await read("components/auth/PasswordField.tsx");
   assert.match(source, /aria-label={visible \? "비밀번호 숨기기" : "비밀번호 표시"}/);
   const css = await read("app/globals.css");
-  assert.match(css, /\.password-toggle-button \{[^}]*width: 44px; height: 44px/);
+  assert.match(css, /\.password-toggle-button\s*\{[^}]*width:\s*44px;\s*height:\s*44px/);
 });

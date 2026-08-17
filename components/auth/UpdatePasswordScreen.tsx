@@ -16,7 +16,12 @@ function readRecoveryCode() {
   return new URLSearchParams(window.location.search).get("code");
 }
 
-export function UpdatePasswordScreen({ onExchangeCode, onUpdatePassword, onGoToLogin, onGoToForgotPassword }: {
+export function UpdatePasswordScreen({
+  onExchangeCode,
+  onUpdatePassword,
+  onGoToLogin,
+  onGoToForgotPassword,
+}: {
   onExchangeCode: (code: string) => Promise<boolean>;
   onUpdatePassword: (newPassword: string) => Promise<void>;
   onGoToLogin: () => void;
@@ -32,8 +37,12 @@ export function UpdatePasswordScreen({ onExchangeCode, onUpdatePassword, onGoToL
     let active = true;
     const code = readRecoveryCode();
     const check = code ? onExchangeCode(code) : Promise.resolve(false);
-    void check.then((ok) => { if (active) setStatus(ok ? "ready" : "invalid"); });
-    return () => { active = false; };
+    void check.then((ok) => {
+      if (active) setStatus(ok ? "ready" : "invalid");
+    });
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -57,24 +66,56 @@ export function UpdatePasswordScreen({ onExchangeCode, onUpdatePassword, onGoToL
     <main className="login-ad-page">
       <div className="auth-standalone-layout">
         <section className="login-card compact-login-card">
-          <div className="login-card-icon"><LockKeyhole size={21} /></div>
+          <div className="login-card-icon">
+            <LockKeyhole size={21} />
+          </div>
           <h2>새 비밀번호 설정</h2>
           {status === "checking" && <p className="login-note">링크를 확인하고 있어요...</p>}
-          {status === "invalid" && <>
-            <p className="login-note">링크가 만료되었거나 이미 사용된 링크예요.</p>
-            <button type="button" className="primary full" onClick={onGoToForgotPassword}>비밀번호 재설정 다시 요청하기</button>
-          </>}
-          {status === "ready" && <>
-            <p className="login-note">새 비밀번호를 설정해주세요.</p>
-            <PasswordField label="새 비밀번호" autoComplete="new-password" value={password} onChange={setPassword} placeholder="8자 이상" />
-            <PasswordField label="새 비밀번호 확인" autoComplete="new-password" value={confirmPassword} onChange={setConfirmPassword} onKeyDown={(event) => event.key === "Enter" && void submit()} />
-            {error && <p className="login-error">{error}</p>}
-            <button type="button" className="primary full" onClick={() => void submit()} disabled={submitting} aria-busy={submitting}>{submitting ? "변경 중..." : "비밀번호 변경"} {!submitting && <ArrowRight size={17} />}</button>
-          </>}
-          {status === "success" && <>
-            <p className="login-note">비밀번호가 변경됐어요.</p>
-            <button type="button" className="primary full" onClick={onGoToLogin}>로그인하기</button>
-          </>}
+          {status === "invalid" && (
+            <>
+              <p className="login-note">링크가 만료되었거나 이미 사용된 링크예요.</p>
+              <button type="button" className="primary full" onClick={onGoToForgotPassword}>
+                비밀번호 재설정 다시 요청하기
+              </button>
+            </>
+          )}
+          {status === "ready" && (
+            <>
+              <p className="login-note">새 비밀번호를 설정해주세요.</p>
+              <PasswordField
+                label="새 비밀번호"
+                autoComplete="new-password"
+                value={password}
+                onChange={setPassword}
+                placeholder="8자 이상"
+              />
+              <PasswordField
+                label="새 비밀번호 확인"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                onKeyDown={(event) => event.key === "Enter" && void submit()}
+              />
+              {error && <p className="login-error">{error}</p>}
+              <button
+                type="button"
+                className="primary full"
+                onClick={() => void submit()}
+                disabled={submitting}
+                aria-busy={submitting}
+              >
+                {submitting ? "변경 중..." : "비밀번호 변경"} {!submitting && <ArrowRight size={17} />}
+              </button>
+            </>
+          )}
+          {status === "success" && (
+            <>
+              <p className="login-note">비밀번호가 변경됐어요.</p>
+              <button type="button" className="primary full" onClick={onGoToLogin}>
+                로그인하기
+              </button>
+            </>
+          )}
         </section>
       </div>
     </main>

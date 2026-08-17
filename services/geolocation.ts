@@ -7,7 +7,10 @@ export type GeoPosition = { latitude: number; longitude: number };
  */
 export function getCurrentPosition(): Promise<GeoPosition | null> {
   return new Promise((resolve) => {
-    if (typeof navigator === "undefined" || !navigator.geolocation) { resolve(null); return; }
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      resolve(null);
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       (position) => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
       () => resolve(null),

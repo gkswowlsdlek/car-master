@@ -1,10 +1,21 @@
 import type { CurrentUser, InstallerApprovalStatus, LegacyUserRole, UserRole } from "../../types/auth";
 
-export const publicPaths = ["/", "/login", "/signup", "/forgot-password", "/update-password", "/auth/callback", "/terms", "/privacy"] as const;
+export const publicPaths = [
+  "/",
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/update-password",
+  "/auth/callback",
+  "/terms",
+  "/privacy",
+] as const;
 export const protectedPaths = ["/dealer", "/shop", "/admin", "/account-status", "/onboarding"] as const;
 
 export function isPublicPath(pathname: string) {
-  return publicPaths.some((path) => path === "/" ? pathname === path : pathname === path || pathname.startsWith(`${path}/`));
+  return publicPaths.some((path) =>
+    path === "/" ? pathname === path : pathname === path || pathname.startsWith(`${path}/`),
+  );
 }
 
 export function isProtectedPath(pathname: string) {
@@ -35,14 +46,18 @@ export function workspacePathForRole(role: UserRole | LegacyUserRole, approvalSt
   if (normalizedRole === "pending") return "/onboarding" as const;
   if (normalizedRole === "admin") return "/admin" as const;
   if (normalizedRole === "dealer") return "/dealer" as const;
-  return approvalStatus === "approved" ? "/shop" as const : "/account-status" as const;
+  return approvalStatus === "approved" ? ("/shop" as const) : ("/account-status" as const);
 }
 
 export function workspacePathForUser(user: CurrentUser) {
   return workspacePathForRole(user.role, user.approvalStatus);
 }
 
-export function resolveAuthenticatedDestination(role: UserRole | LegacyUserRole, approvalStatus: InstallerApprovalStatus | undefined, pathname: string) {
+export function resolveAuthenticatedDestination(
+  role: UserRole | LegacyUserRole,
+  approvalStatus: InstallerApprovalStatus | undefined,
+  pathname: string,
+) {
   const homePath = workspacePathForRole(role, approvalStatus);
   if (!isProtectedPath(pathname)) return homePath;
   return pathname === homePath || pathname.startsWith(`${homePath}/`) ? pathname : homePath;
@@ -50,5 +65,7 @@ export function resolveAuthenticatedDestination(role: UserRole | LegacyUserRole,
 
 export function canAccessWorkspacePath(user: CurrentUser | null, pathname: string) {
   if (!user) return !isProtectedPath(pathname);
-  return !isProtectedPath(pathname) || resolveAuthenticatedDestination(user.role, user.approvalStatus, pathname) === pathname;
+  return (
+    !isProtectedPath(pathname) || resolveAuthenticatedDestination(user.role, user.approvalStatus, pathname) === pathname
+  );
 }

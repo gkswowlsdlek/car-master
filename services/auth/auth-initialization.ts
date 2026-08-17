@@ -10,10 +10,15 @@ export type AuthInitializationResult =
   | { status: "timeout"; user: null }
   | { status: "error"; user: null; error: unknown };
 
-export async function initializeAuth(provider: Pick<AuthProvider, "initialize">, timeoutMs = AUTH_INITIALIZATION_TIMEOUT_MS): Promise<AuthInitializationResult> {
+export async function initializeAuth(
+  provider: Pick<AuthProvider, "initialize">,
+  timeoutMs = AUTH_INITIALIZATION_TIMEOUT_MS,
+): Promise<AuthInitializationResult> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   try {
-    const timeout = new Promise<"timeout">((resolve) => { timeoutId = setTimeout(() => resolve("timeout"), timeoutMs); });
+    const timeout = new Promise<"timeout">((resolve) => {
+      timeoutId = setTimeout(() => resolve("timeout"), timeoutMs);
+    });
     const initialized = provider.initialize().then((user) => ({ kind: "user" as const, user }));
     const result = await Promise.race([initialized, timeout]);
     if (result === "timeout") return { status: "timeout", user: null };
@@ -27,7 +32,8 @@ export async function initializeAuth(provider: Pick<AuthProvider, "initialize">,
 
 export function routeAfterAuthInitialization(pathname: string, user: CurrentUser | null) {
   const protectedPath = isProtectedPath(pathname);
-  if (user && (protectedPath || pathname === "/" || pathname === "/login")) return { destination: "workspace" as const, user };
+  if (user && (protectedPath || pathname === "/" || pathname === "/login"))
+    return { destination: "workspace" as const, user };
   if (protectedPath) return { destination: "login" as const, screen: "login" as const };
   return { destination: "public" as const, screen: publicScreenForPath(pathname) };
 }

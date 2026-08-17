@@ -1,7 +1,10 @@
 import type { InstallerListing } from "../types/installer";
 import type { InstallerSearchResult, SearchLocation } from "../types/location";
 
-export function calculateDistanceKm(origin: { latitude: number; longitude: number }, destination: { latitude: number; longitude: number }) {
+export function calculateDistanceKm(
+  origin: { latitude: number; longitude: number },
+  destination: { latitude: number; longitude: number },
+) {
   const earthRadius = 6371;
   const dLat = ((destination.latitude - origin.latitude) * Math.PI) / 180;
   const dLng = ((destination.longitude - origin.longitude) * Math.PI) / 180;
@@ -11,21 +14,27 @@ export function calculateDistanceKm(origin: { latitude: number; longitude: numbe
   return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export function formatDistanceKm(value: number) { return `${value.toFixed(value < 10 ? 1 : 0)}km`; }
+export function formatDistanceKm(value: number) {
+  return `${value.toFixed(value < 10 ? 1 : 0)}km`;
+}
 const responseMinutes = (value: string) => Number(value.match(/\d+/)?.[0] ?? Number.MAX_SAFE_INTEGER);
 
 export function searchNearbyInstallers(location: SearchLocation, shops: InstallerListing[]): InstallerSearchResult[] {
-  return shops.map((shop) => {
-    if (shop.lat == null || shop.lng == null) return { shop, distanceKm: null, distanceLabel: "거리 정보 없음" };
-    const distanceKm = calculateDistanceKm(location, { latitude: shop.lat, longitude: shop.lng });
-    return { shop, distanceKm, distanceLabel: formatDistanceKm(distanceKm) };
-  }).sort((a, b) => {
-    if (a.distanceKm == null) return b.distanceKm == null ? 0 : 1;
-    if (b.distanceKm == null) return -1;
-    const distanceDifference = a.distanceKm - b.distanceKm;
-    if (Math.abs(distanceDifference) > 0.01) return distanceDifference;
-    return responseMinutes(a.shop.responseTime) - responseMinutes(b.shop.responseTime)
-      || b.shop.recentTransactionCount - a.shop.recentTransactionCount
-      || b.shop.rating - a.shop.rating;
-  });
+  return shops
+    .map((shop) => {
+      if (shop.lat == null || shop.lng == null) return { shop, distanceKm: null, distanceLabel: "거리 정보 없음" };
+      const distanceKm = calculateDistanceKm(location, { latitude: shop.lat, longitude: shop.lng });
+      return { shop, distanceKm, distanceLabel: formatDistanceKm(distanceKm) };
+    })
+    .sort((a, b) => {
+      if (a.distanceKm == null) return b.distanceKm == null ? 0 : 1;
+      if (b.distanceKm == null) return -1;
+      const distanceDifference = a.distanceKm - b.distanceKm;
+      if (Math.abs(distanceDifference) > 0.01) return distanceDifference;
+      return (
+        responseMinutes(a.shop.responseTime) - responseMinutes(b.shop.responseTime) ||
+        b.shop.recentTransactionCount - a.shop.recentTransactionCount ||
+        b.shop.rating - a.shop.rating
+      );
+    });
 }

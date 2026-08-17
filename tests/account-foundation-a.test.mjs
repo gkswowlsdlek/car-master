@@ -2,11 +2,15 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const migrationPath = new URL("../supabase/migrations/202608090001_account_foundation_a_shop_membership.sql", import.meta.url);
+const migrationPath = new URL(
+  "../supabase/migrations/202608090001_account_foundation_a_shop_membership.sql",
+  import.meta.url,
+);
 const legacyMembershipPath = new URL("../supabase/migrations/202607190001_v034_membership.sql", import.meta.url);
 const legacyTransactionPath = new URL("../supabase/migrations/202607210001_v035_foundation.sql", import.meta.url);
 
-const normalizeSql = (sql) => sql.replace(/\r\n?/g, "\n").replace(/--.*$/gm, "").replace(/\s+/g, " ").trim().toLowerCase();
+const normalizeSql = (sql) =>
+  sql.replace(/\r\n?/g, "\n").replace(/--.*$/gm, "").replace(/\s+/g, " ").trim().toLowerCase();
 
 test("Account Foundation A adds account-independent Shops and explicit User memberships", async () => {
   const sql = normalizeSql(await readFile(migrationPath, "utf8"));
@@ -14,7 +18,10 @@ test("Account Foundation A adds account-independent Shops and explicit User memb
   assert.match(sql, /create table if not exists public\.installer_shops/);
   assert.match(sql, /id uuid primary key default gen_random_uuid\(\)/);
   assert.match(sql, /created_by uuid references public\.profiles\(id\) on delete set null/);
-  assert.match(sql, /legacy_installer_user_id uuid unique references public\.installer_profiles\(user_id\) on delete set null/);
+  assert.match(
+    sql,
+    /legacy_installer_user_id uuid unique references public\.installer_profiles\(user_id\) on delete set null/,
+  );
   assert.doesNotMatch(sql, /id uuid primary key references (?:public\.)?profiles/);
 
   assert.match(sql, /create table if not exists public\.shop_memberships/);
@@ -59,10 +66,23 @@ test("Account Foundation A does not replace the legacy runtime contracts", async
   const sql = normalizeSql(foundation);
 
   assert.match(normalizeSql(legacyMembership), /create table public\.installer_profiles/);
-  assert.match(normalizeSql(legacyTransaction), /installer_id uuid not null references public\.installer_profiles\(user_id\)/);
+  assert.match(
+    normalizeSql(legacyTransaction),
+    /installer_id uuid not null references public\.installer_profiles\(user_id\)/,
+  );
   assert.doesNotMatch(sql, /drop table/);
   assert.doesNotMatch(sql, /alter table public\.transactions/);
-  assert.doesNotMatch(sql, /create or replace function public\.(?:handle_new_user|complete_installer_onboarding|get_approved_installer_directory|create_transaction_with_room)/);
-  const destructiveStatements = sql.split(";").filter((statement) => /^\s*drop (?:policy|function|trigger)/.test(statement));
-  assert.equal(destructiveStatements.some((statement) => /(?:installer_profiles|installer_approvals|transactions)/.test(statement)), false);
+  assert.doesNotMatch(
+    sql,
+    /create or replace function public\.(?:handle_new_user|complete_installer_onboarding|get_approved_installer_directory|create_transaction_with_room)/,
+  );
+  const destructiveStatements = sql
+    .split(";")
+    .filter((statement) => /^\s*drop (?:policy|function|trigger)/.test(statement));
+  assert.equal(
+    destructiveStatements.some((statement) =>
+      /(?:installer_profiles|installer_approvals|transactions)/.test(statement),
+    ),
+    false,
+  );
 });

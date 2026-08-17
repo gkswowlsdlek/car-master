@@ -20,6 +20,7 @@ const serverKey = (process.env.SUPABASE_SECRET_KEY?.trim() || process.env.SUPABA
 export const isServiceRoleConfigured = Boolean(supabaseUrl && serverKey);
 
 export function createSupabaseServiceClient() {
-  if (!isServiceRoleConfigured) throw new Error("SUPABASE_SECRET_KEY(또는 SUPABASE_SERVICE_ROLE_KEY)가 설정되지 않았습니다.");
+  if (!isServiceRoleConfigured)
+    throw new Error("SUPABASE_SECRET_KEY(또는 SUPABASE_SERVICE_ROLE_KEY)가 설정되지 않았습니다.");
   return createClient(supabaseUrl, serverKey, { auth: { autoRefreshToken: false, persistSession: false } });
 }

@@ -55,7 +55,9 @@ export function useTransactionStore(useSupabase = false, demoActorId = "") {
         if (!useSupabase) setDemoSchemaReady(schemaReady);
         const [nextTransactions, roomResult] = await Promise.all([
           useSupabase ? supabaseTransactionRepository.getAll() : loadDemoTransactions(schemaReady),
-          useSupabase ? supabaseChatRepository.getAll().then((value) => ({ rooms: value, sharedRoomIds: new Set<string>() })) : loadDemoRooms(demoActorId),
+          useSupabase
+            ? supabaseChatRepository.getAll().then((value) => ({ rooms: value, sharedRoomIds: new Set<string>() }))
+            : loadDemoRooms(demoActorId),
         ]);
         if (!active) return;
         setTransactions(nextTransactions);
@@ -68,12 +70,26 @@ export function useTransactionStore(useSupabase = false, demoActorId = "") {
         if (active) setIsLoading(false);
       }
     };
-    const frame = requestAnimationFrame(() => { setIsLoading(true); void load(); });
-    const unsubscribeTransactions = useSupabase ? supabaseTransactionRepository.subscribe(() => void load()) : transactionRepository.subscribe(() => void load());
+    const frame = requestAnimationFrame(() => {
+      setIsLoading(true);
+      void load();
+    });
+    const unsubscribeTransactions = useSupabase
+      ? supabaseTransactionRepository.subscribe(() => void load())
+      : transactionRepository.subscribe(() => void load());
     const unsubscribeDemoTransactions = useSupabase ? () => {} : demoTransactionRepository.subscribe(() => void load());
     const unsubscribeLocalRooms = useSupabase ? () => {} : chatRepository.subscribe(() => void load());
-    const unsubscribeSharedRooms = useSupabase ? supabaseChatRepository.subscribe(() => void load()) : demoChatRepository.subscribe(() => void load());
-    return () => { active = false; cancelAnimationFrame(frame); unsubscribeTransactions(); unsubscribeDemoTransactions(); unsubscribeLocalRooms(); unsubscribeSharedRooms(); };
+    const unsubscribeSharedRooms = useSupabase
+      ? supabaseChatRepository.subscribe(() => void load())
+      : demoChatRepository.subscribe(() => void load());
+    return () => {
+      active = false;
+      cancelAnimationFrame(frame);
+      unsubscribeTransactions();
+      unsubscribeDemoTransactions();
+      unsubscribeLocalRooms();
+      unsubscribeSharedRooms();
+    };
   }, [useSupabase, demoActorId]);
 
   const refresh = async () => {
@@ -82,13 +98,20 @@ export function useTransactionStore(useSupabase = false, demoActorId = "") {
       const schemaReady = useSupabase ? true : await demoTransactionRepository.isSchemaReady();
       const [nextTransactions, roomResult] = await Promise.all([
         useSupabase ? supabaseTransactionRepository.getAll() : loadDemoTransactions(schemaReady),
-        useSupabase ? supabaseChatRepository.getAll().then((value) => ({ rooms: value, sharedRoomIds: new Set<string>() })) : loadDemoRooms(demoActorId),
+        useSupabase
+          ? supabaseChatRepository.getAll().then((value) => ({ rooms: value, sharedRoomIds: new Set<string>() }))
+          : loadDemoRooms(demoActorId),
       ]);
-      setTransactions(nextTransactions); setRooms(roomResult.rooms); setSharedRoomIds(roomResult.sharedRoomIds); setError("");
+      setTransactions(nextTransactions);
+      setRooms(roomResult.rooms);
+      setSharedRoomIds(roomResult.sharedRoomIds);
+      setError("");
     } catch {
       setError("거래 정보를 불러오지 못했습니다. 네트워크 연결을 확인한 뒤 다시 시도해 주세요.");
       throw new Error("거래 정보를 새로고침하지 못했습니다.");
-    } finally { setIsLoading(false); }
+    } finally {
+      setIsLoading(false);
+    }
   };
   return { transactions, rooms, isLoading, error, refresh, demoSchemaReady, sharedRoomIds };
 }

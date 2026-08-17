@@ -5,14 +5,42 @@ import fs from "node:fs";
 const migration = fs.readFileSync("supabase/migrations/202608140001_shop_management_operating_profile_rpc.sql", "utf8");
 
 test("Shop Management boundary uses a SECURITY DEFINER allowlist RPC", () => {
-  assert.match(migration, /create or replace function public\.update_shop_operating_profile\(\s*p_shop_id uuid,\s*p_payload jsonb/s);
+  assert.match(
+    migration,
+    /create or replace function public\.update_shop_operating_profile\(\s*p_shop_id uuid,\s*p_payload jsonb/s,
+  );
   assert.match(migration, /security definer\s+set search_path = ''/s);
-  assert.match(migration, /revoke all on function public\.update_shop_operating_profile\(uuid, jsonb\) from public, anon, authenticated/);
-  assert.match(migration, /grant execute on function public\.update_shop_operating_profile\(uuid, jsonb\) to authenticated/);
-  for (const field of ["shop_name", "address", "detail_address", "phone", "contact_phone", "business_hours", "closed_days", "supported_brands", "supported_services", "introduction", "accepting_requests"]) {
+  assert.match(
+    migration,
+    /revoke all on function public\.update_shop_operating_profile\(uuid, jsonb\) from public, anon, authenticated/,
+  );
+  assert.match(
+    migration,
+    /grant execute on function public\.update_shop_operating_profile\(uuid, jsonb\) to authenticated/,
+  );
+  for (const field of [
+    "shop_name",
+    "address",
+    "detail_address",
+    "phone",
+    "contact_phone",
+    "business_hours",
+    "closed_days",
+    "supported_brands",
+    "supported_services",
+    "introduction",
+    "accepting_requests",
+  ]) {
     assert.match(migration, new RegExp(`\\b${field}\\b`));
   }
-  for (const field of ["approval_status", "ownership_status", "business_registration_number", "created_by", "membership_role", "status"]) {
+  for (const field of [
+    "approval_status",
+    "ownership_status",
+    "business_registration_number",
+    "created_by",
+    "membership_role",
+    "status",
+  ]) {
     assert.doesNotMatch(migration, new RegExp(`set\\s+[\\s\\S]{0,80}\\b${field}\\s*=`, "i"));
   }
 });

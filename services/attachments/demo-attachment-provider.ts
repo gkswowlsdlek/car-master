@@ -25,7 +25,7 @@ export class DemoAttachmentProvider implements AttachmentProvider {
         try {
           const response = await fetch("/api/demo-attachments/ready");
           if (!response.ok) return false;
-          const data = await response.json().catch(() => null) as { ready?: boolean } | null;
+          const data = (await response.json().catch(() => null)) as { ready?: boolean } | null;
           return data?.ready === true;
         } catch {
           return false;
@@ -42,12 +42,14 @@ export class DemoAttachmentProvider implements AttachmentProvider {
     form.append("file", file);
     form.append("roomId", roomId);
     const response = await fetch("/api/demo-attachments/upload", { method: "POST", body: form });
-    const body = await response.json().catch(() => null) as (ChatAttachment & { error?: string }) | null;
+    const body = (await response.json().catch(() => null)) as (ChatAttachment & { error?: string }) | null;
     if (!response.ok || !body) throw new Error(body?.error ?? "파일 업로드에 실패했습니다.");
     return body;
   }
 
-  release() { /* Remote files remain attached to the transaction. */ }
+  release() {
+    /* Remote files remain attached to the transaction. */
+  }
 
   async discard(attachment: ChatAttachment) {
     if (!attachment.storagePath) return;

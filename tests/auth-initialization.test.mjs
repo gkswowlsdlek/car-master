@@ -5,7 +5,10 @@ import { initializeAuth, routeAfterAuthInitialization } from "../services/auth/a
 const dealer = { id: "dealer", email: "dealer@example.com", name: "딜러", role: "dealer" };
 
 test("auth initialization completes for authenticated and anonymous users", async () => {
-  assert.deepEqual(await initializeAuth({ initialize: async () => dealer }, 20), { status: "authenticated", user: dealer });
+  assert.deepEqual(await initializeAuth({ initialize: async () => dealer }, 20), {
+    status: "authenticated",
+    user: dealer,
+  });
   assert.deepEqual(await initializeAuth({ initialize: async () => null }, 20), { status: "anonymous", user: null });
 });
 
@@ -16,7 +19,14 @@ test("delayed auth initialization times out instead of blocking a public page", 
 
 test("failed auth initialization completes with a safe error result", async () => {
   const failure = new Error("internal Supabase detail");
-  const result = await initializeAuth({ initialize: async () => { throw failure; } }, 20);
+  const result = await initializeAuth(
+    {
+      initialize: async () => {
+        throw failure;
+      },
+    },
+    20,
+  );
   assert.equal(result.status, "error");
   assert.equal(result.user, null);
   assert.equal(result.error, failure);
@@ -29,5 +39,6 @@ test("anonymous protected routes go to login while public routes keep their scre
 });
 
 test("authenticated users enter their workspace from root, login, and protected routes", () => {
-  for (const path of ["/", "/login", "/dealer"]) assert.equal(routeAfterAuthInitialization(path, dealer).destination, "workspace");
+  for (const path of ["/", "/login", "/dealer"])
+    assert.equal(routeAfterAuthInitialization(path, dealer).destination, "workspace");
 });

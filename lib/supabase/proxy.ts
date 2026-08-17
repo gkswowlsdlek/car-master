@@ -2,7 +2,11 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server.js";
 import { supabasePublishableKey, supabaseUrl } from "./config.ts";
 import { demoSessionCookie, verifyDemoSession } from "../demo-session.ts";
-import { isProtectedPath, normalizeUserRole, resolveAuthenticatedDestination } from "../../services/auth/access-policy.ts";
+import {
+  isProtectedPath,
+  normalizeUserRole,
+  resolveAuthenticatedDestination,
+} from "../../services/auth/access-policy.ts";
 import type { InstallerApprovalStatus, UserRole } from "../../types/auth.ts";
 
 const AUTH_PROXY_TIMEOUT_MS = 5_000;
@@ -11,7 +15,12 @@ const defaultProxyRuntime = { supabaseUrl, supabasePublishableKey, createServerC
 async function withTimeout<T>(value: PromiseLike<T>): Promise<T | null> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   try {
-    return await Promise.race([Promise.resolve(value), new Promise<null>((resolve) => { timeoutId = setTimeout(() => resolve(null), AUTH_PROXY_TIMEOUT_MS); })]);
+    return await Promise.race([
+      Promise.resolve(value),
+      new Promise<null>((resolve) => {
+        timeoutId = setTimeout(() => resolve(null), AUTH_PROXY_TIMEOUT_MS);
+      }),
+    ]);
   } finally {
     if (timeoutId) clearTimeout(timeoutId);
   }
@@ -27,7 +36,11 @@ export async function updateSupabaseSession(request: NextRequest, runtime = defa
   // receives no authenticated user and continues to protect real member data.
   if (protectedRoute && demoRole) {
     response.headers.set("Cache-Control", "private, no-store");
-    const destination = resolveAuthenticatedDestination(normalizeUserRole(demoRole), demoRole === "shop" ? "approved" : undefined, pathname);
+    const destination = resolveAuthenticatedDestination(
+      normalizeUserRole(demoRole),
+      demoRole === "shop" ? "approved" : undefined,
+      pathname,
+    );
     return destination === pathname ? response : NextResponse.redirect(new URL(destination, request.url));
   }
   // Public pages must not wait for a remote Supabase session check. The client
@@ -53,17 +66,23 @@ export async function updateSupabaseSession(request: NextRequest, runtime = defa
   if (protectedRoute) {
     const userId = typeof claimsResult?.data?.claims?.sub === "string" ? claimsResult.data.claims.sub : null;
     if (!userId) return copyAuthCookies(response, NextResponse.redirect(new URL("/login", request.url)));
-    const profileResult = await withTimeout(supabase.from("profiles").select("role").eq("id", userId).single<{ role: UserRole }>());
+    const profileResult = await withTimeout(
+      supabase.from("profiles").select("role").eq("id", userId).single<{ role: UserRole }>(),
+    );
     const profile = profileResult?.data;
     if (!profile) return copyAuthCookies(response, NextResponse.redirect(new URL("/login", request.url)));
     let approvalStatus: InstallerApprovalStatus | undefined;
     if (profile.role === "installer") {
-      const approvalResult = await withTimeout(supabase.from("installer_approvals").select("status").eq("user_id", userId).single<{ status: string }>());
+      const approvalResult = await withTimeout(
+        supabase.from("installer_approvals").select("status").eq("user_id", userId).single<{ status: string }>(),
+      );
       const status = approvalResult?.data?.status;
-      if (status === "pending" || status === "approved" || status === "rejected" || status === "suspended") approvalStatus = status;
+      if (status === "pending" || status === "approved" || status === "rejected" || status === "suspended")
+        approvalStatus = status;
     }
     const destination = resolveAuthenticatedDestination(profile.role, approvalStatus, pathname);
-    if (destination !== pathname) return copyAuthCookies(response, NextResponse.redirect(new URL(destination, request.url)));
+    if (destination !== pathname)
+      return copyAuthCookies(response, NextResponse.redirect(new URL(destination, request.url)));
   }
   return response;
 }

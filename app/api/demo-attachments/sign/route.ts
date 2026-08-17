@@ -20,16 +20,20 @@ export async function POST(request: NextRequest) {
   const role = await verifyDemoSession(request.cookies.get(demoSessionCookie)?.value);
   if (!isChatRole(role)) return NextResponse.json({ error: "인증이 필요합니다." }, { status: 401 });
 
-  const body = await request.json().catch(() => null) as { paths?: unknown } | null;
+  const body = (await request.json().catch(() => null)) as { paths?: unknown } | null;
   const rawPaths = Array.isArray(body?.paths) ? body.paths : [];
-  const paths = rawPaths.filter((path): path is string => typeof path === "string" && path.startsWith("demo/")).slice(0, MAX_PATHS);
+  const paths = rawPaths
+    .filter((path): path is string => typeof path === "string" && path.startsWith("demo/"))
+    .slice(0, MAX_PATHS);
   if (paths.length === 0) return NextResponse.json({ urls: {} });
 
   const client = createSupabaseServiceClient();
   const urls: Record<string, string> = {};
-  await Promise.all(paths.map(async (path) => {
-    const { data, error } = await client.storage.from(DEMO_ATTACHMENTS_BUCKET).createSignedUrl(path, 3600);
-    if (!error && data?.signedUrl) urls[path] = data.signedUrl;
-  }));
+  await Promise.all(
+    paths.map(async (path) => {
+      const { data, error } = await client.storage.from(DEMO_ATTACHMENTS_BUCKET).createSignedUrl(path, 3600);
+      if (!error && data?.signedUrl) urls[path] = data.signedUrl;
+    }),
+  );
   return NextResponse.json({ urls });
 }

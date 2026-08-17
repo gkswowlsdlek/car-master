@@ -11,12 +11,21 @@ test("chat messages are de-duplicated and sorted deterministically", () => {
     { ...base, id: "a", created_at: "2026-07-21T01:00:00.000Z" },
     { ...base, id: "a", created_at: "2026-07-21T01:00:00.000Z" },
   ]);
-  assert.deepEqual(messages.map((message) => message.id), ["a", "b"]);
+  assert.deepEqual(
+    messages.map((message) => message.id),
+    ["a", "b"],
+  );
 });
 
 test("chat attachment validation rejects empty, oversized and mismatched files", () => {
-  assert.throws(() => validateChatAttachment({ name: "empty.pdf", size: 0, type: "application/pdf" }), /내용이 없는 파일/);
-  assert.throws(() => validateChatAttachment({ name: "large.pdf", size: 10 * 1024 * 1024 + 1, type: "application/pdf" }), /10MB 이하/);
+  assert.throws(
+    () => validateChatAttachment({ name: "empty.pdf", size: 0, type: "application/pdf" }),
+    /내용이 없는 파일/,
+  );
+  assert.throws(
+    () => validateChatAttachment({ name: "large.pdf", size: 10 * 1024 * 1024 + 1, type: "application/pdf" }),
+    /10MB 이하/,
+  );
   assert.throws(() => validateChatAttachment({ name: "photo.exe", size: 100, type: "image/jpeg" }), /파일만 첨부/);
   assert.doesNotThrow(() => validateChatAttachment({ name: "견적서.PDF", size: 100, type: "application/pdf" }));
 });
@@ -28,7 +37,9 @@ test("local collections preserve legacy arrays and fail safely on corrupt JSON",
     setItem: (key, value) => values.set(key, value),
   };
   globalThis.window = {
-    dispatchEvent() {}, addEventListener() {}, removeEventListener() {},
+    dispatchEvent() {},
+    addEventListener() {},
+    removeEventListener() {},
   };
 
   values.set("legacy", JSON.stringify([{ id: "old" }]));
