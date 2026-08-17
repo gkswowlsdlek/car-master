@@ -1,0 +1,223 @@
+/* Extracted from app/globals.css — components/profile/ProfileEditor.tsx only. Values
+   unchanged, position only. Excludes profile-password-card/profile-saved/shop-management-card
+   (shared with components/auth/PasswordChangeForm.tsx) and shop-operation-status (shared with
+   components/shop/ShopManagementScreen.tsx), plus the multi-screen shared padding rule
+   ".transaction-management-screen, .profile-editor, .request-page, .summary-page" and other
+   giant responsive mega-blocks — all left in app/globals.css. */
+/* Profile + Admin */
+.profile-editor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  padding: 22px;
+}
+.profile-editor-grid label {
+  display: grid;
+  gap: 7px;
+  color: var(--color-text-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+.profile-notification-settings label {
+  display: inline-flex;
+  gap: 7px;
+  margin: 8px 18px 0 0;
+}
+.profile-notification-settings input {
+  width: auto;
+}
+.profile-editor-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.profile-activity-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.profile-activity-summary article {
+  display: grid;
+  gap: 9px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.profile-activity-summary span {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+.profile-activity-summary b {
+  font-size: 25px;
+}
+.profile-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+  gap: var(--workspace-gap);
+  align-items: start;
+}
+.profile-activity-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 0;
+}
+.profile-activity-summary article {
+  min-width: 0;
+  padding: 17px;
+}
+.profile-editor-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 20px;
+}
+.profile-notification-settings {
+  margin-top: 0;
+}
+.profile-editor-actions {
+  grid-column: 2;
+  margin-top: 0;
+}
+.profile-editor > p:last-child {
+  grid-column: 2;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.profile-editor-grid .profile-checkbox-field {
+  display: flex;
+  align-items: center;
+  align-self: end;
+  min-height: 48px;
+  border: 1px solid var(--color-primary-soft);
+  border-radius: 12px;
+  background: var(--color-surface-soft);
+  padding: 12px 14px;
+}
+.profile-editor-grid .profile-checkbox-field input {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+.profile-demo-password-note {
+  margin: 8px 0 0;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.shop-management-page {
+  display: block;
+}
+.shop-management-page > .page-title {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.shop-management-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.shop-management-card .subsection-head {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-primary-soft);
+}
+.shop-management-card .profile-checkbox-field {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  margin-top: 12px;
+  border-radius: 11px;
+  background: var(--color-surface-soft);
+  padding: 11px;
+}
+.shop-management-card .profile-checkbox-field input {
+  width: 18px;
+}
+.management-placeholder {
+  background: var(--color-surface-soft);
+}
+.management-placeholder p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.shop-management-page > .profile-notification-settings {
+  margin-top: 14px;
+}
+.shop-management-page > .profile-editor-actions {
+  display: flex;
+  margin-top: 14px;
+}
+.shop-management-page > p:last-child {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.notification-toggle-list {
+  display: grid;
+}
+.profile-notification-settings .notification-toggle-list label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 66px;
+  margin: 0;
+  border-top: 1px solid var(--color-line);
+}
+.profile-notification-settings .notification-toggle-list label:first-child {
+  border-top: 0;
+}
+.notification-toggle-list label > span {
+  display: grid;
+  gap: 3px;
+}
+.notification-toggle-list label b {
+  font-size: 13px;
+}
+.notification-toggle-list label small {
+  color: var(--color-muted);
+  font-weight: 500;
+}
+.toggle-input {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 36px !important;
+  height: 20px;
+  min-height: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-line-strong);
+  padding: 3px;
+  transition: background 0.2s ease-out;
+}
+.toggle-input::before {
+  content: "";
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.24);
+  transition: transform 0.2s ease-out;
+}
+.toggle-input:checked {
+  background: var(--color-primary);
+}
+.toggle-input:checked::before {
+  transform: translateX(16px);
+}
+.profile-editor-grid label {
+  min-width: 0;
+}
+.profile-editor-grid label:last-child {
+  grid-column: 1/-1;
+}
+.profile-editor-grid :is(input, select) {
+  width: 100%;
+}

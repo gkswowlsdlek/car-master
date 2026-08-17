@@ -9,6 +9,8 @@
 @import "../styles/installer-dashboard.css";
 @import "../styles/messenger.css";
 @import "../styles/transactions.css";
+@import "../styles/profile.css";
+@import "../styles/request.css";
 
 /* R4 reference-locked Dealer workspace presentation. */
 .role-dealer .app-sidebar {
@@ -747,28 +749,6 @@
   color: var(--color-muted);
   font-size: 12px;
 }
-.request-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 380px;
-  gap: 18px;
-  align-items: start;
-}
-.service-request-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  padding: 22px;
-}
-.service-request-form label {
-  display: grid;
-  gap: 7px;
-  color: var(--color-text-soft);
-  font-size: 12px;
-  font-weight: 700;
-}
 .wide-field {
   grid-column: 1/-1;
 }
@@ -798,82 +778,6 @@
 .vehicle-class-picker p {
   color: var(--color-muted);
   font-size: 10px;
-}
-.request-submit-button {
-  grid-column: 1/-1;
-}
-.request-shop-panel {
-  padding: 20px;
-}
-.request-shop-list {
-  display: grid;
-  margin-top: 12px;
-}
-.request-shop-list button {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 4px;
-  border-top: 1px solid var(--color-line);
-  background: #fff;
-  padding: 13px 3px;
-  text-align: left;
-}
-.request-shop-list button.selected {
-  color: var(--color-primary);
-}
-.request-shop-list button span {
-  display: grid;
-}
-.request-shop-list small,
-.request-shop-list i {
-  color: var(--color-muted);
-  font-size: 10px;
-  font-style: normal;
-}
-.request-shop-list i {
-  grid-column: 1/-1;
-}
-.selected-installer {
-  display: grid;
-  gap: 4px;
-  margin-top: 14px;
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
-  padding: 14px;
-}
-.selected-installer span,
-.selected-installer small {
-  color: var(--color-muted);
-  font-size: 11px;
-}
-.summary-page {
-  max-width: 900px;
-}
-.summary-card {
-  padding: 26px;
-}
-.summary-card dl {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
-.summary-card dl div {
-  display: grid;
-  gap: 5px;
-}
-.summary-card dt {
-  color: var(--color-muted);
-  font-size: 12px;
-}
-.summary-card dd {
-  margin: 0;
-  font-weight: 700;
-}
-.summary-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 26px;
 }
 
 /* Transactions */
@@ -1037,23 +941,6 @@
   padding: 8px 14px;
 }
 
-/* Profile + Admin */
-.profile-editor-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  padding: 22px;
-}
-.profile-editor-grid label {
-  display: grid;
-  gap: 7px;
-  color: var(--color-text-soft);
-  font-size: 12px;
-  font-weight: 700;
-}
 .profile-notification-settings,
 .admin-transaction-panel,
 .admin-price-summary {
@@ -1062,19 +949,6 @@
   border-radius: var(--radius-lg);
   background: #fff;
   padding: 20px;
-}
-.profile-notification-settings label {
-  display: inline-flex;
-  gap: 7px;
-  margin: 8px 18px 0 0;
-}
-.profile-notification-settings input {
-  width: auto;
-}
-.profile-editor-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 14px;
 }
 .profile-saved {
   border-radius: var(--radius-sm);
@@ -1392,110 +1266,6 @@
   color: var(--color-primary);
 }
 
-.service-request-form {
-  gap: 20px 16px;
-  padding: 26px;
-}
-.form-section-title {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  border-bottom: 1px solid var(--color-line);
-  padding: 4px 0 14px;
-}
-.form-section-title > span {
-  display: grid;
-  width: 32px;
-  height: 32px;
-  place-items: center;
-  border-radius: 9px;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-size: 11px;
-  font-weight: 800;
-}
-.form-section-title > div {
-  display: grid;
-  gap: 3px;
-}
-.form-section-title small {
-  color: var(--color-muted);
-  font-size: 12px;
-}
-.service-request-form label {
-  font-size: 13px;
-}
-.required-field em {
-  margin-left: 4px;
-  color: var(--color-danger);
-  font-size: 10px;
-  font-style: normal;
-}
-.request-submit-area {
-  position: sticky;
-  bottom: 12px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  border: 1px solid var(--color-primary-border);
-  border-radius: var(--radius-md);
-  background: rgba(239, 244, 255, 0.96);
-  padding: 12px;
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(12px);
-}
-.request-submit-area p {
-  margin: 0 0 0 4px;
-  color: var(--color-text-soft);
-  font-size: 12px;
-}
-.request-submit-area .request-submit-button {
-  min-width: 210px;
-  min-height: 46px;
-}
-.request-shop-panel {
-  border-color: var(--color-primary-border);
-  box-shadow: var(--shadow-md);
-}
-.request-shop-list {
-  gap: 8px;
-}
-.request-shop-list button {
-  position: relative;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  padding: 13px;
-}
-.request-shop-list button:hover {
-  background: var(--color-surface-soft);
-}
-.request-shop-list button.selected {
-  border-color: var(--color-primary);
-  background: var(--color-primary-soft);
-  box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.08);
-}
-.request-shop-list button strong {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  border-radius: 999px;
-  background: var(--color-primary);
-  color: #fff;
-  padding: 3px 8px;
-  font-size: 10px;
-}
-.selected-installer {
-  border: 1px solid var(--color-primary-border);
-  background: linear-gradient(145deg, var(--color-primary-soft), var(--color-primary-soft));
-  padding: 18px;
-}
-.selected-installer p {
-  margin: 5px 0 0;
-  color: var(--color-text-soft);
-  font-size: 12px;
-}
 
 .shop-row,
 .map-card {
@@ -1607,28 +1377,6 @@
 
 .transaction-stage-flow button.complete:disabled {
   opacity: 1;
-}
-.profile-activity-summary {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 18px;
-}
-.profile-activity-summary article {
-  display: grid;
-  gap: 9px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-}
-.profile-activity-summary span {
-  color: var(--color-muted);
-  font-size: 13px;
-}
-.profile-activity-summary b {
-  font-size: 25px;
 }
 
 @media (hover: hover) {
@@ -3844,57 +3592,13 @@ textarea:focus-visible {
   min-width: 0;
 }
 
-.request-layout {
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
-  gap: var(--workspace-gap);
-  align-items: start;
-}
-.request-shop-panel {
-  position: sticky;
-  top: 104px;
-  max-height: calc(100dvh - 124px);
-  overflow-y: auto;
-}
 .shop-finder-layout {
   grid-template-columns: minmax(0, 1fr) minmax(340px, 410px);
   gap: var(--workspace-gap);
 }
 
-.profile-editor {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
-  gap: var(--workspace-gap);
-  align-items: start;
-}
 .profile-editor > :is(.page-title, .profile-activity-summary, .profile-saved, .login-error) {
   grid-column: 1 / -1;
-}
-.profile-activity-summary {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 0;
-}
-.profile-activity-summary article {
-  min-width: 0;
-  padding: 17px;
-}
-.profile-editor-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  padding: 20px;
-}
-.profile-notification-settings {
-  margin-top: 0;
-}
-.profile-editor-actions {
-  grid-column: 2;
-  margin-top: 0;
-}
-.profile-editor > p:last-child {
-  grid-column: 2;
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 12px;
 }
 
 @media (max-width: 1279px) {
@@ -4310,21 +4014,6 @@ textarea:focus-visible {
   }
 }
 
-.profile-editor-grid .profile-checkbox-field {
-  display: flex;
-  align-items: center;
-  align-self: end;
-  min-height: 48px;
-  border: 1px solid var(--color-primary-soft);
-  border-radius: 12px;
-  background: var(--color-surface-soft);
-  padding: 12px 14px;
-}
-.profile-editor-grid .profile-checkbox-field input {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 auto;
-}
 .shop-metric-card.waiting > i {
   background: var(--color-warning-bg);
   color: #ea580c;
@@ -6420,11 +6109,6 @@ textarea:focus-visible {
   font-size: 12px;
   font-weight: 700;
 }
-.profile-demo-password-note {
-  margin: 8px 0 0;
-  color: var(--color-muted);
-  font-size: 12px;
-}
 
 .member-role-badge.role-dealer {
   background: var(--color-primary-soft);
@@ -6488,10 +6172,6 @@ textarea:focus-visible {
   color: var(--color-danger);
 }
 
-.shop-search-request-screen {
-  display: grid;
-  gap: 18px;
-}
 .shop-search-request-form {
   display: grid;
   gap: 14px;
@@ -6512,48 +6192,6 @@ textarea:focus-visible {
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
-.shop-search-request-form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-.shop-search-request-list {
-  display: grid;
-  gap: 10px;
-}
-.shop-search-request-list li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border: 1px solid var(--color-line);
-  border-radius: 14px;
-  background: #fff;
-  padding: 16px;
-}
-.shop-search-request-list li > div:first-child {
-  display: grid;
-  gap: 4px;
-}
-.shop-search-request-list li > div:first-child span {
-  color: var(--color-muted);
-  font-size: 12px;
-}
-.shop-search-request-list li > div:first-child em {
-  color: var(--color-muted-soft);
-  font-size: 11px;
-  font-style: normal;
-}
-.shop-search-request-list-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.shop-search-request-list-meta small {
-  color: var(--color-muted);
-  font-size: 10px;
-}
 @media (max-width: 760px) {
   .shop-search-request-form-row {
     grid-template-columns: 1fr;
@@ -6566,62 +6204,6 @@ textarea:focus-visible {
 
 
 
-.shop-proposal-card {
-  margin-top: 12px;
-  border-top: 1px solid var(--color-line);
-  padding-top: 12px;
-}
-.shop-proposal-lead {
-  margin: 0 0 10px;
-  color: var(--color-primary);
-  font-size: 12.5px;
-  font-weight: 700;
-}
-.shop-proposal-card dl {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 0 0 14px;
-}
-.shop-proposal-card dl div {
-  display: grid;
-  gap: 3px;
-}
-.shop-proposal-card dt {
-  color: var(--color-muted-soft);
-  font-size: 9px;
-}
-.shop-proposal-card dd {
-  margin: 0;
-  color: var(--color-text-soft);
-  font-size: 12px;
-  font-weight: 650;
-}
-.shop-proposal-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.shop-proposal-accept-form {
-  display: grid;
-  gap: 12px;
-}
-.shop-proposal-accept-form label {
-  display: grid;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--color-text-soft);
-}
-@media (max-width: 760px) {
-  .shop-proposal-card dl {
-    grid-template-columns: 1fr;
-  }
-  .shop-proposal-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
 
 .status-chip.status-취소,
 .status-chip.status-시공불가 {
@@ -7099,19 +6681,6 @@ textarea:focus-visible {
   justify-content: flex-end;
   gap: 8px;
 }
-.shop-management-page {
-  display: block;
-}
-.shop-management-page > .page-title {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-}
-.shop-management-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
 .shop-management-card {
   border: 1px solid var(--color-line);
   border-radius: 16px;
@@ -7152,42 +6721,6 @@ textarea:focus-visible {
 .shop-management-card label:first-child:last-child,
 .shop-management-card label:nth-child(5) {
   grid-column: 1/-1;
-}
-.shop-management-card .subsection-head {
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid var(--color-primary-soft);
-}
-.shop-management-card .profile-checkbox-field {
-  display: flex;
-  min-height: 48px;
-  align-items: center;
-  margin-top: 12px;
-  border-radius: 11px;
-  background: var(--color-surface-soft);
-  padding: 11px;
-}
-.shop-management-card .profile-checkbox-field input {
-  width: 18px;
-}
-.management-placeholder {
-  background: var(--color-surface-soft);
-}
-.management-placeholder p {
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 12px;
-}
-.shop-management-page > .profile-notification-settings {
-  margin-top: 14px;
-}
-.shop-management-page > .profile-editor-actions {
-  display: flex;
-  margin-top: 14px;
-}
-.shop-management-page > p:last-child {
-  color: var(--color-muted);
-  font-size: 11px;
 }
 @media (max-width: 767px) {
   .shop-operations-metrics {
@@ -7991,30 +7524,6 @@ textarea:focus-visible {
   }
 }
 
-/* v0.3.11 — Dealer Experience / Meeting Ready.
-   Keep the existing token system and product structure; these rules only
-   strengthen hierarchy, touch targets, and narrow-screen containment. */
-.request-submit-area {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  border: 1px solid var(--color-primary-border);
-  border-radius: 12px;
-  background: var(--color-primary-soft);
-  padding: 14px;
-}
-.request-submit-area p {
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 12px;
-  line-height: 1.55;
-}
-.request-submit-area .request-submit-button {
-  flex: 0 0 auto;
-  min-width: 190px;
-  min-height: 48px;
-}
 
 @media (max-width: 760px) {
   .topbar-actions > .primary {
@@ -8516,108 +8025,7 @@ textarea:focus-visible {
   text-align: left;
 }
 
-.notification-toggle-list {
-  display: grid;
-}
-.profile-notification-settings .notification-toggle-list label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  min-height: 66px;
-  margin: 0;
-  border-top: 1px solid var(--color-line);
-}
-.profile-notification-settings .notification-toggle-list label:first-child {
-  border-top: 0;
-}
-.notification-toggle-list label > span {
-  display: grid;
-  gap: 3px;
-}
-.notification-toggle-list label b {
-  font-size: 13px;
-}
-.notification-toggle-list label small {
-  color: var(--color-muted);
-  font-weight: 500;
-}
-.toggle-input {
-  appearance: none;
-  flex: 0 0 auto;
-  width: 36px !important;
-  height: 20px;
-  min-height: 0;
-  border: 0;
-  border-radius: 999px;
-  background: var(--color-line-strong);
-  padding: 3px;
-  transition: background 0.2s ease-out;
-}
-.toggle-input::before {
-  content: "";
-  display: block;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.24);
-  transition: transform 0.2s ease-out;
-}
-.toggle-input:checked {
-  background: var(--color-primary);
-}
-.toggle-input:checked::before {
-  transform: translateX(16px);
-}
-.profile-editor-grid label {
-  min-width: 0;
-}
-.profile-editor-grid label:last-child {
-  grid-column: 1/-1;
-}
-.profile-editor-grid :is(input, select) {
-  width: 100%;
-}
 
-.request-region-field {
-  min-width: 0;
-  margin: 0;
-  border: 0;
-  padding: 0;
-}
-.request-region-field legend {
-  margin-bottom: 7px;
-  color: var(--color-text-soft);
-  font-size: 12px;
-  font-weight: 750;
-}
-.request-region-field legend em {
-  color: var(--color-danger);
-  font-size: 10px;
-  font-style: normal;
-}
-.request-region-field > div {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.request-region-field small {
-  display: block;
-  margin-top: 6px;
-  color: var(--color-muted);
-  font-size: 10px;
-}
-.service-request-form :is(input, select) {
-  min-height: 48px;
-  border-radius: 12px;
-  padding-inline: 14px;
-  font-size: 14px;
-}
-.service-request-form input[type="date"] {
-  color: var(--color-text);
-  color-scheme: light;
-}
 
 
 /* Phase E: below this width the 거래 정보 panel stays the existing
