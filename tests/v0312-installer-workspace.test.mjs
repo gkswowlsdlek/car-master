@@ -25,7 +25,7 @@ test("새 요청 vs 응답 대기 is derived from existing room message data, no
 });
 
 test("Installer Dashboard CTA hit targets are >=44px", async () => {
-  const source = await read("app/globals.css");
+  const source = await read("styles/installer-dashboard.css");
   assert.match(source, /\.installer-vehicle-actions \.secondary \{[^}]*width: 44px;[^}]*height: 44px;/);
   assert.match(source, /\.installer-vehicle-actions \.primary \{[^}]*min-height: 44px;/);
 });
