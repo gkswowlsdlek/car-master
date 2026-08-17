@@ -92,7 +92,7 @@ test("AdminMemberPanel links a pending/rejected/suspended installer to the exist
 });
 
 test("Long company names and emails get overflow protection in both the list row and the detail drawer", async () => {
-  const css = await read("app/globals.css");
+  const css = await read("styles/admin.css");
   assert.match(css, /\.admin-member-list button span:nth-child\(2\) b \{[^}]*text-overflow: ellipsis/);
   assert.match(css, /\.admin-member-layout dd \{[^}]*overflow-wrap: anywhere/);
 });
