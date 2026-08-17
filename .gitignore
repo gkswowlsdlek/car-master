@@ -47,3 +47,17 @@ next-env.d.ts
 /work/
 /.pnpm-store/
 *.tsbuildinfo
+
+# QA/verification artifacts. The scripts under tools/ ARE tracked — only the
+# screenshots and run logs they produce are ignored, since roughly 300 of them
+# had accumulated at the repo root and buried real untracked work in
+# `git status`.
+/*.png
+/tools/*.png
+/tmp/
+/e2e-artifacts/
+/screenshots/
+.codex-*.log
+
+# git worktrees live inside the repo here
+/.worktrees/
