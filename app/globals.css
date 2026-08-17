@@ -860,7 +860,6 @@ button:active:not(:disabled) {
   overflow-y: auto;
 }
 .transaction-detail {
-  box-shadow: var(--shadow-sm);
 }
 
 @media (hover: hover) {
@@ -1189,7 +1188,6 @@ button:active:not(:disabled) {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lg);
   padding: 24px;
-  box-shadow: var(--shadow-sm);
   transition:
     transform 0.2s,
     border-color 0.2s,
@@ -1270,7 +1268,6 @@ button:active:not(:disabled) {
 .today-list-card {
   border-radius: var(--radius-lg);
   padding: 20px;
-  box-shadow: var(--shadow-sm);
 }
 .section-head h2 {
   display: flex;
@@ -2224,7 +2221,6 @@ textarea:focus-visible {
 .price-guide-toolbar > .search-field {
   border-color: var(--color-line-strong);
   background: #fff;
-  box-shadow: 0 1px 2px rgba(15, 27, 25, 0.04);
 }
 .price-guide-toolbar > .search-field > svg {
   color: var(--color-text-soft);
@@ -2251,12 +2247,10 @@ textarea:focus-visible {
 .metric-card.tone-orange {
   border-color: var(--color-warning);
   background: linear-gradient(145deg, #fff, var(--color-warning-bg));
-  box-shadow: 0 10px 24px rgba(245, 158, 11, 0.1);
 }
 .metric-card.tone-violet {
   border-color: #a78bfa;
   background: linear-gradient(145deg, #fff, #f5f3ff);
-  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.1);
 }
 .dashboard-activity-grid {
   grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(260px, 0.8fr));
@@ -2718,7 +2712,6 @@ textarea:focus-visible {
 .schedule-range-tabs button.active {
   background: #fff;
   color: var(--color-primary);
-  box-shadow: 0 2px 8px rgba(15, 27, 25, 0.09);
 }
 .transaction-list > button {
   min-height: 104px;
@@ -2949,7 +2942,6 @@ textarea:focus-visible {
   border-right: 0 !important;
   border-left: 0 !important;
   border-radius: 0 !important;
-  box-shadow: none !important;
 }
 .r4-dealer-dashboard .r3-recent-work .ws-section-head,
 .r4-dealer-dashboard .r3-recent-work .ws-row-columns,
@@ -2997,12 +2989,10 @@ textarea:focus-visible {
   height: 58px !important;
   background: var(--color-surface-soft) !important;
   border: 1px solid var(--color-line) !important;
-  box-shadow: inset 0 1px 2px rgba(15, 27, 25, 0.025) !important;
 }
 .r4-dealer-dashboard .r3-search-hero .ws-search-cta {
   height: 58px !important;
   background: var(--color-primary) !important;
-  box-shadow: 0 7px 16px rgba(14, 122, 108, 0.18) !important;
 }
 .r4-dealer-dashboard .r3-quick-work {
   margin-top: 24px !important;
@@ -3020,7 +3010,6 @@ textarea:focus-visible {
   margin-top: 58px !important;
   border: 1px solid var(--color-line) !important;
   border-radius: var(--radius-md) !important;
-  box-shadow: 0 8px 24px rgba(15, 27, 25, 0.045) !important;
 }
 .r4-dealer-dashboard .r3-recent-work .ws-section-head {
   padding: 20px 28px !important;
@@ -3070,7 +3059,6 @@ textarea:focus-visible {
 }
 .r4-dealer-dashboard .r3-search-hero .ws-search-cta {
   background: var(--color-primary) !important;
-  box-shadow: 0 5px 12px rgba(14, 122, 108, 0.16) !important;
 }
 .r4-dealer-dashboard .r3-quick-work {
   margin-top: 18px !important;
@@ -3084,7 +3072,6 @@ textarea:focus-visible {
 }
 .r4-dealer-dashboard .r3-recent-work {
   margin-top: 52px !important;
-  box-shadow: 0 5px 16px rgba(15, 27, 25, 0.035) !important;
 }
 .r4-dealer-dashboard .r3-recent-work .ws-section-head h2 {
   font-size: var(--font-md) !important;
@@ -3145,8 +3132,11 @@ textarea:focus-visible {
   background: #fbfcfe !important;
   border-color: var(--color-line-strong) !important;
 }
+/* This input used to carry an `inset ... !important` resting shadow, which
+   beat the design system's focus glow, so a bespoke 2px outline stood in for
+   it. With that shadow gone the shared focus treatment applies again and the
+   outline would double it, so only the border override remains. */
 .r4-dealer-dashboard .r3-search-form input:focus {
-  outline: 2px solid rgba(14, 122, 108, 0.2);
   border-color: var(--cm-primary) !important;
 }
 .r4-dealer-dashboard .r3-search-hero .ws-search-cta {
@@ -3155,7 +3145,6 @@ textarea:focus-visible {
 .r4-dealer-dashboard .r3-quick-work button {
   color: var(--cm-text) !important;
   border-color: var(--cm-border) !important;
-  box-shadow: 0 1px 2px rgba(15, 27, 25, 0.03);
 }
 .r4-dealer-dashboard .r3-recent-work {
   background: var(--cm-surface) !important;
@@ -4186,7 +4175,6 @@ textarea:focus-visible {
   font-size: var(--font-sm);
   line-height: 1.65;
   white-space: pre-wrap;
-  box-shadow: 0 4px 12px rgba(15, 27, 25, 0.04);
 }
 .message-row.mine .message-content > p {
   border-color: var(--color-primary-border);
@@ -5157,7 +5145,6 @@ textarea:focus-visible {
   border-radius: var(--radius-lg);
   background: #fff;
   padding: 20px;
-  box-shadow: 0 7px 20px rgba(15, 27, 25, 0.045);
 }
 .shop-management-card > header {
   display: flex;
@@ -5266,7 +5253,6 @@ textarea:focus-visible {
   background: var(--color-primary-soft);
   padding: 18px 20px;
   text-align: left;
-  box-shadow: var(--shadow-sm);
   transition:
     transform 0.16s ease,
     box-shadow 0.16s ease;
@@ -5984,7 +5970,6 @@ textarea:focus-visible {
   background: #fff;
   padding: 16px 18px;
   text-align: left;
-  box-shadow: var(--shadow-sm);
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
@@ -6036,7 +6021,6 @@ textarea:focus-visible {
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lg);
   background: #fff;
-  box-shadow: var(--shadow-sm);
   padding: 18px 20px;
 }
 .ws-section-head {
@@ -6472,7 +6456,6 @@ textarea:focus-visible {
   padding: 0 16px;
   color: var(--prototype-text);
   font-size: var(--font-sm);
-  box-shadow: 0 3px 10px rgba(15, 27, 25, 0.035);
 }
 .reference-search-panel .ws-search-form input:focus {
   border-color: var(--prototype-primary);
@@ -6526,7 +6509,6 @@ textarea:focus-visible {
   padding: 16px 18px;
 }
 .reference-module {
-  box-shadow: 0 1px 2px rgba(15, 27, 25, 0.025);
 }
 .reference-module:hover {
   border-color: var(--color-line-strong);

@@ -153,7 +153,6 @@
   border-radius: var(--radius-md);
   background: rgba(239, 244, 255, 0.96);
   padding: 12px;
-  box-shadow: var(--shadow-md);
   backdrop-filter: blur(12px);
 }
 .request-submit-area p {
@@ -167,7 +166,6 @@
 }
 .request-shop-panel {
   border-color: var(--color-primary-border);
-  box-shadow: var(--shadow-md);
 }
 .request-shop-list {
   gap: 8px;

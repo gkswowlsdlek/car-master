@@ -360,7 +360,6 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   padding: 13px;
-  box-shadow: 0 3px 10px rgba(15, 27, 25, 0.04);
 }
 .preview-metrics small {
   color: var(--color-muted);
@@ -569,11 +568,9 @@
 }
 .preview-metrics article {
   border-color: var(--color-line);
-  box-shadow: 0 6px 18px rgba(15, 27, 25, 0.055);
 }
 .preview-table {
   border-color: var(--color-line);
-  box-shadow: 0 8px 24px rgba(15, 27, 25, 0.045);
 }
 .preview-table p > em {
   border: 1px solid var(--color-primary-border);
@@ -614,7 +611,6 @@
 .trust-strip span {
   gap: 10px;
   padding: 12px 18px;
-  box-shadow: 0 3px 12px rgba(15, 27, 25, 0.04);
   transition-property: transform, border-color, color, box-shadow, background;
 }
 .trust-strip span svg {
@@ -633,7 +629,6 @@
   margin-bottom: 36px;
   border-radius: 50%;
   background: linear-gradient(145deg, var(--color-primary-soft), var(--color-primary-soft));
-  box-shadow: 0 8px 20px rgba(14, 122, 108, 0.12);
 }
 .step-icon svg {
   width: 24px;
@@ -878,7 +873,6 @@
   font-size: var(--font-xs);
   font-style: normal;
   font-weight: 850;
-  box-shadow: 0 3px 8px rgba(14, 122, 108, 0.1);
 }
 .hero-workflow li:last-child i {
   border-color: var(--color-primary);
@@ -1107,7 +1101,6 @@
   border-color: var(--color-primary-border);
   background: linear-gradient(145deg, var(--color-primary-soft), #fff);
   color: var(--color-primary-hover);
-  box-shadow: 0 10px 24px rgba(14, 122, 108, 0.1);
 }
 @media (max-width: 900px) {
   .trust-strip {

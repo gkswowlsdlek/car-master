@@ -110,7 +110,6 @@
   grid-template-columns: minmax(360px, 0.82fr) minmax(0, 1.8fr);
   border-color: var(--color-line);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
 }
 .shop-transaction-management .transaction-room-layout > .transaction-list {
   background: var(--color-surface-soft);
@@ -129,7 +128,6 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   background: #fff;
-  box-shadow: none;
 }
 .shop-transaction-management .transaction-room-layout > .transaction-list {
   max-height: min(710px, calc(100vh - 286px));
@@ -353,7 +351,6 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   background: #fff;
-  box-shadow: none;
 }
 .shop-transaction-management .transaction-room-layout > .transaction-list {
   max-height: min(710px, calc(100vh - 286px));
@@ -717,7 +714,6 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lg);
   background: #fff;
-  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 .dealer-transaction-row {
@@ -1264,7 +1260,6 @@
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   background: #fff;
-  box-shadow: none;
 }
 .shop-transaction-management .transaction-room-layout > .transaction-list {
   max-height: min(710px, calc(100vh - 286px));

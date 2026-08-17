@@ -184,7 +184,6 @@
   border-radius: var(--radius-md);
   background: #fff;
   padding: 14px 16px;
-  box-shadow: var(--shadow-sm);
 }
 .installer-priority-item i {
   display: grid;
@@ -236,7 +235,6 @@
   border-radius: var(--radius-md);
   background: #fff;
   padding: 6px 6px 6px 4px;
-  box-shadow: var(--shadow-sm);
 }
 .installer-vehicle-main {
   flex: 1;

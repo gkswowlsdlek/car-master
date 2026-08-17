@@ -302,7 +302,6 @@
 .login-card .full {
   min-height: 52px;
   margin-top: 26px;
-  box-shadow: 0 8px 20px rgba(14, 122, 108, 0.22);
 }
 .login-card .full:hover {
   transform: translateY(-2px);
@@ -714,7 +713,6 @@
   border-radius: var(--radius-lg);
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.92));
   padding: 20px;
-  box-shadow: 0 10px 26px rgba(15, 27, 25, 0.055);
 }
 .login-workspace-benefits li > i {
   display: grid;
@@ -724,7 +722,6 @@
   border-radius: var(--radius-md);
   background: linear-gradient(145deg, var(--color-primary-soft), var(--color-primary-soft));
   color: var(--color-primary);
-  box-shadow: 0 8px 20px rgba(14, 122, 108, 0.12);
 }
 .login-workspace-benefits li span {
   display: grid;
