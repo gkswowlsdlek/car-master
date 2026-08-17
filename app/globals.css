@@ -8,6 +8,7 @@
 @import "../styles/installer-directory.css";
 @import "../styles/installer-dashboard.css";
 @import "../styles/messenger.css";
+@import "../styles/transactions.css";
 
 /* R4 reference-locked Dealer workspace presentation. */
 .role-dealer .app-sidebar {
@@ -898,31 +899,6 @@
   color: var(--color-primary);
   font-weight: 800;
 }
-.transaction-filters {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-.transaction-filters input {
-  max-width: 520px;
-}
-.transaction-filters label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--color-muted);
-  font-size: 12px;
-  white-space: nowrap;
-}
-.transaction-filters label input {
-  width: auto;
-}
-.transaction-room-layout {
-  display: grid;
-  grid-template-columns: 330px minmax(0, 1fr);
-  gap: 16px;
-}
 .transaction-list,
 .transaction-detail,
 .transaction-payment-table {
@@ -1059,20 +1035,6 @@
   background: var(--color-primary);
   color: #fff;
   padding: 8px 14px;
-}
-.transaction-hide-button {
-  margin-top: 18px;
-  background: transparent;
-  color: var(--color-muted);
-}
-.transaction-payment-table > button {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1.3fr 1fr 1fr 1fr;
-  border-bottom: 1px solid var(--color-line);
-  background: #fff;
-  padding: 14px;
-  text-align: left;
 }
 
 /* Profile + Admin */
@@ -1389,9 +1351,6 @@
 }
 .dashboard-empty {
   margin-top: 18px;
-}
-.transaction-empty {
-  min-height: 390px;
 }
 
 .price-brand-tabs button,
@@ -2181,9 +2140,6 @@ button:active:not(:disabled) {
   font-size: 11px;
 }
 
-.transaction-page-title {
-  align-items: flex-end;
-}
 .transaction-summary-strip {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -2217,20 +2173,6 @@ button:active:not(:disabled) {
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
   box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.09);
-}
-.transaction-filters {
-  display: grid;
-  grid-template-columns: minmax(280px, 1fr) 150px auto;
-  align-items: center;
-}
-.transaction-filters input {
-  max-width: none;
-}
-.transaction-filters select {
-  min-width: 150px;
-}
-.transaction-room-layout {
-  grid-template-columns: 350px minmax(620px, 1fr);
 }
 .transaction-list {
   max-height: calc(100vh - 310px);
@@ -3857,20 +3799,8 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
-.transaction-management-screen {
-  max-width: none !important;
-}
 .transaction-summary-strip {
   grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-.transaction-filters {
-  grid-template-columns: minmax(240px, 1fr) 180px auto;
-  align-items: center;
-}
-.transaction-room-layout {
-  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
-  min-width: 0;
-  overflow: hidden;
 }
 .transaction-list {
   min-width: 0;
@@ -4501,25 +4431,6 @@ textarea:focus-visible {
   font-size: 11px;
   line-height: 1.65;
 }
-.transaction-management-screen {
-  width: min(1600px, 100%);
-}
-.transaction-room-layout {
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 0;
-  overflow: hidden;
-  border: 1px solid var(--color-primary-soft);
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
-}
-.transaction-room-layout > .transaction-list {
-  max-height: min(760px, calc(100vh - 270px));
-  border: 0;
-  border-right: 1px solid var(--color-line);
-  border-radius: 0;
-  background: var(--color-surface-soft);
-}
 .transaction-list > button {
   min-height: 104px;
   border-color: var(--color-primary-soft);
@@ -4542,15 +4453,6 @@ textarea:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.shop-transaction-management .transaction-room-layout {
-  grid-template-columns: minmax(360px, 0.82fr) minmax(0, 1.8fr);
-  border-color: var(--color-line);
-  border-radius: 14px;
-  box-shadow: var(--shadow-sm);
-}
-.shop-transaction-management .transaction-room-layout > .transaction-list {
-  background: #f8fafc;
-}
 .shop-transaction-management .transaction-list > button {
   min-height: 132px;
   gap: 5px;
@@ -4567,16 +4469,9 @@ textarea:focus-visible {
   color: var(--color-muted);
   font-size: 11px;
 }
-.shop-transaction-management .transaction-list > button .transaction-list-schedule {
-  color: var(--color-text-soft);
-  font-variant-numeric: tabular-nums;
-}
 .shop-transaction-management .transaction-list > button em {
   color: var(--color-muted-soft);
   font-size: 11px;
-}
-.shop-transaction-management .transaction-page-title {
-  margin-bottom: 18px;
 }
 .shop-transaction-management .transaction-summary-strip {
   margin-bottom: 14px;
@@ -4625,20 +4520,6 @@ textarea:focus-visible {
   color: var(--color-primary);
   font-weight: 800;
 }
-.shop-transaction-management .transaction-room-layout {
-  grid-template-columns: minmax(370px, 0.92fr) minmax(0, 1.65fr);
-  gap: 0;
-  overflow: hidden;
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: none;
-}
-.shop-transaction-management .transaction-room-layout > .transaction-list {
-  max-height: min(710px, calc(100vh - 286px));
-  border-right: 1px solid var(--color-line);
-  background: #f8fafc;
-}
 .shop-transaction-management .transaction-list > button {
   min-height: 112px;
   border-bottom: 1px solid var(--color-line);
@@ -4662,143 +4543,9 @@ textarea:focus-visible {
   color: var(--color-muted);
   font-size: 11px;
 }
-.shop-transaction-management .transaction-list > button .transaction-list-schedule {
-  color: var(--color-text-soft);
-  font-variant-numeric: tabular-nums;
-}
 .shop-transaction-management .transaction-list > button em {
   color: var(--color-muted-soft);
   font-size: 11px;
-}
-.shop-transaction-management .transaction-operations-detail {
-  gap: 14px;
-  min-height: 640px;
-  padding: 25px 28px 18px;
-}
-.shop-transaction-management .transaction-operations-detail > header {
-  align-items: flex-start;
-  padding-bottom: 15px;
-  border-bottom: 1px solid var(--color-line);
-}
-.shop-transaction-management .transaction-operations-detail > header h2 {
-  margin: 3px 0 4px;
-  font-size: 30px;
-  letter-spacing: -0.04em;
-}
-.shop-transaction-management .transaction-operations-detail > header p {
-  color: var(--color-text-soft);
-  font-size: 13px;
-}
-.shop-transaction-management .transaction-detail-status {
-  display: grid;
-  justify-items: end;
-  gap: 7px;
-}
-.shop-transaction-management .transaction-detail-status > span {
-  color: var(--color-muted);
-  font-size: 10px;
-}
-.shop-transaction-management .transaction-detail-status .status-chip {
-  padding: 7px 10px;
-}
-.shop-transaction-management .transaction-progress-card {
-  border: 0;
-  border-bottom: 1px solid var(--color-line);
-  border-radius: 0;
-  background: transparent;
-  padding: 2px 0 15px;
-}
-.shop-transaction-management .transaction-progress-card > div span {
-  color: var(--color-muted);
-  font-size: 11px;
-}
-.shop-transaction-management .transaction-progress-card > div b {
-  color: var(--color-ink);
-  font-size: 14px;
-}
-.shop-transaction-management .transaction-progress-card ol {
-  gap: 0;
-  margin-top: 13px;
-}
-.shop-transaction-management .transaction-progress-card ol {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-.shop-transaction-management .transaction-progress-card li {
-  gap: 5px;
-  font-size: 10px;
-}
-.shop-transaction-management .transaction-progress-card li i {
-  width: 22px;
-  height: 22px;
-  border-width: 1px;
-  font-size: 9px;
-}
-.shop-transaction-management .transaction-progress-card li::before {
-  top: 10px;
-  height: 1px;
-}
-.shop-transaction-management .shop-next-action {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--color-line);
-  padding: 0 0 16px;
-}
-.shop-transaction-management .shop-next-action > span {
-  color: var(--color-muted);
-  font-size: 11px;
-}
-.shop-transaction-management .shop-next-action > b {
-  color: var(--color-ink);
-  font-size: 17px;
-}
-.shop-transaction-management .shop-next-action > button {
-  min-height: 42px;
-}
-.shop-transaction-management .transaction-core-info {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border: 0;
-  border-radius: 0;
-}
-.shop-transaction-management .transaction-core-info > div {
-  min-height: 74px;
-  border-right: 1px solid var(--color-line);
-  border-bottom: 1px solid var(--color-line);
-  padding: 12px 14px;
-}
-.shop-transaction-management .transaction-core-info > div:nth-child(odd) {
-  border-right: 1px solid var(--color-line);
-}
-.shop-transaction-management .transaction-core-info > div:last-child {
-  border-right: 0;
-}
-.shop-transaction-management .transaction-core-info dt {
-  font-size: 10px;
-}
-.shop-transaction-management .transaction-core-info dd {
-  font-size: 13px;
-}
-.shop-transaction-management .transaction-price-editor {
-  border: 0;
-  border-top: 1px solid var(--color-line);
-  border-bottom: 1px solid var(--color-line);
-  border-radius: 0;
-  background: #fff;
-  padding: 14px 0;
-}
-.shop-transaction-management .transaction-operations-detail > footer {
-  justify-content: flex-start;
-  align-items: center;
-  margin-top: auto;
-  padding-top: 3px;
-}
-.shop-transaction-management .transaction-operations-detail > footer .primary {
-  order: -1;
-  margin-right: auto;
-}
-.shop-transaction-management .transaction-operations-detail > footer button:last-child {
-  min-height: 44px;
 }
 @media (max-width: 760px) {
   .shop-transaction-management .transaction-summary-strip {
@@ -5954,83 +5701,7 @@ textarea:focus-visible {
   text-align: right;
 }
 
-.dealer-transaction-management .dealer-transaction-table-head {
-  display: grid;
-  grid-template-columns: minmax(240px, 1.2fr) minmax(150px, 0.7fr) minmax(220px, 1fr) minmax(120px, 0.5fr);
-  gap: 20px;
-  border-bottom: 1px solid var(--color-line);
-  background: var(--color-surface-soft);
-  padding: 9px 18px;
-  color: var(--color-muted);
-  font-size: 10px;
-  font-weight: 750;
-}
-.dealer-transaction-management .dealer-transaction-row {
-  grid-template-columns: minmax(240px, 1.2fr) minmax(150px, 0.7fr) minmax(220px, 1fr) minmax(120px, 0.5fr);
-}
-.dealer-transaction-management .dealer-transaction-row-schedule {
-  display: grid;
-  gap: 3px;
-}
-.dealer-transaction-management .dealer-transaction-row-schedule b {
-  color: var(--color-text-soft);
-  font-size: 12px;
-}
-.dealer-transaction-management .dealer-transaction-row-schedule small {
-  color: var(--color-muted);
-  font-size: 10px;
-}
-.dealer-transaction-management .dealer-transaction-row-next {
-  color: var(--color-primary);
-  font-size: 11px;
-  text-align: right;
-  white-space: nowrap;
-}
-.dealer-transaction-management .dealer-transaction-row-next span {
-  margin-left: 3px;
-  font-size: 14px;
-}
 
-.r2-job-context {
-  display: grid;
-  grid-template-columns: 1.15fr 1.1fr 0.9fr 1.1fr;
-  gap: 0;
-  border: 1px solid var(--color-line);
-  border-radius: 10px;
-  background: #fff;
-  margin-bottom: 14px;
-}
-.r2-job-context > div {
-  display: grid;
-  align-content: center;
-  gap: 4px;
-  min-height: 82px;
-  border-right: 1px solid var(--color-line);
-  padding: 14px 16px;
-}
-.r2-job-context > div:last-child {
-  border-right: 0;
-}
-.r2-context-label {
-  color: var(--color-muted);
-  font-size: 10px;
-  font-weight: 750;
-}
-.r2-job-context strong {
-  color: var(--color-ink);
-  font-size: 15px;
-  letter-spacing: -0.02em;
-}
-.r2-job-context small {
-  color: var(--color-muted);
-  font-size: 11px;
-}
-.r2-job-next {
-  background: var(--color-primary-soft);
-}
-.r2-job-next strong {
-  color: var(--color-primary);
-}
 
 @media (max-width: 760px) {
   .dealer-dashboard .ws-work-grid {
@@ -6122,20 +5793,6 @@ textarea:focus-visible {
   color: var(--color-primary);
   font-weight: 800;
 }
-.shop-transaction-management .transaction-room-layout {
-  grid-template-columns: minmax(370px, 0.92fr) minmax(0, 1.65fr);
-  gap: 0;
-  overflow: hidden;
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: none;
-}
-.shop-transaction-management .transaction-room-layout > .transaction-list {
-  max-height: min(710px, calc(100vh - 286px));
-  border-right: 1px solid var(--color-line);
-  background: #f8fafc;
-}
 .shop-transaction-management .transaction-list > button {
   min-height: 112px;
   border-bottom: 1px solid var(--color-line);
@@ -6159,137 +5816,9 @@ textarea:focus-visible {
   color: var(--color-muted);
   font-size: 11px;
 }
-.shop-transaction-management .transaction-list > button .transaction-list-schedule {
-  color: var(--color-text-soft);
-  font-variant-numeric: tabular-nums;
-}
 .shop-transaction-management .transaction-list > button em {
   color: var(--color-muted-soft);
   font-size: 11px;
-}
-.shop-transaction-management .transaction-operations-detail {
-  gap: 14px;
-  min-height: 640px;
-  padding: 25px 28px 18px;
-}
-.shop-transaction-management .transaction-operations-detail > header {
-  align-items: flex-start;
-  padding-bottom: 15px;
-  border-bottom: 1px solid var(--color-line);
-}
-.shop-transaction-management .transaction-operations-detail > header h2 {
-  margin: 3px 0 4px;
-  font-size: 30px;
-  letter-spacing: -0.04em;
-}
-.shop-transaction-management .transaction-operations-detail > header p {
-  color: var(--color-text-soft);
-  font-size: 13px;
-}
-.shop-transaction-management .transaction-detail-status {
-  display: grid;
-  justify-items: end;
-  gap: 7px;
-}
-.shop-transaction-management .transaction-detail-status > span {
-  color: var(--color-muted);
-  font-size: 10px;
-}
-.shop-transaction-management .transaction-detail-status .status-chip {
-  padding: 7px 10px;
-}
-.shop-transaction-management .transaction-progress-card {
-  border: 0;
-  border-bottom: 1px solid var(--color-line);
-  border-radius: 0;
-  background: transparent;
-  padding: 2px 0 15px;
-}
-.shop-transaction-management .transaction-progress-card > div span {
-  color: var(--color-muted);
-  font-size: 11px;
-}
-.shop-transaction-management .transaction-progress-card > div b {
-  color: var(--color-ink);
-  font-size: 14px;
-}
-.shop-transaction-management .transaction-progress-card ol {
-  gap: 0;
-  margin-top: 13px;
-}
-.shop-transaction-management .transaction-progress-card li {
-  gap: 5px;
-  font-size: 10px;
-}
-.shop-transaction-management .transaction-progress-card li i {
-  width: 22px;
-  height: 22px;
-  border-width: 1px;
-  font-size: 9px;
-}
-.shop-transaction-management .transaction-progress-card li::before {
-  top: 10px;
-  height: 1px;
-}
-.shop-transaction-management .shop-next-action {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--color-line);
-  padding: 0 0 16px;
-}
-.shop-transaction-management .shop-next-action > span {
-  color: var(--color-muted);
-  font-size: 11px;
-}
-.shop-transaction-management .shop-next-action > b {
-  color: var(--color-ink);
-  font-size: 17px;
-}
-.shop-transaction-management .shop-next-action > button {
-  min-height: 42px;
-}
-.shop-transaction-management .transaction-core-info {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border: 0;
-  border-radius: 0;
-}
-.shop-transaction-management .transaction-core-info > div {
-  min-height: 74px;
-  border-right: 1px solid var(--color-line);
-  border-bottom: 1px solid var(--color-line);
-  padding: 12px 14px;
-}
-.shop-transaction-management .transaction-core-info > div:nth-child(odd) {
-  border-right: 1px solid var(--color-line);
-}
-.shop-transaction-management .transaction-core-info > div:last-child {
-  border-right: 0;
-}
-.shop-transaction-management .transaction-core-info dt {
-  font-size: 10px;
-}
-.shop-transaction-management .transaction-core-info dd {
-  font-size: 13px;
-}
-.shop-transaction-management .transaction-price-editor {
-  border: 0;
-  border-top: 1px solid var(--color-line);
-  border-bottom: 1px solid var(--color-line);
-  border-radius: 0;
-  background: #fff;
-  padding: 14px 0;
-}
-.shop-transaction-management .transaction-operations-detail > footer {
-  justify-content: flex-start;
-  align-items: center;
-  margin-top: auto;
-  padding-top: 3px;
-}
-.shop-transaction-management .transaction-operations-detail > footer .primary {
-  order: -1;
-  margin-right: auto;
 }
 @media (max-width: 760px) {
   .shop-transaction-management .transaction-summary-strip {
@@ -6644,172 +6173,6 @@ textarea:focus-visible {
 }
 .sidebar-close {
   display: none;
-}
-.briefing-title > span {
-  color: var(--color-primary);
-  font-size: 10px;
-  font-weight: 850;
-  letter-spacing: 0.02em;
-}
-.briefing-title h3 {
-  margin: 6px 0;
-  font-size: 18px;
-}
-.briefing-title p {
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 11px;
-  line-height: 1.6;
-}
-.briefing-data {
-  display: grid;
-  gap: 0;
-  margin: 20px 0;
-}
-.briefing-data > div {
-  display: grid;
-  gap: 4px;
-  border-top: 1px solid var(--color-primary-soft);
-  padding: 11px 0;
-}
-.briefing-data dt {
-  color: var(--color-muted-soft);
-  font-size: 9px;
-}
-.briefing-data dd {
-  margin: 0;
-  color: var(--color-text-soft);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.5;
-}
-.sidebar-stage,
-.sidebar-settlement {
-  border: 1px solid var(--color-line);
-  border-radius: 14px;
-  background: var(--color-surface-soft);
-  padding: 14px;
-}
-.sidebar-stage > span {
-  color: var(--color-muted);
-  font-size: 10px;
-}
-.sidebar-stage > b {
-  display: block;
-  margin: 5px 0 11px;
-  font-size: 16px;
-}
-.sidebar-stage-rail {
-  margin-top: 4px;
-}
-.sidebar-stage-rail i {
-  width: 24px;
-  height: 24px;
-  font-size: 9px;
-}
-.sidebar-stage-rail small {
-  font-size: 9px;
-}
-.sidebar-stage-log {
-  margin-top: 12px;
-  border: 1px solid var(--color-line);
-  border-radius: 14px;
-  background: var(--color-surface-soft);
-  padding: 14px;
-}
-.sidebar-stage-log > span {
-  color: var(--color-muted);
-  font-size: 10px;
-}
-.sidebar-stage-log-toggle {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  background: transparent;
-  padding: 0;
-  color: var(--color-text-soft);
-  font-size: 12px;
-  font-weight: 700;
-}
-.sidebar-stage-log-toggle span {
-  font-weight: 700;
-}
-.sidebar-stage-log .stage-log-empty {
-  margin: 8px 0 0;
-  color: var(--color-muted-soft);
-  font-size: 11.5px;
-}
-.sidebar-stage-log ul {
-  display: grid;
-  gap: 8px;
-  max-height: 220px;
-  margin: 10px 0 0;
-  padding: 0;
-  overflow-y: auto;
-  list-style: none;
-}
-.sidebar-stage-log li {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  border-top: 1px solid var(--color-line);
-  padding-top: 8px;
-  font-size: 12px;
-}
-.sidebar-stage-log li:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-.sidebar-stage-log time {
-  flex: 0 0 auto;
-  color: var(--color-muted-soft);
-  font-size: 10.5px;
-  font-variant-numeric: tabular-nums;
-}
-.sidebar-stage-log li span {
-  color: var(--color-text-soft);
-  font-weight: 600;
-}
-.sidebar-settlement {
-  margin-top: 12px;
-}
-.sidebar-settlement h4 {
-  margin: 0 0 10px;
-}
-.sidebar-settlement p {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 7px 0;
-  color: var(--color-muted);
-  font-size: 10px;
-}
-.sidebar-settlement p b {
-  color: var(--color-text-soft);
-}
-.sidebar-settlement > div {
-  display: flex;
-  gap: 5px;
-  margin-top: 10px;
-}
-.sidebar-settlement input {
-  min-width: 0;
-  height: 38px;
-  font-size: 11px;
-}
-.sidebar-settlement button {
-  border-radius: 9px;
-  background: var(--color-primary);
-  color: #fff;
-  padding: 8px 10px;
-  font-size: 10px;
-}
-.messenger-sidebar .transaction-hide-button {
-  width: 100%;
-  margin-top: 14px;
-  color: var(--color-muted-soft);
-  font-size: 10px;
 }
 .attachment-lightbox {
   position: fixed;
@@ -7260,184 +6623,12 @@ textarea:focus-visible {
   }
 }
 
-/* Phase 5: 거래 Lifecycle 완성 (예외 종료 + 최종 시공금액) */
-.transaction-outcome-banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  border-radius: 12px;
-  background: var(--color-danger-bg);
-  padding: 14px 16px;
-}
-.transaction-outcome-banner b {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--color-danger);
-  font-size: 13px;
-}
-.transaction-outcome-banner p {
-  flex: 1 1 100%;
-  margin: 0;
-  color: var(--color-text-soft);
-  font-size: 12.5px;
-}
-.transaction-outcome-banner .button {
-  flex-shrink: 0;
-}
-.outcome-note-field {
-  display: grid;
-  gap: 7px;
-  margin: 14px 0;
-  color: var(--color-text-soft);
-  font-size: 12px;
-  font-weight: 700;
-}
 .status-chip.status-취소,
 .status-chip.status-시공불가 {
   background: var(--color-danger-bg);
   color: var(--color-danger);
 }
-.final-amount-value {
-  margin: 4px 0 10px;
-  font-size: 15px;
-}
 
-/* Phase 6: Dealer 거래관리 완성 (browse-and-find; no inline detail pane — click always hands off to the existing Room) */
-.dealer-deal-groups em {
-  margin-left: 6px;
-  border-radius: 999px;
-  background: var(--color-line);
-  color: var(--color-muted);
-  padding: 1px 7px;
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 800;
-}
-.dealer-deal-groups button.active em {
-  background: var(--color-primary);
-  color: #fff;
-}
-/* Phase D: rows used to each be their own bordered/shadowed card (14px+
-   gap between them) — that read as a vertical feed rather than a scannable
-   work list. Now the list itself is the single surface, rows are divided
-   by a hairline + a per-stage accent bar (reusing the same stage colors as
-   .status-chip), so far more rows fit above the fold. */
-.dealer-transaction-list {
-  display: block;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-.dealer-transaction-row {
-  position: relative;
-  display: grid;
-  gap: 2px;
-  width: 100%;
-  border: 0;
-  border-bottom: 1px solid var(--color-line);
-  background: #fff;
-  padding: 7px 18px 7px 22px;
-  text-align: left;
-  line-height: 1.35;
-  transition: background 0.15s ease;
-}
-.dealer-transaction-row:last-child {
-  border-bottom: 0;
-}
-.dealer-transaction-row::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--color-muted-soft);
-}
-.dealer-transaction-row[data-stage="견적"]::before {
-  background: var(--color-warning);
-}
-.dealer-transaction-row[data-stage="시공예약"]::before,
-.dealer-transaction-row[data-stage="입고"]::before {
-  background: var(--color-primary);
-}
-.dealer-transaction-row[data-stage="작업완료"]::before {
-  background: var(--color-success);
-}
-.dealer-transaction-row[data-stage="출고"]::before {
-  background: var(--color-ink);
-}
-.dealer-transaction-row[data-stage="취소"]::before,
-.dealer-transaction-row[data-stage="시공불가"]::before {
-  background: var(--color-danger);
-}
-.dealer-transaction-row-main {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px;
-}
-.dealer-transaction-row-main b {
-  font-size: 14.5px;
-}
-.dealer-transaction-row-main span {
-  color: var(--color-muted);
-  font-size: 12.5px;
-}
-.dealer-transaction-row-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-.dealer-transaction-row-meta small {
-  color: var(--color-muted);
-  font-size: 11.5px;
-}
-.dealer-transaction-row-activity {
-  margin-left: auto;
-}
-.phone-confirm-flag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 999px;
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
-  padding: 2px 8px;
-  font-weight: 700;
-}
-.dealer-transaction-row-lastmessage {
-  display: block;
-  overflow: hidden;
-  color: var(--color-muted-soft);
-  font-size: 11.5px;
-  font-style: normal;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-@media (hover: hover) {
-  .dealer-transaction-row:hover {
-    background: var(--color-surface-soft);
-  }
-}
-@media (max-width: 760px) {
-  .dealer-deal-groups {
-    display: flex;
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 4px;
-  }
-  .dealer-deal-groups button {
-    flex: 0 0 auto;
-  }
-  .dealer-transaction-row-activity {
-    margin-left: 0;
-  }
-}
 
 .installer-registration-editor {
   padding: 28px;
@@ -7868,187 +7059,6 @@ textarea:focus-visible {
   }
 }
 
-/* Phase E: this used to be a solid primary-soft full-width block (just a
-   "현재 상태: X" line + a big CTA) — the room read as "messenger with a
-   status banner" rather than a work screen. Now a light card holding a
-   compact, read-only stepper (clicking it can't change stage — only the
-   existing advance/revert buttons do that) so progress is legible at a
-   glance without dominating the top of the screen. */
-.shop-stage-overview {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  border-bottom: 1px solid var(--color-line);
-  background: #fff;
-  padding: 12px 20px;
-}
-.room-stepper {
-  display: flex;
-  align-items: center;
-  gap: 0;
-}
-.room-stepper span {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-muted-soft);
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.room-stepper span:not(:last-child)::after {
-  content: "";
-  flex: 1;
-  height: 2px;
-  margin: 0 6px;
-  background: var(--color-line);
-}
-.room-stepper span.complete:not(:last-child)::after {
-  background: var(--color-success);
-}
-.room-stepper span i {
-  display: grid;
-  flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--color-line);
-  color: var(--color-muted);
-  font-size: 9px;
-  font-style: normal;
-  font-weight: 800;
-}
-.room-stepper span.active {
-  color: var(--color-primary);
-}
-.room-stepper span.active i {
-  background: var(--color-primary);
-  color: #fff;
-}
-.room-stepper span.complete {
-  color: var(--color-text-soft);
-}
-.room-stepper span.complete i {
-  background: var(--color-success);
-  color: #fff;
-}
-@media (max-width: 767px) {
-  .room-stepper {
-    overflow-x: auto;
-  }
-  .room-stepper span small {
-    display: none;
-  }
-  .room-stepper span:not(:last-child)::after {
-    min-width: 10px;
-  }
-}
-.stage-progress-rail {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(54px, 1fr));
-}
-.stage-progress-rail::before {
-  content: "";
-  position: absolute;
-  top: 14px;
-  right: 12%;
-  left: 12%;
-  height: 2px;
-  background: var(--color-primary-soft);
-}
-.stage-progress-rail span {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  justify-items: center;
-  gap: 5px;
-  color: var(--color-muted-soft);
-}
-.stage-progress-rail i {
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  border: 2px solid var(--color-primary-soft);
-  border-radius: 50%;
-  background: #fff;
-  font-size: 10px;
-  font-style: normal;
-  font-weight: 800;
-}
-.stage-progress-rail small {
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.stage-progress-rail span.active,
-.stage-progress-rail span.complete {
-  color: var(--color-primary);
-}
-.stage-progress-rail span.active i {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  color: #fff;
-  box-shadow: 0 0 0 4px var(--color-primary-soft);
-}
-.stage-progress-rail span.complete i {
-  border-color: var(--color-success);
-  background: var(--color-success);
-  color: #fff;
-}
-.stage-error {
-  margin: 0;
-  border-radius: var(--radius-sm);
-  background: var(--color-danger-bg);
-  padding: 9px 12px;
-  color: var(--color-danger);
-  font-size: 12.5px;
-  font-weight: 600;
-}
-.stage-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-}
-.dealer-stage-current {
-  margin: 0;
-  width: auto;
-  color: var(--color-text-soft);
-  font-size: 13px;
-  font-weight: 600;
-}
-.dealer-stage-current b {
-  color: var(--color-primary);
-  font-size: 14px;
-}
-.stage-cta {
-  min-height: 40px;
-  padding-inline: 18px;
-  font-size: 13.5px;
-}
-.stage-revert-link {
-  background: transparent;
-  padding: 4px;
-  color: var(--color-muted);
-  font-size: 12.5px;
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.stage-revert-link:hover {
-  color: var(--color-text-soft);
-}
-.stage-revert-link:disabled,
-.stage-cta:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 .stage-confirm-overlay {
   position: fixed;
   inset: 0;
@@ -8088,98 +7098,6 @@ textarea:focus-visible {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-}
-@media (max-width: 767px) {
-  .stage-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .stage-cta {
-    width: 100%;
-  }
-}
-/* Phase E: was a solid full-width warning-bg block that read as a large
-   alert; now a compact left-accent card (same visual language as the
-   Phase D transaction-row accent bar) — findable, still warm-toned, but no
-   longer the biggest thing on screen. Content/buttons unchanged. */
-.phone-confirm-banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border-bottom: 1px solid var(--color-line);
-  border-left: 3px solid var(--color-warning);
-  background: #fff;
-  padding: 9px 18px 9px 15px;
-}
-.phone-confirm-banner p {
-  margin: 0;
-  color: var(--color-text-soft);
-  font-size: 12.5px;
-  line-height: 1.5;
-  flex: 1 1 220px;
-}
-.phone-confirm-banner .button {
-  flex-shrink: 0;
-  min-height: 36px;
-  padding-inline: 14px;
-  font-size: 13px;
-}
-.phone-confirm-fallback {
-  flex-shrink: 0;
-  color: var(--color-muted);
-  font-size: 12.5px;
-  font-weight: 600;
-}
-@media (max-width: 767px) {
-  .phone-confirm-banner {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .phone-confirm-banner .button {
-    width: 100%;
-    justify-content: center;
-  }
-}
-/* Phase 8: 전화 연락 결과 기록 (연결됐어요/연락이 안 돼요) */
-.phone-confirm-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.phone-confirm-result-row {
-  display: flex;
-  flex: 1 1 100%;
-  gap: 8px;
-}
-.phone-confirm-done {
-  background: #fff;
-  border-left-color: var(--color-success);
-  border-bottom-color: var(--color-line);
-}
-.phone-confirm-done p {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-success);
-  font-weight: 700;
-}
-.phone-confirm-unreachable {
-  background: #fff;
-  border-left-color: var(--color-danger);
-  border-bottom-color: var(--color-line);
-}
-.phone-confirm-unreachable p {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-danger);
-  flex: 1 1 100%;
-}
-.phone-confirm-flag-unreachable {
-  background: var(--color-danger-bg) !important;
-  color: var(--color-danger) !important;
 }
 .shop-management-page {
   display: block;
@@ -9535,164 +8453,6 @@ textarea:focus-visible {
   color: #fff;
 }
 
-.transaction-workspace-layout {
-  grid-template-columns: 300px minmax(0, 1fr);
-}
-.transaction-operations-detail {
-  display: grid;
-  align-content: start;
-  gap: 18px;
-  min-width: 0;
-  background: #fff;
-  padding: 24px;
-}
-.transaction-operations-detail > header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-.transaction-operations-detail > header small {
-  color: var(--color-muted);
-  font-size: 11px;
-}
-.transaction-operations-detail > header h2 {
-  margin: 5px 0;
-  font-size: 24px;
-}
-.transaction-operations-detail > header p {
-  margin: 0;
-  color: var(--color-muted);
-}
-.transaction-progress-card {
-  border: 1px solid var(--color-line);
-  border-radius: 16px;
-  background: var(--color-surface-soft);
-  padding: 18px;
-}
-.transaction-progress-card > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.transaction-progress-card > div span {
-  color: var(--color-muted);
-  font-size: 12px;
-}
-.transaction-progress-card ol {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin: 18px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.transaction-progress-card li {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: 7px;
-  color: var(--color-muted);
-  font-size: 11px;
-  font-weight: 700;
-  text-align: center;
-}
-.transaction-progress-card li::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  top: 14px;
-  right: 50%;
-  width: 100%;
-  height: 2px;
-  background: var(--color-line);
-}
-.transaction-progress-card li:first-child::before {
-  display: none;
-}
-.transaction-progress-card li i {
-  z-index: 1;
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  border: 2px solid var(--color-line);
-  border-radius: 50%;
-  background: #fff;
-  font-style: normal;
-}
-.transaction-progress-card li.complete i,
-.transaction-progress-card li.active i {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  color: #fff;
-}
-.transaction-progress-card li.complete::before,
-.transaction-progress-card li.active::before {
-  background: var(--color-primary);
-}
-.transaction-core-info {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0;
-  margin: 0;
-  border: 1px solid var(--color-line);
-  border-radius: 16px;
-  overflow: hidden;
-}
-.transaction-core-info > div {
-  display: grid;
-  gap: 5px;
-  min-height: 84px;
-  padding: 16px;
-  border-bottom: 1px solid var(--color-line);
-}
-.transaction-core-info > div:nth-child(odd) {
-  border-right: 1px solid var(--color-line);
-}
-.transaction-core-info > div:nth-last-child(-n + 2) {
-  border-bottom: 0;
-}
-.transaction-core-info dt {
-  color: var(--color-muted);
-  font-size: 11px;
-}
-.transaction-core-info dd {
-  margin: 0;
-  font-weight: 750;
-  line-height: 1.5;
-}
-.transaction-price-editor {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  border: 1px solid var(--color-primary-border);
-  border-radius: 14px;
-  background: var(--color-primary-soft);
-  padding: 14px 16px;
-}
-.transaction-price-editor > span {
-  color: var(--color-text-soft);
-  font-size: 13px;
-  font-weight: 700;
-}
-.transaction-price-editor > div {
-  display: flex;
-  gap: 8px;
-}
-.transaction-price-editor input {
-  width: 160px;
-  min-height: 44px;
-}
-.transaction-price-editor button {
-  min-height: 44px;
-}
-.transaction-operations-detail > footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
 .compact-control {
   justify-content: flex-end;
 }
@@ -9961,20 +8721,6 @@ textarea:focus-visible {
   color: var(--color-primary);
   font-weight: 800;
 }
-.shop-transaction-management .transaction-room-layout {
-  grid-template-columns: minmax(370px, 0.92fr) minmax(0, 1.65fr);
-  gap: 0;
-  overflow: hidden;
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: none;
-}
-.shop-transaction-management .transaction-room-layout > .transaction-list {
-  max-height: min(710px, calc(100vh - 286px));
-  border-right: 1px solid var(--color-line);
-  background: #f8fafc;
-}
 .shop-transaction-management .transaction-list > button {
   min-height: 112px;
   border-bottom: 1px solid var(--color-line);
@@ -9998,137 +8744,9 @@ textarea:focus-visible {
   color: var(--color-muted);
   font-size: 11px;
 }
-.shop-transaction-management .transaction-list > button .transaction-list-schedule {
-  color: var(--color-text-soft);
-  font-variant-numeric: tabular-nums;
-}
 .shop-transaction-management .transaction-list > button em {
   color: var(--color-muted-soft);
   font-size: 11px;
-}
-.shop-transaction-management .transaction-operations-detail {
-  gap: 14px;
-  min-height: 640px;
-  padding: 25px 28px 18px;
-}
-.shop-transaction-management .transaction-operations-detail > header {
-  align-items: flex-start;
-  padding-bottom: 15px;
-  border-bottom: 1px solid var(--color-line);
-}
-.shop-transaction-management .transaction-operations-detail > header h2 {
-  margin: 3px 0 4px;
-  font-size: 30px;
-  letter-spacing: -0.04em;
-}
-.shop-transaction-management .transaction-operations-detail > header p {
-  color: var(--color-text-soft);
-  font-size: 13px;
-}
-.shop-transaction-management .transaction-detail-status {
-  display: grid;
-  justify-items: end;
-  gap: 7px;
-}
-.shop-transaction-management .transaction-detail-status > span {
-  color: var(--color-muted);
-  font-size: 10px;
-}
-.shop-transaction-management .transaction-detail-status .status-chip {
-  padding: 7px 10px;
-}
-.shop-transaction-management .transaction-progress-card {
-  border: 0;
-  border-bottom: 1px solid var(--color-line);
-  border-radius: 0;
-  background: transparent;
-  padding: 2px 0 15px;
-}
-.shop-transaction-management .transaction-progress-card > div span {
-  color: var(--color-muted);
-  font-size: 11px;
-}
-.shop-transaction-management .transaction-progress-card > div b {
-  color: var(--color-ink);
-  font-size: 14px;
-}
-.shop-transaction-management .transaction-progress-card ol {
-  gap: 0;
-  margin-top: 13px;
-}
-.shop-transaction-management .transaction-progress-card li {
-  gap: 5px;
-  font-size: 10px;
-}
-.shop-transaction-management .transaction-progress-card li i {
-  width: 22px;
-  height: 22px;
-  border-width: 1px;
-  font-size: 9px;
-}
-.shop-transaction-management .transaction-progress-card li::before {
-  top: 10px;
-  height: 1px;
-}
-.shop-transaction-management .shop-next-action {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid var(--color-line);
-  padding: 0 0 16px;
-}
-.shop-transaction-management .shop-next-action > span {
-  color: var(--color-muted);
-  font-size: 11px;
-}
-.shop-transaction-management .shop-next-action > b {
-  color: var(--color-ink);
-  font-size: 17px;
-}
-.shop-transaction-management .shop-next-action > button {
-  min-height: 42px;
-}
-.shop-transaction-management .transaction-core-info {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border: 0;
-  border-radius: 0;
-}
-.shop-transaction-management .transaction-core-info > div {
-  min-height: 74px;
-  border-right: 1px solid var(--color-line);
-  border-bottom: 1px solid var(--color-line);
-  padding: 12px 14px;
-}
-.shop-transaction-management .transaction-core-info > div:nth-child(odd) {
-  border-right: 1px solid var(--color-line);
-}
-.shop-transaction-management .transaction-core-info > div:last-child {
-  border-right: 0;
-}
-.shop-transaction-management .transaction-core-info dt {
-  font-size: 10px;
-}
-.shop-transaction-management .transaction-core-info dd {
-  font-size: 13px;
-}
-.shop-transaction-management .transaction-price-editor {
-  border: 0;
-  border-top: 1px solid var(--color-line);
-  border-bottom: 1px solid var(--color-line);
-  border-radius: 0;
-  background: #fff;
-  padding: 14px 0;
-}
-.shop-transaction-management .transaction-operations-detail > footer {
-  justify-content: flex-start;
-  align-items: center;
-  margin-top: auto;
-  padding-top: 3px;
-}
-.shop-transaction-management .transaction-operations-detail > footer .primary {
-  order: -1;
-  margin-right: auto;
 }
 @media (max-width: 760px) {
   .shop-transaction-management .transaction-summary-strip {
