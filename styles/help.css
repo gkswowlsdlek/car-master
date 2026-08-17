@@ -2,7 +2,7 @@
 /* Product polish: standalone service help surface */
 .help-page {
   min-height: 100vh;
-  background: #f7f9fc;
+  background: var(--color-surface-soft);
   padding: 48px 24px 80px;
   color: var(--color-ink);
 }

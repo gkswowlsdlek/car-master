@@ -113,7 +113,7 @@
   box-shadow: var(--shadow-sm);
 }
 .shop-transaction-management .transaction-room-layout > .transaction-list {
-  background: #f8fafc;
+  background: var(--color-surface-soft);
 }
 .shop-transaction-management .transaction-list > button .transaction-list-schedule {
   color: var(--color-text-soft);
@@ -134,7 +134,7 @@
 .shop-transaction-management .transaction-room-layout > .transaction-list {
   max-height: min(710px, calc(100vh - 286px));
   border-right: 1px solid var(--color-line);
-  background: #f8fafc;
+  background: var(--color-surface-soft);
 }
 .shop-transaction-management .transaction-list > button .transaction-list-schedule {
   color: var(--color-text-soft);
@@ -358,7 +358,7 @@
 .shop-transaction-management .transaction-room-layout > .transaction-list {
   max-height: min(710px, calc(100vh - 286px));
   border-right: 1px solid var(--color-line);
-  background: #f8fafc;
+  background: var(--color-surface-soft);
 }
 .shop-transaction-management .transaction-list > button .transaction-list-schedule {
   color: var(--color-text-soft);
@@ -1269,7 +1269,7 @@
 .shop-transaction-management .transaction-room-layout > .transaction-list {
   max-height: min(710px, calc(100vh - 286px));
   border-right: 1px solid var(--color-line);
-  background: #f8fafc;
+  background: var(--color-surface-soft);
 }
 .shop-transaction-management .transaction-list > button .transaction-list-schedule {
   color: var(--color-text-soft);

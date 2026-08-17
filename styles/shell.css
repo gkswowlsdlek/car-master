@@ -510,7 +510,7 @@
   height: 52px !important;
   padding: 0 36px !important;
   background: #fff !important;
-  border-bottom-color: #eef1f5 !important;
+  border-bottom-color: var(--color-surface-soft) !important;
 }
 /* R6 reference lock: proportions and visual grammar follow the approved Dealer reference. */
 .role-dealer .app-frame,
@@ -571,7 +571,7 @@
   color: var(--cm-text);
 }
 .role-dealer .app-topbar .topbar-icon-button:hover {
-  background: #f0f3fb;
+  background: var(--color-surface-soft);
   box-shadow: none;
 }
 .role-dealer .app-topbar .service-status {
