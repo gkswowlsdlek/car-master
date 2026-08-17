@@ -1,6 +1,3 @@
-import { pricePackages } from "../../data/pricePackages";
-import { calculateVehicleClassPrice, vehicleClassOptions, type VehicleClass } from "../../data/vehicle-class-options";
-import { formatGuidePrice } from "../../data/installation-price-guide";
 import { classifyVehicleModel } from "../../data/vehicleClasses";
 import {
   administrativeRegionNames,
@@ -24,22 +21,6 @@ export function ServiceRequestForm({
 }) {
   const updateModel = (model: string) =>
     setRequest({ ...request, model, vehicleClass: classifyVehicleModel(model) || request.vehicleClass });
-  const updateVehicleClass = (vehicleClass: VehicleClass) => {
-    const pkg = pricePackages.find((item) => item.id === request.selectedPackageId);
-    if (!pkg) return setRequest({ ...request, vehicleClass });
-    const price = calculateVehicleClassPrice(pkg.guidePrice, vehicleClass);
-    setRequest({
-      ...request,
-      vehicleClass,
-      baseGuidePrice: pkg.guidePrice,
-      ...price,
-      expectedPrice: price.priceRequiresInquiry
-        ? vehicleClass === "국산 대형/SUV"
-          ? "추가금 발생 가능"
-          : "별도 견적"
-        : formatGuidePrice(price.finalGuidePrice ?? pkg.guidePrice),
-    });
-  };
   const selectedRegion = administrativeRegionNames.find((region) => request.deliveryArea.includes(region)) ?? "경기";
   const districts = administrativeRegions[selectedRegion];
   const selectedDistrict = districts.find((district) => request.deliveryArea.includes(district)) ?? districts[0];
@@ -63,7 +44,7 @@ export function ServiceRequestForm({
         <span>01</span>
         <div>
           <b>차량 정보</b>
-          <small>시공할 차량과 등급을 확인해 주세요.</small>
+          <small>시공할 차량 모델을 입력해 주세요.</small>
         </div>
       </div>
       <label className="wide-field required-field">
@@ -77,21 +58,6 @@ export function ServiceRequestForm({
           placeholder="예: 제네시스 GV80"
         />
       </label>
-      <div className="vehicle-class-picker wide-field">
-        <span>차량 등급</span>
-        {vehicleClassOptions.map((option) => (
-          <button
-            type="button"
-            key={option.id}
-            className={request.vehicleClass === option.id ? "active" : ""}
-            onClick={() => updateVehicleClass(option.id)}
-          >
-            <b>{option.label}</b>
-            <small>{option.description}</small>
-          </button>
-        ))}
-        <p>※ 같은 차량 등급이라도 창문 크기, 필름 사용량 및 작업 조건에 따라 추가 비용이 발생할 수 있습니다.</p>
-      </div>
       <div className="form-section-title wide-field">
         <span>02</span>
         <div>

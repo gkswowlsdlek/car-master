@@ -2,13 +2,6 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("the recommended package guide keeps the supported brand catalog", async () => {
-  const source = await readFile(new URL("../data/pricePackages.ts", import.meta.url), "utf8");
-  for (const brand of ["버텍스", "브이쿨", "솔라가드", "후퍼옵틱", "글라스틴트", "기타"])
-    assert.match(source, new RegExp(brand));
-  assert.match(source, /installationPriceGuide\.flatMap/);
-});
-
 test("installer search retains coordinate-free shops and sorts them after located shops", async () => {
   const source = await readFile(new URL("../services/installer-search.ts", import.meta.url), "utf8");
   assert.match(source, /shop\.lat == null \|\| shop\.lng == null/);

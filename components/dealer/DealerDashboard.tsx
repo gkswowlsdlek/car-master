@@ -108,7 +108,6 @@ export function DealerDashboard({
   onNewRequest: _onNewRequest,
   onFindShop,
   onSearchLocation,
-  onPriceGuide: _onPriceGuide,
   onShopSearchRequests,
 }: {
   dealerName: string;
@@ -118,7 +117,6 @@ export function DealerDashboard({
   onNewRequest: () => void;
   onFindShop: () => void;
   onSearchLocation: (area: string, workType: string) => void;
-  onPriceGuide: () => void;
   onShopSearchRequests?: () => void;
 }) {
   const [area, setArea] = useState("");

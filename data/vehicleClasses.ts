@@ -1,4 +1,4 @@
-import type { VehicleClass } from "./pricePackages";
+import type { VehicleClass } from "./vehicle-class-options";
 
 export function classifyVehicleModel(model: string): VehicleClass | "" {
   const normalized = model.toLowerCase();

@@ -5,10 +5,6 @@ import { defaultRequest } from "../../data/default-request";
 import { isDemoAccountId } from "../../data/demo-accounts";
 import { districtCenters } from "../../data/district-centers";
 import { demoInstallerListings } from "../../data/installer-directory-demo";
-import { formatGuidePrice } from "../../data/installation-price-guide";
-import { pricePackages, type PriceGuideFilter, type PricePackage, type VehicleClass } from "../../data/pricePackages";
-import { calculateVehicleClassPrice } from "../../data/vehicle-class-options";
-import type { Brand } from "../../lib/dealer-flow-data";
 import { chatRepository } from "../../repositories/chat-repository";
 import { demoTransactionRepository } from "../../repositories/demo-transaction-repository";
 import { installerDirectoryRepository } from "../../repositories/installer-directory-repository";
@@ -34,7 +30,6 @@ import type {
 } from "../../types/transactions";
 import { DealerDashboard } from "../dealer/DealerDashboard";
 import { InstallerDirectoryScreen } from "../dealer/InstallerDirectoryScreen";
-import { PriceGuideScreen } from "../dealer/PriceGuideScreen";
 import { RequestSummary } from "../dealer/RequestSummary";
 import { ServiceRequestScreen } from "../dealer/ServiceRequestScreen";
 import { ShopSearchRequestScreen } from "../dealer/ShopSearchRequestScreen";
@@ -125,10 +120,6 @@ export function DealerWorkspace({
   const [selectedShopId, setSelectedShopId] = useState("SHOP-MISA-001");
   const [favoriteShopIds, setFavoriteShopIds] = useState<string[]>(["SHOP-MISA-001"]);
   const [request, setRequest] = useState<ServiceRequest>(initialServiceRequest);
-  const [priceFilter, setPriceFilter] = useState<PriceGuideFilter>("전체");
-  const [priceSearch, setPriceSearch] = useState("");
-  const [vehicleClass, setVehicleClass] = useState<VehicleClass>("국산 승용");
-  const [selectedPackageId, setSelectedPackageId] = useState(pricePackages[0].id);
   const [selectedTransactionId, setSelectedTransactionId] = useState("");
   const [dealFilter, setDealFilter] = useState<TransactionStage | "전체">("전체");
   const [mobileChatOpen, setMobileChatOpen] = useState(false);
@@ -154,18 +145,6 @@ export function DealerWorkspace({
   );
   const selectedShop =
     availableShops.find((shop) => shop.id === selectedShopId) ?? nearbyResults[0]?.shop ?? demoInstallerListings[0];
-  const selectedPackage = pricePackages.find((item) => item.id === selectedPackageId) ?? pricePackages[0];
-  const filteredPackages = pricePackages.filter((item) => {
-    const keyword = priceSearch.trim().toLowerCase();
-    const matchesFilter =
-      priceFilter === "전체" ||
-      (priceFilter === "기타" && item.brandGroup === "기타") ||
-      (priceFilter === "솔라가드" && item.brand.startsWith("솔라가드")) ||
-      item.brand === priceFilter;
-    return (
-      matchesFilter && (!keyword || `${item.brand} ${item.product} ${item.description}`.toLowerCase().includes(keyword))
-    );
-  });
   const unreadMessageCount = useMemo(
     () =>
       rooms
@@ -256,43 +235,6 @@ export function DealerWorkspace({
     onNavigate("dealerMap");
   };
 
-  const applyPackage = (
-    item: PricePackage,
-    nextClass = vehicleClass,
-    optionalServices: string[] = [],
-    requestType: RequestType = "실제 시공 요청",
-  ) => {
-    const price = calculateVehicleClassPrice(item.guidePrice, nextClass);
-    const expectedPrice = price.priceRequiresInquiry
-      ? nextClass === "국산 대형/SUV"
-        ? "추가금 발생 가능"
-        : "별도 견적"
-      : formatGuidePrice(price.finalGuidePrice ?? item.guidePrice);
-    setSelectedPackageId(item.id);
-    setVehicleClass(nextClass);
-    setRequest((current) => ({
-      ...current,
-      preferredBrand: item.brand as Brand,
-      works: [`${item.brand} ${item.product} 썬팅`],
-      workDescription: `${item.brand} ${item.product} 썬팅`,
-      memo: item.name,
-      requestType,
-      vehicleClass: nextClass,
-      selectedPackageId: item.id,
-      selectedPackageName: item.product,
-      selectedPackageBrand: item.brand,
-      selectedPackageProduct: item.product,
-      expectedPrice,
-      baseGuidePrice: item.guidePrice,
-      surcharge: price.surcharge,
-      finalGuidePrice: price.finalGuidePrice,
-      priceRequiresInquiry: price.priceRequiresInquiry,
-      includedServices: item.includedServices,
-      optionalServices,
-    }));
-    onNavigate("request");
-  };
-
   const createTransaction = async () => {
     if (isCreatingTransaction) return;
     setIsCreatingTransaction(true);
@@ -306,15 +248,10 @@ export function DealerWorkspace({
           const created = await supabaseTransactionRepository.createWithShopRoom(selectedShop.id, {
             vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass },
             service: {
-              brand: request.selectedPackageBrand,
-              product: request.selectedPackageProduct,
               workDescription: request.workDescription,
               extraRequest: request.extraRequest,
             },
             pricing: {
-              baseGuidePrice: request.baseGuidePrice,
-              surcharge: request.surcharge,
-              finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice,
               paymentStatus: "미결제",
             },
             schedule: { requestedInboundAt: request.inboundStart, desiredReleaseAt: request.releaseDate },
@@ -343,15 +280,10 @@ export function DealerWorkspace({
               installerName: selectedShop.name,
               vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass },
               service: {
-                brand: request.selectedPackageBrand,
-                product: request.selectedPackageProduct,
                 workDescription: request.workDescription,
                 extraRequest: request.extraRequest,
               },
               pricing: {
-                baseGuidePrice: request.baseGuidePrice,
-                surcharge: request.surcharge,
-                finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice,
                 paymentStatus: "미결제",
               },
               schedule: { requestedInboundAt: request.inboundStart, desiredReleaseAt: request.releaseDate },
@@ -387,15 +319,10 @@ export function DealerWorkspace({
         installerName: selectedShop.name,
         vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass },
         service: {
-          brand: request.selectedPackageBrand,
-          product: request.selectedPackageProduct,
           workDescription: request.workDescription,
           extraRequest: request.extraRequest,
         },
         pricing: {
-          baseGuidePrice: request.baseGuidePrice,
-          surcharge: request.surcharge,
-          finalPrice: request.priceRequiresInquiry ? undefined : request.finalGuidePrice,
           paymentStatus: "미결제",
         },
         schedule: { requestedInboundAt: request.inboundStart, desiredReleaseAt: request.releaseDate },
@@ -462,23 +389,7 @@ export function DealerWorkspace({
           onNewRequest={() => onNavigate("request")}
           onFindShop={() => onNavigate("dealerMap")}
           onSearchLocation={searchHomeLocation}
-          onPriceGuide={() => onNavigate("priceGuide")}
           onShopSearchRequests={useSupabaseData ? () => onNavigate("shopSearchRequests") : undefined}
-        />
-      )}
-      {screen === "priceGuide" && (
-        <PriceGuideScreen
-          packages={filteredPackages}
-          selectedPackage={selectedPackage}
-          selectedPackageId={selectedPackageId}
-          setSelectedPackageId={setSelectedPackageId}
-          brandFilter={priceFilter}
-          setBrandFilter={setPriceFilter}
-          search={priceSearch}
-          setSearch={setPriceSearch}
-          vehicleClass={vehicleClass}
-          setVehicleClass={setVehicleClass}
-          onRequest={applyPackage}
         />
       )}
       {screen === "dealerMap" && (
@@ -493,8 +404,7 @@ export function DealerWorkspace({
               current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
             )
           }
-          selectedBrand={request.selectedPackageBrand}
-          isOtherBrand={selectedPackage.brandGroup === "기타"}
+          isOtherBrand={false}
           onRequest={() => onNavigate("request")}
           onShopSearchRequest={useSupabaseData ? () => onNavigate("shopSearchRequests") : undefined}
         />
@@ -514,7 +424,6 @@ export function DealerWorkspace({
           setSelectedShopId={setSelectedShopId}
           onFindShops={(area) => void searchArea(area ?? request.deliveryArea)}
           onSummary={() => onNavigate("requestSummary")}
-          onPriceGuide={() => onNavigate("priceGuide")}
         />
       )}
       {screen === "requestSummary" && (

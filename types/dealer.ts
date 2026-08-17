@@ -16,7 +16,6 @@ export type Screen =
   | "accountStatus"
   | "dealerDashboard"
   | "shopDashboard"
-  | "priceGuide"
   | "dealerMap"
   | "request"
   | "requestSummary"
@@ -57,15 +56,4 @@ export type ServiceRequest = {
   requestType: RequestType;
   extraWorkNote: string;
   vehicleClass: VehicleClass | "";
-  selectedPackageId?: string;
-  selectedPackageName?: string;
-  selectedPackageBrand?: string;
-  selectedPackageProduct?: string;
-  expectedPrice?: string;
-  baseGuidePrice?: number;
-  surcharge?: number;
-  finalGuidePrice?: number;
-  priceRequiresInquiry?: boolean;
-  includedServices?: string[];
-  optionalServices?: string[];
 };

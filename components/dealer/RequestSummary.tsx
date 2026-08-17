@@ -21,7 +21,6 @@ export function RequestSummary({
     ["입고예정일", request.inboundStart],
     ["출고 희망일", request.releaseDate],
     ["시공점", shop.name],
-    ["가이드 가격", request.expectedPrice ?? "시공점 확인"],
   ];
   return (
     <section className="section summary-page">

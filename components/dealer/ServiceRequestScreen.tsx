@@ -25,7 +25,6 @@ export function ServiceRequestScreen({
   setSelectedShopId,
   onFindShops,
   onSummary,
-  onPriceGuide,
 }: {
   request: ServiceRequest;
   setRequest: (value: ServiceRequest) => void;
@@ -35,7 +34,6 @@ export function ServiceRequestScreen({
   setSelectedShopId: (id: string) => void;
   onFindShops: (area?: string) => void;
   onSummary: () => void;
-  onPriceGuide: () => void;
 }) {
   const selectedTrust = shopTrustParts(selectedShop, true).join(" · ");
   return (
@@ -47,22 +45,6 @@ export function ServiceRequestScreen({
           <p className="page-subtitle">필수 정보만 입력하고 작업을 맡길 시공점을 선택하세요.</p>
         </div>
       </header>
-      {request.selectedPackageName && (
-        <div className="card selected-package-summary">
-          <div>
-            <span>선택한 권장 시공 패키지</span>
-            <b>
-              {request.selectedPackageBrand} {request.selectedPackageName}
-            </b>
-            <p>
-              {request.vehicleClass} · {request.expectedPrice}
-            </p>
-          </div>
-          <button className="button button-secondary" onClick={onPriceGuide}>
-            상품 변경
-          </button>
-        </div>
-      )}
       <div className="request-layout">
         <ServiceRequestForm
           request={request}
