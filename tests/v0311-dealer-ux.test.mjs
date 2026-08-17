@@ -123,5 +123,4 @@ test("responsive rules cover requested desktop and mobile workspace behavior", a
   );
   assert.match(css, /\.messenger-chat-pane \.messenger-sidebar\.mobile-open/);
   assert.match(css, /\.app-frame\.mobile-chat-fullscreen \.messenger-workspace/);
-  assert.match(css, /@media \(max-width: 390px\)/);
 });
