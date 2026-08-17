@@ -723,3 +723,69 @@
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
 }
+
+/* Sidebar coverage block — sits between the nav and the profile, filling what
+   was dead space at the bottom of the rail with the one number a dealer cares
+   about before searching: how much of the country is actually reachable.
+   `margin-top: auto` pins it low without a fixed height, so when the figure is
+   unavailable and the block is not rendered the rail simply closes up. */
+.sidebar-coverage {
+  margin: auto 2px 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+}
+.sidebar-coverage-count {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+}
+.sidebar-coverage-count b {
+  color: #fff;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.sidebar-coverage-count span {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: var(--font-sm);
+  font-weight: 600;
+}
+.sidebar-coverage-label {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+.sidebar-coverage-bar {
+  display: flex;
+  gap: 3px;
+  margin-top: 11px;
+}
+.sidebar-coverage-bar i {
+  height: 5px;
+  flex-basis: 0;
+  border-radius: 3px;
+  background: var(--color-primary);
+}
+.sidebar-coverage-bar i:nth-child(2) { opacity: 0.78; }
+.sidebar-coverage-bar i:nth-child(3) { opacity: 0.58; }
+.sidebar-coverage-bar i:nth-child(4) { opacity: 0.42; }
+.sidebar-coverage-bar i:nth-child(5) { opacity: 0.3; }
+.sidebar-coverage-legend {
+  display: block;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: var(--font-xs);
+  line-height: 1.55;
+}
+/* The rail is a grid; the coverage block needs a flex context for margin-auto
+   to push it down, and the profile must stay last. */
+.app-sidebar {
+  display: flex;
+  flex-direction: column;
+}

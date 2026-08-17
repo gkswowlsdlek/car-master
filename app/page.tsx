@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AccountStatusScreen } from "../components/auth/AccountStatusScreen";
 import { LoginScreen } from "../components/auth/LoginScreen";
@@ -17,6 +17,9 @@ import { DealerWorkspace } from "../components/workspaces/DealerWorkspace";
 import { InstallerWorkspace } from "../components/workspaces/InstallerWorkspace";
 import { demoAccounts, isDemoAccountId } from "../data/demo-accounts";
 import { demoInstallerListings } from "../data/installer-directory-demo";
+import { installerDirectoryRepository } from "../repositories/installer-directory-repository";
+import type { InstallerListing } from "../types/installer";
+import type { ShopCoverage } from "../components/layout/AppShell";
 import { useTransactionActions } from "../hooks/use-transaction-actions";
 import { useTransactionStore } from "../hooks/use-transaction-store";
 import { demoAttachmentProvider } from "../services/attachments";
@@ -36,6 +39,23 @@ import type {
   SignUpInput,
   SignUpResult,
 } from "../types/auth";
+
+/** Groups approved shops by 시/도 for the sidebar coverage block: the four
+ * largest regions, everything else folded into "그 외". Returns null when
+ * there is nothing to show, so the caller can omit the block entirely. */
+function summarizeCoverage(shops: InstallerListing[]): ShopCoverage | null {
+  const usable = shops.filter((shop) => shop.approved !== false);
+  if (usable.length === 0) return null;
+  const counts = new Map<string, number>();
+  for (const shop of usable) {
+    const label = (shop.province || "기타").replace(/(특별시|광역시|특별자치시|특별자치도|도)$/, "") || shop.province;
+    counts.set(label, (counts.get(label) ?? 0) + 1);
+  }
+  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  const top = sorted.slice(0, 4).map(([label, count]) => ({ label, count }));
+  const rest = sorted.slice(4).reduce((sum, [, count]) => sum + count, 0);
+  return { total: usable.length, regions: rest > 0 ? [...top, { label: "그 외", count: rest }] : top };
+}
 
 function pathForScreen(screen: Screen, role: Role) {
   if (screen === "landing") return "/";
@@ -75,6 +95,7 @@ export default function Home() {
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [dealerCompanyName, setDealerCompanyName] = useState<string | undefined>(undefined);
+  const [realShopCoverage, setRealShopCoverage] = useState<ShopCoverage | null>(null);
   const [dealerUnreadMessageCount, setDealerUnreadMessageCount] = useState(0);
   const [dealerMobileFullscreen, setDealerMobileFullscreen] = useState(false);
   const [installerMobileFullscreen, setInstallerMobileFullscreen] = useState(false);
@@ -282,6 +303,21 @@ export default function Home() {
     };
   }, [enterAuthenticatedUser, login, pathname]);
 
+  // Sidebar coverage figure. Never hardcoded: Demo derives it from the demo
+  // directory during render, Real fetches the approved-shop directory. Any
+  // failure leaves it null and the sidebar omits the block entirely.
+  useEffect(() => {
+    if (!useSupabaseData) return;
+    let active = true;
+    void installerDirectoryRepository
+      .getApproved()
+      .then((shops) => { if (active) setRealShopCoverage(summarizeCoverage(shops)); })
+      .catch(() => { if (active) setRealShopCoverage(null); });
+    return () => { active = false; };
+  }, [useSupabaseData]);
+  const demoShopCoverage = useMemo(() => summarizeCoverage(demoInstallerListings), []);
+  const shopCoverage = useSupabaseData ? realShopCoverage : demoShopCoverage;
+
   useEffect(() => {
     if (!authProvider.subscribe) return;
     return authProvider.subscribe((user) => {
@@ -359,6 +395,7 @@ export default function Home() {
       screen={screen}
       unreadMessageCount={unreadMessageCount}
       mobileFullscreen={mobileFullscreen}
+      shopCoverage={role === "dealer" ? shopCoverage : null}
       onNavigate={goToScreen}
       onLogout={() => void logout()}
     >

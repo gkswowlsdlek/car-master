@@ -79,6 +79,11 @@ const shopScreenTitles: Partial<Record<Screen, string>> = { shopRequests: "거�
 
 const MOBILE_PRIMARY_COUNT = 4;
 
+/** Approved-shop network summary for the sidebar coverage block. Always
+ * derived from a real directory read (see app/page.tsx); null whenever that
+ * read fails or returns nothing, in which case the block is simply omitted. */
+export type ShopCoverage = { total: number; regions: { label: string; count: number }[] };
+
 function isActive(screen: Screen, target: Screen) {
   return screen === target || (target === "request" && screen === "requestSummary");
 }
@@ -90,6 +95,7 @@ export function AppShell({
   screen,
   unreadMessageCount = 0,
   mobileFullscreen = false,
+  shopCoverage = null,
   onNavigate,
   onLogout,
   children,
@@ -100,6 +106,7 @@ export function AppShell({
   screen: Screen;
   unreadMessageCount?: number;
   mobileFullscreen?: boolean;
+  shopCoverage?: ShopCoverage | null;
   onNavigate: (screen: Screen) => void;
   onLogout: () => void;
   children: ReactNode;
@@ -184,6 +191,23 @@ export function AppShell({
               ))}
             </nav>
           </>
+        )}
+        {shopCoverage && (
+          <div className="sidebar-coverage">
+            <p className="sidebar-coverage-count">
+              <b>{shopCoverage.total}</b>
+              <span>곳 연결됨</span>
+            </p>
+            <small className="sidebar-coverage-label">전국 시공점 네트워크</small>
+            <span className="sidebar-coverage-bar" aria-hidden="true">
+              {shopCoverage.regions.map((region) => (
+                <i key={region.label} style={{ flexGrow: region.count }} />
+              ))}
+            </span>
+            <small className="sidebar-coverage-legend">
+              {shopCoverage.regions.map((region) => `${region.label} ${region.count}`).join(" · ")}
+            </small>
+          </div>
         )}
         <div className="sidebar-profile">
           <span>{account.name.slice(0, 1)}</span>
