@@ -25,4 +25,4 @@ V0.3.4.1은 데모 계정 중심 인증을 실제 이메일 회원가입과 회�
 
 ## 외부 설정
 
-코드에는 실제 Secret이 포함되어 있지 않습니다. Supabase 마이그레이션, Auth URL, Vercel 환경변수와 최초 관리자 지정은 `SUPABASE_SETUP_V0.3.4.md` 절차에 따라 사용자가 적용해야 합니다.
+코드에는 실제 Secret이 포함되어 있지 않습니다. Supabase 마이그레이션, Auth URL, Vercel 환경변수와 최초 관리자 지정은 `docs/supabase/SUPABASE_SETUP_V0.3.4.md` 절차에 따라 사용자가 적용해야 합니다.

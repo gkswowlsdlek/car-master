@@ -25,9 +25,9 @@
 
 ### Not included / Pending
 
-- **`202608030001_v0313_demo_installer_membership.sql` 마이그레이션은 아직 Production Supabase에 적용되지 않았습니다.** 이번 라운드는 구현과 로컬 검증(단위 테스트, TypeScript, ESLint, Production build)까지만 완료했습니다.
-- 마이그레이션 미적용 상태이므로 Demo Admin 승인 패널의 실제 인터랙티브 동작은 Production에서 아직 눈으로 확인되지 않았습니다.
-- 실제(Real) 관리자 승인 경로는 코드상 로직이 변경 전과 동일함을 확인했으나, Production 라이브 재검증은 남아 있습니다.
+- **정정 (2026-08-17):** `202608030001_v0313_demo_installer_membership.sql`은 이후 `supabase/retired-migrations/`로 폐기되어 active migration chain에 포함되지 않습니다. 아래 두 항목은 해당 마이그레이션이 활성 상태였을 때 남긴 기록이며, 현재는 적용 대상이 아닙니다. 현재 pending 마이그레이션은 0건입니다.
+- ~~마이그레이션 미적용 상태이므로 Demo Admin 승인 패널의 실제 인터랙티브 동작은 Production에서 아직 눈으로 확인되지 않았습니다.~~
+- ~~실제(Real) 관리자 승인 경로는 코드상 로직이 변경 전과 동일함을 확인했으나, Production 라이브 재검증은 남아 있습니다.~~
 - 새로운 결제·정산 기능, 다른 워크스페이스 재설계는 포함하지 않습니다.
 
 ## v0.3.11 Dealer Experience / Meeting Ready - 2026-07-26
@@ -256,7 +256,7 @@
 - 딜러 대시보드에 업무 우선순위, 최근 활동, 거래 없음 상태를 추가했습니다.
 - 가격 가이드, 시공 요청, 시공점 선택, 거래 타임라인, 마이페이지 UX를 개선했습니다.
 - Desktop, Tablet, Mobile 반응형 표현과 마이크로 인터랙션을 정리했습니다.
-- 자세한 사용자 관점 변경 사항은 `RELEASE_NOTES_V0.3.md`에서 확인할 수 있습니다.
+- 자세한 사용자 관점 변경 사항은 `docs/releases/RELEASE_NOTES_V0.3.md`에서 확인할 수 있습니다.
 
 # V0.3.1 Beta Candidate
 

@@ -2,7 +2,7 @@
 
 Car-Master는 리스·렌트 에이전시 딜러와 자동차 시공점을 연결하고, 가격 확인부터 시공 완료까지의 업무를 거래 단위로 관리하는 B2B 플랫폼입니다.
 
-현재 개발 기준 버전은 `Car-Master v0.3.5 Baseline`입니다.
+현재 개발 기준 버전은 `Car-Master v0.3.13`입니다.
 
 ## 핵심 사용자 흐름
 
@@ -53,12 +53,12 @@ pnpm run lint
 pnpm run build
 ```
 
-## v0.3.5 Baseline 데이터 구조
+## 데이터 구조
 
 Supabase가 설정된 운영 환경에서는 이메일 인증과 회원 프로필을 Supabase Auth/Postgres에 저장합니다. 역할은 `dealer`, `installer`, `admin`으로 관리하며 시공점은 관리자 승인 후 워크스페이스에 접근합니다.
 
 `shop`은 기존 화면과 저장 데이터 호환을 위해 유지되는 명칭이며, 서비스 경계에서는 표준 역할명 `installer`로 정규화합니다.
 
-Supabase가 설정되고 실제 회원으로 로그인한 환경에서는 거래, 거래방, 채팅과 첨부파일이 Supabase 저장소를 사용합니다. 시험용 역할 계정은 기능 확인을 위한 localStorage 데이터를 사용하며 실제 회원 데이터와 분리됩니다.
+Supabase가 설정되고 실제 회원으로 로그인한 환경에서는 거래, 거래방, 채팅과 첨부파일이 Supabase 저장소를 사용합니다. 시험용 역할 계정(베타 계정)은 기능 확인을 위한 localStorage 데이터를 사용하며 실제 회원 데이터와 분리됩니다.
 
-외부 서비스 설정은 `SUPABASE_SETUP_V0.3.4.md`, 현재 기준 변경 사항은 `RELEASE_NOTES_V0.3.5.md`를 참고하세요.
+외부 서비스 설정은 `docs/supabase/SUPABASE_SETUP_V0.3.4.md`, 최신 변경 사항은 `docs/releases/RELEASE_NOTES_V0.3.13.md`를 참고하세요.

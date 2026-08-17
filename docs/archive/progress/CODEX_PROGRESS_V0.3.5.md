@@ -56,10 +56,10 @@
 
 ## 4단계 — 문서화 (완료)
 
-- `AUDIT_V0.3.5.md`
-- `RELEASE_NOTES_V0.3.5.md`
-- `TEST_PLAN_V0.3.5.md`
-- `SUPABASE_V0.3.6_CHECKLIST.md`
+- `docs/audits/AUDIT_V0.3.5.md`
+- `docs/releases/RELEASE_NOTES_V0.3.5.md`
+- `docs/test-plans/TEST_PLAN_V0.3.5.md`
+- `docs/supabase/SUPABASE_V0.3.6_CHECKLIST.md`
 
 ## 다음 작업
 
