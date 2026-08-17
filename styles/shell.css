@@ -28,7 +28,7 @@
 }
 .role-dealer .app-sidebar nav button {
   min-height: 48px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   color: rgba(255, 255, 255, 0.78);
   font-size: 15px;
 }
@@ -231,7 +231,7 @@
   width: 28px;
   height: 28px;
   place-items: center;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   color: var(--color-muted);
   font-size: 17px;
   font-style: normal;
@@ -251,7 +251,7 @@
   display: grid;
   gap: 5px;
   margin: 14px 0;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-line);
   padding: 14px;
 }
@@ -389,7 +389,7 @@
 }
 .app-sidebar nav button {
   min-height: 48px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 9px 12px;
   transition:
     background 0.2s,
@@ -419,7 +419,7 @@
   place-items: center;
   width: 34px;
   height: 34px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   color: var(--color-muted);
 }
 .sidebar-profile > button:hover {
@@ -441,7 +441,7 @@
   height: 40px;
   place-items: center;
   border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: #fff;
   color: var(--color-muted);
   transition: 0.2s;
@@ -490,7 +490,7 @@
 .role-dealer .app-sidebar nav button {
   grid-template-columns: 28px 1fr auto !important;
   min-height: 44px !important;
-  border-radius: 7px !important;
+  border-radius: var(--radius-sm) !important;
   padding: 7px 10px !important;
   color: rgba(255, 255, 255, 0.74) !important;
   font-size: 14px !important;
@@ -540,7 +540,7 @@
   margin-top: 20px !important;
   border-color: rgba(255, 255, 255, 0.12) !important;
   background: rgba(255, 255, 255, 0.035) !important;
-  border-radius: 9px !important;
+  border-radius: var(--radius-sm) !important;
 }
 .role-dealer .sidebar-profile {
   border-top-color: rgba(255, 255, 255, 0.13) !important;
@@ -583,7 +583,7 @@
 .role-dealer .app-topbar-default {
   margin: 12px 14px 0 0;
   border: 1px solid var(--cm-border);
-  border-radius: 11px 11px 0 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 .app-mobile-nav {
   display: none;
@@ -674,7 +674,7 @@
   grid-template-columns: 42px 1fr auto;
   gap: 14px;
   min-height: 58px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 0 14px;
   color: rgba(255, 255, 255, 0.72);
   font-size: 16.5px;
@@ -690,7 +690,7 @@
 .app-sidebar nav button i {
   width: 42px;
   height: 42px;
-  border-radius: 11px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.75);
 }

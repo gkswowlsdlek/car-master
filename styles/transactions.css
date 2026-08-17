@@ -95,7 +95,7 @@
   gap: 0;
   overflow: hidden;
   border: 1px solid var(--color-primary-soft);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: #fff;
   box-shadow: 0 18px 50px rgba(15, 27, 25, 0.08);
 }
@@ -109,7 +109,7 @@
 .shop-transaction-management .transaction-room-layout {
   grid-template-columns: minmax(360px, 0.82fr) minmax(0, 1.8fr);
   border-color: var(--color-line);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 .shop-transaction-management .transaction-room-layout > .transaction-list {
@@ -127,7 +127,7 @@
   gap: 0;
   overflow: hidden;
   border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: #fff;
   box-shadow: none;
 }
@@ -311,7 +311,7 @@
   grid-template-columns: 1.15fr 1.1fr 0.9fr 1.1fr;
   gap: 0;
   border: 1px solid var(--color-line);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: #fff;
   margin-bottom: 14px;
 }
@@ -351,7 +351,7 @@
   gap: 0;
   overflow: hidden;
   border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: #fff;
   box-shadow: none;
 }
@@ -529,7 +529,7 @@
 .sidebar-stage,
 .sidebar-settlement {
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-soft);
   padding: 14px;
 }
@@ -556,7 +556,7 @@
 .sidebar-stage-log {
   margin-top: 12px;
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-soft);
   padding: 14px;
 }
@@ -642,7 +642,7 @@
   font-size: 11px;
 }
 .sidebar-settlement button {
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: #fff;
   padding: 8px 10px;
@@ -660,7 +660,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--color-danger-bg);
   padding: 14px 16px;
 }
@@ -1130,7 +1130,7 @@
 }
 .transaction-progress-card {
   border: 1px solid var(--color-line);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--color-surface-soft);
   padding: 18px;
 }
@@ -1201,7 +1201,7 @@
   gap: 0;
   margin: 0;
   border: 1px solid var(--color-line);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 .transaction-core-info > div {
@@ -1232,7 +1232,7 @@
   justify-content: space-between;
   gap: 14px;
   border: 1px solid var(--color-primary-border);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-primary-soft);
   padding: 14px 16px;
 }
@@ -1262,7 +1262,7 @@
   gap: 0;
   overflow: hidden;
   border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: #fff;
   box-shadow: none;
 }

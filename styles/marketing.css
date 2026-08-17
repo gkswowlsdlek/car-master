@@ -83,7 +83,7 @@
   grid-template-columns: 0.85fr 1.15fr;
   gap: 56px;
   align-items: center;
-  border-radius: 28px;
+  border-radius: var(--radius-xl);
   background: var(--color-ink);
   color: #fff;
   padding: 52px;
@@ -112,7 +112,7 @@
   display: grid;
   align-content: space-between;
   border: 1px solid var(--color-text-soft);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-ink);
   padding: 14px;
 }
@@ -254,7 +254,7 @@
 .product-preview {
   overflow: hidden;
   border: 1px solid var(--color-primary-soft);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: #fff;
   box-shadow:
     0 36px 90px rgba(15, 27, 25, 0.16),
@@ -301,14 +301,14 @@
   height: 30px;
   place-items: center;
   margin-bottom: 15px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: #fff;
   font-size: 9px;
   font-weight: 900;
 }
 .preview-app aside i {
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   color: var(--color-muted-soft);
   padding: 8px;
   font-size: 8px;
@@ -341,7 +341,7 @@
   font-size: 18px;
 }
 .preview-app section > header span {
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: #fff;
   padding: 8px 10px;
@@ -358,7 +358,7 @@
   display: grid;
   gap: 3px;
   border: 1px solid var(--color-line);
-  border-radius: 11px;
+  border-radius: var(--radius-md);
   padding: 13px;
   box-shadow: 0 3px 10px rgba(15, 27, 25, 0.04);
 }
@@ -376,7 +376,7 @@
 }
 .preview-table {
   border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 15px;
 }
 .preview-table > div {
@@ -402,7 +402,7 @@
   width: 28px;
   height: 28px;
   place-items: center;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--color-primary-soft);
   color: var(--color-primary);
 }
@@ -483,7 +483,7 @@
   height: 48px;
   place-items: center;
   margin-bottom: 32px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-primary-soft);
   color: var(--color-primary);
 }
@@ -813,7 +813,7 @@
   display: grid;
   gap: 12px;
   border: 1px solid var(--color-primary-soft);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.95));
   padding: 14px 16px 16px;
   box-shadow:
@@ -1093,7 +1093,7 @@
 .trust-strip span {
   min-height: 74px;
   justify-content: center;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 16px 18px;
   font-size: 15px;
   font-weight: 750;

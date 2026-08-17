@@ -28,7 +28,7 @@
   height: 58px;
   margin: 0 auto 18px;
   place-items: center;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: var(--color-primary-soft);
   color: var(--color-primary);
 }

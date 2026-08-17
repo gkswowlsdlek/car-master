@@ -95,7 +95,7 @@
   align-self: end;
   min-height: 48px;
   border: 1px solid var(--color-primary-soft);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-soft);
   padding: 12px 14px;
 }
@@ -132,7 +132,7 @@
   min-height: 48px;
   align-items: center;
   margin-top: 12px;
-  border-radius: 11px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-soft);
   padding: 11px;
 }

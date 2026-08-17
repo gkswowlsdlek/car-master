@@ -132,7 +132,7 @@
 .admin-transaction-list button {
   grid-template-columns: 1.2fr 1fr auto !important;
   align-items: center;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   padding: 13px !important;
 }
 .admin-transaction-list button.selected {
@@ -183,7 +183,7 @@
   display: grid;
   gap: 2px;
   margin: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: #fff;
   padding: 9px;
 }
@@ -202,7 +202,7 @@
   justify-content: space-between;
   gap: 10px;
   margin: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: #fff;
   padding: 8px 10px;
 }
@@ -251,7 +251,7 @@
 }
 .admin-alert-strip {
   margin-top: 20px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   padding: 16px 20px;
 }
 .admin-insight-grid {
@@ -303,7 +303,7 @@
 .admin-chart > i {
   position: relative;
   flex: 1;
-  border-radius: 7px 7px 0 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   background: linear-gradient(var(--color-primary), var(--color-primary));
   min-height: 20px;
 }
@@ -337,11 +337,11 @@
   font-size: 13px;
 }
 .admin-transaction-panel {
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 28px;
 }
 .admin-transaction-list button {
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 16px !important;
   transition: background 0.2s;
 }
@@ -396,7 +396,7 @@
 .admin-member-list {
   overflow: hidden;
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   max-height: 560px;
   overflow-y: auto;
 }
@@ -457,7 +457,7 @@
 }
 .admin-member-layout > aside {
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-soft);
   padding: 20px;
 }
@@ -556,7 +556,7 @@
 .installer-application-list {
   overflow: hidden;
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 }
 .installer-application-list > button {
   width: 100%;
@@ -586,7 +586,7 @@
 }
 .installer-approval-layout > aside {
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--color-surface-soft);
   padding: 20px;
 }
@@ -632,7 +632,7 @@
   align-items: center;
   gap: 6px;
   border: 1px solid var(--color-primary-soft);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: #fff;
   padding: 9px 11px;
   font-size: 10px;
@@ -736,7 +736,7 @@
   height: 32px;
   background: transparent;
   color: var(--color-muted);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 .admin-quick-shop-checkbox-group {
   margin-bottom: 16px;
@@ -756,7 +756,7 @@
 .admin-quick-shop-duplicate-warning {
   margin-top: 8px;
   border: 1px solid var(--color-warning-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--color-warning-bg);
   padding: 14px;
 }
@@ -779,7 +779,7 @@
 .admin-quick-shop-duplicate-warning li {
   display: grid;
   gap: 2px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: #fff;
   padding: 10px 12px;
 }
@@ -855,7 +855,7 @@
   justify-content: space-between;
   gap: 12px;
   border: 1px solid var(--color-line);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   padding: 10px 12px;
 }
 .admin-propose-results li div {
