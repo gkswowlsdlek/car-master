@@ -33,7 +33,7 @@
   background: #fff;
   border-radius: var(--radius-md);
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .shop-management-status-strip b {
   color: var(--color-ink);
@@ -67,13 +67,13 @@
 }
 .shop-management-screen .shop-management-card h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .shop-management-screen .shop-management-card header small {
   display: block;
   margin-top: 4px;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .shop-management-fields {
   display: grid;
@@ -84,7 +84,7 @@
   display: grid;
   gap: 6px;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .shop-management-fields label.wide-field {
   grid-column: 1/-1;
@@ -118,7 +118,7 @@
 .shop-management-actions p {
   margin-right: auto;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .shop-management-actions button:disabled {
   cursor: not-allowed;
@@ -197,11 +197,11 @@
 }
 .installer-priority-item span {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .installer-priority-item b {
-  font-size: 24px;
+  font-size: var(--font-lg);
 }
 .installer-priority-item.tone-urgent i {
   background: var(--color-danger-bg);
@@ -252,7 +252,7 @@
 }
 .installer-vehicle-main time {
   color: var(--color-primary);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 800;
 }
 .installer-vehicle-main b {
@@ -261,7 +261,7 @@
   gap: 6px;
   max-width: 100%;
   overflow: hidden;
-  font-size: 15px;
+  font-size: var(--font-body);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -269,7 +269,7 @@
   max-width: 100%;
   overflow: hidden;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -293,7 +293,7 @@
 .installer-vehicle-actions .primary {
   min-height: 44px;
   padding-inline: 14px;
-  font-size: 13px;
+  font-size: var(--font-sm);
   white-space: nowrap;
 }
 .installer-work-list {
@@ -319,7 +319,7 @@
 }
 .installer-work-list time {
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 800;
 }
 .installer-work-list > button > i {
@@ -337,12 +337,12 @@
   gap: 4px;
 }
 .installer-work-list b {
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 .installer-work-list small,
 .installer-work-list em {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .installer-work-list strong {
@@ -382,11 +382,11 @@
 }
 .shop-quick-work h2 {
   margin: 2px 0 0;
-  font-size: 18px;
+  font-size: var(--font-md);
 }
 .shop-quick-work > div > span {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .shop-quick-work nav {
   display: flex;
@@ -408,7 +408,7 @@
   background: var(--color-warning-bg);
   color: #c2410c;
   padding: 5px 8px;
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .priority-queue {
   border-color: var(--color-warning-bg);
@@ -424,7 +424,7 @@
 .shop-operation-status > span {
   border-radius: 999px;
   padding: 8px 11px;
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
 }
 .shop-operation-status .open {

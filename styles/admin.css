@@ -49,7 +49,7 @@
 }
 .workspace-heading h1 {
   margin: 5px 0 7px;
-  font-size: 36px;
+  font-size: var(--font-xl);
   letter-spacing: -0.045em;
 }
 .workspace-heading p:last-child {
@@ -65,7 +65,7 @@
   background: var(--color-success-bg);
   color: var(--color-success);
   padding: 7px 11px;
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
 }
 .admin-live-badge i {
@@ -76,7 +76,7 @@
 }
 .admin-summary-grid .card small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .admin-alert-strip {
   display: flex;
@@ -107,11 +107,11 @@
 .admin-alert-strip p {
   margin: 0;
   color: #7a2e0e;
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .admin-alert-strip > div:last-child span {
   color: #7a2e0e;
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .admin-search-tools {
   display: grid;
@@ -145,7 +145,7 @@
 }
 .admin-transaction-list button small {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .admin-transaction-detail {
   background: var(--color-surface-soft) !important;
@@ -156,7 +156,7 @@
 }
 .admin-transaction-detail > div:first-child > span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .admin-transaction-detail dl {
   display: grid;
@@ -168,11 +168,11 @@
 }
 .admin-transaction-detail dt {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .admin-transaction-detail dd {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .admin-chat-preview {
@@ -188,7 +188,7 @@
   padding: 9px;
 }
 .admin-chat-preview b {
-  font-size: 9px;
+  font-size: var(--font-xs);
   text-transform: uppercase;
 }
 .admin-stage-log {
@@ -209,17 +209,17 @@
 .admin-stage-log b {
   flex: 0 0 auto;
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .admin-stage-log span {
   color: var(--color-text-soft);
-  font-size: 11.5px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 .admin-chat-preview span {
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 @media (max-width: 900px) {
   .admin-search-tools {
@@ -237,7 +237,7 @@
   margin-bottom: 32px;
 }
 .workspace-heading h1 {
-  font-size: 36px;
+  font-size: var(--font-xl);
 }
 .admin-summary-grid {
   gap: 18px;
@@ -247,7 +247,7 @@
   min-height: 178px;
 }
 .admin-summary-grid .card small {
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .admin-alert-strip {
   margin-top: 20px;
@@ -272,7 +272,7 @@
 .admin-chart-card h2,
 .admin-health-card h2 {
   margin: 4px 0 20px;
-  font-size: 22px;
+  font-size: var(--font-lg);
 }
 .admin-chart-card header > span {
   display: inline-flex;
@@ -282,7 +282,7 @@
   background: var(--color-success-bg);
   color: var(--color-success);
   padding: 6px 10px;
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 700;
 }
 .admin-chart {
@@ -312,7 +312,7 @@
   bottom: -28px;
   left: 50%;
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-style: normal;
   transform: translateX(-50%);
 }
@@ -328,13 +328,13 @@
   align-items: center;
   gap: 9px;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .admin-health-card > div svg {
   color: var(--color-primary);
 }
 .admin-health-card > div b {
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .admin-transaction-panel {
   border-radius: var(--radius-lg);
@@ -434,7 +434,7 @@
 .admin-member-list button small {
   overflow: hidden;
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -450,7 +450,7 @@
   display: inline-flex;
   border-radius: 999px;
   padding: 6px 9px;
-  font-size: 9px;
+  font-size: var(--font-xs);
   font-style: normal;
   font-weight: 800;
   text-transform: uppercase;
@@ -474,7 +474,7 @@
 .admin-member-layout aside header p {
   margin: 4px 0 0;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .admin-member-layout dl {
   display: grid;
@@ -488,19 +488,19 @@
 }
 .admin-member-layout dt {
   color: var(--color-muted-soft);
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .admin-member-layout dd {
   margin: 0;
   overflow-wrap: anywhere;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .admin-member-hint {
   margin: 16px 0 0;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .admin-member-hint a {
   color: var(--color-primary);
@@ -545,7 +545,7 @@
   gap: 7px;
   background: transparent;
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 750;
 }
 .installer-approval-layout {
@@ -582,7 +582,7 @@
 }
 .installer-application-list small {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .installer-approval-layout > aside {
   border: 1px solid var(--color-line);
@@ -600,7 +600,7 @@
 .installer-approval-layout aside header p {
   margin: 4px 0;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .installer-approval-layout dl {
   display: grid;
@@ -613,12 +613,12 @@
 }
 .installer-approval-layout dt {
   color: var(--color-muted-soft);
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .installer-approval-layout dd {
   margin: 0;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .approval-actions {
@@ -635,7 +635,7 @@
   border-radius: var(--radius-md);
   background: #fff;
   padding: 9px 11px;
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 750;
 }
 .approval-actions .approve {
@@ -666,14 +666,14 @@
   gap: 7px;
   background: transparent;
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 750;
 }
 .admin-shop-search-request-panel .installer-application-list em,
 .admin-shop-search-request-panel aside header em {
   border-radius: 999px;
   padding: 6px 9px;
-  font-size: 9px;
+  font-size: var(--font-xs);
   font-style: normal;
   font-weight: 800;
   text-transform: uppercase;
@@ -687,7 +687,7 @@
 }
 .admin-note-field label {
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 750;
   text-transform: uppercase;
 }
@@ -700,7 +700,7 @@
 .compact-empty-note {
   margin: 12px 0 0;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 /* Phase 3: Admin 시공점 빠른 등록 */
 .admin-quick-shop-card {
@@ -716,14 +716,14 @@
 .admin-quick-shop-card > p {
   margin: 0 0 18px;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .admin-quick-shop-card label {
   display: grid;
   gap: 7px;
   margin-bottom: 14px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .admin-quick-shop-close {
@@ -745,7 +745,7 @@
   display: block;
   margin-bottom: 8px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .admin-quick-shop-checkbox-group > div {
@@ -766,7 +766,7 @@
   gap: 7px;
   margin: 0 0 10px;
   color: var(--color-warning);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .admin-quick-shop-duplicate-warning ul {
@@ -785,11 +785,11 @@
 }
 .admin-quick-shop-duplicate-warning li span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .admin-quick-shop-duplicate-warning li em {
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .admin-quick-shop-result {
@@ -804,12 +804,12 @@
 }
 .admin-quick-shop-result dt {
   color: var(--color-muted-soft);
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .admin-quick-shop-result dd {
   margin: 0;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .admin-quick-shop-registered-note {
@@ -818,7 +818,7 @@
   gap: 6px;
   margin: 10px 0 0;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 @media (max-width: 760px) {
   .admin-quick-shop-result {
@@ -865,11 +865,11 @@
 }
 .admin-propose-results li span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .admin-propose-results li em {
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .admin-ops-queue-strip {

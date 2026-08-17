@@ -36,7 +36,7 @@
   letter-spacing: -0.065em;
 }
 .marketing-hero .page-subtitle {
-  font-size: 18px;
+  font-size: var(--font-md);
 }
 .marketing-cta {
   justify-content: center;
@@ -49,7 +49,7 @@
   padding: 20px;
   border-block: 1px solid var(--color-line);
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .marketing-features {
   width: min(1100px, 100%);
@@ -68,7 +68,7 @@
 }
 .marketing-features h2 {
   margin: 26px 0 10px;
-  font-size: 20px;
+  font-size: var(--font-lg);
 }
 .marketing-features p {
   margin: 0;
@@ -118,11 +118,11 @@
 }
 .workflow-story li span {
   color: var(--color-primary-border);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
 }
 .workflow-story li b {
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 .workflow-story li:last-child {
   background: var(--color-primary);
@@ -161,13 +161,13 @@
 }
 .service-steps article > span {
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
   letter-spacing: 0.08em;
 }
 .service-steps h3 {
   margin: 70px 0 10px;
-  font-size: 20px;
+  font-size: var(--font-lg);
 }
 .service-steps article p {
   margin: 0;
@@ -219,7 +219,7 @@
   background: var(--color-primary-soft);
   color: var(--color-primary-hover);
   padding: 7px 12px;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 750;
 }
 .marketing-hero h1 {
@@ -232,7 +232,7 @@
   color: var(--color-primary);
 }
 .marketing-hero .page-subtitle {
-  font-size: 17px;
+  font-size: var(--font-md);
   line-height: 1.8;
 }
 .marketing-cta {
@@ -244,7 +244,7 @@
   gap: 20px;
   margin-top: 24px;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .hero-assurance span {
   display: inline-flex;
@@ -279,7 +279,7 @@
 .preview-window-bar > b {
   margin-left: 8px;
   color: var(--color-muted-soft);
-  font-size: 9px;
+  font-size: var(--font-xs);
   font-weight: 650;
 }
 .preview-app {
@@ -304,14 +304,14 @@
   border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: #fff;
-  font-size: 9px;
+  font-size: var(--font-xs);
   font-weight: 900;
 }
 .preview-app aside i {
   border-radius: var(--radius-sm);
   color: var(--color-muted-soft);
   padding: 8px;
-  font-size: 8px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .preview-app aside i.active {
@@ -333,19 +333,19 @@
 }
 .preview-app section > header small {
   color: var(--color-primary);
-  font-size: 7px;
+  font-size: var(--font-xs);
   font-weight: 800;
   letter-spacing: 0.1em;
 }
 .preview-app section > header strong {
-  font-size: 18px;
+  font-size: var(--font-md);
 }
 .preview-app section > header span {
   border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: #fff;
   padding: 8px 10px;
-  font-size: 8px;
+  font-size: var(--font-xs);
   font-weight: 700;
 }
 .preview-metrics {
@@ -364,14 +364,14 @@
 }
 .preview-metrics small {
   color: var(--color-muted);
-  font-size: 8px;
+  font-size: var(--font-xs);
 }
 .preview-metrics b {
-  font-size: 20px;
+  font-size: var(--font-lg);
 }
 .preview-metrics em {
   color: var(--color-success);
-  font-size: 7px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .preview-table {
@@ -383,7 +383,7 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 9px;
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .preview-table > div span {
   color: var(--color-primary);
@@ -410,18 +410,18 @@
   display: grid;
 }
 .preview-table p b {
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .preview-table p small {
   color: var(--color-muted-soft);
-  font-size: 7px;
+  font-size: var(--font-xs);
 }
 .preview-table p > em {
   border-radius: 999px;
   background: var(--color-primary-soft);
   color: var(--color-primary);
   padding: 4px 7px;
-  font-size: 7px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .preview-table p > em.waiting {
@@ -447,7 +447,7 @@
   background: #fff;
   color: var(--color-muted);
   padding: 9px 14px;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .workflow-story {
@@ -473,7 +473,7 @@
 }
 .service-steps article > small {
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
   letter-spacing: 0.08em;
 }
@@ -489,7 +489,7 @@
 }
 .service-steps article h3 {
   margin-top: 10px;
-  font-size: 21px;
+  font-size: var(--font-lg);
 }
 .marketing-final-cta {
   padding-block: 112px;
@@ -508,7 +508,7 @@
   display: flex;
   gap: 24px;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .marketing-nav {
   min-height: 92px;
@@ -522,7 +522,7 @@
   gap: 12px;
 }
 .marketing-nav .button {
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .marketing-nav .button-primary {
   min-width: 92px;
@@ -641,11 +641,11 @@
 }
 .service-steps article h3 {
   margin: 12px 0;
-  font-size: 23px;
+  font-size: var(--font-lg);
   letter-spacing: -0.025em;
 }
 .service-steps article p {
-  font-size: 14px;
+  font-size: var(--font-sm);
   line-height: 1.85;
 }
 .marketing-final-cta {
@@ -678,14 +678,14 @@
   z-index: 1;
   margin: -10px auto 30px;
   color: var(--color-muted);
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .marketing-final-cta .button-large {
   position: relative;
   z-index: 1;
   min-height: 54px;
   padding-inline: 26px;
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .marketing-footer {
   min-height: 150px;
@@ -703,7 +703,7 @@
 .footer-brand p {
   margin: 0;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .footer-meta {
   display: grid !important;
@@ -714,12 +714,12 @@
   display: grid;
   gap: 5px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .footer-meta small {
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -732,7 +732,7 @@
 }
 .footer-links a {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .footer-links a:hover {
@@ -741,7 +741,7 @@
 }
 .footer-links span {
   color: var(--color-line-strong);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 @media (max-width: 900px) {
   .marketing-nav {
@@ -779,7 +779,7 @@
     padding-block: 82px;
   }
   .final-cta-description {
-    font-size: 14px;
+    font-size: var(--font-sm);
   }
   .marketing-footer {
     min-height: 0;
@@ -828,13 +828,13 @@
 }
 .hero-workflow > div span {
   color: var(--color-primary);
-  font-size: 9px;
+  font-size: var(--font-xs);
   font-weight: 850;
   letter-spacing: 0.11em;
 }
 .hero-workflow > div b {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 650;
 }
 .hero-workflow ol {
@@ -862,7 +862,7 @@
   justify-items: center;
   gap: 5px;
   color: var(--color-muted);
-  font-size: 9px;
+  font-size: var(--font-xs);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -875,7 +875,7 @@
   border-radius: 50%;
   background: #fff;
   color: var(--color-primary);
-  font-size: 8px;
+  font-size: var(--font-xs);
   font-style: normal;
   font-weight: 850;
   box-shadow: 0 3px 8px rgba(14, 122, 108, 0.1);
@@ -944,7 +944,7 @@
     display: none;
   }
   .hero-workflow li {
-    font-size: 9px;
+    font-size: var(--font-xs);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -993,7 +993,7 @@
 .marketing-brand > small {
   width: 286px;
   color: var(--color-text-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 650;
   line-height: 1.25;
   letter-spacing: 0.14em;
@@ -1021,7 +1021,7 @@
     width: 206px;
   }
   .marketing-brand > small {
-    font-size: 9px;
+    font-size: var(--font-xs);
     letter-spacing: 0.1em;
   }
   .marketing-hero .hero-message br {
@@ -1037,7 +1037,7 @@
     width: 184px;
   }
   .marketing-brand > small {
-    font-size: 8px;
+    font-size: var(--font-xs);
     letter-spacing: 0.08em;
   }
 }
@@ -1076,12 +1076,12 @@
 }
 .hero-workflow li {
   gap: 7px;
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .hero-workflow li i {
   width: 29px;
   height: 29px;
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .trust-strip {
   display: grid;
@@ -1095,7 +1095,7 @@
   justify-content: center;
   border-radius: var(--radius-lg);
   padding: 16px 18px;
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 750;
 }
 .trust-strip span svg {
@@ -1128,7 +1128,7 @@
   }
   .hero-workflow li {
     gap: 6px;
-    font-size: 10px;
+    font-size: var(--font-xs);
     line-height: 1.25;
     text-align: center;
     white-space: normal;
@@ -1150,7 +1150,7 @@
     justify-content: flex-start;
     gap: 9px;
     padding: 14px 13px;
-    font-size: 13px;
+    font-size: var(--font-sm);
   }
   .trust-strip span svg {
     width: 23px;

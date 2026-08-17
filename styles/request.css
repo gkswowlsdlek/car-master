@@ -23,7 +23,7 @@
   display: grid;
   gap: 7px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .request-submit-button {
@@ -54,7 +54,7 @@
 .request-shop-list small,
 .request-shop-list i {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .request-shop-list i {
@@ -71,7 +71,7 @@
 .selected-installer span,
 .selected-installer small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .summary-page {
   max-width: 900px;
@@ -90,7 +90,7 @@
 }
 .summary-card dt {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .summary-card dd {
   margin: 0;
@@ -121,7 +121,7 @@
   border-radius: var(--radius-sm);
   background: var(--color-primary-soft);
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
 }
 .form-section-title > div {
@@ -130,15 +130,15 @@
 }
 .form-section-title small {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .service-request-form label {
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .required-field em {
   margin-left: 4px;
   color: var(--color-danger);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .request-submit-area {
@@ -159,7 +159,7 @@
 .request-submit-area p {
   margin: 0 0 0 4px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .request-submit-area .request-submit-button {
   min-width: 210px;
@@ -194,7 +194,7 @@
   background: var(--color-primary);
   color: #fff;
   padding: 3px 8px;
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .selected-installer {
   border: 1px solid var(--color-primary-border);
@@ -204,7 +204,7 @@
 .selected-installer p {
   margin: 5px 0 0;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .request-layout {
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
@@ -247,11 +247,11 @@
 }
 .shop-search-request-list li > div:first-child span {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .shop-search-request-list li > div:first-child em {
   color: var(--color-muted-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .shop-search-request-list-meta {
@@ -261,7 +261,7 @@
 }
 .shop-search-request-list-meta small {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-proposal-card {
   margin-top: 12px;
@@ -271,7 +271,7 @@
 .shop-proposal-lead {
   margin: 0 0 10px;
   color: var(--color-primary);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .shop-proposal-card dl {
@@ -286,12 +286,12 @@
 }
 .shop-proposal-card dt {
   color: var(--color-muted-soft);
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .shop-proposal-card dd {
   margin: 0;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .shop-proposal-actions {
@@ -306,7 +306,7 @@
 .shop-proposal-accept-form label {
   display: grid;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
   color: var(--color-text-soft);
 }
@@ -335,7 +335,7 @@
 .request-submit-area p {
   margin: 0;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   line-height: 1.55;
 }
 .request-submit-area .request-submit-button {
@@ -352,12 +352,12 @@
 .request-region-field legend {
   margin-bottom: 7px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 750;
 }
 .request-region-field legend em {
   color: var(--color-danger);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .request-region-field > div {
@@ -369,13 +369,13 @@
   display: block;
   margin-top: 6px;
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .service-request-form :is(input, select) {
   min-height: 48px;
   border-radius: var(--radius-md);
   padding-inline: 14px;
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .service-request-form input[type="date"] {
   color: var(--color-text);

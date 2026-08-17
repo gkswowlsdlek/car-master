@@ -18,7 +18,7 @@
   display: grid;
   gap: 7px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .profile-notification-settings label {
@@ -51,10 +51,10 @@
 }
 .profile-activity-summary span {
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .profile-activity-summary b {
-  font-size: 25px;
+  font-size: var(--font-lg);
 }
 .profile-editor {
   display: grid;
@@ -87,7 +87,7 @@
   grid-column: 2;
   margin: 0;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .profile-editor-grid .profile-checkbox-field {
   display: flex;
@@ -107,7 +107,7 @@
 .profile-demo-password-note {
   margin: 8px 0 0;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .shop-management-page {
   display: block;
@@ -145,7 +145,7 @@
 .management-placeholder p {
   margin: 0;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .shop-management-page > .profile-notification-settings {
   margin-top: 14px;
@@ -156,7 +156,7 @@
 }
 .shop-management-page > p:last-child {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .notification-toggle-list {
   display: grid;
@@ -178,7 +178,7 @@
   gap: 3px;
 }
 .notification-toggle-list label b {
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .notification-toggle-list label small {
   color: var(--color-muted);

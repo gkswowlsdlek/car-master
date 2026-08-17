@@ -30,7 +30,7 @@
   align-items: center;
   gap: 7px;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   white-space: nowrap;
 }
 .transaction-filters label input {
@@ -152,12 +152,12 @@
 }
 .shop-transaction-management .transaction-operations-detail > header h2 {
   margin: 3px 0 4px;
-  font-size: 30px;
+  font-size: var(--font-xl);
   letter-spacing: -0.04em;
 }
 .shop-transaction-management .transaction-operations-detail > header p {
   color: var(--color-text-soft);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-detail-status {
   display: grid;
@@ -166,7 +166,7 @@
 }
 .shop-transaction-management .transaction-detail-status > span {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-detail-status .status-chip {
   padding: 7px 10px;
@@ -180,11 +180,11 @@
 }
 .shop-transaction-management .transaction-progress-card > div span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-progress-card > div b {
   color: var(--color-ink);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-progress-card ol {
   gap: 0;
@@ -195,13 +195,13 @@
 }
 .shop-transaction-management .transaction-progress-card li {
   gap: 5px;
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-progress-card li i {
   width: 22px;
   height: 22px;
   border-width: 1px;
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-progress-card li::before {
   top: 10px;
@@ -217,11 +217,11 @@
 }
 .shop-transaction-management .shop-next-action > span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .shop-next-action > b {
   color: var(--color-ink);
-  font-size: 17px;
+  font-size: var(--font-md);
 }
 .shop-transaction-management .shop-next-action > button {
   min-height: 42px;
@@ -244,10 +244,10 @@
   border-right: 0;
 }
 .shop-transaction-management .transaction-core-info dt {
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-core-info dd {
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-price-editor {
   border: 0;
@@ -278,7 +278,7 @@
   background: var(--color-surface-soft);
   padding: 9px 18px;
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 750;
 }
 .dealer-transaction-management .dealer-transaction-row {
@@ -290,21 +290,21 @@
 }
 .dealer-transaction-management .dealer-transaction-row-schedule b {
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .dealer-transaction-management .dealer-transaction-row-schedule small {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .dealer-transaction-management .dealer-transaction-row-next {
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
   text-align: right;
   white-space: nowrap;
 }
 .dealer-transaction-management .dealer-transaction-row-next span {
   margin-left: 3px;
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .r2-job-context {
   display: grid;
@@ -328,17 +328,17 @@
 }
 .r2-context-label {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 750;
 }
 .r2-job-context strong {
   color: var(--color-ink);
-  font-size: 15px;
+  font-size: var(--font-body);
   letter-spacing: -0.02em;
 }
 .r2-job-context small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .r2-job-next {
   background: var(--color-primary-soft);
@@ -376,12 +376,12 @@
 }
 .shop-transaction-management .transaction-operations-detail > header h2 {
   margin: 3px 0 4px;
-  font-size: 30px;
+  font-size: var(--font-xl);
   letter-spacing: -0.04em;
 }
 .shop-transaction-management .transaction-operations-detail > header p {
   color: var(--color-text-soft);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-detail-status {
   display: grid;
@@ -390,7 +390,7 @@
 }
 .shop-transaction-management .transaction-detail-status > span {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-detail-status .status-chip {
   padding: 7px 10px;
@@ -404,11 +404,11 @@
 }
 .shop-transaction-management .transaction-progress-card > div span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-progress-card > div b {
   color: var(--color-ink);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-progress-card ol {
   gap: 0;
@@ -416,13 +416,13 @@
 }
 .shop-transaction-management .transaction-progress-card li {
   gap: 5px;
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-progress-card li i {
   width: 22px;
   height: 22px;
   border-width: 1px;
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-progress-card li::before {
   top: 10px;
@@ -438,11 +438,11 @@
 }
 .shop-transaction-management .shop-next-action > span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .shop-next-action > b {
   color: var(--color-ink);
-  font-size: 17px;
+  font-size: var(--font-md);
 }
 .shop-transaction-management .shop-next-action > button {
   min-height: 42px;
@@ -465,10 +465,10 @@
   border-right: 0;
 }
 .shop-transaction-management .transaction-core-info dt {
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-core-info dd {
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-price-editor {
   border: 0;
@@ -490,18 +490,18 @@
 }
 .briefing-title > span {
   color: var(--color-primary);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 850;
   letter-spacing: 0.02em;
 }
 .briefing-title h3 {
   margin: 6px 0;
-  font-size: 18px;
+  font-size: var(--font-md);
 }
 .briefing-title p {
   margin: 0;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   line-height: 1.6;
 }
 .briefing-data {
@@ -517,12 +517,12 @@
 }
 .briefing-data dt {
   color: var(--color-muted-soft);
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .briefing-data dd {
   margin: 0;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
   line-height: 1.5;
 }
@@ -535,12 +535,12 @@
 }
 .sidebar-stage > span {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .sidebar-stage > b {
   display: block;
   margin: 5px 0 11px;
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .sidebar-stage-rail {
   margin-top: 4px;
@@ -548,10 +548,10 @@
 .sidebar-stage-rail i {
   width: 24px;
   height: 24px;
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .sidebar-stage-rail small {
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .sidebar-stage-log {
   margin-top: 12px;
@@ -562,7 +562,7 @@
 }
 .sidebar-stage-log > span {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .sidebar-stage-log-toggle {
   display: flex;
@@ -572,7 +572,7 @@
   background: transparent;
   padding: 0;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .sidebar-stage-log-toggle span {
@@ -581,7 +581,7 @@
 .sidebar-stage-log .stage-log-empty {
   margin: 8px 0 0;
   color: var(--color-muted-soft);
-  font-size: 11.5px;
+  font-size: var(--font-sm);
 }
 .sidebar-stage-log ul {
   display: grid;
@@ -598,7 +598,7 @@
   gap: 8px;
   border-top: 1px solid var(--color-line);
   padding-top: 8px;
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .sidebar-stage-log li:first-child {
   border-top: 0;
@@ -607,7 +607,7 @@
 .sidebar-stage-log time {
   flex: 0 0 auto;
   color: var(--color-muted-soft);
-  font-size: 10.5px;
+  font-size: var(--font-xs);
   font-variant-numeric: tabular-nums;
 }
 .sidebar-stage-log li span {
@@ -626,7 +626,7 @@
   gap: 8px;
   margin: 7px 0;
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .sidebar-settlement p b {
   color: var(--color-text-soft);
@@ -639,20 +639,20 @@
 .sidebar-settlement input {
   min-width: 0;
   height: 38px;
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .sidebar-settlement button {
   border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: #fff;
   padding: 8px 10px;
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .messenger-sidebar .transaction-hide-button {
   width: 100%;
   margin-top: 14px;
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 /* Phase 5: 거래 Lifecycle 완성 (예외 종료 + 최종 시공금액) */
 .transaction-outcome-banner {
@@ -669,13 +669,13 @@
   align-items: center;
   gap: 7px;
   color: var(--color-danger);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .transaction-outcome-banner p {
   flex: 1 1 100%;
   margin: 0;
   color: var(--color-text-soft);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
 }
 .transaction-outcome-banner .button {
   flex-shrink: 0;
@@ -685,12 +685,12 @@
   gap: 7px;
   margin: 14px 0;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .final-amount-value {
   margin: 4px 0 10px;
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 /* Phase 6: Dealer 거래관리 완성 (browse-and-find; no inline detail pane — click always hands off to the existing Room) */
 .dealer-deal-groups em {
@@ -699,7 +699,7 @@
   background: var(--color-line);
   color: var(--color-muted);
   padding: 1px 7px;
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-style: normal;
   font-weight: 800;
 }
@@ -769,11 +769,11 @@
   gap: 8px;
 }
 .dealer-transaction-row-main b {
-  font-size: 14.5px;
+  font-size: var(--font-body);
 }
 .dealer-transaction-row-main span {
   color: var(--color-muted);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
 }
 .dealer-transaction-row-meta {
   display: flex;
@@ -783,7 +783,7 @@
 }
 .dealer-transaction-row-meta small {
   color: var(--color-muted);
-  font-size: 11.5px;
+  font-size: var(--font-sm);
 }
 .dealer-transaction-row-activity {
   margin-left: auto;
@@ -802,7 +802,7 @@
   display: block;
   overflow: hidden;
   color: var(--color-muted-soft);
-  font-size: 11.5px;
+  font-size: var(--font-sm);
   font-style: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -853,7 +853,7 @@
   align-items: center;
   gap: 6px;
   color: var(--color-muted-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -876,7 +876,7 @@
   border-radius: 50%;
   background: var(--color-line);
   color: var(--color-muted);
-  font-size: 9px;
+  font-size: var(--font-xs);
   font-style: normal;
   font-weight: 800;
 }
@@ -935,12 +935,12 @@
   border: 2px solid var(--color-primary-soft);
   border-radius: 50%;
   background: #fff;
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-style: normal;
   font-weight: 800;
 }
 .stage-progress-rail small {
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 700;
   white-space: nowrap;
 }
@@ -965,7 +965,7 @@
   background: var(--color-danger-bg);
   padding: 9px 12px;
   color: var(--color-danger);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 .stage-actions {
@@ -978,23 +978,23 @@
   margin: 0;
   width: auto;
   color: var(--color-text-soft);
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 .dealer-stage-current b {
   color: var(--color-primary);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .stage-cta {
   min-height: 40px;
   padding-inline: 18px;
-  font-size: 13.5px;
+  font-size: var(--font-sm);
 }
 .stage-revert-link {
   background: transparent;
   padding: 4px;
   color: var(--color-muted);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -1034,7 +1034,7 @@
 .phone-confirm-banner p {
   margin: 0;
   color: var(--color-text-soft);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   line-height: 1.5;
   flex: 1 1 220px;
 }
@@ -1042,12 +1042,12 @@
   flex-shrink: 0;
   min-height: 36px;
   padding-inline: 14px;
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .phone-confirm-fallback {
   flex-shrink: 0;
   color: var(--color-muted);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 @media (max-width: 767px) {
@@ -1118,11 +1118,11 @@
 }
 .transaction-operations-detail > header small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .transaction-operations-detail > header h2 {
   margin: 5px 0;
-  font-size: 24px;
+  font-size: var(--font-lg);
 }
 .transaction-operations-detail > header p {
   margin: 0;
@@ -1141,7 +1141,7 @@
 }
 .transaction-progress-card > div span {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .transaction-progress-card ol {
   display: grid;
@@ -1157,7 +1157,7 @@
   justify-items: center;
   gap: 7px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 700;
   text-align: center;
 }
@@ -1219,7 +1219,7 @@
 }
 .transaction-core-info dt {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .transaction-core-info dd {
   margin: 0;
@@ -1238,7 +1238,7 @@
 }
 .transaction-price-editor > span {
   color: var(--color-text-soft);
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .transaction-price-editor > div {
@@ -1287,12 +1287,12 @@
 }
 .shop-transaction-management .transaction-operations-detail > header h2 {
   margin: 3px 0 4px;
-  font-size: 30px;
+  font-size: var(--font-xl);
   letter-spacing: -0.04em;
 }
 .shop-transaction-management .transaction-operations-detail > header p {
   color: var(--color-text-soft);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-detail-status {
   display: grid;
@@ -1301,7 +1301,7 @@
 }
 .shop-transaction-management .transaction-detail-status > span {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-detail-status .status-chip {
   padding: 7px 10px;
@@ -1315,11 +1315,11 @@
 }
 .shop-transaction-management .transaction-progress-card > div span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-progress-card > div b {
   color: var(--color-ink);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-progress-card ol {
   gap: 0;
@@ -1327,13 +1327,13 @@
 }
 .shop-transaction-management .transaction-progress-card li {
   gap: 5px;
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-progress-card li i {
   width: 22px;
   height: 22px;
   border-width: 1px;
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-progress-card li::before {
   top: 10px;
@@ -1349,11 +1349,11 @@
 }
 .shop-transaction-management .shop-next-action > span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .shop-next-action > b {
   color: var(--color-ink);
-  font-size: 17px;
+  font-size: var(--font-md);
 }
 .shop-transaction-management .shop-next-action > button {
   min-height: 42px;
@@ -1376,10 +1376,10 @@
   border-right: 0;
 }
 .shop-transaction-management .transaction-core-info dt {
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-core-info dd {
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-price-editor {
   border: 0;

@@ -12,7 +12,7 @@
   display: inline-block;
   margin-bottom: 20px;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .legal-home-link:hover {
@@ -26,7 +26,7 @@
 .legal-meta {
   margin: 0 0 28px;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .legal-notice {
   margin-bottom: 32px;
@@ -37,7 +37,7 @@
 .legal-notice p {
   margin: 0;
   color: #7a4a12;
-  font-size: 13px;
+  font-size: var(--font-sm);
   line-height: 1.75;
 }
 .legal-shell article {
@@ -51,18 +51,18 @@
 }
 .legal-shell h2 {
   margin: 0 0 14px;
-  font-size: 19px;
+  font-size: var(--font-md);
   letter-spacing: -0.02em;
 }
 .legal-shell h3 {
   margin: 20px 0 8px;
   color: var(--color-text-soft);
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 .legal-shell p {
   margin: 0 0 12px;
   color: var(--color-text-soft);
-  font-size: 14.5px;
+  font-size: var(--font-body);
   line-height: 1.85;
 }
 .legal-shell ul,
@@ -72,7 +72,7 @@
   display: grid;
   gap: 8px;
   color: var(--color-text-soft);
-  font-size: 14.5px;
+  font-size: var(--font-body);
   line-height: 1.8;
 }
 .legal-shell a {
@@ -84,7 +84,7 @@
   background: var(--color-danger-bg);
   padding: 10px 12px;
   color: var(--color-danger);
-  font-size: 12.5px !important;
+  font-size: var(--font-sm) !important;
 }
 .legal-table-wrap {
   overflow-x: auto;
@@ -94,7 +94,7 @@
   width: 100%;
   min-width: 480px;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .legal-table th,
 .legal-table td {
@@ -118,7 +118,7 @@
   padding: 22px;
 }
 .legal-operator-box h2 {
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .legal-operator-box dl,
 .legal-contact {
@@ -130,7 +130,7 @@
   display: grid;
   grid-template-columns: 140px 1fr;
   gap: 10px;
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .legal-operator-box dt,
 .legal-contact dt {
@@ -144,7 +144,7 @@
 .legal-operator-note {
   margin-top: 12px;
   color: var(--color-muted-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 @media (max-width: 560px) {
   .legal-page {

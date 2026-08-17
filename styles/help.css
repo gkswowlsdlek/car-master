@@ -15,7 +15,7 @@
   align-items: center;
   gap: 7px;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
   text-decoration: none;
 }
 .help-hero {
@@ -102,7 +102,7 @@
 }
 .help-quick-grid small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .help-section {
   margin-top: 24px;
@@ -120,14 +120,14 @@
 }
 .help-section-head h2 {
   margin: 5px 0 0;
-  font-size: 23px;
+  font-size: var(--font-lg);
 }
 .help-role-badge {
   border-radius: 999px;
   background: var(--color-primary-soft);
   color: var(--color-primary);
   padding: 6px 10px;
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
 }
 .help-search {
@@ -159,7 +159,7 @@
   border-radius: 999px;
   padding: 6px 10px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .help-faq-list {
   border-top: 1px solid var(--color-line);
@@ -175,7 +175,7 @@
   cursor: pointer;
   list-style: none;
   padding: 17px 2px;
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 750;
 }
 .help-faq-list summary::-webkit-details-marker {
@@ -191,14 +191,14 @@
 .help-faq-list details p {
   margin: -2px 34px 17px 2px;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
   line-height: 1.75;
 }
 .help-no-results {
   padding: 30px 4px;
   color: var(--color-muted);
   text-align: center;
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .help-contact {
   display: flex;
@@ -212,12 +212,12 @@
   padding: 22px 24px;
 }
 .help-contact b {
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 .help-contact p {
   margin: 5px 0 0;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .help-contact a {
   flex: 0 0 auto;

@@ -30,7 +30,7 @@
 }
 .login-service-intro > p:not(.eyebrow) {
   color: var(--color-muted);
-  font-size: 16px;
+  font-size: var(--font-body);
   line-height: 1.8;
 }
 .login-service-intro ul {
@@ -66,7 +66,7 @@
   gap: 7px;
   margin-top: 14px;
   color: var(--color-text-soft);
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .login-card .full {
@@ -75,12 +75,12 @@
 }
 .login-error {
   color: var(--color-danger);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .login-support-note {
   margin: 14px 0 0;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   text-align: center;
 }
 .login-support-note button {
@@ -106,7 +106,7 @@
 }
 .login-service-intro > p:not(.eyebrow):not(.login-trust) {
   max-width: 650px;
-  font-size: 17px;
+  font-size: var(--font-md);
 }
 .login-service-intro ul {
   max-width: 620px;
@@ -133,11 +133,11 @@
   gap: 5px;
 }
 .login-service-intro li b {
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .login-service-intro li small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   line-height: 1.55;
 }
 .login-trust {
@@ -145,7 +145,7 @@
   align-items: center;
   gap: 7px;
   color: var(--color-muted) !important;
-  font-size: 12px !important;
+  font-size: var(--font-sm) !important;
 }
 .compact-login-card {
   position: relative;
@@ -172,7 +172,7 @@
 .login-card label {
   gap: 8px;
   margin-top: 18px;
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .login-input-wrap {
   position: relative;
@@ -225,11 +225,11 @@
   height: 24px;
 }
 .login-service-intro li b {
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 800;
 }
 .login-service-intro li small {
-  font-size: 11px;
+  font-size: var(--font-xs);
   line-height: 1.7;
 }
 .login-intro-actions {
@@ -243,7 +243,7 @@
   box-shadow: none;
   color: var(--color-muted);
   padding: 8px 10px;
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .login-intro-actions .primary:hover,
 .login-intro-actions .secondary:hover {
@@ -344,11 +344,11 @@
 }
 .login-security-note b {
   color: var(--color-ink);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .login-security-note small {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
   line-height: 1.5;
 }
 .login-support-note {
@@ -428,7 +428,7 @@
   background: transparent;
   color: var(--color-muted);
   padding: 8px;
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .login-signup-link b {
   color: var(--color-primary);
@@ -496,11 +496,11 @@
   gap: 5px;
 }
 .signup-role-picker b {
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .signup-role-picker small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .signup-role-picker > button.active {
   border-color: var(--color-primary);
@@ -518,7 +518,7 @@
 }
 .signup-form h2 {
   margin: 0 0 22px;
-  font-size: 22px;
+  font-size: var(--font-lg);
 }
 .signup-grid {
   display: grid;
@@ -529,7 +529,7 @@
   display: grid;
   gap: 8px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 750;
 }
 .signup-grid label b {
@@ -548,7 +548,7 @@
 .signup-policy {
   margin: 14px 0 0;
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   text-align: center;
 }
 .signup-complete {
@@ -636,7 +636,7 @@
   background: transparent;
   color: var(--color-muted);
   padding: 0;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .login-forgot-password-link {
@@ -646,7 +646,7 @@
   background: transparent;
   color: var(--color-primary);
   padding: 4px 0;
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
   min-height: 44px;
 }
@@ -655,7 +655,7 @@
 }
 .password-input-wrap input {
   padding-right: 46px;
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .password-toggle-button {
   position: absolute;
@@ -732,13 +732,13 @@
 }
 .login-workspace-benefits li b {
   color: var(--color-text);
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 .login-workspace-benefits li small {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   line-height: 1.65;
   word-break: keep-all;
 }
@@ -784,10 +784,10 @@
     height: 52px;
   }
   .login-benefits-mobile li b {
-    font-size: 16px;
+    font-size: var(--font-body);
   }
   .login-benefits-mobile li small {
-    font-size: 12px;
+    font-size: var(--font-sm);
   }
 }
 @media (max-width: 560px) {
@@ -795,7 +795,7 @@
     margin-bottom: 20px;
   }
   .login-intro-description {
-    font-size: 15px !important;
+    font-size: var(--font-body) !important;
     line-height: 1.8 !important;
   }
   .login-benefits-mobile {

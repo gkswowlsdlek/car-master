@@ -43,7 +43,7 @@
   margin-bottom: 46px;
 }
 .r4-dealer-dashboard .r3-dashboard-header h1 {
-  font-size: 32px;
+  font-size: var(--font-xl);
 }
 .r4-dealer-dashboard .r3-search-hero {
   border: 0;
@@ -54,7 +54,7 @@
   margin-bottom: 28px;
 }
 .r4-dealer-dashboard .r3-hero-title h2 {
-  font-size: 36px;
+  font-size: var(--font-xl);
 }
 .r4-dealer-dashboard .r3-search-form {
   max-width: 860px;
@@ -68,7 +68,7 @@
   border-radius: var(--radius-sm);
   background: var(--color-surface-soft);
   border-color: var(--color-line);
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 .r4-dealer-dashboard .r3-search-hero .ws-search-cta {
   height: 54px;
@@ -100,7 +100,7 @@
     margin-bottom: 28px;
   }
   .r4-dealer-dashboard .r3-hero-title h2 {
-    font-size: 25px;
+    font-size: var(--font-lg);
   }
   .r4-dealer-dashboard .r3-search-form {
     grid-template-columns: 1fr;
@@ -131,7 +131,7 @@
 }
 .dealer-welcome h1 {
   margin: 0;
-  font-size: 36px;
+  font-size: var(--font-xl);
   letter-spacing: -0.04em;
 }
 .dealer-welcome p {
@@ -150,7 +150,7 @@
   color: var(--color-muted);
 }
 .metric-card b {
-  font-size: 30px;
+  font-size: var(--font-xl);
 }
 .dashboard-quick-actions,
 .today-list-card {
@@ -286,7 +286,7 @@
 .transaction-list small,
 .transaction-list em {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .transaction-detail {
@@ -324,7 +324,7 @@
   min-width: 112px;
   min-height: 44px;
   padding-inline: 12px;
-  font-size: 14px;
+  font-size: var(--font-sm);
   line-height: 1;
   white-space: nowrap;
   word-break: keep-all;
@@ -495,7 +495,7 @@
     box-shadow 0.16s ease;
 }
 .metric-card span {
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .metric-card b {
@@ -503,7 +503,7 @@
 }
 .metric-card small {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   line-height: 1.5;
 }
 .dashboard-quick-actions .section-head h2 {
@@ -523,13 +523,13 @@
 .today-list-card .section-head > button {
   background: transparent;
   color: var(--color-primary);
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .today-list-card time,
 .today-list-card em {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-style: normal;
   white-space: nowrap;
 }
@@ -552,12 +552,12 @@
   border-radius: var(--radius-md);
   background: var(--color-primary-soft);
   color: var(--color-primary);
-  font-size: 24px;
+  font-size: var(--font-lg);
   font-weight: 800;
 }
 .empty-state h2 {
   margin: 18px 0 6px;
-  font-size: 21px;
+  font-size: var(--font-lg);
 }
 .empty-state p {
   margin: 0 0 20px;
@@ -712,7 +712,7 @@ button:active:not(:disabled) {
     padding: 16px;
   }
   .metric-card b {
-    font-size: 26px;
+    font-size: var(--font-lg);
   }
   .dashboard-quick-actions > div:last-child {
     display: grid;
@@ -736,7 +736,7 @@ button:active:not(:disabled) {
     min-width: 62px;
   }
   .transaction-stage-flow button span {
-    font-size: 10px;
+    font-size: var(--font-xs);
   }
   .price-package-row {
     grid-template-columns: minmax(0, 1fr) 112px;
@@ -818,7 +818,7 @@ button:active:not(:disabled) {
 }
 .compact-empty span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 
 .transaction-summary-strip {
@@ -844,11 +844,11 @@ button:active:not(:disabled) {
 }
 .transaction-summary-strip button span {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .transaction-summary-strip button b {
-  font-size: 22px;
+  font-size: var(--font-lg);
 }
 .transaction-summary-strip button.active {
   border-color: var(--color-primary);
@@ -945,7 +945,7 @@ button:active:not(:disabled) {
   .topbar-actions > .primary {
     min-height: 36px;
     padding: 7px 11px;
-    font-size: 12px;
+    font-size: var(--font-sm);
   }
   .beta-environment-bar {
     padding: 6px 14px;
@@ -1048,7 +1048,7 @@ button:active:not(:disabled) {
 }
 .system-state-page h1 {
   margin: 10px 0;
-  font-size: 30px;
+  font-size: var(--font-xl);
   letter-spacing: -0.04em;
 }
 .system-state-page section > p:not(.eyebrow) {
@@ -1076,7 +1076,7 @@ button:active:not(:disabled) {
 .system-state-icon.error {
   background: var(--color-danger-bg);
   color: var(--color-danger);
-  font-size: 24px;
+  font-size: var(--font-lg);
 }
 .loading-line {
   width: 46%;
@@ -1165,14 +1165,14 @@ button:active:not(:disabled) {
 }
 .dealer-welcome h1 {
   margin: 8px 0;
-  font-size: 36px;
+  font-size: var(--font-xl);
   line-height: 1.2;
 }
 .dealer-welcome h1 span {
   color: var(--color-text-soft);
 }
 .dealer-welcome > div > p:last-child {
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .metric-grid,
 .dashboard-core-metrics {
@@ -1216,7 +1216,7 @@ button:active:not(:disabled) {
 .admin-summary-grid .card > span {
   align-self: center;
   color: var(--color-muted);
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .metric-card > b,
@@ -1224,7 +1224,7 @@ button:active:not(:disabled) {
 .admin-summary-grid .card > b {
   grid-column: 1/-1;
   margin-top: 8px;
-  font-size: 34px;
+  font-size: var(--font-xl);
   line-height: 1;
 }
 .metric-card > b small,
@@ -1232,7 +1232,7 @@ button:active:not(:disabled) {
 .admin-summary-grid .card > b small {
   margin-left: 3px;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .metric-card > em,
@@ -1240,7 +1240,7 @@ button:active:not(:disabled) {
 .admin-summary-grid .card > em {
   grid-column: 1/-1;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-style: normal;
 }
 .tone-orange > i,
@@ -1276,7 +1276,7 @@ button:active:not(:disabled) {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 20px;
+  font-size: var(--font-lg);
 }
 .today-list-card > div:last-child > button {
   min-height: 68px;
@@ -1438,7 +1438,7 @@ button:active:not(:disabled) {
   }
   .dealer-welcome h1,
   .workspace-heading h1 {
-    font-size: 30px;
+    font-size: var(--font-xl);
   }
   .topbar-icon-button {
     display: none;
@@ -1635,13 +1635,13 @@ table :is(th, td) {
 .transaction-payment-table th,
 table th {
   white-space: nowrap;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 750;
   letter-spacing: -0.012em;
 }
 .transaction-payment-table td,
 table td {
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 :where(input, textarea, select) {
   line-height: 1.5;
@@ -1685,7 +1685,7 @@ table td {
     line-height: 1.7;
   }
   .eyebrow {
-    font-size: 10px;
+    font-size: var(--font-xs);
   }
 }
 
@@ -1710,7 +1710,7 @@ table td {
 .r3-dashboard-header p {
   margin: 6px 0 0;
   color: var(--color-muted);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .r3-search-hero {
   border: 1px solid var(--color-line);
@@ -1743,7 +1743,7 @@ table td {
 }
 .r3-search-form label span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .r3-search-form input,
 .r3-search-form select {
@@ -1767,7 +1767,7 @@ table td {
 .r3-quick-work > span {
   margin-right: 8px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 700;
 }
 .r3-quick-work button {
@@ -1777,7 +1777,7 @@ table td {
   background: #fff;
   padding: 0 15px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .r3-quick-work button:hover,
@@ -1789,7 +1789,7 @@ table td {
   min-height: 32px;
   border: 0;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .r3-recent-work {
   margin-top: 24px;
@@ -1802,10 +1802,10 @@ table td {
   padding-inline: 22px;
 }
 .r3-recent-work .ws-section-head h2 {
-  font-size: 18px;
+  font-size: var(--font-md);
 }
 .r3-recent-work .ws-section-head p {
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .r3-recent-work .ws-row-columns {
   grid-template-columns: minmax(0, 1fr) 90px 150px 100px;
@@ -1836,7 +1836,7 @@ table td {
     justify-content: flex-start;
   }
   .r3-hero-title h2 {
-    font-size: 23px;
+    font-size: var(--font-lg);
     text-align: left;
   }
   .r3-search-form {
@@ -1892,7 +1892,7 @@ table td {
   .dealer-dashboard .ws-dashboard-header h1 {
     margin: 0;
     color: var(--r1-ink);
-    font-size: 28px;
+    font-size: var(--font-xl);
     letter-spacing: -0.035em;
   }
 
@@ -1911,14 +1911,14 @@ table td {
   .dealer-dashboard .ws-search-hero-copy h2 {
     margin: 0;
     color: var(--r1-ink);
-    font-size: 21px;
+    font-size: var(--font-lg);
     letter-spacing: -0.025em;
   }
 
   .dealer-dashboard .ws-search-hero-copy p {
     margin: 4px 0 0;
     color: var(--r1-muted);
-    font-size: 13px;
+    font-size: var(--font-sm);
   }
 
   .dealer-dashboard .ws-search-form {
@@ -1930,7 +1930,7 @@ table td {
 
   .dealer-dashboard .ws-search-form label span {
     color: var(--r1-muted);
-    font-size: 11px;
+    font-size: var(--font-xs);
     font-weight: 700;
   }
 
@@ -1950,7 +1950,7 @@ table td {
     min-height: 32px;
     border: 0;
     color: var(--r1-muted);
-    font-size: 12px;
+    font-size: var(--font-sm);
   }
 
   .dealer-dashboard .ws-summary-row {
@@ -1979,12 +1979,12 @@ table td {
 
   .dealer-dashboard .ws-summary-card b {
     color: var(--r1-ink);
-    font-size: 22px;
+    font-size: var(--font-lg);
   }
 
   .dealer-dashboard .ws-summary-card small {
     color: var(--r1-muted);
-    font-size: 12px;
+    font-size: var(--font-sm);
   }
 
   .dealer-dashboard .ws-work-grid {
@@ -2005,7 +2005,7 @@ table td {
 
   .dealer-dashboard .ws-section-head h2 {
     color: var(--r1-ink);
-    font-size: 14px;
+    font-size: var(--font-sm);
   }
 
   .dealer-dashboard .ws-list-card .ws-row {
@@ -2039,7 +2039,7 @@ table td {
 
   .dealer-transaction-management .page-title h1 {
     color: var(--r1-ink);
-    font-size: 28px;
+    font-size: var(--font-xl);
     letter-spacing: -0.035em;
   }
 
@@ -2104,7 +2104,7 @@ table td {
   .dealer-transaction-management .dealer-transaction-row-main b {
     overflow: hidden;
     color: var(--r1-ink);
-    font-size: 14px;
+    font-size: var(--font-sm);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -2114,7 +2114,7 @@ table td {
   .dealer-transaction-management .dealer-transaction-row-lastmessage {
     overflow: hidden;
     color: var(--r1-muted);
-    font-size: 11px;
+    font-size: var(--font-xs);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -2414,12 +2414,12 @@ textarea:focus-visible {
     display: none;
   }
   .topbar-title b {
-    font-size: 17px;
+    font-size: var(--font-md);
   }
   .topbar-actions .primary {
     min-height: 44px;
     padding-inline: 13px;
-    font-size: 13px;
+    font-size: var(--font-sm);
   }
   .beta-environment-bar {
     display: none;
@@ -2581,11 +2581,11 @@ textarea:focus-visible {
   }
   .metric-card > span,
   .shop-metric-card > span {
-    font-size: 11px;
+    font-size: var(--font-xs);
   }
   .metric-card > b,
   .shop-metric-card > b {
-    font-size: 25px;
+    font-size: var(--font-lg);
   }
   .map-search {
     grid-template-columns: 1fr;
@@ -2603,7 +2603,7 @@ textarea:focus-visible {
   margin: 16px 48px 0;
   border-radius: var(--radius-md);
   padding: 12px 16px;
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 
 .system-inline-error {
@@ -2731,10 +2731,10 @@ textarea:focus-visible {
 }
 .transaction-list > button b {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .transaction-list > button span {
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 800;
 }
 .transaction-list > button em {
@@ -2752,15 +2752,15 @@ textarea:focus-visible {
   box-shadow: inset 3px 0 var(--color-primary);
 }
 .shop-transaction-management .transaction-list > button span {
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 .shop-transaction-management .transaction-list > button small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-list > button em {
   color: var(--color-muted-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-summary-strip {
   margin-bottom: 14px;
@@ -2783,12 +2783,12 @@ textarea:focus-visible {
 }
 .shop-transaction-management .transaction-summary-strip button span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-summary-strip button b {
   margin-left: 7px;
   color: var(--color-text-soft);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-summary-strip button.active {
   background: var(--color-primary-soft);
@@ -2802,7 +2802,7 @@ textarea:focus-visible {
 .shop-transaction-management .transaction-tabs button {
   padding: 6px 8px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-tabs button.active {
   border: 0;
@@ -2820,21 +2820,21 @@ textarea:focus-visible {
 }
 .shop-transaction-management .transaction-list > button b {
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-variant-numeric: tabular-nums;
 }
 .shop-transaction-management .transaction-list > button span {
   color: var(--color-ink);
-  font-size: 16px;
+  font-size: var(--font-body);
   letter-spacing: -0.02em;
 }
 .shop-transaction-management .transaction-list > button small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-list > button em {
   color: var(--color-muted-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 @media (max-width: 760px) {
   .shop-transaction-management .transaction-summary-strip {
@@ -2857,7 +2857,7 @@ textarea:focus-visible {
     padding: 19px 15px 15px;
   }
   .shop-transaction-management .transaction-operations-detail > header h2 {
-    font-size: 24px;
+    font-size: var(--font-lg);
   }
   .shop-transaction-management .transaction-core-info {
     grid-template-columns: 1fr 1fr;
@@ -2904,14 +2904,14 @@ textarea:focus-visible {
   margin-bottom: 30px !important;
 }
 .r4-dealer-dashboard .r3-dashboard-header h1 {
-  font-size: 30px !important;
+  font-size: var(--font-xl) !important;
   letter-spacing: -0.045em;
   line-height: 1.2;
 }
 .r4-dealer-dashboard .r3-dashboard-header p {
   margin-top: 8px;
   color: var(--color-muted);
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 .r4-dealer-dashboard .r3-search-hero {
   border: 0 !important;
@@ -2925,7 +2925,7 @@ textarea:focus-visible {
   margin-bottom: 22px !important;
 }
 .r4-dealer-dashboard .r3-hero-title h2 {
-  font-size: 32px !important;
+  font-size: var(--font-xl) !important;
   letter-spacing: -0.055em;
 }
 .r4-dealer-dashboard .r3-search-form {
@@ -2964,7 +2964,7 @@ textarea:focus-visible {
     justify-content: flex-start;
   }
   .r4-dealer-dashboard .r3-hero-title h2 {
-    font-size: 25px !important;
+    font-size: var(--font-lg) !important;
   }
 }
 
@@ -2978,14 +2978,14 @@ textarea:focus-visible {
   margin-bottom: 34px !important;
 }
 .r4-dealer-dashboard .r3-dashboard-header h1 {
-  font-size: 28px !important;
+  font-size: var(--font-xl) !important;
   font-weight: 760 !important;
 }
 .r4-dealer-dashboard .r3-hero-title {
   margin-bottom: 20px !important;
 }
 .r4-dealer-dashboard .r3-hero-title h2 {
-  font-size: 34px !important;
+  font-size: var(--font-xl) !important;
   font-weight: 760 !important;
   color: var(--color-text) !important;
 }
@@ -3040,7 +3040,7 @@ textarea:focus-visible {
     padding-top: 0 !important;
   }
   .r4-dealer-dashboard .r3-hero-title h2 {
-    font-size: 25px !important;
+    font-size: var(--font-lg) !important;
   }
   .r4-dealer-dashboard .r3-search-form {
     grid-template-columns: 1fr !important;
@@ -3051,14 +3051,14 @@ textarea:focus-visible {
   background: var(--color-primary) !important;
 }
 .r4-dealer-dashboard .r3-dashboard-header h1 {
-  font-size: 25px !important;
+  font-size: var(--font-lg) !important;
   font-weight: 720 !important;
 }
 .r4-dealer-dashboard .r3-dashboard-header p {
-  font-size: 14px !important;
+  font-size: var(--font-sm) !important;
 }
 .r4-dealer-dashboard .r3-hero-title h2 {
-  font-size: 33px !important;
+  font-size: var(--font-xl) !important;
   font-weight: 720 !important;
 }
 .r4-dealer-dashboard .r3-search-form input,
@@ -3066,7 +3066,7 @@ textarea:focus-visible {
   height: 54px !important;
 }
 .r4-dealer-dashboard .r3-search-form input {
-  font-size: 14px !important;
+  font-size: var(--font-sm) !important;
 }
 .r4-dealer-dashboard .r3-search-hero .ws-search-cta {
   background: var(--color-primary) !important;
@@ -3080,26 +3080,26 @@ textarea:focus-visible {
   min-width: 76px;
   min-height: 36px;
   padding-inline: 14px;
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .r4-dealer-dashboard .r3-recent-work {
   margin-top: 52px !important;
   box-shadow: 0 5px 16px rgba(15, 27, 25, 0.035) !important;
 }
 .r4-dealer-dashboard .r3-recent-work .ws-section-head h2 {
-  font-size: 17px !important;
+  font-size: var(--font-md) !important;
 }
 .r4-dealer-dashboard .r3-recent-work .ws-section-head p,
 .r4-dealer-dashboard .r3-recent-work .ws-row small {
-  font-size: 12px !important;
+  font-size: var(--font-sm) !important;
 }
 .r4-dealer-dashboard .r3-recent-work .ws-row {
   min-height: 66px;
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 @media (max-width: 760px) {
   .r4-dealer-dashboard .r3-hero-title h2 {
-    font-size: 25px !important;
+    font-size: var(--font-lg) !important;
   }
   .r4-dealer-dashboard .r3-search-form input,
   .r4-dealer-dashboard .r3-search-hero .ws-search-cta {
@@ -3130,7 +3130,7 @@ textarea:focus-visible {
   margin-bottom: 30px !important;
 }
 .r4-dealer-dashboard .r3-dashboard-header h1 {
-  font-size: 25px !important;
+  font-size: var(--font-lg) !important;
   color: var(--cm-text) !important;
 }
 .r4-dealer-dashboard .r3-dashboard-header p {
@@ -3138,7 +3138,7 @@ textarea:focus-visible {
 }
 .r4-dealer-dashboard .r3-hero-title h2 {
   color: var(--cm-text) !important;
-  font-size: 33px !important;
+  font-size: var(--font-xl) !important;
 }
 .r4-dealer-dashboard .r3-search-form input {
   color: var(--cm-text) !important;
@@ -3187,14 +3187,14 @@ textarea:focus-visible {
 .reference-dashboard-top h1 {
   margin: 0;
   color: var(--color-text);
-  font-size: 25px;
+  font-size: var(--font-lg);
   font-weight: 700;
   letter-spacing: -0.04em;
 }
 .reference-dashboard-top p {
   margin: 7px 0 0;
   color: var(--color-muted-soft);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .reference-utility {
   display: flex;
@@ -3222,7 +3222,7 @@ textarea:focus-visible {
   border-radius: 999px;
   background: var(--color-primary);
   color: #fff;
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .reference-avatar {
   display: grid;
@@ -3244,7 +3244,7 @@ textarea:focus-visible {
   margin: 0 0 24px;
 }
 .reference-search-panel .r3-hero-title h2 {
-  font-size: 33px !important;
+  font-size: var(--font-xl) !important;
 }
 .reference-search-panel .r3-search-form {
   max-width: 840px !important;
@@ -3275,7 +3275,7 @@ textarea:focus-visible {
   border-radius: var(--radius-sm);
   background: #fff;
   color: var(--color-text);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 650;
 }
 .reference-module-grid {
@@ -3306,7 +3306,7 @@ textarea:focus-visible {
   gap: 8px;
   margin: 0;
   color: var(--color-text);
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .reference-module header button,
 .prototype-recent-work > header button {
@@ -3316,7 +3316,7 @@ textarea:focus-visible {
   border: 0;
   background: transparent;
   color: var(--color-muted-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .reference-module ul,
 .reference-module ol {
@@ -3331,7 +3331,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 9px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .reference-module li i {
   width: 7px;
@@ -3342,7 +3342,7 @@ textarea:focus-visible {
 .reference-module li small {
   margin-left: auto;
   color: var(--color-muted-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .reference-module li div {
   display: grid;
@@ -3351,7 +3351,7 @@ textarea:focus-visible {
 }
 .reference-module li div span {
   color: var(--color-muted-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .reference-module li em {
   display: grid;
@@ -3361,7 +3361,7 @@ textarea:focus-visible {
   border-radius: 50%;
   background: var(--color-primary);
   color: #fff;
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .getting-started ol {
@@ -3375,7 +3375,7 @@ textarea:focus-visible {
   border: 1px solid var(--color-muted-soft);
   border-radius: 50%;
   color: var(--color-text-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .getting-started li span {
   flex: 1;
@@ -3385,7 +3385,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 3px;
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .getting-started li em.done {
@@ -3416,13 +3416,13 @@ textarea:focus-visible {
   min-height: 38px;
   border-bottom: 1px solid var(--color-line);
   color: var(--color-muted-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .prototype-job-row {
   min-height: 70px;
   border-bottom: 1px solid var(--color-line);
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .prototype-job-row:last-child {
   border-bottom: 0;
@@ -3445,13 +3445,13 @@ textarea:focus-visible {
   border-radius: var(--radius-sm);
   background: #fff;
   color: var(--color-text);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .prototype-status {
   justify-self: start;
   border-radius: var(--radius-sm);
   padding: 6px 8px;
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .prototype-status.blue {
@@ -3470,7 +3470,7 @@ textarea:focus-visible {
   display: block;
   margin: 9px 0 0;
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   text-align: right;
 }
 @media (max-width: 900px) {
@@ -3504,7 +3504,7 @@ textarea:focus-visible {
   .dealer-dashboard .ws-dashboard-header h1,
   .dealer-transaction-management .page-title h1 {
     margin: 0;
-    font-size: 28px;
+    font-size: var(--font-xl);
     letter-spacing: -0.035em;
   }
   .dealer-dashboard .ws-search-hero {
@@ -3533,7 +3533,7 @@ textarea:focus-visible {
     min-height: 32px;
     border: 0;
     color: var(--color-muted);
-    font-size: 12px;
+    font-size: var(--font-sm);
   }
   .dealer-dashboard .ws-summary-row {
     display: flex;
@@ -3557,7 +3557,7 @@ textarea:focus-visible {
   }
   .dealer-dashboard .ws-summary-card b {
     color: var(--color-text);
-    font-size: 22px;
+    font-size: var(--font-lg);
   }
   .dealer-dashboard .ws-card {
     border: 1px solid var(--color-line);
@@ -3627,7 +3627,7 @@ textarea:focus-visible {
   .dealer-transaction-management .dealer-transaction-row-main b {
     overflow: hidden;
     color: var(--color-text);
-    font-size: 14px;
+    font-size: var(--font-sm);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -3636,7 +3636,7 @@ textarea:focus-visible {
   .dealer-transaction-management .dealer-transaction-row-lastmessage {
     overflow: hidden;
     color: var(--color-muted);
-    font-size: 11px;
+    font-size: var(--font-xs);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -3672,7 +3672,7 @@ textarea:focus-visible {
   .dealer-dashboard .ws-dashboard-header h1,
   .dealer-transaction-management .page-title h1 {
     margin: 0;
-    font-size: 28px;
+    font-size: var(--font-xl);
     letter-spacing: -0.035em;
   }
   .dealer-dashboard .ws-search-hero {
@@ -3701,7 +3701,7 @@ textarea:focus-visible {
     min-height: 32px;
     border: 0;
     color: var(--color-muted);
-    font-size: 12px;
+    font-size: var(--font-sm);
   }
   .dealer-dashboard .ws-summary-row {
     display: flex;
@@ -3725,7 +3725,7 @@ textarea:focus-visible {
   }
   .dealer-dashboard .ws-summary-card b {
     color: var(--color-text);
-    font-size: 22px;
+    font-size: var(--font-lg);
   }
   .dealer-dashboard .ws-card {
     border: 1px solid var(--color-line);
@@ -3795,7 +3795,7 @@ textarea:focus-visible {
   .dealer-transaction-management .dealer-transaction-row-main b {
     overflow: hidden;
     color: var(--color-text);
-    font-size: 14px;
+    font-size: var(--font-sm);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -3804,7 +3804,7 @@ textarea:focus-visible {
   .dealer-transaction-management .dealer-transaction-row-lastmessage {
     overflow: hidden;
     color: var(--color-muted);
-    font-size: 11px;
+    font-size: var(--font-xs);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -3846,7 +3846,7 @@ textarea:focus-visible {
 .dealer-dashboard .ws-section-head p {
   margin: 0;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .dealer-dashboard .ws-row-columns {
   display: grid;
@@ -3855,7 +3855,7 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--color-line);
   color: var(--color-muted);
   padding: 8px 16px;
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 750;
 }
 .dealer-dashboard .ws-row {
@@ -3871,15 +3871,15 @@ textarea:focus-visible {
 }
 .dealer-dashboard .ws-row-schedule small {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .dealer-dashboard .ws-row-schedule b {
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .dealer-dashboard .ws-row-next {
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 750;
   text-align: right;
 }
@@ -3950,12 +3950,12 @@ textarea:focus-visible {
 }
 .shop-transaction-management .transaction-summary-strip button span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-summary-strip button b {
   margin-left: 7px;
   color: var(--color-text-soft);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-summary-strip button.active {
   background: var(--color-primary-soft);
@@ -3969,7 +3969,7 @@ textarea:focus-visible {
 .shop-transaction-management .transaction-tabs button {
   padding: 6px 8px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-tabs button.active {
   border: 0;
@@ -3987,21 +3987,21 @@ textarea:focus-visible {
 }
 .shop-transaction-management .transaction-list > button b {
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-variant-numeric: tabular-nums;
 }
 .shop-transaction-management .transaction-list > button span {
   color: var(--color-ink);
-  font-size: 16px;
+  font-size: var(--font-body);
   letter-spacing: -0.02em;
 }
 .shop-transaction-management .transaction-list > button small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-list > button em {
   color: var(--color-muted-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 @media (max-width: 760px) {
   .shop-transaction-management .transaction-summary-strip {
@@ -4024,7 +4024,7 @@ textarea:focus-visible {
     padding: 19px 15px 15px;
   }
   .shop-transaction-management .transaction-operations-detail > header h2 {
-    font-size: 24px;
+    font-size: var(--font-lg);
   }
   .shop-transaction-management .transaction-core-info {
     grid-template-columns: 1fr 1fr;
@@ -4077,7 +4077,7 @@ textarea:focus-visible {
   border-radius: var(--radius-md);
   background: linear-gradient(145deg, var(--color-primary), var(--color-primary-hover));
   color: #fff;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 850;
 }
 .messenger-avatar {
@@ -4087,7 +4087,7 @@ textarea:focus-visible {
 .messenger-header h2 {
   overflow: hidden;
   margin: 0 0 5px;
-  font-size: 16px;
+  font-size: var(--font-body);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4097,7 +4097,7 @@ textarea:focus-visible {
   gap: 7px;
   margin: 0;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .messenger-header p i {
   width: 3px;
@@ -4146,7 +4146,7 @@ textarea:focus-visible {
   background: rgba(255, 255, 255, 0.92);
   color: var(--color-muted-soft);
   padding: 6px 11px;
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .message-row {
   display: flex;
@@ -4162,7 +4162,7 @@ textarea:focus-visible {
   height: 34px;
   border-radius: var(--radius-md);
   background: var(--color-text-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .message-content {
   display: grid;
@@ -4171,7 +4171,7 @@ textarea:focus-visible {
 }
 .message-content > small {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .message-row.mine .message-content > small {
   text-align: right;
@@ -4183,7 +4183,7 @@ textarea:focus-visible {
   background: #fff;
   padding: 11px 14px;
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--font-sm);
   line-height: 1.65;
   white-space: pre-wrap;
   box-shadow: 0 4px 12px rgba(15, 27, 25, 0.04);
@@ -4195,7 +4195,7 @@ textarea:focus-visible {
 }
 .message-content time {
   color: var(--color-muted-soft);
-  font-size: 9px;
+  font-size: var(--font-xs);
 }
 .message-row.mine .message-content time {
   text-align: right;
@@ -4222,7 +4222,7 @@ textarea:focus-visible {
   overflow: hidden;
   padding: 7px 8px 5px;
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4246,13 +4246,13 @@ textarea:focus-visible {
 .file-message b {
   overflow: hidden;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .file-message small {
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .messenger-empty {
   display: grid;
@@ -4262,7 +4262,7 @@ textarea:focus-visible {
   color: var(--color-muted);
 }
 .messenger-empty span {
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .messenger-composer {
   min-width: 0;
@@ -4335,13 +4335,13 @@ textarea:focus-visible {
 }
 .attachment-preview-strip b {
   overflow: hidden;
-  font-size: 10px;
+  font-size: var(--font-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .attachment-preview-strip small {
   color: var(--color-muted-soft);
-  font-size: 8px;
+  font-size: var(--font-xs);
 }
 .attachment-preview-strip button {
   background: transparent;
@@ -4525,7 +4525,7 @@ textarea:focus-visible {
   background: var(--color-danger-bg);
   color: var(--color-danger);
   padding: 11px 13px;
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .onboarding-consent {
   display: grid;
@@ -4539,7 +4539,7 @@ textarea:focus-visible {
   align-items: flex-start;
   gap: 9px;
   color: var(--color-text-soft);
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 .onboarding-consent input[type="checkbox"] {
@@ -4562,7 +4562,7 @@ textarea:focus-visible {
   gap: 6px;
   background: transparent;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   padding: 8px;
 }
 .account-status-profile em,
@@ -4570,7 +4570,7 @@ textarea:focus-visible {
 .installer-approval-panel aside header em {
   border-radius: 999px;
   padding: 6px 9px;
-  font-size: 9px;
+  font-size: var(--font-xs);
   font-style: normal;
   font-weight: 800;
   text-transform: uppercase;
@@ -4587,7 +4587,7 @@ textarea:focus-visible {
   display: grid;
   gap: 7px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 
@@ -4665,7 +4665,7 @@ textarea:focus-visible {
   display: grid;
   gap: 7px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .shop-search-request-form-row {
@@ -4712,7 +4712,7 @@ textarea:focus-visible {
   display: grid;
   gap: 7px;
   color: var(--color-text-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 750;
 }
 .installer-registration-editor input {
@@ -4724,7 +4724,7 @@ textarea:focus-visible {
   background: var(--color-primary-soft);
   color: var(--color-primary-hover);
   padding: 10px 12px;
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .installer-registration-editor .primary {
   margin-top: 18px;
@@ -4788,7 +4788,7 @@ textarea:focus-visible {
     border-radius: var(--radius-md);
     padding: 7px 3px;
     color: var(--color-muted);
-    font-size: 11px;
+    font-size: var(--font-xs);
     font-weight: 600;
     text-align: center;
     min-height: 52px;
@@ -4838,7 +4838,7 @@ textarea:focus-visible {
     padding: 10px 2px 14px;
   }
   .app-mobile-more-head b {
-    font-size: 16px;
+    font-size: var(--font-body);
   }
   .app-mobile-more-head button {
     display: grid;
@@ -4863,7 +4863,7 @@ textarea:focus-visible {
     border-radius: var(--radius-md);
     padding: 10px 6px;
     color: var(--color-text-soft);
-    font-size: 12.5px;
+    font-size: var(--font-sm);
     font-weight: 600;
   }
   .app-mobile-more-grid button svg {
@@ -4886,7 +4886,7 @@ textarea:focus-visible {
     min-height: 32px;
   }
   .beta-environment-bar > span {
-    font-size: 9px;
+    font-size: var(--font-xs);
   }
   .role-home {
     padding-top: 24px !important;
@@ -4898,16 +4898,16 @@ textarea:focus-visible {
   }
   .role-home :is(.dealer-welcome, .workspace-heading) h1 {
     margin: 5px 0 7px;
-    font-size: 29px;
+    font-size: var(--font-xl);
     line-height: 1.22;
   }
   .role-home :is(.dealer-welcome, .workspace-heading) > div > p:last-child {
-    font-size: 14px;
+    font-size: var(--font-sm);
     line-height: 1.65;
   }
   .role-home :is(.dealer-welcome, .workspace-heading) > button {
     min-height: 48px;
-    font-size: 15px;
+    font-size: var(--font-body);
   }
   .role-home :is(.dashboard-core-metrics, .shop-metric-grid, .admin-summary-grid) {
     display: grid;
@@ -4933,16 +4933,16 @@ textarea:focus-visible {
   .role-home :is(.metric-card, .shop-metric-card, .admin-summary-grid .card) > span {
     min-width: 0;
     overflow: hidden;
-    font-size: 12px;
+    font-size: var(--font-sm);
     text-overflow: ellipsis;
   }
   .role-home :is(.metric-card, .shop-metric-card, .admin-summary-grid .card) > b {
     margin-top: 4px;
-    font-size: 27px;
+    font-size: var(--font-lg);
   }
   .role-home :is(.metric-card, .shop-metric-card, .admin-summary-grid .card) > em {
     overflow: hidden;
-    font-size: 10px;
+    font-size: var(--font-xs);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -5139,12 +5139,12 @@ textarea:focus-visible {
 }
 .stage-confirm-card h3 {
   margin: 0 0 10px;
-  font-size: 18px;
+  font-size: var(--font-md);
 }
 .stage-confirm-card p {
   margin: 0 0 20px;
   color: var(--color-muted);
-  font-size: 13.5px;
+  font-size: var(--font-sm);
   line-height: 1.6;
 }
 .stage-confirm-buttons {
@@ -5171,11 +5171,11 @@ textarea:focus-visible {
 .shop-management-card h2,
 .shop-management-card h3 {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--font-md);
 }
 .shop-management-card header small {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .shop-management-card > div:not(:first-child) {
   display: grid;
@@ -5186,7 +5186,7 @@ textarea:focus-visible {
   display: grid;
   gap: 6px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 750;
 }
 .shop-management-card label:first-child:last-child,
@@ -5223,7 +5223,7 @@ textarea:focus-visible {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .stage-progress-rail small {
-    font-size: 9px;
+    font-size: var(--font-xs);
   }
   .shop-management-page > .page-title {
     align-items: stretch;
@@ -5284,11 +5284,11 @@ textarea:focus-visible {
   gap: 3px;
 }
 .dealer-primary-action > span > b {
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .dealer-primary-action > span > small {
   color: var(--color-muted);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
 }
 .dealer-primary-action > svg:last-child {
   flex: 0 0 auto;
@@ -5307,7 +5307,7 @@ textarea:focus-visible {
   background: var(--color-warning-bg);
   padding: 12px 18px;
   color: #9a3412;
-  font-size: 13.5px;
+  font-size: var(--font-sm);
   font-weight: 700;
   text-align: left;
 }
@@ -5327,7 +5327,7 @@ textarea:focus-visible {
   display: block;
   margin-top: 6px;
   color: var(--color-muted);
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 500;
 }
 
@@ -5348,7 +5348,7 @@ textarea:focus-visible {
   background: transparent;
   padding: 4px;
   color: var(--color-primary);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .dealer-active-deals ul {
@@ -5376,11 +5376,11 @@ textarea:focus-visible {
   gap: 3px;
 }
 .dealer-active-deals li > button > span > b {
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .dealer-active-deals li > button > span > small {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .dealer-secondary-actions {
@@ -5393,7 +5393,7 @@ textarea:focus-visible {
 }
 @media (max-width: 640px) {
   .dealer-focus-banner {
-    font-size: 13px;
+    font-size: var(--font-sm);
   }
 }
 
@@ -5405,7 +5405,7 @@ textarea:focus-visible {
   gap: 3px;
   margin-left: 6px;
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 650;
 }
 .message-status.read {
@@ -5421,7 +5421,7 @@ textarea:focus-visible {
 .installer-card-brands {
   margin: 0;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 
@@ -5515,7 +5515,7 @@ textarea:focus-visible {
   padding: 7px 14px;
   color: var(--color-muted);
   text-align: center;
-  font-size: 11.5px;
+  font-size: var(--font-sm);
   font-weight: 600;
   line-height: 1.5;
 }
@@ -5538,7 +5538,7 @@ textarea:focus-visible {
   background: #fff;
   padding: 8px 14px;
   color: var(--color-primary);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
   box-shadow: var(--shadow-md);
   transform: translateX(-50%);
@@ -5563,7 +5563,7 @@ textarea:focus-visible {
   background: #fff;
   padding: 6px 13px;
   color: var(--color-text-soft);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -5611,15 +5611,15 @@ textarea:focus-visible {
 .contact-sheet-status {
   margin: 8px 0;
   color: var(--color-muted);
-  font-size: 13.5px;
+  font-size: var(--font-sm);
 }
 .contact-sheet-name {
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .contact-sheet-phone {
   margin: 0 0 6px;
   color: var(--color-text-soft);
-  font-size: 20px;
+  font-size: var(--font-lg);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
@@ -5638,7 +5638,7 @@ textarea:focus-visible {
   margin-top: 14px;
   background: transparent;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 
 
@@ -5836,7 +5836,7 @@ textarea:focus-visible {
   }
   .app-frame.messenger-focus .messenger-focus-topbar > b {
     flex: 1;
-    font-size: 15px;
+    font-size: var(--font-body);
   }
   .messenger-back-to-workspace {
     display: inline-flex;
@@ -5846,7 +5846,7 @@ textarea:focus-visible {
     background: var(--color-surface-soft);
     padding: 8px 14px 8px 10px;
     color: var(--color-muted-soft);
-    font-size: 13px;
+    font-size: var(--font-sm);
     font-weight: 700;
   }
   .messenger-back-to-workspace:hover {
@@ -5956,7 +5956,7 @@ textarea:focus-visible {
   display: grid;
   gap: 6px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .ws-search-form input,
@@ -6014,7 +6014,7 @@ textarea:focus-visible {
 }
 .ws-summary-card b {
   display: block;
-  font-size: 22px;
+  font-size: var(--font-lg);
   font-weight: 800;
   line-height: 1.1;
 }
@@ -6022,7 +6022,7 @@ textarea:focus-visible {
   display: block;
   margin-top: 2px;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 
@@ -6047,13 +6047,13 @@ textarea:focus-visible {
 }
 .ws-section-head h2 {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 800;
 }
 .ws-section-head button {
   background: transparent;
   color: var(--color-primary);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
   padding: 0;
 }
@@ -6082,12 +6082,12 @@ textarea:focus-visible {
   gap: 2px;
 }
 .ws-row-main b {
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 750;
 }
 .ws-row-main small {
   color: var(--color-muted);
-  font-size: 11.5px;
+  font-size: var(--font-sm);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -6098,7 +6098,7 @@ textarea:focus-visible {
   gap: 4px;
   border-radius: 999px;
   padding: 3px 9px;
-  font-size: 10.5px;
+  font-size: var(--font-xs);
   font-weight: 800;
   white-space: nowrap;
   flex: 0 0 auto;
@@ -6115,7 +6115,7 @@ textarea:focus-visible {
   margin: 0;
   padding: 20px 4px;
   color: var(--color-muted);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   text-align: center;
 }
 @media (max-width: 900px) {
@@ -6189,7 +6189,7 @@ textarea:focus-visible {
   display: block !important;
   padding: 10px 11px !important;
   color: var(--color-text-soft) !important;
-  font-size: 12px;
+  font-size: var(--font-sm);
   text-align: left;
 }
 
@@ -6229,7 +6229,7 @@ textarea:focus-visible {
     gap: 2px;
   }
   .transaction-progress-card li span {
-    font-size: 9px;
+    font-size: var(--font-xs);
   }
   .transaction-core-info {
     grid-template-columns: 1fr;
@@ -6271,12 +6271,12 @@ textarea:focus-visible {
 }
 .shop-transaction-management .transaction-summary-strip button span {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-summary-strip button b {
   margin-left: 7px;
   color: var(--color-text-soft);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .shop-transaction-management .transaction-summary-strip button.active {
   background: var(--color-primary-soft);
@@ -6290,7 +6290,7 @@ textarea:focus-visible {
 .shop-transaction-management .transaction-tabs button {
   padding: 6px 8px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-tabs button.active {
   border: 0;
@@ -6308,21 +6308,21 @@ textarea:focus-visible {
 }
 .shop-transaction-management .transaction-list > button b {
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-variant-numeric: tabular-nums;
 }
 .shop-transaction-management .transaction-list > button span {
   color: var(--color-ink);
-  font-size: 16px;
+  font-size: var(--font-body);
   letter-spacing: -0.02em;
 }
 .shop-transaction-management .transaction-list > button small {
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .shop-transaction-management .transaction-list > button em {
   color: var(--color-muted-soft);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 @media (max-width: 760px) {
   .shop-transaction-management .transaction-summary-strip {
@@ -6345,7 +6345,7 @@ textarea:focus-visible {
     padding: 19px 15px 15px;
   }
   .shop-transaction-management .transaction-operations-detail > header h2 {
-    font-size: 24px;
+    font-size: var(--font-lg);
   }
   .shop-transaction-management .transaction-core-info {
     grid-template-columns: 1fr 1fr;
@@ -6394,14 +6394,14 @@ textarea:focus-visible {
 }
 .reference-dashboard-top h1 {
   margin: 0;
-  font-size: 25px;
+  font-size: var(--font-lg);
   line-height: 1.25;
   letter-spacing: -0.035em;
 }
 .reference-dashboard-top p {
   margin: 7px 0 0;
   color: var(--prototype-muted);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .reference-utility {
   display: flex;
@@ -6425,7 +6425,7 @@ textarea:focus-visible {
   border-radius: 999px;
   background: var(--prototype-primary);
   color: #fff;
-  font-size: 10px;
+  font-size: var(--font-xs);
   line-height: 16px;
   text-align: center;
 }
@@ -6437,7 +6437,7 @@ textarea:focus-visible {
   border-radius: 50%;
   background: var(--color-primary-soft);
   color: var(--prototype-primary);
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 800;
 }
 .reference-search-panel {
@@ -6448,7 +6448,7 @@ textarea:focus-visible {
 .reference-search-panel .r3-hero-title h2 {
   margin: 0 0 26px;
   color: var(--prototype-navy);
-  font-size: 34px;
+  font-size: var(--font-xl);
   line-height: 1.2;
   letter-spacing: -0.055em;
 }
@@ -6471,7 +6471,7 @@ textarea:focus-visible {
   background: #fff;
   padding: 0 16px;
   color: var(--prototype-text);
-  font-size: 14px;
+  font-size: var(--font-sm);
   box-shadow: 0 3px 10px rgba(15, 27, 25, 0.035);
 }
 .reference-search-panel .ws-search-form input:focus {
@@ -6484,7 +6484,7 @@ textarea:focus-visible {
   border: 0;
   border-radius: var(--radius-sm);
   background: var(--prototype-primary);
-  font-size: 14px;
+  font-size: var(--font-sm);
   box-shadow: none;
 }
 .reference-quick-work {
@@ -6501,7 +6501,7 @@ textarea:focus-visible {
   background: #fff;
   color: var(--prototype-text);
   padding: 0 14px;
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .reference-quick-work button:hover {
@@ -6543,7 +6543,7 @@ textarea:focus-visible {
   gap: 8px;
   margin: 0;
   color: var(--prototype-text);
-  font-size: 15px;
+  font-size: var(--font-body);
   letter-spacing: -0.025em;
 }
 .reference-module h2 svg {
@@ -6551,7 +6551,7 @@ textarea:focus-visible {
 }
 .reference-module > header button {
   color: var(--prototype-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .reference-module ul,
 .reference-module ol {
@@ -6566,7 +6566,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 8px;
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
   line-height: 1.35;
 }
 .reference-module li {
@@ -6582,7 +6582,7 @@ textarea:focus-visible {
 .reference-module li small {
   margin-left: auto;
   color: var(--prototype-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   white-space: nowrap;
 }
 .reference-module li > div {
@@ -6604,7 +6604,7 @@ textarea:focus-visible {
   border-radius: 50%;
   background: var(--prototype-primary);
   color: #fff;
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-style: normal;
 }
 .getting-started ol {
@@ -6618,7 +6618,7 @@ textarea:focus-visible {
   border: 1px solid var(--color-line-strong);
   border-radius: 50%;
   color: var(--prototype-text);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .getting-started li span {
   flex: 1;
@@ -6628,7 +6628,7 @@ textarea:focus-visible {
   height: auto;
   background: none;
   color: var(--prototype-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .getting-started li em.done {
   color: #159570;
@@ -6650,12 +6650,12 @@ textarea:focus-visible {
 }
 .prototype-recent-work > header h2 {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--font-md);
   letter-spacing: -0.03em;
 }
 .prototype-recent-work > header button {
   color: var(--prototype-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .prototype-job-head,
 .prototype-job-row {
@@ -6671,13 +6671,13 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--prototype-border);
   background: #fbfcfe;
   color: var(--prototype-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .prototype-job-row {
   min-height: 70px;
   border-bottom: 1px solid var(--prototype-border);
   color: var(--color-text-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .prototype-job-row:last-child {
   border-bottom: 0;
@@ -6688,11 +6688,11 @@ textarea:focus-visible {
 }
 .prototype-job-vehicle b {
   color: var(--prototype-text);
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .prototype-job-vehicle small {
   color: var(--prototype-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .prototype-job-row > button {
   display: inline-flex;
@@ -6704,13 +6704,13 @@ textarea:focus-visible {
   border-radius: var(--radius-sm);
   background: #fff;
   color: var(--prototype-text);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .prototype-status {
   justify-self: start;
   border-radius: 999px;
   padding: 5px 9px;
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-style: normal;
   font-weight: 800;
   white-space: nowrap;
@@ -6731,7 +6731,7 @@ textarea:focus-visible {
   display: block;
   margin-top: 8px;
   color: var(--color-muted-soft);
-  font-size: 10px;
+  font-size: var(--font-xs);
   text-align: right;
 }
 .dealer-home-frame .app-sidebar {
@@ -6767,7 +6767,7 @@ textarea:focus-visible {
   top: 39px;
   left: 5px;
   color: #fff;
-  font-size: 21px;
+  font-size: var(--font-lg);
   font-weight: 800;
   letter-spacing: -0.045em;
 }
@@ -6814,7 +6814,7 @@ textarea:focus-visible {
 .reference-recent-work .ws-section-head p {
   margin: 4px 0 0;
   color: var(--prototype-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
 }
 .reference-recent-work .ws-row {
   min-height: 68px;
@@ -6836,12 +6836,12 @@ textarea:focus-visible {
 }
 .reference-recent-work .ws-row-next {
   color: var(--prototype-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 750;
   white-space: nowrap;
 }
 .reference-recent-work .status-chip {
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .reference-recent-work .ws-badge {
   order: 3;
@@ -6853,11 +6853,11 @@ textarea:focus-visible {
 }
 .reference-recent-work .ws-row-schedule small {
   color: var(--prototype-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 .reference-recent-work .ws-row-schedule b {
   color: var(--prototype-text);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 /* Reference lock: local dashboard composition calibrated to the supplied 1680px frame. */
@@ -6877,7 +6877,7 @@ textarea:focus-visible {
 .dealer-home-frame .sidebar-section-label {
   margin: 20px 14px 20px;
   color: rgba(255, 255, 255, 0.62);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .dealer-home-frame .sidebar-primary-nav {
   gap: 7px;
@@ -6886,7 +6886,7 @@ textarea:focus-visible {
   min-height: 58px;
   border-radius: var(--radius-sm);
   padding: 0 18px;
-  font-size: 17px;
+  font-size: var(--font-md);
 }
 .dealer-home-frame .sidebar-primary-nav button i {
   width: 28px;
@@ -6910,13 +6910,13 @@ textarea:focus-visible {
 .dealer-home-frame .sidebar-profile > span {
   width: 42px;
   height: 42px;
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 .dealer-home-frame .sidebar-profile b {
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 .dealer-home-frame .sidebar-profile small {
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .dealer-home-frame .reference-prototype-dashboard {
   max-width: none;
@@ -6927,10 +6927,10 @@ textarea:focus-visible {
   margin-bottom: 25px;
 }
 .dealer-home-frame .reference-dashboard-top h1 {
-  font-size: 28px;
+  font-size: var(--font-xl);
 }
 .dealer-home-frame .reference-dashboard-top p {
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 .dealer-home-frame .reference-search-panel {
   margin-bottom: 20px;
@@ -6941,7 +6941,7 @@ textarea:focus-visible {
 }
 .dealer-home-frame .reference-search-panel .r3-hero-title h2 {
   margin-bottom: 27px;
-  font-size: 32px;
+  font-size: var(--font-xl);
 }
 .dealer-home-frame .reference-search-panel .ws-search-form {
   max-width: 996px;
@@ -6949,11 +6949,11 @@ textarea:focus-visible {
 }
 .dealer-home-frame .reference-search-panel .ws-search-form input {
   height: 56px;
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .dealer-home-frame .reference-search-panel .ws-search-cta {
   height: 56px;
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .dealer-home-frame .reference-quick-work {
   display: flex;
@@ -6964,7 +6964,7 @@ textarea:focus-visible {
   min-width: 112px;
   height: 43px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .dealer-home-frame .reference-module-grid {
   grid-template-columns: 1fr 1fr;
@@ -6977,14 +6977,14 @@ textarea:focus-visible {
   padding: 18px 22px;
 }
 .dealer-home-frame .reference-module h2 {
-  font-size: 17px;
+  font-size: var(--font-md);
 }
 .dealer-home-frame .reference-module li {
   min-height: 34px;
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .dealer-home-frame .reference-module li small {
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .dealer-home-frame .reference-module.getting-started {
   display: none;
@@ -6996,23 +6996,23 @@ textarea:focus-visible {
   padding: 19px 22px 14px;
 }
 .dealer-home-frame .reference-recent-work .ws-section-head h2 {
-  font-size: 18px;
+  font-size: var(--font-md);
 }
 .dealer-home-frame .reference-recent-work .ws-section-head p {
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .dealer-home-frame .reference-recent-work .ws-row {
   min-height: 76px;
   padding: 13px 22px;
 }
 .dealer-home-frame .reference-recent-work .ws-row-main b {
-  font-size: 14px;
+  font-size: var(--font-sm);
 }
 .dealer-home-frame .reference-recent-work .ws-row-main small {
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .dealer-home-frame .reference-recent-work .ws-row-schedule b {
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 @media (max-width: 900px) {
   .dealer-home-frame .app-sidebar {
@@ -7048,7 +7048,7 @@ textarea:focus-visible {
     margin-bottom: 18px;
   }
   .reference-search-panel .r3-hero-title h2 {
-    font-size: 28px;
+    font-size: var(--font-xl);
   }
   .reference-search-panel .ws-search-form {
     grid-template-columns: 1fr;

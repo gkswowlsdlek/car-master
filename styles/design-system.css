@@ -46,9 +46,20 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
+  /* Six steps. --font-body stays 16px on purpose: Korean reads visually
+     smaller than Latin at the same px, most users are dealers in their
+     40s-50s, and mobile is a heavy share — the density won from shrinking
+     body text is not worth the legibility. Landing/login/legal display copy
+     sits outside this scale (see tools/type-migrate.mjs). */
+  --font-xs: 11px;
+  --font-sm: 13px;
+  --font-body: 16px;
+  --font-md: 18px;
+  --font-lg: 24px;
+  --font-xl: 32px;
+  /* Retained aliases — older rules still reference these. */
   --font-display: 36px;
   --font-heading: 24px;
-  --font-body: 16px;
   --font-caption: 14px;
   --leading-display: 1.24;
   --leading-heading: 1.35;
@@ -151,14 +162,14 @@ textarea {
   display: block;
   margin-top: 6px;
   color: var(--color-danger);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 .field-hint {
   display: block;
   margin-top: 6px;
   color: var(--color-muted-soft);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 input.invalid,
 textarea.invalid,
@@ -241,20 +252,20 @@ select.invalid,
 }
 .page-title h1 {
   margin: 5px 0 0;
-  font-size: 36px;
+  font-size: var(--font-xl);
   line-height: 1.25;
   letter-spacing: -0.04em;
 }
 .page-subtitle {
   margin: 10px 0 0;
   color: var(--color-muted);
-  font-size: 16px;
+  font-size: var(--font-body);
   line-height: 1.75;
 }
 .eyebrow {
   margin: 0;
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
   letter-spacing: 0.12em;
 }
@@ -266,7 +277,7 @@ select.invalid,
   align-items: center;
   border-radius: 999px;
   padding: 4px 9px;
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
 }
 .status-견적 {
@@ -299,11 +310,11 @@ select.invalid,
 }
 .section-heading h2 {
   margin: 3px 0 0;
-  font-size: 18px;
+  font-size: var(--font-md);
 }
 .section-heading span {
   color: var(--color-muted);
-  font-size: 10px;
+  font-size: var(--font-xs);
   font-weight: 800;
   letter-spacing: 0.1em;
 }
@@ -319,10 +330,10 @@ select.invalid,
 }
 .summary-grid span {
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .summary-grid b {
-  font-size: 28px;
+  font-size: var(--font-xl);
 }
 @media (hover: hover) {
   .card:hover {
@@ -343,7 +354,7 @@ select.invalid,
     padding: 20px 14px;
   }
   .page-title h1 {
-    font-size: 28px;
+    font-size: var(--font-xl);
   }
   .summary-grid {
     grid-template-columns: 1fr;

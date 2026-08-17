@@ -12,7 +12,7 @@
 }
 .verified-badge {
   color: var(--color-success);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
 }
 .brand-check-badge.supported {
@@ -41,7 +41,7 @@
 .installer-empty-state-shop-search p {
   margin: 0;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   line-height: 1.6;
 }
 /* ============================================================
@@ -76,7 +76,7 @@
   display: grid;
   gap: 5px;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .installer-filter-controls select {
@@ -122,7 +122,7 @@
 .installer-loading-note {
   margin: 0;
   color: var(--color-muted);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
 }
 .installer-mobile-tabs {
   display: none;
@@ -133,7 +133,7 @@
 .ws-page-subtitle {
   margin: 4px 0 0;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .ws-shop-search-bar {
   border: 1px solid var(--color-line);
@@ -167,7 +167,7 @@
 }
 .installer-list-head span {
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 .installer-list {
   display: flex;
@@ -257,12 +257,12 @@
   padding-right: 30px;
 }
 .installer-card-name {
-  font-size: 14.5px;
+  font-size: var(--font-body);
 }
 .installer-card-top > span {
   flex: 0 0 auto;
   color: var(--color-muted);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .installer-card-heading {
@@ -278,7 +278,7 @@
   background: var(--color-warning-bg);
   padding: 3px 9px;
   color: var(--color-warning);
-  font-size: 10.5px;
+  font-size: var(--font-xs);
   font-weight: 800;
 }
 /* Neutral (not success-green) on purpose — this marks "지도 위치가 등록됨", not "인증/공식 등록 완료". Always paired with the "데모 시공점" badge and the literal 위치 label so it can't read as verification. */
@@ -290,7 +290,7 @@
   background: var(--color-primary);
   padding: 4px 10px 4px 8px;
   color: #fff;
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 800;
   box-shadow: 0 2px 6px rgba(14, 122, 108, 0.28);
 }
@@ -307,14 +307,14 @@
   background: var(--color-primary-soft);
   padding: 3px 9px;
   color: var(--color-primary-hover);
-  font-size: 10.5px;
+  font-size: var(--font-xs);
   font-weight: 800;
 }
 .installer-availability {
   flex: 0 0 auto;
   border-radius: 999px;
   padding: 3px 9px;
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 800;
 }
 .installer-availability.open {
@@ -328,7 +328,7 @@
 .installer-card-location {
   margin: 0;
   color: var(--color-muted);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
 }
 .installer-card-actions {
   display: flex;
@@ -338,7 +338,7 @@
 .installer-card-actions .button {
   flex: 1;
   min-height: 38px;
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .installer-empty-state {
   display: grid;
@@ -352,16 +352,16 @@
   text-align: center;
 }
 .installer-empty-state span {
-  font-size: 26px;
+  font-size: var(--font-lg);
 }
 .installer-empty-state h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .installer-empty-state p {
   margin: 0;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .installer-map-pane {
   position: sticky;
@@ -393,7 +393,7 @@
   gap: 8px;
   background: rgba(247, 248, 250, 0.92);
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 .naver-map-spinner {
@@ -424,7 +424,7 @@
   margin: 0;
   max-width: 320px;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: var(--font-sm);
 }
 .installer-map-footer {
   display: flex;
@@ -438,7 +438,7 @@
   align-items: center;
   gap: 6px;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 600;
 }
 .installer-bounds-toggle input {
@@ -450,12 +450,12 @@
   align-items: center;
   gap: 5px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 600;
 }
 .installer-map-legend-star {
   color: #16a34a;
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-style: normal;
   line-height: 1;
 }
@@ -482,7 +482,7 @@
 .installer-detail-location {
   margin: 0;
   color: var(--color-muted);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
 }
 .installer-detail-badges {
   display: flex;
@@ -508,12 +508,12 @@
 .installer-detail-label {
   margin: 0 0 4px;
   color: var(--color-muted);
-  font-size: 11px;
+  font-size: var(--font-xs);
   font-weight: 700;
 }
 .installer-detail-value {
   margin: 0;
-  font-size: 13.5px;
+  font-size: var(--font-sm);
   font-weight: 600;
   line-height: 1.6;
 }
@@ -526,7 +526,7 @@
   justify-content: space-between;
   gap: 10px;
   margin: 0;
-  font-size: 12.5px;
+  font-size: var(--font-sm);
 }
 .installer-detail-section-secondary p span:first-child {
   color: var(--color-muted);
@@ -540,7 +540,7 @@
   background: var(--color-surface-soft);
   padding: 10px 12px;
   color: var(--color-muted);
-  font-size: 12.5px;
+  font-size: var(--font-sm);
   text-align: center;
 }
 .installer-detail-panel .card-actions .primary {
@@ -578,7 +578,7 @@
   background: var(--color-surface-soft);
   padding: 6px 14px;
   color: var(--color-muted);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 .installer-filter-sheet {
@@ -597,7 +597,7 @@
   margin-bottom: 14px;
 }
 .installer-filter-sheet-head b {
-  font-size: 16px;
+  font-size: var(--font-body);
 }
 .installer-filter-sheet-head button {
   display: grid;
@@ -633,7 +633,7 @@
     border-radius: 999px;
     padding: 8px 16px;
     color: var(--color-muted);
-    font-size: 13px;
+    font-size: var(--font-sm);
     font-weight: 700;
   }
   .installer-mobile-tabs button.active {
@@ -681,13 +681,13 @@
 .ws-eyebrow {
   margin: 0 0 4px;
   color: var(--color-primary);
-  font-size: 12px;
+  font-size: var(--font-sm);
   font-weight: 800;
   letter-spacing: 0.08em;
 }
 .ws-dashboard-header h1 {
   margin: 0;
-  font-size: 26px;
+  font-size: var(--font-lg);
   font-weight: 800;
   letter-spacing: -0.02em;
 }
