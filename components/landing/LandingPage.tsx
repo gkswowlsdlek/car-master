@@ -1,22 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import { ArrowRight, Building2, Clock3, MapPin, MessageCircle } from "lucide-react";
+import { RegionMap } from "./RegionMap";
 
 // Product Rule sanity (Phase 8 §20): 견적 요청→협의→거래 확정 순서는 실제
 // Flow와 다르다 — Shop 선택 즉시 거래/거래방이 생성되고(Installer 수락 대기
 // 없음), 전화 확인은 그 이후 정상 절차다. "확정"이라는 별도 후행 단계는 없다.
 const workflow = ["지역 검색", "용품점 비교", "시공 요청", "전화 확인", "작업 관리"];
-
-// 검색 가능한 권역과 그 안의 주요 출고 지역. "우리 업체가 이 도시에 다 있다"는
-// 주장이 아니라 딜러가 어느 지역명으로 찾게 되는지를 보여주는 것이고, 실제 업체
-// 노출 기준은 아래 hero-coverage-note에 그대로 적는다.
-const coverage = [
-  { region: "수도권", cities: "서울 · 인천 · 수원 · 성남 · 고양 · 용인" },
-  { region: "강원권", cities: "춘천 · 원주 · 강릉 · 속초" },
-  { region: "충청권", cities: "대전 · 세종 · 청주 · 천안 · 아산" },
-  { region: "호남권", cities: "광주 · 전주 · 익산 · 순천 · 목포" },
-  { region: "영남권", cities: "부산 · 대구 · 울산 · 창원 · 포항 · 진주" },
-  { region: "제주권", cities: "제주 · 서귀포" },
-];
 
 const benefits = [
   {
@@ -88,35 +77,28 @@ export function LandingPage({ onStart }: { onStart: () => void }) {
           <div className="hero-coverage">
             <div className="hero-coverage-head">
               <span>NATIONWIDE COVERAGE</span>
-              <b>전국 어디로 출고해도 그 지역부터 찾습니다</b>
+              <b>전국 어디든 가까운 곳부터 찾아드립니다</b>
             </div>
-            <ul className="hero-coverage-grid">
-              {coverage.map(({ region, cities }) => (
-                <li key={region}>
-                  <b>{region}</b>
-                  <small>{cities}</small>
-                </li>
-              ))}
-            </ul>
+            <RegionMap />
             <p className="hero-coverage-note">
               업체는 등록 지역 기준으로 표시되며, 거리도 같은 기준으로 계산합니다.
             </p>
           </div>
-          <div className="hero-workflow" aria-label="카마스터 이용 흐름">
-            <div>
-              <span>NEARBY SHOP FIRST</span>
-              <b>가까운 용품점을 찾고, 요청하고, 연결하세요</b>
-            </div>
-            <ol>
-              {workflow.map((item, index) => (
-                <li key={item}>
-                  <i>{index + 1}</i>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
         </div>
+      </section>
+      <section className="region-flow" aria-label="카마스터 이용 흐름">
+        <div className="region-flow-head">
+          <span>NEARBY SHOP FIRST</span>
+          <b>가까운 용품점을 찾고, 요청하고, 연결하세요</b>
+        </div>
+        <ol>
+          {workflow.map((item, index) => (
+            <li key={item}>
+              <i>{index + 1}</i>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ol>
       </section>
       <section className="trust-strip">
         {benefits.map(({ icon: Icon, title, description }) => (
