@@ -170,7 +170,15 @@ export function InstallerDirectoryScreen({
   const selectedDistanceLabel =
     withDistance.find((item) => item.installer.id === selected?.id)?.distanceLabel ?? "거리 정보 없음";
 
+  // 사용자가 선택을 *바꿨을 때만* 해당 카드로 스크롤한다. selectedId가 시드된
+  // 채로 마운트되는 경우(화면 진입 직후) 첫 실행을 건너뛰지 않으면 창 전체가
+  // 66px쯤 끌려 내려간 상태로 화면이 시작된다 — fix/shell-consistency 문제 2.
+  const selectionSettled = useRef(false);
   useEffect(() => {
+    if (!selectionSettled.current) {
+      selectionSettled.current = true;
+      return;
+    }
     if (!selectedId) return;
     document.getElementById(`installer-card-${selectedId}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [selectedId]);
