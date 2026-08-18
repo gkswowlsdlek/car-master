@@ -245,14 +245,14 @@ fs.writeFileSync(
 );
 
 function pinMarkup(x, y) {
-  const R = 9;
+  const R = 18; // 사용자 요청: 기존 9에서 2배
   const headCy = y - R * 1.8;
   const baseY = headCy + R * 0.72;
   const baseHalfW = R * 0.62;
   return (
     `<ellipse cx="${x.toFixed(2)}" cy="${(y + 1).toFixed(2)}" rx="${(R * 0.85).toFixed(2)}" ry="${(R * 0.32).toFixed(2)}" fill="rgba(15,23,42,0.16)" />` +
     `<polygon points="${(x - baseHalfW).toFixed(2)},${baseY.toFixed(2)} ${(x + baseHalfW).toFixed(2)},${baseY.toFixed(2)} ${x.toFixed(2)},${y.toFixed(2)}" fill="var(--color-primary)" />` +
-    `<circle cx="${x.toFixed(2)}" cy="${headCy.toFixed(2)}" r="${R.toFixed(2)}" fill="var(--color-primary)" stroke="#fff" stroke-width="0.8" />` +
+    `<circle cx="${x.toFixed(2)}" cy="${headCy.toFixed(2)}" r="${R.toFixed(2)}" fill="var(--color-primary)" stroke="#fff" stroke-width="1.6" />` +
     `<circle cx="${x.toFixed(2)}" cy="${headCy.toFixed(2)}" r="${(R * 0.4).toFixed(2)}" fill="#fff" />`
   );
 }
