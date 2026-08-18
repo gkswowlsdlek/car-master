@@ -894,3 +894,42 @@
 .admin-ops-queue {
   margin: 18px 0;
 }
+
+/* ── redesign/shop-admin-shell: Admin 계정 정보 카드 ─────────────────────
+   기존 .card + dl/dt/dd 관례를 그대로 쓴다. 새 색/여백 값 없이 토큰만. */
+.admin-account-info {
+  margin-bottom: 24px;
+  padding: 20px 22px;
+}
+.admin-account-info dl {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+.admin-account-info dl > div {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--color-line);
+  padding: 12px 0;
+}
+.admin-account-info dl > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.admin-account-info dt {
+  color: var(--color-muted);
+  font-size: var(--font-xs);
+  font-weight: 650;
+}
+.admin-account-info dd {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-sm);
+  font-weight: 700;
+}
+.admin-account-info .badge {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-hover);
+}

@@ -27,7 +27,8 @@ export type Screen =
   | "adminShops"
   | "adminAccount"
   | "messages"
-  | "dealerHelp";
+  | "dealerHelp"
+  | "shopHelp";
 export type RequestType = "견적 문의" | "실제 시공 요청";
 export type DemoAccount = {
   id: string;

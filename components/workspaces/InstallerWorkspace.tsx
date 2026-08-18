@@ -14,6 +14,7 @@ import type {
 import { MessengerScreen } from "../messenger/MessengerScreen";
 import { ShopManagementScreen } from "../shop/ShopManagementScreen";
 import { ShopDashboard } from "../shop/ShopDashboard";
+import { HelpCenterScreen } from "../support/HelpCenterScreen";
 import { TransactionManagementScreen } from "../transactions/TransactionManagementScreen";
 import { isDemoAccountId } from "../../data/demo-accounts";
 import { shopManagementRepository } from "../../repositories/shop-management-repository";
@@ -198,6 +199,7 @@ export function InstallerWorkspace({
         />
       )}
       {screen === "dealerProfile" && <ShopManagementScreen userId={account.id} onChangePassword={onChangePassword} />}
+      {screen === "shopHelp" && <HelpCenterScreen role="shop" embedded />}
     </>
   );
 }
