@@ -52,7 +52,7 @@ const navigation: Record<Role, NavItem[]> = {
     { screen: "shopRequests", label: "거래방", icon: Building2, group: "work" },
     { screen: "messages", label: "메시지", icon: MessageCircle, group: "work" },
     { screen: "dealerProfile", label: "시공점 관리", icon: Settings2, group: "support" },
-    { href: "/help/shop", label: "고객센터", icon: HelpCircle, group: "support" },
+    { screen: "shopHelp", label: "고객센터", icon: HelpCircle, group: "support" },
   ],
   admin: [
     { screen: "ops", label: "운영 현황", icon: UsersRound, group: "work" },
@@ -75,6 +75,7 @@ const screenTitles: Partial<Record<Screen, string>> = {
   adminShops: "시공점 관리",
   adminAccount: "계정",
   dealerHelp: "고객센터",
+  shopHelp: "고객센터",
 };
 
 // Shop's sidebar labels ("거래방"/"시공점 관리") and the shared screenTitles
@@ -376,15 +377,9 @@ export function AppShell({
                   <span>{item.label}</span>
                 </button>
               ))}
-              <button
-                onClick={() => {
-                  setMoreOpen(false);
-                  window.location.href = role === "shop" ? "/help/shop" : "/help";
-                }}
-              >
-                <HelpCircle size={20} strokeWidth={2} aria-hidden="true" />
-                <span>고객센터</span>
-              </button>
+              {/* 고객센터는 이제 dealerHelp/shopHelp가 둘 다 일반 nav 항목(screen 기반)이라
+                  위 overflow.map이 이미 렌더한다 — 여기서 하드코딩된 href 버튼을 또 두면
+                  더보기 시트에 고객센터가 두 번 뜬다(redesign/shop-admin-shell에서 발견). */}
               <button
                 onClick={() => {
                   setMoreOpen(false);
