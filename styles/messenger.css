@@ -325,3 +325,16 @@
   cursor: default;
   opacity: 0.6;
 }
+
+/* Shown only while a search is active AND some room still has unloaded
+   history — the alternative was letting older conversations silently drop out
+   of results with no explanation. */
+.inbox-search-scope {
+  margin: 0 0 10px;
+  border-left: 2px solid var(--color-primary-border);
+  background: var(--color-primary-soft);
+  color: var(--color-text-soft);
+  padding: 8px 10px;
+  font-size: var(--font-xs);
+  line-height: 1.6;
+}

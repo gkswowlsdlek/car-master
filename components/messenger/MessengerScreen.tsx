@@ -139,6 +139,15 @@ export function MessengerScreen({
       return haystack.includes(keyword);
     });
   }, [rows, query]);
+  // Search runs over what is loaded. Five of its six fields (거래번호, 차량,
+  // 시공점, 작업내용) come from the transaction and are always complete; only
+  // message bodies are windowed. Rather than let older conversations quietly
+  // fall out of results, say so — but only while searching, and only when some
+  // room genuinely has unloaded history.
+  const searchScopeLimited = useMemo(
+    () => query.trim().length > 0 && rows.some(({ room }) => room?.hasMoreMessages),
+    [query, rows],
+  );
   const totalUnread = useMemo(() => rows.reduce((sum, { room }) => sum + (room?.unreadCount ?? 0), 0), [rows]);
   const selected = filtered.find((item) => item.transaction.id === selectedId) ?? filtered[0];
   const selectedRoom = rooms.find((item) => item.transactionId === selected?.transaction.id);
@@ -196,6 +205,12 @@ export function MessengerScreen({
               <X size={16} aria-hidden="true" />
             </button>
           </div>
+          {searchScopeLimited && (
+            <p className="inbox-search-scope" role="status">
+              거래 정보는 전체에서, 대화 내용은 최근 메시지에서 찾습니다. 예전 대화까지 찾으려면 거래방에서 “이전 메시지
+              보기”로 불러온 뒤 검색해 주세요.
+            </p>
+          )}
           {isLoading ? (
             <div className="inbox-state" role="status">
               대화 목록을 불러오는 중입니다…
