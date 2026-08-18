@@ -20,9 +20,6 @@
   filter: brightness(0) invert(1);
 }
 .role-dealer .app-logo small,
-.role-dealer .sidebar-section-label {
-  color: rgba(255, 255, 255, 0.62);
-}
 .role-dealer .app-sidebar nav {
   gap: 3px;
 }
@@ -37,7 +34,7 @@
   color: #fff;
 }
 .role-dealer .sidebar-profile {
-  border-top-color: #1a2a33;
+  border-top-color: #1e2a4a;
   color: #fff;
 }
 .role-dealer .sidebar-profile small,
@@ -60,31 +57,12 @@
 .role-dealer .app-topbar-default .topbar-actions {
   margin-left: auto;
 }
-.sidebar-subsection-label {
-  margin: 22px 12px 7px;
-  color: var(--color-muted-soft);
-  font-size: var(--font-xs);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
 .mobile-sidebar-toggle {
   display: none;
   border: 0;
   background: transparent;
   color: var(--color-ink);
   padding: 6px;
-}
-.sidebar-secondary-nav {
-  padding-top: 0;
-}
-.sidebar-secondary-nav button {
-  min-height: 38px !important;
-  color: var(--color-muted) !important;
-  font-size: var(--font-sm) !important;
-}
-.sidebar-secondary-nav button i {
-  width: 26px !important;
-  height: 26px !important;
 }
 /* Application frame */
 .app-frame {
@@ -207,13 +185,6 @@
   font-weight: 700;
   letter-spacing: 0.08em;
 }
-.sidebar-section-label {
-  padding: 0 12px 8px;
-  color: var(--color-muted-soft);
-  font-size: var(--font-xs);
-  font-weight: 800;
-  letter-spacing: 0.1em;
-}
 .app-sidebar nav {
   gap: 5px;
 }
@@ -246,31 +217,6 @@
   padding: 3px 7px;
   font-size: var(--font-xs);
   font-style: normal;
-}
-.sidebar-support {
-  display: grid;
-  gap: 5px;
-  margin: 14px 0;
-  border-radius: var(--radius-md);
-  background: var(--color-line);
-  padding: 14px;
-}
-.sidebar-support b {
-  font-size: var(--font-sm);
-}
-.sidebar-support span {
-  color: var(--color-muted);
-  font-size: var(--font-xs);
-  line-height: 1.5;
-}
-.sidebar-support button {
-  margin-top: 3px;
-  background: transparent;
-  color: var(--color-primary);
-  padding: 4px 0;
-  text-align: left;
-  font-size: var(--font-xs);
-  font-weight: 800;
 }
 .sidebar-profile {
   grid-template-columns: 38px 1fr auto;
@@ -396,20 +342,6 @@
     color 0.2s,
     transform 0.2s;
 }
-.sidebar-support {
-  grid-template-columns: auto 1fr;
-  gap: 4px 9px;
-  border: 1px solid var(--color-line);
-  background: var(--color-surface-soft);
-  padding: 16px;
-}
-.sidebar-support > svg {
-  grid-row: span 2;
-  color: var(--color-primary);
-}
-.sidebar-support button {
-  grid-column: 1/-1;
-}
 .sidebar-profile {
   border-top: 1px solid var(--color-line);
   padding-top: 16px;
@@ -479,9 +411,6 @@
 .app-logo small {
   margin-top: 10px;
 }
-.role-dealer .app-sidebar .sidebar-section-label {
-  margin-top: 0 !important;
-}
 .role-dealer .app-sidebar nav {
   align-content: start !important;
   margin-top: 6px;
@@ -520,10 +449,10 @@
   background: #fff !important;
 }
 .role-dealer .app-frame {
-  grid-template-columns: 236px minmax(0, 1fr) !important;
+  grid-template-columns: 296px minmax(0, 1fr) !important;
 }
 .role-dealer .app-sidebar {
-  min-width: 236px;
+  min-width: 296px;
 }
 .role-dealer .app-logo {
   padding: 0 8px !important;
@@ -532,14 +461,8 @@
   width: 172px !important;
 }
 .role-dealer .app-logo small {
-  margin: 7px 4px 18px !important;
+  margin: 6px 4px 10px !important;
   color: rgba(255, 255, 255, 0.55) !important;
-}
-.role-dealer .sidebar-support {
-  margin-top: 20px !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  background: rgba(255, 255, 255, 0.035) !important;
-  border-radius: var(--radius-sm) !important;
 }
 .role-dealer .sidebar-profile {
   border-top-color: rgba(255, 255, 255, 0.13) !important;
@@ -549,7 +472,7 @@
 }
 /* R7 hybrid calibration: Production navigation usability + Local main composition. */
 .role-dealer .app-sidebar {
-  background: #0d1a23 !important;
+  background: #0f1a33 !important;
 }
 .role-dealer .app-sidebar nav button {
   font-size: var(--font-sm) !important;
@@ -559,7 +482,7 @@
   font-size: var(--font-body) !important;
 }
 .role-dealer .app-sidebar .sidebar-profile > span {
-  background: #1a2a33 !important;
+  background: #1e2a4a !important;
 }
 .role-dealer .app-topbar .topbar-icon-button {
   display: grid !important;
@@ -580,9 +503,9 @@
   background: var(--cm-background) !important;
 }
 .role-dealer .app-topbar-default {
-  margin: 12px 14px 0 0;
+  margin: 0;
   border: 1px solid var(--cm-border);
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-radius: 0;
 }
 .app-mobile-nav {
   display: none;
@@ -635,9 +558,9 @@
 }
 .app-sidebar {
   grid-template-rows: auto auto 1fr auto;
-  background: linear-gradient(175deg, #1a2a33 0%, #0d1a23 100%);
-  border-right: 1px solid rgba(13, 26, 35, 0.14);
-  padding: 24px 18px 20px;
+  background: linear-gradient(175deg, #1e2a4a 0%, #0f1a33 100%);
+  border-right: 1px solid rgba(15, 26, 51, 0.14);
+  padding: 14px 16px 16px;
 }
 .app-logo {
   display: flex;
@@ -658,13 +581,6 @@
   font-size: var(--font-xs);
   font-weight: 700;
   letter-spacing: 0.04em;
-}
-.sidebar-section-label {
-  padding: 18px 12px 10px;
-  color: rgba(255, 255, 255, 0.42);
-  font-size: var(--font-xs);
-  font-weight: 800;
-  letter-spacing: 0.1em;
 }
 .app-sidebar nav {
   gap: 5px;
@@ -729,63 +645,122 @@
    about before searching: how much of the country is actually reachable.
    `margin-top: auto` pins it low without a fixed height, so when the figure is
    unavailable and the block is not rendered the rail simply closes up. */
-.sidebar-coverage {
-  margin: auto 2px 12px;
-  padding: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.04);
-}
-.sidebar-coverage-count {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  margin: 0;
-}
-.sidebar-coverage-count b {
-  color: #fff;
-  font-size: 26px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-.sidebar-coverage-count span {
-  color: rgba(255, 255, 255, 0.78);
-  font-size: var(--font-sm);
-  font-weight: 600;
-}
-.sidebar-coverage-label {
-  display: block;
-  margin-top: 2px;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: var(--font-xs);
-  font-weight: 600;
-}
-.sidebar-coverage-bar {
-  display: flex;
-  gap: 3px;
-  margin-top: 11px;
-}
-.sidebar-coverage-bar i {
-  height: 5px;
-  flex-basis: 0;
-  border-radius: 3px;
-  background: var(--color-primary);
-}
-.sidebar-coverage-bar i:nth-child(2) { opacity: 0.78; }
-.sidebar-coverage-bar i:nth-child(3) { opacity: 0.58; }
-.sidebar-coverage-bar i:nth-child(4) { opacity: 0.42; }
-.sidebar-coverage-bar i:nth-child(5) { opacity: 0.3; }
-.sidebar-coverage-legend {
-  display: block;
-  margin-top: 8px;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: var(--font-xs);
-  line-height: 1.55;
-}
 /* The rail is a grid; the coverage block needs a flex context for margin-auto
    to push it down, and the profile must stay last. */
 .app-sidebar {
   display: flex;
   flex-direction: column;
+}
+
+/* ── redesign/sidebar-royalblue ─────────────────────────────────────────
+   이 블록이 shell.css의 마지막이다. 앞쪽 .role-dealer 규칙들이 !important를
+   달고 있어 뒤에서 덮으려면 !important를 또 붙여야 하므로, 폭·여백처럼 기존
+   선언이 있는 값은 여기서 덮지 않고 원래 규칙을 직접 고쳤다(위 523/526/535/640행).
+   여기에는 새로 생긴 요소(그룹 라벨, 커버리지 버튼, 계정 메뉴)만 정의한다. */
+
+/* 업무 / 지원 두 그룹. 라벨 불투명도는 50% — 45%는 ink 대비 4.42:1로
+   WCAG AA(4.5:1)에 미달하고 50%는 5.16:1이라 통과한다. */
+.sidebar-group + .sidebar-group {
+  margin-top: 18px;
+}
+.sidebar-group-label {
+  padding: 0 12px 8px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* 커버리지 — 광고 카드가 아니라 "지금 몇 곳이 연결돼 있고 어디를 보면 되는지"만
+   말하는 업무용 진입점. 클릭하면 시공점 찾기로 간다. */
+.sidebar-coverage {
+  display: grid;
+  gap: 3px;
+  margin: auto 2px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 13px 14px;
+  text-align: left;
+}
+.sidebar-coverage:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+}
+.sidebar-coverage-title {
+  color: #fff;
+  font-size: var(--font-sm);
+  font-weight: 700;
+}
+.sidebar-coverage-count {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+.sidebar-coverage-count b {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.sidebar-coverage-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 5px;
+  color: var(--color-primary-border);
+  font-size: var(--font-xs);
+  font-weight: 700;
+}
+
+/* 계정 메뉴 — 실제 존재하는 화면(역할별 프로필/계정)과 로그아웃만 넣는다. */
+.sidebar-profile {
+  position: relative;
+}
+.sidebar-account-toggle {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+}
+.sidebar-account-toggle:hover {
+  color: #fff;
+}
+.sidebar-account-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  border: 0;
+  background: transparent;
+}
+.sidebar-account-menu {
+  position: absolute;
+  right: 4px;
+  bottom: calc(100% + 6px);
+  z-index: 31;
+  display: grid;
+  min-width: 168px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: #fff;
+  padding: 5px;
+  box-shadow: var(--shadow-md);
+}
+.sidebar-account-menu button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 9px 10px;
+  color: var(--color-text-soft);
+  font-size: var(--font-sm);
+  font-weight: 650;
+  text-align: left;
+}
+.sidebar-account-menu button:hover {
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+}
+
+/* 사이드바와 본문이 붙었으므로 상단바는 아래 경계선만 남긴다. */
+.role-dealer .app-topbar-default {
+  border-width: 0 0 1px;
 }
