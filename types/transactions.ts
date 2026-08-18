@@ -92,6 +92,12 @@ export type ChatRoom = {
   unreadCount: number;
   /** True when older messages exist beyond the loaded window. */
   hasMoreMessages?: boolean;
+  /** This viewer's own read cursor for the room (room_reads/demo_chat_reads
+   * .last_read_at) — already fetched to compute unreadCount, just not
+   * previously surfaced. "" when the viewer has never read the room.
+   * Notifications use it to tell a stage change the viewer has already seen
+   * (by opening the room since) from one they haven't. */
+  lastReadAt?: string;
 };
 
 export type UserProfile = {

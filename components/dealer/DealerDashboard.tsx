@@ -1,5 +1,6 @@
 import { Bell, CheckCircle2, ChevronRight, MessageCircle, Phone, Search } from "lucide-react";
 import { useState } from "react";
+import type { AppNotification } from "../../hooks/use-notifications";
 import type { Transaction, TransactionStage } from "../../types/transactions";
 import { dealerStageLabel } from "../../services/transaction-state-service";
 
@@ -103,27 +104,43 @@ function EmptyRow({ children }: { children: string }) {
 export function DealerDashboard({
   dealerName,
   deals,
+  notifications,
   onFilterDeals,
   onOpenTransaction,
+  onOpenMessages,
   onNewRequest: _onNewRequest,
   onFindShop,
   onSearchLocation,
   onShopSearchRequests,
+  relativeTime,
 }: {
   dealerName: string;
   deals: Transaction[];
+  /** 새 메시지·거래 상태 변경·Admin 시공점 제안 — 전부 기존 데이터에서 파생된
+   * 것이라(hooks/use-notifications) 가짜 항목이 섞일 수 없다. 빈 배열이면
+   * 두 카드 모두 빈 상태를 보여준다. */
+  notifications: AppNotification[];
   onFilterDeals: (filter: TransactionStage | "전체") => void;
   onOpenTransaction: (id: string) => void;
+  /** 메신저로 이동(특정 거래 지정 없이) — "새 메시지" 카드의 전체 보기 전용. */
+  onOpenMessages: () => void;
   onNewRequest: () => void;
   onFindShop: () => void;
   onSearchLocation: (area: string) => void;
   onShopSearchRequests?: () => void;
+  relativeTime: (iso: string) => string;
 }) {
   const [area, setArea] = useState("");
   const activeDeals = deals.filter((deal) => ACTIVE_STAGES.includes(deal.status.stage));
   const recentDeals = [...activeDeals].sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt)).slice(0, 5);
   const submitSearch = () => (area.trim() ? onSearchLocation(area.trim()) : onFindShop());
   const usePrototypeJobs = DESIGN_PROTOTYPE_ONLY && deals.length === 0;
+  const messageNotifications = notifications.filter((item) => item.type === "message");
+  const recentNotifications = notifications.slice(0, 5);
+  const openNotification = (item: AppNotification) => {
+    if (item.type === "shop_proposed") onShopSearchRequests?.();
+    else if (item.transactionId) onOpenTransaction(item.transactionId);
+  };
 
   return (
     <section
@@ -135,12 +152,15 @@ export function DealerDashboard({
           <p>오늘도 안전하고 성공적인 출고를 응원합니다.</p>
         </div>
         <div className="reference-utility">
-          <button type="button" aria-label="알림">
+          <button type="button" aria-label="알림" onClick={() => onFilterDeals("전체")}>
             <Bell size={22} />
+            {notifications.length > 0 && <b>{notifications.length > 99 ? "99+" : notifications.length}</b>}
           </button>
-          <button type="button" aria-label="메시지">
+          <button type="button" aria-label="메시지" onClick={onOpenMessages}>
             <MessageCircle size={22} />
-            <b>2</b>
+            {messageNotifications.length > 0 && (
+              <b>{messageNotifications.length > 99 ? "99+" : messageNotifications.length}</b>
+            )}
           </button>
           <span className="reference-avatar">{dealerName.slice(0, 1)}</span>
         </div>
@@ -170,51 +190,61 @@ export function DealerDashboard({
             <h2>
               <Bell size={19} /> 최근 알림
             </h2>
-            <button type="button">
+            <button type="button" onClick={() => onFilterDeals("전체")}>
               전체 보기 <ChevronRight size={14} />
             </button>
           </header>
-          <ul>
-            <li>
-              <i />
-              작업 일정이 변경되었습니다.<small>1시간 전</small>
-            </li>
-            <li>
-              <i />새 메시지 2건이 도착했습니다.<small>2시간 전</small>
-            </li>
-            <li>
-              <i />
-              작업이 완료되어 리뷰를 요청드립니다.<small>1일 전</small>
-            </li>
-          </ul>
+          {recentNotifications.length > 0 ? (
+            <ul>
+              {recentNotifications.map((item) => (
+                <li key={item.id}>
+                  <button type="button" onClick={() => openNotification(item)}>
+                    <i />
+                    <span>
+                      {item.type === "message"
+                        ? `${item.title}님이 메시지를 보냈습니다.`
+                        : item.type === "stage_change"
+                          ? `${item.title} — ${item.body}`
+                          : item.type === "shop_proposed"
+                            ? `${item.title}을(를) 제안드렸습니다.`
+                            : item.body}
+                    </span>
+                    <small>{relativeTime(item.createdAt)}</small>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="reference-module-empty">아직 알림이 없습니다.</p>
+          )}
         </article>
         <article className="reference-module">
           <header>
             <h2>
               <MessageCircle size={19} /> 새 메시지
             </h2>
-            <button type="button" onClick={() => onFilterDeals("전체")}>
+            <button type="button" onClick={onOpenMessages}>
               전체 보기 <ChevronRight size={14} />
             </button>
           </header>
-          <ul>
-            <li>
-              <div>
-                <b>강남 프리미엄 카케어</b>
-                <span>안녕하세요, 작업 일정 확인 부탁드립니다.</span>
-              </div>
-              <small>1시간 전</small>
-              <em>1</em>
-            </li>
-            <li>
-              <div>
-                <b>미사틴팅 스튜디오</b>
-                <span>PPF 시공 관련 추가 문의드립니다.</span>
-              </div>
-              <small>3시간 전</small>
-              <em>1</em>
-            </li>
-          </ul>
+          {messageNotifications.length > 0 ? (
+            <ul>
+              {messageNotifications.slice(0, 5).map((item) => (
+                <li key={item.id}>
+                  <button type="button" onClick={() => openNotification(item)}>
+                    <div>
+                      <b>{item.title}</b>
+                      <span>{item.body}</span>
+                    </div>
+                    <small>{relativeTime(item.createdAt)}</small>
+                    <em>1</em>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="reference-module-empty">아직 대화가 없습니다.</p>
+          )}
         </article>
         <article className="reference-module getting-started">
           <header>

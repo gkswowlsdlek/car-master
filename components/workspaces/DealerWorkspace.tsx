@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useNotifications } from "../../hooks/use-notifications";
 import { defaultRequest } from "../../data/default-request";
 import { isDemoAccountId } from "../../data/demo-accounts";
 import { districtCenters } from "../../data/district-centers";
@@ -86,6 +87,7 @@ type DealerWorkspaceProps = {
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   onCompanyNameChange: (name: string | undefined) => void;
   onUnreadMessageCountChange: (count: number) => void;
+  onUnreadNotificationCountChange: (count: number) => void;
   onMobileFullscreenChange: (open: boolean) => void;
 };
 
@@ -115,6 +117,7 @@ export function DealerWorkspace({
   onChangePassword,
   onCompanyNameChange,
   onUnreadMessageCountChange,
+  onUnreadNotificationCountChange,
   onMobileFullscreenChange,
 }: DealerWorkspaceProps) {
   const [query, setQuery] = useState("하남시");
@@ -160,6 +163,7 @@ export function DealerWorkspace({
         .reduce((sum, room) => sum + room.unreadCount, 0),
     [rooms, transactions],
   );
+  const notifications = useNotifications({ role: "dealer", transactions, rooms, useSupabaseData });
   const activeTransactionId = selectedTransactionId || transactions[0]?.id || "";
   const profileActivity = useMemo(() => {
     const now = new Date();
@@ -216,6 +220,10 @@ export function DealerWorkspace({
   }, [account.id, onCompanyNameChange]);
 
   useEffect(() => onUnreadMessageCountChange(unreadMessageCount), [onUnreadMessageCountChange, unreadMessageCount]);
+  useEffect(
+    () => onUnreadNotificationCountChange(notifications.unreadCount),
+    [onUnreadNotificationCountChange, notifications.unreadCount],
+  );
   useEffect(() => {
     onMobileFullscreenChange(screen === "messages" && mobileChatOpen);
     return () => onMobileFullscreenChange(false);
@@ -386,6 +394,8 @@ export function DealerWorkspace({
         <DealerDashboard
           dealerName={account.name}
           deals={transactions.filter((item) => !item.visibility.hiddenByDealer)}
+          notifications={notifications.items}
+          relativeTime={notifications.relativeTime}
           onFilterDeals={(filter) => {
             setDealFilter(filter);
             onNavigate("deals");
@@ -394,6 +404,7 @@ export function DealerWorkspace({
             setSelectedTransactionId(id);
             onNavigate("messages");
           }}
+          onOpenMessages={() => onNavigate("messages")}
           onNewRequest={() => onNavigate("request")}
           onFindShop={() => onNavigate("dealerMap")}
           onSearchLocation={searchHomeLocation}

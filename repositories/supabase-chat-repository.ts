@@ -74,7 +74,8 @@ export class SupabaseChatRepository {
         reader_id: read.user_id,
         last_read_at: read.last_read_at,
       }));
-      cursors.set(room.id, reads.find((read) => read.reader_id === myId)?.last_read_at ?? "");
+      const myCursor = reads.find((read) => read.reader_id === myId)?.last_read_at ?? "";
+      cursors.set(room.id, myCursor);
       const page = [...(room.chat_messages ?? [])].reverse();
       return {
         id: room.id,
@@ -84,6 +85,7 @@ export class SupabaseChatRepository {
         messages: normalizeChatMessages(page, reads),
         unreadCount: 0,
         hasMoreMessages: page.length === CHAT_PAGE_SIZE,
+        lastReadAt: myCursor,
       } satisfies ChatRoom;
     });
 
@@ -136,6 +138,7 @@ export class SupabaseChatRepository {
       last_read_at: read.last_read_at,
     }));
     const page = [...(row.chat_messages ?? [])].reverse();
+    const myCursor = reads.find((read) => read.reader_id === myId)?.last_read_at ?? "";
     const room: ChatRoom = {
       id: row.id,
       transactionId: row.transaction_id,
@@ -144,8 +147,9 @@ export class SupabaseChatRepository {
       messages: normalizeChatMessages(page, reads),
       unreadCount: 0,
       hasMoreMessages: page.length === CHAT_PAGE_SIZE,
+      lastReadAt: myCursor,
     };
-    const cursors = new Map([[row.id, reads.find((read) => read.reader_id === myId)?.last_read_at ?? ""]]);
+    const cursors = new Map([[row.id, myCursor]]);
     await Promise.all([this.applyUnreadCounts([room], cursors, myId), signAttachments([room])]);
     return room;
   }

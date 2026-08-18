@@ -97,9 +97,11 @@ export default function Home() {
   const [dealerCompanyName, setDealerCompanyName] = useState<string | undefined>(undefined);
   const [realShopCoverage, setRealShopCoverage] = useState<ShopCoverage | null>(null);
   const [dealerUnreadMessageCount, setDealerUnreadMessageCount] = useState(0);
+  const [dealerUnreadNotificationCount, setDealerUnreadNotificationCount] = useState(0);
   const [dealerMobileFullscreen, setDealerMobileFullscreen] = useState(false);
   const [installerMobileFullscreen, setInstallerMobileFullscreen] = useState(false);
   const [installerUnreadMessageCount, setInstallerUnreadMessageCount] = useState(0);
+  const [installerUnreadNotificationCount, setInstallerUnreadNotificationCount] = useState(0);
   const useSupabaseData = Boolean(currentUser);
   const {
     transactions,
@@ -386,6 +388,9 @@ export default function Home() {
       : role === "dealer"
         ? dealerUnreadMessageCount
         : adminUnreadMessageCount;
+  // Admin은 알림 레이어가 없다(운영 현황 화면이 이미 그 역할) — 항상 0.
+  const unreadNotificationCount =
+    role === "shop" ? installerUnreadNotificationCount : role === "dealer" ? dealerUnreadNotificationCount : 0;
   const mobileFullscreen =
     role === "shop" ? installerMobileFullscreen : role === "dealer" ? dealerMobileFullscreen : false;
   return (
@@ -395,6 +400,7 @@ export default function Home() {
       company={role === "dealer" ? dealerCompanyName : undefined}
       screen={screen}
       unreadMessageCount={unreadMessageCount}
+      unreadNotificationCount={unreadNotificationCount}
       mobileFullscreen={mobileFullscreen}
       shopCoverage={role === "dealer" ? shopCoverage : null}
       onNavigate={goToScreen}
@@ -438,6 +444,7 @@ export default function Home() {
           onChangePassword={changePassword}
           onCompanyNameChange={setDealerCompanyName}
           onUnreadMessageCountChange={setDealerUnreadMessageCount}
+          onUnreadNotificationCountChange={setDealerUnreadNotificationCount}
           onMobileFullscreenChange={setDealerMobileFullscreen}
         />
       )}
@@ -465,6 +472,7 @@ export default function Home() {
           onLoadOlderMessages={loadOlderMessages}
           onChangePassword={changePassword}
           onUnreadMessageCountChange={setInstallerUnreadMessageCount}
+          onUnreadNotificationCountChange={setInstallerUnreadNotificationCount}
           onMobileFullscreenChange={setInstallerMobileFullscreen}
         />
       )}

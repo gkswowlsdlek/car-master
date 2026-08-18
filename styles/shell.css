@@ -795,3 +795,15 @@
     padding-top: 24px;
   }
 }
+
+/* feat/notifications: 상단바 알림 벨의 안 읽음 배지. .nav-unread-badge의
+   색·크기는 그대로 쓰고 위치만 아이콘 우상단으로 얹는다(사이드바에서 쓰는
+   inline 배치와 다른 컨텍스트라 별도 클래스로 구분). */
+.topbar-icon-button {
+  position: relative;
+}
+.topbar-icon-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+}

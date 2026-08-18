@@ -92,7 +92,8 @@ export class DemoChatRepository {
     const cursors = new Map<string, string>();
     const rooms = ((data ?? []) as unknown as RoomRow[]).map((room) => {
       const reads: ReadCursor[] = room.demo_chat_reads ?? [];
-      cursors.set(room.id, reads.find((read) => read.reader_id === myId)?.last_read_at ?? "");
+      const myCursor = reads.find((read) => read.reader_id === myId)?.last_read_at ?? "";
+      cursors.set(room.id, myCursor);
       const page = [...(room.demo_chat_messages ?? [])].reverse();
       return {
         id: room.id,
@@ -102,6 +103,7 @@ export class DemoChatRepository {
         messages: normalizeChatMessages(page, reads),
         unreadCount: 0,
         hasMoreMessages: page.length === CHAT_PAGE_SIZE,
+        lastReadAt: myCursor,
       } satisfies ChatRoom;
     });
     await this.applyUnreadCounts(rooms, cursors, myId);
@@ -149,6 +151,7 @@ export class DemoChatRepository {
     const row = data as unknown as RoomRow;
     const reads: ReadCursor[] = row.demo_chat_reads ?? [];
     const page = [...(row.demo_chat_messages ?? [])].reverse();
+    const myCursor = reads.find((read) => read.reader_id === myId)?.last_read_at ?? "";
     const room: ChatRoom = {
       id: row.id,
       transactionId: row.transaction_id,
@@ -157,8 +160,9 @@ export class DemoChatRepository {
       messages: normalizeChatMessages(page, reads),
       unreadCount: 0,
       hasMoreMessages: page.length === CHAT_PAGE_SIZE,
+      lastReadAt: myCursor,
     };
-    const cursors = new Map([[row.id, reads.find((read) => read.reader_id === myId)?.last_read_at ?? ""]]);
+    const cursors = new Map([[row.id, myCursor]]);
     await this.applyUnreadCounts([room], cursors, myId);
     const [signed] = await resignAttachmentUrls([room]);
     return signed;
