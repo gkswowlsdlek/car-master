@@ -38,7 +38,7 @@ export function AdminWorkspace({
       )}
       {screen === "adminShops" && <AdminShopManagementScreen />}
       {screen === "adminAccount" && (
-        <AdminAccountScreen demoSession={demoSession} onChangePassword={onChangePassword} />
+        <AdminAccountScreen account={account} demoSession={demoSession} onChangePassword={onChangePassword} />
       )}
     </>
   );
