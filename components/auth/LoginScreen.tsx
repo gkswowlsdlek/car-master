@@ -47,7 +47,6 @@ export function LoginScreen({
             <LockKeyhole size={21} />
           </div>
           <h2>로그인</h2>
-          <p className="login-note">이메일 회원 계정 또는 발급받은 아이디로 워크스페이스를 시작하세요.</p>
           <label>
             이메일 또는 아이디
             <span className="login-input-wrap">
@@ -60,7 +59,7 @@ export function LoginScreen({
                 autoComplete="username"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="이메일 또는 발급받은 아이디"
+                placeholder="이메일 또는 아이디"
               />
             </span>
           </label>
@@ -82,26 +81,32 @@ export function LoginScreen({
             비밀번호를 잊으셨나요?
           </button>
           {error && <p className="login-error">{error}</p>}
-          <button
-            className="primary full"
-            onClick={() => void submit()}
-            disabled={isSubmitting}
-            aria-busy={isSubmitting}
-          >
-            {isSubmitting ? "로그인 중..." : "워크스페이스 로그인"} {!isSubmitting && <ArrowRight size={17} />}
-          </button>
+          {/* 로그인 수단은 이 스택 안에서만 늘어난다. 추후 카카오톡 로그인 버튼이
+              들어갈 자리로, 여기에 형제 버튼을 추가하면 아래 구분선·회원가입 링크는
+              그대로 두고 스택만 아래로 밀린다 — 카드 구조를 다시 짤 필요가 없다. */}
+          <div className="login-submit-stack">
+            <button
+              className="primary full"
+              onClick={() => void submit()}
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+            >
+              {isSubmitting ? "로그인 중..." : "로그인"} {!isSubmitting && <ArrowRight size={18} />}
+            </button>
+          </div>
+          <div className="login-card-divider" role="presentation" />
           <button className="login-signup-link" onClick={onSignUp}>
             처음이신가요? <b>회원가입</b>
           </button>
           <div className="login-security-note">
-            <ShieldCheck size={19} />
+            <ShieldCheck size={19} strokeWidth={1.75} />
             <span>
               <b>안전한 회원 워크스페이스</b>
-              <small>회원 역할과 시공점 승인 상태에 따라 접근 권한을 확인합니다.</small>
+              <small>회원 역할과 용품점 승인 상태에 따라 접근 권한을 확인합니다.</small>
             </span>
           </div>
           <p className="login-support-note">
-            계정 발급이나 로그인에 문제가 있나요?{" "}
+            로그인에 문제가 있나요?{" "}
             <button
               onClick={() => {
                 window.location.href = "/help";

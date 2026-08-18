@@ -251,186 +251,6 @@
   align-items: center;
   gap: 6px;
 }
-.product-preview {
-  overflow: hidden;
-  border: 1px solid var(--color-primary-soft);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  box-shadow:
-    0 36px 90px rgba(13, 26, 35, 0.16),
-    0 2px 8px rgba(13, 26, 35, 0.08);
-  transform: perspective(1400px) rotateY(-2deg) rotateX(1deg);
-}
-.preview-window-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 42px;
-  border-bottom: 1px solid var(--color-line);
-  background: var(--color-surface-soft);
-  padding: 0 14px;
-}
-.preview-window-bar > span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-line-strong);
-}
-.preview-window-bar > b {
-  margin-left: 8px;
-  color: var(--color-muted-soft);
-  font-size: var(--font-xs);
-  font-weight: 650;
-}
-.preview-app {
-  display: grid;
-  grid-template-columns: 125px 1fr;
-  min-height: 410px;
-}
-.preview-app > aside {
-  display: grid;
-  align-content: start;
-  gap: 7px;
-  border-right: 1px solid var(--color-line);
-  background: #fbfcfe;
-  padding: 19px 12px;
-}
-.preview-logo-mark {
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  margin-bottom: 15px;
-  border-radius: var(--radius-sm);
-  background: var(--color-primary);
-  color: #fff;
-  font-size: var(--font-xs);
-  font-weight: 900;
-}
-.preview-app aside i {
-  border-radius: var(--radius-sm);
-  color: var(--color-muted-soft);
-  padding: 8px;
-  font-size: var(--font-xs);
-  font-style: normal;
-}
-.preview-app aside i.active {
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-weight: 800;
-}
-.preview-app > section {
-  padding: 24px;
-}
-.preview-app section > header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.preview-app section > header div {
-  display: grid;
-  gap: 4px;
-}
-.preview-app section > header small {
-  color: var(--color-primary);
-  font-size: var(--font-xs);
-  font-weight: 800;
-  letter-spacing: 0.1em;
-}
-.preview-app section > header strong {
-  font-size: var(--font-md);
-}
-.preview-app section > header span {
-  border-radius: var(--radius-sm);
-  background: var(--color-primary);
-  color: #fff;
-  padding: 8px 10px;
-  font-size: var(--font-xs);
-  font-weight: 700;
-}
-.preview-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin: 22px 0 16px;
-}
-.preview-metrics article {
-  display: grid;
-  gap: 3px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  padding: 13px;
-}
-.preview-metrics small {
-  color: var(--color-muted);
-  font-size: var(--font-xs);
-}
-.preview-metrics b {
-  font-size: var(--font-lg);
-}
-.preview-metrics em {
-  color: var(--color-success);
-  font-size: var(--font-xs);
-  font-style: normal;
-}
-.preview-table {
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  padding: 15px;
-}
-.preview-table > div {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 9px;
-  font-size: var(--font-xs);
-}
-.preview-table > div span {
-  color: var(--color-primary);
-}
-.preview-table p {
-  display: grid;
-  grid-template-columns: 28px 1fr auto;
-  align-items: center;
-  gap: 9px;
-  margin: 0;
-  border-top: 1px solid var(--color-line);
-  padding: 11px 0;
-}
-.preview-table p > i {
-  display: grid;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: var(--radius-sm);
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-}
-.preview-table p > span {
-  display: grid;
-}
-.preview-table p b {
-  font-size: var(--font-xs);
-}
-.preview-table p small {
-  color: var(--color-muted-soft);
-  font-size: var(--font-xs);
-}
-.preview-table p > em {
-  border-radius: 999px;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  padding: 4px 7px;
-  font-size: var(--font-xs);
-  font-style: normal;
-}
-.preview-table p > em.waiting {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
-}
-.preview-table p > em.done {
-  background: var(--color-success-bg);
-  color: var(--color-success);
-}
 .trust-strip {
   gap: 16px;
   border-block: 1px solid var(--color-line);
@@ -542,7 +362,7 @@
   width: 58%;
   height: 82%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(21, 94, 117, 0.18) 0, rgba(52, 140, 165, 0.08) 38%, transparent 72%);
+  background: radial-gradient(circle, rgba(29, 78, 216, 0.18) 0, rgba(52, 140, 165, 0.08) 38%, transparent 72%);
   filter: blur(18px);
   content: "";
   pointer-events: none;
@@ -550,45 +370,13 @@
 .marketing-hero-copy {
   animation: hero-rise 0.6s ease-out both;
 }
-.product-preview {
-  position: relative;
-  border-color: rgba(179, 213, 226, 0.85);
-  box-shadow:
-    0 42px 100px rgba(13, 26, 35, 0.18),
-    0 18px 46px rgba(21, 94, 117, 0.13),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
-  animation: hero-rise 0.7s 0.08s ease-out both;
-  transition:
-    transform 240ms ease-out,
-    box-shadow 240ms ease-out,
-    border-color 240ms ease-out;
-}
-.preview-window-bar {
-  background: linear-gradient(180deg, var(--color-primary-soft), var(--color-primary-soft));
-}
-.preview-metrics article {
-  border-color: var(--color-line);
-}
-.preview-table {
-  border-color: var(--color-line);
-}
-.preview-table p > em {
-  border: 1px solid var(--color-primary-border);
-  font-weight: 700;
-}
-.preview-table p > em.waiting {
-  border-color: var(--color-warning-bg);
-}
-.preview-table p > em.done {
-  border-color: var(--color-success-bg);
-}
 .workflow-story {
   gap: 64px;
   border: 1px solid var(--color-ink);
   background:
     radial-gradient(circle at 10% 0, var(--color-ink) 0, transparent 34%),
     linear-gradient(145deg, var(--color-text), var(--color-text));
-  box-shadow: 0 34px 80px rgba(13, 26, 35, 0.22);
+  box-shadow: 0 34px 80px rgba(15, 26, 51, 0.22);
 }
 .workflow-story ol {
   gap: 12px;
@@ -647,7 +435,7 @@
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 115%, rgba(21, 94, 117, 0.16), transparent 46%),
+    radial-gradient(circle at 50% 115%, rgba(29, 78, 216, 0.16), transparent 46%),
     linear-gradient(180deg, #fff 0, var(--color-primary-soft) 100%);
 }
 .marketing-final-cta::before,
@@ -798,12 +586,6 @@
   gap: 14px;
   animation: hero-rise 0.7s 0.08s ease-out both;
 }
-.hero-product-stack .product-preview {
-  animation: none;
-}
-.hero-product-stack .preview-app {
-  min-height: 378px;
-}
 .hero-workflow {
   display: grid;
   gap: 12px;
@@ -812,8 +594,8 @@
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.95));
   padding: 14px 16px 16px;
   box-shadow:
-    0 14px 34px rgba(13, 26, 35, 0.09),
-    0 6px 18px rgba(21, 94, 117, 0.07);
+    0 14px 34px rgba(15, 26, 51, 0.09),
+    0 6px 18px rgba(29, 78, 216, 0.07);
 }
 .hero-workflow > div {
   display: flex;
@@ -886,8 +668,8 @@
   .hero-workflow:hover {
     border-color: var(--color-primary-border);
     box-shadow:
-      0 18px 42px rgba(13, 26, 35, 0.1),
-      0 8px 24px rgba(21, 94, 117, 0.1);
+      0 18px 42px rgba(15, 26, 51, 0.1),
+      0 8px 24px rgba(29, 78, 216, 0.1);
   }
 }
 @media (max-width: 1180px) {
@@ -895,9 +677,6 @@
     grid-template-columns: minmax(360px, 0.8fr) minmax(540px, 1.2fr);
     gap: 34px;
     padding-top: 54px;
-  }
-  .hero-product-stack .preview-app {
-    min-height: 360px;
   }
   .hero-workflow > div b {
     display: none;
@@ -970,14 +749,12 @@
   width: 286px;
   line-height: 0;
 }
-.marketing-brand-logo::after {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 70%;
-  height: 34%;
-  background: #fff;
-  content: "";
+/* 로고 PNG에는 "자동차 용품 시공, 더 스마트하게" 태그라인이 이미지로 구워져
+   있다(우측 하단). 그 자리만 잘라내고 아래에서 실제 텍스트로 다시 그린다 —
+   흰 박스로 덮으면 로그인 화면처럼 배경이 흰색이 아닌 곳에서 사각형이 드러나므로
+   clip-path로 투명하게 도려낸다. 좌측 28%는 CM 심볼이라 전체 높이를 남긴다. */
+.brand-logo-clip {
+  clip-path: polygon(0 0, 100% 0, 100% 66%, 28% 66%, 28% 100%, 0 100%);
 }
 .marketing-brand-logo img {
   display: block;
@@ -986,11 +763,12 @@
 }
 .marketing-brand > small {
   width: 286px;
+  margin-top: 10px;
   color: var(--color-text-soft);
-  font-size: var(--font-xs);
-  font-weight: 650;
-  line-height: 1.25;
-  letter-spacing: 0.14em;
+  font-size: var(--font-sm);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
   text-align: center;
   white-space: nowrap;
 }
@@ -1148,5 +926,279 @@
   .trust-strip span svg {
     width: 23px;
     height: 23px;
+  }
+}
+
+/* ── redesign/landing-login ─────────────────────────────────────────────
+   이 블록이 marketing.css의 마지막이다. 최상위 규칙을 먼저, @media를 전부
+   맨 뒤에 둔다 — 앞쪽 파일에도 같은 선택자의 미디어쿼리가 있어서, 최상위
+   규칙을 뒤에 붙이면 특정도가 같아 모바일 규칙을 덮어버린다. */
+
+/* 로고 PNG에는 "자동차 용품 시공, 더 스마트하게" 태그라인이 이미지로 구워져
+   있다(우측 하단). 그 자리만 잘라내고 아래에서 실제 텍스트로 다시 그린다 —
+   흰 박스로 덮으면 로그인 화면처럼 배경이 흰색이 아닌 곳에서 사각형이 드러나므로
+   clip-path로 투명하게 도려낸다. 좌측 28%는 CM 심볼이라 전체 높이를 남긴다. */
+.brand-logo-clip {
+  clip-path: polygon(0 0, 100% 0, 100% 66%, 28% 66%, 28% 100%, 0 100%);
+}
+.marketing-brand > small {
+  width: 286px;
+  margin-top: 10px;
+  color: var(--color-text-soft);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* 히어로 h1 — "차량용품점"이 "시공점"보다 길어져 5줄로 흘렀다. 단어 중간에서
+   끊기지 않게 keep-all을 걸고 상한 크기를 낮춰 3~4줄로 맞춘다. */
+.marketing-hero h1 {
+  font-size: clamp(42px, 4.4vw, 64px);
+  word-break: keep-all;
+}
+
+/* 히어로 우측 상단: 제품 목업 스크린샷 → 검색 가능한 권역·도시 목록.
+   숫자를 지어내지 않고 "어느 지역명으로 찾게 되는지"만 보여준다. */
+.hero-coverage {
+  display: grid;
+  gap: 18px;
+  border: 1px solid var(--color-primary-soft);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(140deg, #fff 14%, var(--color-primary-soft));
+  padding: 28px 30px 26px;
+  box-shadow:
+    0 24px 60px rgba(15, 26, 51, 0.1),
+    0 8px 22px rgba(29, 78, 216, 0.07);
+}
+.hero-coverage-head {
+  display: grid;
+  gap: 8px;
+}
+.hero-coverage-head span {
+  color: var(--color-primary);
+  font-size: var(--font-xs);
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+.hero-coverage-head b {
+  color: var(--color-text);
+  font-size: var(--font-md);
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+.hero-coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hero-coverage-grid li {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 13px 14px;
+}
+.hero-coverage-grid b {
+  color: var(--color-primary-hover);
+  font-size: var(--font-sm);
+  font-weight: 800;
+}
+.hero-coverage-grid small {
+  color: var(--color-muted);
+  font-size: var(--font-xs);
+  line-height: 1.6;
+  word-break: keep-all;
+}
+.hero-coverage-note {
+  margin: 0;
+  color: var(--color-muted-soft);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+
+/* 1~5단계 플로우 — 글자·번호원·여백 확대 */
+.hero-workflow {
+  gap: 18px;
+  padding: 22px 24px 24px;
+}
+.hero-workflow > div span,
+.hero-workflow > div b {
+  font-size: var(--font-sm);
+}
+.hero-workflow ol {
+  gap: 12px;
+}
+.hero-workflow ol::before {
+  top: 18px;
+}
+.hero-workflow li {
+  gap: 11px;
+  font-size: var(--font-sm);
+  font-weight: 750;
+}
+.hero-workflow li i {
+  width: 38px;
+  height: 38px;
+  font-size: var(--font-sm);
+}
+
+/* 기능 4개 카드 — 아이콘 한 줄 → 제목 + 한 줄 설명 */
+.trust-strip {
+  align-items: stretch;
+  gap: 18px;
+  padding-block: 34px;
+}
+.trust-strip article {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  border: 1px solid var(--color-primary-soft);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  padding: 22px 22px 24px;
+  text-align: left;
+}
+.trust-strip article > i {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.trust-strip article > b {
+  color: var(--color-text);
+  font-size: var(--font-body);
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+.trust-strip article > small {
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+/* 푸터 로고 아래 문구 — 상단 태그라인과 같은 이유로 키우고 띄운다 */
+.footer-brand {
+  gap: 14px;
+}
+.footer-brand-logo {
+  display: block;
+  width: 238px;
+  max-width: 100%;
+  line-height: 0;
+}
+.footer-brand-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.footer-brand p {
+  color: var(--color-text-soft);
+  font-size: var(--font-body);
+  font-weight: 650;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+
+@media (hover: hover) {
+  .trust-strip article {
+    transition:
+      transform 200ms ease-out,
+      border-color 200ms ease-out,
+      box-shadow 200ms ease-out;
+  }
+  .trust-strip article:hover {
+    border-color: var(--color-primary-border);
+    box-shadow: 0 14px 32px rgba(29, 78, 216, 0.1);
+    transform: translateY(-2px);
+  }
+}
+@media (max-width: 1180px) {
+  .hero-coverage {
+    padding: 24px 24px 22px;
+  }
+}
+@media (max-width: 900px) {
+  .hero-coverage-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  /* 앞쪽 파일의 @media (max-width: 760px)가 태그라인을 다시 --font-xs로
+     되돌리므로 여기서 한 번 더 잡는다. */
+  .marketing-brand > small {
+    margin-top: 8px;
+    font-size: var(--font-sm);
+    letter-spacing: 0.04em;
+  }
+  .hero-coverage {
+    gap: 14px;
+    padding: 20px 18px;
+  }
+  .hero-coverage-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+  .hero-coverage-grid li {
+    padding: 11px 12px;
+  }
+  .hero-workflow ol {
+    row-gap: 16px;
+  }
+  .hero-workflow li i {
+    width: 34px;
+    height: 34px;
+  }
+  .trust-strip {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 24px 20px 30px;
+    text-align: left;
+  }
+  .trust-strip article {
+    grid-template-columns: 42px minmax(0, 1fr);
+    grid-template-areas:
+      "icon title"
+      "icon desc";
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 4px;
+    padding: 16px 16px 18px;
+  }
+  .trust-strip article > i {
+    grid-area: icon;
+    align-self: start;
+  }
+  .trust-strip article > b {
+    grid-area: title;
+  }
+  .trust-strip article > small {
+    grid-area: desc;
+  }
+}
+@media (max-width: 420px) {
+  .marketing-brand > small {
+    font-size: var(--font-sm);
+    letter-spacing: 0.02em;
+  }
+  .hero-coverage-grid {
+    grid-template-columns: 1fr;
   }
 }

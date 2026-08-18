@@ -16,8 +16,8 @@
 /* R4 reference-locked Dealer workspace presentation. */
 .role-dealer .app-sidebar {
   grid-template-rows: auto 1fr auto;
-  background: #0d1a23;
-  border-right: 1px solid #1a2a33;
+  background: #0f1a33;
+  border-right: 1px solid #1e2a4a;
   padding: 24px 16px 18px;
 }
 .role-dealer .app-sidebar nav button.active {
@@ -566,7 +566,7 @@
 }
 
 .price-brand-tabs button.active {
-  box-shadow: 0 0 0 3px rgba(21, 94, 117, 0.1);
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
 }
 .price-package-row.selected {
   position: relative;
@@ -581,7 +581,7 @@
 .vehicle-class-picker button.active {
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
-  box-shadow: 0 0 0 3px rgba(21, 94, 117, 0.1);
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
 }
 .vehicle-class-detail-options button.active b,
 .vehicle-class-picker button.active b {
@@ -610,7 +610,7 @@
   border-color: var(--color-primary);
   background: var(--color-primary);
   color: #fff;
-  box-shadow: 0 0 0 5px rgba(21, 94, 117, 0.12);
+  box-shadow: 0 0 0 5px rgba(29, 78, 216, 0.12);
 }
 .transaction-stage-flow button.active span {
   color: var(--color-primary);
@@ -853,7 +853,7 @@ button:active:not(:disabled) {
 .transaction-summary-strip button.active {
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
-  box-shadow: 0 0 0 3px rgba(21, 94, 117, 0.09);
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.09);
 }
 .transaction-list {
   max-height: calc(100vh - 310px);
@@ -883,9 +883,6 @@ button:active:not(:disabled) {
   .app-logo img {
     width: 165px;
   }
-  .sidebar-support {
-    display: none;
-  }
   .shop-metric-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -908,12 +905,6 @@ button:active:not(:disabled) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-  }
-  .sidebar-section-label,
-  .sidebar-subsection-label,
-  .sidebar-secondary-nav,
-  .sidebar-support {
-    display: none;
   }
   .app-sidebar nav button {
     grid-template-columns: 24px auto;
@@ -1489,7 +1480,7 @@ button:active:not(:disabled) {
     background: var(--color-text);
     box-shadow:
       0 16px 34px rgba(5, 12, 18, 0.3),
-      0 0 0 1px rgba(21, 94, 117, 0.2);
+      0 0 0 1px rgba(29, 78, 216, 0.2);
     transform: translateY(-4px);
   }
   .workflow-story li:last-child:hover {
@@ -1499,20 +1490,20 @@ button:active:not(:disabled) {
     border-color: var(--color-primary-border);
     background: var(--color-primary-soft);
     color: var(--color-primary-hover);
-    box-shadow: 0 10px 24px rgba(21, 94, 117, 0.1);
+    box-shadow: 0 10px 24px rgba(29, 78, 216, 0.1);
     transform: translateY(-2px);
   }
   .service-steps article:hover {
     border-color: var(--color-primary);
     background: #fff;
-    box-shadow: 0 18px 44px rgba(21, 94, 117, 0.12);
+    box-shadow: 0 18px 44px rgba(29, 78, 216, 0.12);
     transform: translateY(-5px);
   }
   .product-preview:hover {
     border-color: var(--color-primary-border);
     box-shadow:
-      0 50px 110px rgba(13, 26, 35, 0.2),
-      0 22px 56px rgba(21, 94, 117, 0.18),
+      0 50px 110px rgba(15, 26, 51, 0.2),
+      0 22px 56px rgba(29, 78, 216, 0.18),
       0 0 0 1px rgba(255, 255, 255, 0.9) inset;
   }
 }
@@ -2168,7 +2159,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(21, 94, 117, 0.24);
+  outline: 3px solid rgba(29, 78, 216, 0.24);
   outline-offset: 2px;
 }
 .app-main
@@ -2326,7 +2317,7 @@ textarea:focus-visible {
     right: 0;
     bottom: 0;
     width: min(360px, 92%);
-    box-shadow: -18px 0 45px rgba(13, 26, 35, 0.16);
+    box-shadow: -18px 0 45px rgba(15, 26, 51, 0.16);
     transform: translateX(105%);
     transition: transform 0.22s ease-out;
   }
@@ -2870,8 +2861,8 @@ textarea:focus-visible {
 .role-dealer .app-sidebar {
   grid-template-rows: auto auto 1fr auto auto !important;
   align-content: start;
-  background: #0d1a23 !important;
-  border-right-color: #1a2a33 !important;
+  background: #0f1a33 !important;
+  border-right-color: #1e2a4a !important;
   padding: 22px 16px 16px !important;
 }
 .role-dealer .app-sidebar nav button.active {
@@ -3096,7 +3087,7 @@ textarea:focus-visible {
 
 /* Final reference foundation: preserve real flows, calibrate the shared workspace surface. */
 :root {
-  --cm-navy: #0d1a23;
+  --cm-navy: #0f1a33;
   --cm-primary: var(--color-primary);
   --cm-background: var(--color-bg);
   --cm-surface: #fff;
@@ -4196,7 +4187,7 @@ textarea:focus-visible {
   background: #fff;
   padding: 4px;
   text-align: left;
-  box-shadow: 0 7px 20px rgba(13, 26, 35, 0.08);
+  box-shadow: 0 7px 20px rgba(15, 26, 51, 0.08);
 }
 .image-message img {
   display: block;
@@ -4763,7 +4754,7 @@ textarea:focus-visible {
     border-top: 1px solid var(--color-line);
     background: rgba(255, 255, 255, 0.98);
     padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
-    box-shadow: 0 -12px 32px rgba(13, 26, 35, 0.1);
+    box-shadow: 0 -12px 32px rgba(15, 26, 51, 0.1);
     backdrop-filter: blur(18px);
   }
   .app-mobile-nav button {
@@ -4807,7 +4798,7 @@ textarea:focus-visible {
     width: 100%;
     height: 100%;
     border: 0;
-    background: rgba(13, 26, 35, 0.45);
+    background: rgba(15, 26, 51, 0.45);
   }
   .app-mobile-more-sheet {
     position: absolute;
@@ -4817,7 +4808,7 @@ textarea:focus-visible {
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     background: #fff;
     padding: 10px 18px calc(18px + env(safe-area-inset-bottom));
-    box-shadow: 0 -20px 48px rgba(13, 26, 35, 0.22);
+    box-shadow: 0 -20px 48px rgba(15, 26, 51, 0.22);
   }
   .app-mobile-more-head {
     display: flex;
@@ -5115,7 +5106,7 @@ textarea:focus-visible {
   width: 100%;
   height: 100%;
   border: 0;
-  background: rgba(13, 26, 35, 0.5);
+  background: rgba(15, 26, 51, 0.5);
 }
 .stage-confirm-card {
   position: relative;
@@ -5454,7 +5445,7 @@ textarea:focus-visible {
   border: 3px solid #fff;
   border-radius: 999px;
   background: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(21, 94, 117, 0.25);
+  box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.25);
 }
 
 
@@ -5497,7 +5488,7 @@ textarea:focus-visible {
 .message-system span {
   max-width: 80%;
   border-radius: 999px;
-  background: rgba(13, 26, 35, 0.05);
+  background: rgba(15, 26, 51, 0.05);
   padding: 7px 14px;
   color: var(--color-muted);
   text-align: center;
@@ -5580,7 +5571,7 @@ textarea:focus-visible {
   width: 100%;
   height: 100%;
   border: 0;
-  background: rgba(13, 26, 35, 0.5);
+  background: rgba(15, 26, 51, 0.5);
 }
 .contact-sheet-card {
   position: relative;
@@ -5763,7 +5754,7 @@ textarea:focus-visible {
 
 @media (min-width: 1024px) {
   .app-frame.messenger-focus {
-    grid-template-columns: 312px minmax(0, 1fr);
+    grid-template-columns: 296px minmax(0, 1fr);
   }
   .app-frame.messenger-focus .app-sidebar {
     display: grid;
@@ -5915,10 +5906,10 @@ textarea:focus-visible {
    Only visual/surface properties are set here (no `display`), so the
    existing <=1180px / <=760px responsive rules elsewhere are untouched. */
 .app-frame {
-  grid-template-columns: 312px minmax(0, 1fr);
+  grid-template-columns: 296px minmax(0, 1fr);
 }
 .app-sidebar nav button.active {
-  background: rgba(21, 94, 117, 0.24);
+  background: rgba(29, 78, 216, 0.24);
   box-shadow: inset 3px 0 0 var(--color-primary);
   color: #fff;
   font-weight: 800;
@@ -6134,7 +6125,7 @@ textarea:focus-visible {
   height: 16px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(13, 26, 35, 0.25);
+  box-shadow: 0 1px 4px rgba(15, 26, 51, 0.25);
   transition: transform 0.2s ease-out;
 }
 .compact-control input:checked {
@@ -6358,7 +6349,7 @@ textarea:focus-visible {
   padding-top: 0;
 }
 .reference-prototype-dashboard {
-  --prototype-navy: #0d1a23;
+  --prototype-navy: #0f1a33;
   --prototype-primary: var(--color-primary);
   --prototype-text: var(--color-text);
   --prototype-muted: var(--color-muted);
@@ -6459,7 +6450,7 @@ textarea:focus-visible {
 }
 .reference-search-panel .ws-search-form input:focus {
   border-color: var(--prototype-primary);
-  outline: 3px solid rgba(21, 94, 117, 0.12);
+  outline: 3px solid rgba(29, 78, 216, 0.12);
   box-shadow: none;
 }
 .reference-search-panel .ws-search-cta {
@@ -6719,9 +6710,6 @@ textarea:focus-visible {
 .dealer-home-frame .app-sidebar {
   background: var(--prototype-navy);
 }
-.dealer-home-frame .sidebar-primary-nav button.active {
-  background: var(--prototype-primary);
-}
 .dealer-home-frame .app-logo {
   position: relative;
   min-height: 108px;
@@ -6803,7 +6791,7 @@ textarea:focus-visible {
 .reference-recent-work .ws-row:focus-visible,
 .prototype-job-row > button:focus-visible,
 .reference-module > header button:focus-visible {
-  outline: 3px solid rgba(21, 94, 117, 0.18);
+  outline: 3px solid rgba(29, 78, 216, 0.18);
   outline-offset: 2px;
 }
 .reference-recent-work .ws-row-next {
@@ -6834,13 +6822,13 @@ textarea:focus-visible {
 
 /* Reference lock: local dashboard composition calibrated to the supplied 1680px frame. */
 .dealer-home-frame {
-  grid-template-columns: 236px minmax(0, 1fr);
+  grid-template-columns: 296px minmax(0, 1fr);
 }
 .dealer-home-frame .app-sidebar {
-  width: 236px;
-  flex-basis: 236px;
+  width: 296px;
+  flex-basis: 296px;
   box-sizing: border-box;
-  padding: 28px 16px 22px;
+  padding: 14px 16px 16px;
 }
 /* Sidebar nav is primary navigation, not caption text. The type-scale pass
    rounded these labels from 14px down to --font-sm (13px), which is the same
@@ -6856,10 +6844,6 @@ textarea:focus-visible {
 }
 /* Section label reads quieter than the items it introduces, so the hierarchy
    is label < item rather than the flat 13px/13px it had. */
-.dealer-home-frame .sidebar-section-label {
-  font-size: var(--font-xs);
-  letter-spacing: 0.1em;
-}
 .dealer-home-frame .app-logo small {
   font-size: 12px;
 }
@@ -6867,37 +6851,19 @@ textarea:focus-visible {
   margin-left: 0;
   background: var(--color-surface-soft);
 }
-.dealer-home-frame .sidebar-section-label {
-  margin: 18px 12px 10px;
-  color: rgba(255, 255, 255, 0.62);
-}
-.dealer-home-frame .sidebar-primary-nav {
-  gap: 7px;
-}
-.dealer-home-frame .sidebar-primary-nav button {
-  min-height: 58px;
-  border-radius: var(--radius-sm);
-  padding: 0 18px;
-  font-size: var(--font-md);
-}
-.dealer-home-frame .sidebar-primary-nav button i {
-  width: 28px;
-  height: 28px;
-}
-.dealer-home-frame .sidebar-primary-nav button i svg {
-  width: 24px;
-  height: 24px;
-}
-.dealer-home-frame .sidebar-primary-nav button.active {
-  background: var(--color-primary);
-  box-shadow: none;
-}
 .dealer-home-frame .sidebar-profile {
   margin-top: auto;
   border-top: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 0;
   background: transparent;
-  padding: 24px 10px 0;
+  padding: 14px 10px 0;
+}
+/* 커버리지 블록도 margin-top:auto로 아래로 밀리기 때문에, 둘 다 auto면 남은
+   공간이 반씩 나뉘어 사이가 크게 벌어진다. 커버리지가 있을 때는 그쪽이 밀어주므로
+   프로필의 auto를 끈다 — 커버리지가 없을 때(shopCoverage=null)는 위 규칙이 그대로
+   적용돼 프로필이 계속 하단에 붙는다. */
+.dealer-home-frame .sidebar-coverage + .sidebar-profile {
+  margin-top: 0;
 }
 .dealer-home-frame .sidebar-profile > span {
   width: 42px;
@@ -7008,8 +6974,8 @@ textarea:focus-visible {
 }
 @media (max-width: 900px) {
   .dealer-home-frame .app-sidebar {
-    width: 236px;
-    flex-basis: 236px;
+    width: 296px;
+    flex-basis: 296px;
   }
   .dealer-home-frame .app-main {
     margin-left: 0;

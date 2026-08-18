@@ -292,8 +292,8 @@
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
   box-shadow:
-    0 0 0 4px rgba(21, 94, 117, 0.11),
-    0 8px 20px rgba(21, 94, 117, 0.06);
+    0 0 0 4px rgba(29, 78, 216, 0.11),
+    0 8px 20px rgba(29, 78, 216, 0.06);
 }
 .login-input-wrap:focus-within > svg {
   color: var(--color-primary);
@@ -305,7 +305,7 @@
 }
 .login-card .full:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(21, 94, 117, 0.28);
+  box-shadow: 0 14px 28px rgba(29, 78, 216, 0.28);
 }
 .login-card .full[aria-busy="true"] {
   position: relative;
@@ -357,7 +357,7 @@
   .login-service-intro li:hover {
     border-color: var(--color-primary-border);
     background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 14px 32px rgba(21, 94, 117, 0.09);
+    box-shadow: 0 14px 32px rgba(29, 78, 216, 0.09);
     transform: translateY(-3px);
   }
 }
@@ -480,7 +480,7 @@
   background: #fff;
   padding: 20px;
   text-align: left;
-  box-shadow: 0 8px 24px rgba(13, 26, 35, 0.05);
+  box-shadow: 0 8px 24px rgba(15, 26, 51, 0.05);
 }
 .signup-role-picker > button > svg {
   width: 42px;
@@ -505,8 +505,8 @@
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
   box-shadow:
-    0 0 0 3px rgba(21, 94, 117, 0.1),
-    0 12px 30px rgba(21, 94, 117, 0.08);
+    0 0 0 3px rgba(29, 78, 216, 0.1),
+    0 12px 30px rgba(29, 78, 216, 0.08);
 }
 .signup-role-picker > button.active > svg {
   background: var(--color-primary-soft);
@@ -746,7 +746,7 @@
   .login-workspace-benefits li:hover {
     border-color: var(--color-primary-border);
     background: #fff;
-    box-shadow: 0 16px 36px rgba(21, 94, 117, 0.1);
+    box-shadow: 0 16px 36px rgba(29, 78, 216, 0.1);
     transform: translateY(-3px);
   }
 }
@@ -803,4 +803,72 @@
     min-height: 92px;
     border-radius: var(--radius-lg);
   }
+}
+
+/* ── redesign/landing-login ─────────────────────────────────────────────
+   로고 PNG에 구워진 태그라인을 .brand-logo-clip(styles/marketing.css)으로
+   잘라내고, 랜딩 상단과 같은 간격·크기로 실제 텍스트를 다시 그린다.
+   "DEALER INSTALLATION WORKSPACE" eyebrow는 제거됐다. */
+.login-intro-brand {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  min-height: 0;
+  margin-bottom: 30px;
+}
+.login-intro-brand img {
+  width: 292px;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 0;
+}
+.login-intro-brand > small {
+  width: 292px;
+  max-width: 100%;
+  color: var(--color-text-soft);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.login-service-intro li b {
+  font-size: var(--font-body);
+}
+.login-service-intro li small {
+  font-size: var(--font-sm);
+  line-height: 1.65;
+}
+.login-trust {
+  gap: 9px;
+  font-size: var(--font-body) !important;
+  font-weight: 650;
+}
+.login-intro-actions {
+  gap: 6px;
+  margin-top: 26px;
+}
+.login-intro-actions .primary,
+.login-intro-actions .secondary {
+  min-height: 48px;
+  padding: 10px 16px;
+  font-size: var(--font-body);
+  font-weight: 700;
+}
+
+/* 로그인 카드 — 소셜 로그인이 들어올 자리를 미리 구조로 잡아둔다.
+   .login-submit-stack에 형제 버튼을 추가하면 구분선 아래(회원가입 링크,
+   보안 안내, 도움말)는 손대지 않아도 된다. */
+.login-submit-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+.login-submit-stack .full {
+  margin-top: 0;
+}
+.login-card-divider {
+  height: 1px;
+  margin: 22px 0 4px;
+  background: var(--color-line);
 }
