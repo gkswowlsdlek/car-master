@@ -103,6 +103,7 @@ export function AppShell({
   company,
   screen,
   unreadMessageCount = 0,
+  unreadNotificationCount = 0,
   mobileFullscreen = false,
   shopCoverage = null,
   onNavigate,
@@ -114,6 +115,7 @@ export function AppShell({
   company?: string;
   screen: Screen;
   unreadMessageCount?: number;
+  unreadNotificationCount?: number;
   mobileFullscreen?: boolean;
   shopCoverage?: ShopCoverage | null;
   onNavigate: (screen: Screen) => void;
@@ -294,8 +296,13 @@ export function AppShell({
             <span className="service-status">
               <i /> 서비스 정상
             </span>
-            <button className="topbar-icon-button" aria-label="알림">
+            <button className="topbar-icon-button" aria-label="알림" onClick={() => onNavigate(homeScreen)}>
               <Bell size={18} />
+              {unreadNotificationCount > 0 && (
+                <span className="nav-unread-badge topbar-icon-badge">
+                  {unreadNotificationCount > 99 ? "99+" : unreadNotificationCount}
+                </span>
+              )}
             </button>
             {role === "dealer" && (
               <button className="primary" onClick={() => onNavigate("request")}>

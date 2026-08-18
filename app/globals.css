@@ -6163,6 +6163,41 @@ textarea:focus-visible {
   font-size: var(--font-xs);
   font-style: normal;
 }
+/* feat/notifications: 알림·새 메시지 항목이 실제 데이터를 클릭해 해당 거래로
+   이동해야 해서 <li> 안에 <button>이 하나 더 생겼다. i/small/div/em 셀렉터는
+   자손 선택자라 그 button을 거쳐도 그대로 매치되고, button 자체만 이전
+   <li>처럼 보이게 편다. */
+.reference-module li {
+  padding: 0;
+}
+.reference-module li > button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 2px 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.reference-module li > button:hover {
+  color: var(--color-primary);
+}
+.reference-module li > button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.reference-module-empty {
+  margin: 15px 0 0;
+  padding: 20px 4px;
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+  text-align: center;
+}
 .getting-started ol {
   gap: 10px;
 }
@@ -6292,9 +6327,6 @@ textarea:focus-visible {
 }
 .dealer-home-frame .app-sidebar {
   background: var(--prototype-navy);
-}
-.dealer-home-frame .reference-utility > button b {
-  display: none;
 }
 .reference-prototype-dashboard.has-deals .reference-module-grid {
   grid-template-columns: 1fr 1fr;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useNotifications } from "../../hooks/use-notifications";
 import type { DemoAccount, Screen } from "../../types/dealer";
 import type { InstallerListing } from "../../types/installer";
 import type { AttachmentProvider } from "../../services/attachments";
@@ -43,6 +44,7 @@ type InstallerWorkspaceProps = {
   onLoadContact: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   onUnreadMessageCountChange: (count: number) => void;
+  onUnreadNotificationCountChange: (count: number) => void;
   onMobileFullscreenChange: (open: boolean) => void;
 };
 
@@ -69,6 +71,7 @@ export function InstallerWorkspace({
   onLoadContact,
   onChangePassword,
   onUnreadMessageCountChange,
+  onUnreadNotificationCountChange,
   onMobileFullscreenChange,
 }: InstallerWorkspaceProps) {
   const [selectedTransactionId, setSelectedTransactionId] = useState("");
@@ -109,6 +112,7 @@ export function InstallerWorkspace({
         .reduce((sum, room) => sum + room.unreadCount, 0),
     [rooms, roleTransactions],
   );
+  const notifications = useNotifications({ role: "shop", transactions: roleTransactions, rooms });
   const profileActivity = useMemo(() => {
     const now = new Date();
     const monthly = roleTransactions.filter((item) => {
@@ -125,6 +129,10 @@ export function InstallerWorkspace({
   }, [roleTransactions]);
 
   useEffect(() => onUnreadMessageCountChange(unreadMessageCount), [onUnreadMessageCountChange, unreadMessageCount]);
+  useEffect(
+    () => onUnreadNotificationCountChange(notifications.unreadCount),
+    [onUnreadNotificationCountChange, notifications.unreadCount],
+  );
   useEffect(() => {
     onMobileFullscreenChange(mobileChatOpen);
     return () => onMobileFullscreenChange(false);
