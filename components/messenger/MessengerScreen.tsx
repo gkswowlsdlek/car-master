@@ -63,6 +63,7 @@ export function MessengerScreen({
   onSetContactStatus,
   onFindAnotherShop,
   onMarkRead,
+  onLoadOlder,
   onLoadContact,
   onMobileChatOpenChange,
 }: {
@@ -87,6 +88,8 @@ export function MessengerScreen({
   /** Only meaningful for role === "dealer" on a terminated transaction. */
   onFindAnotherShop?: () => void;
   onMarkRead: (roomId: string) => void;
+  /** Prepends the previous page of chat history for one room. */
+  onLoadOlder?: (roomId: string) => Promise<boolean>;
   onLoadContact?: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
   onMobileChatOpenChange?: (open: boolean) => void;
 }) {
@@ -268,6 +271,7 @@ export function MessengerScreen({
               onSetContactStatus={onSetContactStatus}
               onFindAnotherShop={onFindAnotherShop}
               onMarkRead={onMarkRead}
+              onLoadOlder={onLoadOlder}
               onLoadContact={onLoadContact}
               onBack={backToList}
             />

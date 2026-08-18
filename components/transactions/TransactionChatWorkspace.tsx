@@ -116,6 +116,7 @@ export function TransactionChatWorkspace({
   onFindAnotherShop,
   onMarkRead,
   onLoadContact,
+  onLoadOlder,
   onBack,
 }: {
   role: "dealer" | "shop";
@@ -140,6 +141,8 @@ export function TransactionChatWorkspace({
   onFindAnotherShop?: () => void;
   onMarkRead?: (roomId: string) => void;
   onLoadContact?: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
+  /** Prepends the previous page of history. Resolves false when nothing more remains. */
+  onLoadOlder?: (roomId: string) => Promise<boolean>;
   /** Only passed by MessengerScreen — renders a mobile-only back-to-Inbox button. TransactionManagementScreen never passes this, so its header is unchanged. */
   onBack?: () => void;
 }) {
@@ -282,6 +285,11 @@ export function TransactionChatWorkspace({
     else sessionStorage.removeItem(key);
   }, [draft, room?.id]);
 
+  // Keyed on the NEWEST entry, never on timeline.length: prepending a page of
+  // history also grows the length, and reacting to that would fire the
+  // "새 메시지" affordance for messages the reader deliberately went back for.
+  const latestKey = timeline.length > 0 ? timeline[timeline.length - 1].key : "";
+
   // Auto-scroll only follows new messages while the reader is already near
   // the bottom — someone scrolled up to reread history shouldn't get yanked
   // back down. Otherwise a small "새 메시지" affordance appears instead.
@@ -291,7 +299,7 @@ export function TransactionChatWorkspace({
       messageEnd.current?.scrollIntoView({ block: "end" });
       setShowJumpToLatest(false);
     } else setShowJumpToLatest(true);
-  }, [timeline.length]);
+  }, [latestKey]);
   const handleScroll = () => {
     const element = messagesContainer.current;
     if (!element) return;
@@ -302,6 +310,30 @@ export function TransactionChatWorkspace({
     messageEnd.current?.scrollIntoView({ block: "end" });
     setShowJumpToLatest(false);
     wasNearBottom.current = true;
+  };
+
+  // Prepending history shifts everything down by exactly the height that was
+  // inserted, which would throw the reader to a different part of the
+  // conversation. Capturing scrollHeight before the load and re-adding the
+  // difference afterwards keeps the message they were looking at still under
+  // the cursor.
+  const [loadingOlder, setLoadingOlder] = useState(false);
+  const loadOlder = async () => {
+    const element = messagesContainer.current;
+    if (!room || !onLoadOlder || loadingOlder) return;
+    const previousHeight = element?.scrollHeight ?? 0;
+    const previousTop = element?.scrollTop ?? 0;
+    setLoadingOlder(true);
+    try {
+      await onLoadOlder(room.id);
+    } finally {
+      setLoadingOlder(false);
+    }
+    requestAnimationFrame(() => {
+      const node = messagesContainer.current;
+      if (!node) return;
+      node.scrollTop = previousTop + (node.scrollHeight - previousHeight);
+    });
   };
 
   // Textarea grows with content up to a cap, then scrolls internally.
@@ -320,10 +352,14 @@ export function TransactionChatWorkspace({
     const timer = setTimeout(() => onMarkRead(room.id), 400);
     return () => clearTimeout(timer);
     // `room` itself changes identity on every parent re-render (it's a fresh
-    // array .find() result each time) — depending on room?.id/timeline.length
+    // array .find() result each time) — depending on room?.id/latestKey
     // instead avoids re-arming this timer on unrelated re-renders.
+    //
+    // latestKey, NOT timeline.length: markRead moves the cursor to now(), so
+    // firing it when a page of HISTORY is prepended would mark genuinely
+    // unseen new messages as read. Only a new newest message may re-arm it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room?.id, timeline.length, onMarkRead]);
+  }, [room?.id, latestKey, onMarkRead]);
   useEffect(() => {
     if (!onMarkRead) return;
     const handleVisibility = () => {
@@ -830,6 +866,13 @@ export function TransactionChatWorkspace({
             </div>
           ))}
         <div className="messenger-messages" ref={messagesContainer} onScroll={handleScroll}>
+          {room?.hasMoreMessages && onLoadOlder && (
+            <div className="messenger-load-older">
+              <button type="button" onClick={() => void loadOlder()} disabled={loadingOlder}>
+                {loadingOlder ? "불러오는 중…" : "이전 메시지 보기"}
+              </button>
+            </div>
+          )}
           <div className="message-date-divider">
             <span>거래방 생성 · {dayLabel(transaction.status.createdAt)}</span>
           </div>

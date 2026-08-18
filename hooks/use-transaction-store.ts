@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { chatRepository } from "../repositories/chat-repository";
 import { demoChatRepository } from "../repositories/demo-chat-repository";
 import { transactionRepository } from "../repositories/transaction-repository";
@@ -45,6 +45,10 @@ export function useTransactionStore(useSupabase = false, demoActorId = "") {
   // yet?) is in flight; true/false once known. Only meaningful in Demo mode.
   const [demoSchemaReady, setDemoSchemaReady] = useState<boolean | null>(null);
   const [sharedRoomIds, setSharedRoomIds] = useState<Set<string>>(new Set());
+  // The subscription is set up once per useSupabase/demoActorId change; routing
+  // through a ref keeps it pointed at the current refreshRoom without making
+  // the effect depend on (and so re-subscribe for) every render.
+  const refreshRoomRef = useRef<(roomId: string) => Promise<boolean>>(async () => false);
 
   useEffect(() => {
     let active = true;
@@ -79,9 +83,18 @@ export function useTransactionStore(useSupabase = false, demoActorId = "") {
       : transactionRepository.subscribe(() => void load());
     const unsubscribeDemoTransactions = useSupabase ? () => {} : demoTransactionRepository.subscribe(() => void load());
     const unsubscribeLocalRooms = useSupabase ? () => {} : chatRepository.subscribe(() => void load());
+    // A chat event refreshes only the room it happened in. Without a room id
+    // (or if that room isn't in this client's list yet, e.g. a brand-new room)
+    // it falls back to the full load so nothing is ever missed.
+    const onChatChange = (roomId?: string) => {
+      if (!roomId) return void load();
+      void refreshRoomRef.current(roomId).then((handled) => {
+        if (!handled) void load();
+      });
+    };
     const unsubscribeSharedRooms = useSupabase
-      ? supabaseChatRepository.subscribe(() => void load())
-      : demoChatRepository.subscribe(() => void load());
+      ? supabaseChatRepository.subscribe(onChatChange)
+      : demoChatRepository.subscribe(onChatChange);
     return () => {
       active = false;
       cancelAnimationFrame(frame);
@@ -113,5 +126,78 @@ export function useTransactionStore(useSupabase = false, demoActorId = "") {
       setIsLoading(false);
     }
   };
-  return { transactions, rooms, isLoading, error, refresh, demoSchemaReady, sharedRoomIds };
+  /**
+   * Refreshes ONE room after a realtime event, instead of rebuilding every
+   * room. Merges rather than replaces, for two reasons: history the reader
+   * pulled in with "이전 메시지 보기" is not in the newest page and would
+   * otherwise vanish under them, and hasMoreMessages must stay true once
+   * older pages are in memory.
+   *
+   * Falls back to a full load() when the event carries no room id, or when the
+   * room is local-only (localStorage demo rooms have no remote counterpart).
+   */
+  const refreshRoom = useCallback(
+    async (roomId: string) => {
+      const room = useSupabase
+        ? await supabaseChatRepository.getRoom(roomId)
+        : await demoChatRepository.getRoom(roomId, demoActorId);
+      if (!room) return false;
+      setRooms((current) => {
+        if (!current.some((item) => item.id === roomId)) return current;
+        return current.map((item) => {
+          if (item.id !== roomId) return item;
+          const incoming = new Set(room.messages.map((message) => message.id));
+          const kept = item.messages.filter((message) => !incoming.has(message.id));
+          const merged = [...kept, ...room.messages].sort(
+            (a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id),
+          );
+          return {
+            ...room,
+            messages: merged,
+            // Older pages already in memory mean there is still history above,
+            // regardless of what the newest-page probe reported.
+            hasMoreMessages: room.hasMoreMessages || merged.length > room.messages.length,
+          };
+        });
+      });
+      return true;
+    },
+    [useSupabase, demoActorId],
+  );
+
+  useEffect(() => {
+    refreshRoomRef.current = refreshRoom;
+  }, [refreshRoom]);
+
+  /**
+   * Prepends one page of history to a single room, in place. Deliberately does
+   * NOT go through refresh(): a full reload would rebuild every room from its
+   * newest page and silently discard the history the reader just pulled in.
+   * Returns false when the room has nothing older left.
+   *
+   * Only shared/remote rooms paginate. A local (localStorage) demo room holds
+   * its whole history in memory already, so hasMoreMessages is never set on it
+   * and this is never reached for one.
+   */
+  const loadOlderMessages = async (roomId: string): Promise<boolean> => {
+    const room = rooms.find((item) => item.id === roomId);
+    const oldest = room?.messages[0]?.createdAt;
+    if (!room || !oldest) return false;
+    const page = useSupabase
+      ? await supabaseChatRepository.loadOlder(roomId, oldest)
+      : await demoChatRepository.loadOlder(roomId, oldest);
+    setRooms((current) =>
+      current.map((item) => {
+        if (item.id !== roomId) return item;
+        // Re-dedupe on merge: a realtime refresh landing mid-load could have
+        // already inserted some of these ids.
+        const seen = new Set(item.messages.map((message) => message.id));
+        const older = page.messages.filter((message) => !seen.has(message.id));
+        return { ...item, messages: [...older, ...item.messages], hasMoreMessages: page.hasMore };
+      }),
+    );
+    return page.hasMore;
+  };
+
+  return { transactions, rooms, isLoading, error, refresh, loadOlderMessages, demoSchemaReady, sharedRoomIds };
 }

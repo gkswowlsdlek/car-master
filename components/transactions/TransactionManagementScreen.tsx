@@ -64,6 +64,8 @@ export function TransactionManagementScreen({
   onFindAnotherShop?: () => void;
   onNewRequest: () => void;
   onMarkRead?: (roomId: string) => void;
+  /** Prepends the previous page of chat history for one room. */
+  onLoadOlder?: (roomId: string) => Promise<boolean>;
   onLoadContact?: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
   onOpenMessages: (transactionId: string) => void;
 }) {

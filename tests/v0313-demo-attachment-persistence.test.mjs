@@ -139,5 +139,9 @@ test("Demo text-only Messenger path is untouched — addMessage/markRead/subscri
   const source = await read("repositories/demo-chat-repository.ts");
   assert.match(source, /async addMessage\(roomId: string, message: TransactionChatMessage\)/);
   assert.match(source, /async markRead\(roomId: string, readerId: string\)/);
-  assert.match(source, /subscribe\(listener: \(\) => void\)/);
+  // subscribe now hands the listener the affected room id so the store can
+  // refresh one conversation instead of every room (chat pagination). Still a
+  // single listener taking no required argument, so callers that ignore it are
+  // unaffected — which is what this guard is really protecting.
+  assert.match(source, /subscribe\(listener: \(roomId\?: string\) => void\)/);
 });

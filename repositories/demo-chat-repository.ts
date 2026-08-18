@@ -129,6 +129,41 @@ export class DemoChatRepository {
     for (const room of rooms) room.unreadCount = counts.get(room.id) ?? 0;
   }
 
+  /**
+   * One room's newest page plus its exact unread count. This is what a realtime
+   * INSERT triggers, instead of rebuilding every room: a message arriving in
+   * one conversation has no bearing on the others.
+   */
+  async getRoom(roomId: string, myId: string): Promise<ChatRoom | null> {
+    if (!isSupabaseConfigured) return null;
+    const { data, error } = await createSupabaseBrowserClient()
+      .from("demo_chat_rooms")
+      .select(
+        "id,transaction_id,created_at,updated_at,demo_chat_messages(id,room_id,sender_id,sender_role,text,attachments,created_at),demo_chat_reads(reader_id,last_read_at)",
+      )
+      .eq("id", roomId)
+      .order("created_at", { referencedTable: "demo_chat_messages", ascending: false })
+      .limit(CHAT_PAGE_SIZE, { referencedTable: "demo_chat_messages" })
+      .maybeSingle();
+    if (error || !data) return null;
+    const row = data as unknown as RoomRow;
+    const reads: ReadCursor[] = row.demo_chat_reads ?? [];
+    const page = [...(row.demo_chat_messages ?? [])].reverse();
+    const room: ChatRoom = {
+      id: row.id,
+      transactionId: row.transaction_id,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      messages: normalizeChatMessages(page, reads),
+      unreadCount: 0,
+      hasMoreMessages: page.length === CHAT_PAGE_SIZE,
+    };
+    const cursors = new Map([[row.id, reads.find((read) => read.reader_id === myId)?.last_read_at ?? ""]]);
+    await this.applyUnreadCounts([room], cursors, myId);
+    const [signed] = await resignAttachmentUrls([room]);
+    return signed;
+  }
+
   /** One room's next page of history, oldest-first, ending just before `before`. */
   async loadOlder(roomId: string, before: string): Promise<{ messages: TransactionChatMessage[]; hasMore: boolean }> {
     if (!isSupabaseConfigured) return { messages: [], hasMore: false };
@@ -196,13 +231,20 @@ export class DemoChatRepository {
     if (error) throw error;
   }
 
-  subscribe(listener: () => void) {
+  /** The listener receives the affected room id so the store can refresh just
+   * that conversation instead of rebuilding every room on every message. */
+  subscribe(listener: (roomId?: string) => void) {
     if (!isSupabaseConfigured) return () => {};
     const client = createSupabaseBrowserClient();
+    const roomOf = (payload: { new?: Record<string, unknown> | null }) => (payload.new as { room_id?: string } | undefined)?.room_id;
     const channel = client
       .channel("car-master-demo-chat")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "demo_chat_messages" }, listener)
-      .on("postgres_changes", { event: "*", schema: "public", table: "demo_chat_reads" }, listener)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "demo_chat_messages" }, (payload: { new?: Record<string, unknown> | null }) =>
+        listener(roomOf(payload)),
+      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "demo_chat_reads" }, (payload: { new?: Record<string, unknown> | null }) =>
+        listener(roomOf(payload)),
+      )
       .subscribe();
     return () => {
       void client.removeChannel(channel);
