@@ -268,10 +268,13 @@
 .shop-transaction-management .transaction-operations-detail > footer button:last-child {
   min-height: 44px;
 }
+/* redesign/transaction-list: 한 거래 = 한 행, 5열. 헤더와 본문이 같은 템플릿을
+   써야 정렬이 맞는다 — 예전에는 헤더 4칸 vs (globals의 옛 규칙이 이긴) 본문
+   3열이라 열이 어긋나고 행이 2줄로 감겼다. */
 .dealer-transaction-management .dealer-transaction-table-head {
   display: grid;
-  grid-template-columns: minmax(240px, 1.2fr) minmax(150px, 0.7fr) minmax(220px, 1fr) minmax(120px, 0.5fr);
-  gap: 20px;
+  grid-template-columns: minmax(250px, 1.6fr) 128px minmax(88px, 0.55fr) minmax(88px, 0.55fr) minmax(104px, 0.65fr);
+  gap: 16px;
   border-bottom: 1px solid var(--color-line);
   background: var(--color-surface-soft);
   padding: 9px 18px;
@@ -280,7 +283,59 @@
   font-weight: 750;
 }
 .dealer-transaction-management .dealer-transaction-row {
-  grid-template-columns: minmax(240px, 1.2fr) minmax(150px, 0.7fr) minmax(220px, 1fr) minmax(120px, 0.5fr);
+  display: grid;
+  grid-template-columns: minmax(250px, 1.6fr) 128px minmax(88px, 0.55fr) minmax(88px, 0.55fr) minmax(104px, 0.65fr);
+  align-items: center;
+  gap: 16px;
+  min-height: 64px;
+}
+.dealer-transaction-management .dealer-transaction-row-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.dealer-transaction-management .dealer-transaction-row-main b {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--font-sm);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dealer-transaction-management .dealer-transaction-row-main > span {
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: var(--font-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dealer-transaction-management .dealer-transaction-row-status {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+.dealer-transaction-management .dealer-transaction-row-price {
+  color: var(--color-text-soft);
+  font-size: var(--font-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.dealer-transaction-management .dealer-transaction-row-activity-cell {
+  display: grid;
+  gap: 3px;
+}
+.dealer-transaction-management .dealer-transaction-row-activity-cell small {
+  color: var(--color-muted);
+  font-size: var(--font-xs);
+}
+.dealer-transaction-management .dealer-transaction-row-activity-cell b {
+  color: var(--color-text-soft);
+  font-size: var(--font-sm);
+  font-weight: 650;
+}
+.dealer-transaction-management .dealer-transaction-row-blank {
+  color: var(--color-muted-soft);
+  font-weight: 600;
 }
 .dealer-transaction-management .dealer-transaction-row-schedule {
   display: grid;
@@ -1408,4 +1463,47 @@
 .shop-transaction-management .transaction-operations-detail > footer .primary {
   order: -1;
   margin-right: auto;
+}
+
+/* ── redesign/transaction-list 모바일 ────────────────────────────────────
+   데스크탑 5열을 모바일에서는 카드형 2열로 접는다: 차량 블록이 왼쪽 전체,
+   상태가 오른쪽, 일정·활동·다음 행동은 아래 한 줄. 옛 모바일 배치 규칙
+   (globals.css의 row-meta 세대)은 삭제됐고 여기가 유일한 정의다. */
+@media (max-width: 900px) {
+  .dealer-transaction-management .dealer-transaction-table-head {
+    display: none;
+  }
+  .dealer-transaction-management .dealer-transaction-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "main status"
+      "main schedule"
+      "activity next";
+    align-items: start;
+    gap: 4px 12px;
+    padding: 12px 16px;
+  }
+  .dealer-transaction-management .dealer-transaction-row-main {
+    grid-area: main;
+  }
+  .dealer-transaction-management .dealer-transaction-row-status {
+    grid-area: status;
+    justify-items: end;
+  }
+  .dealer-transaction-management .dealer-transaction-row-schedule {
+    grid-area: schedule;
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+  .dealer-transaction-management .dealer-transaction-row-activity-cell {
+    grid-area: activity;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .dealer-transaction-management .dealer-transaction-row-next {
+    grid-area: next;
+    align-self: center;
+  }
 }

@@ -2062,62 +2062,6 @@ table td {
     background: #fff;
   }
 
-  .dealer-transaction-management .dealer-transaction-row {
-    display: grid;
-    grid-template-columns: minmax(240px, 1.2fr) minmax(330px, 1fr) minmax(180px, 0.7fr);
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-    min-height: 70px;
-    border-bottom: 1px solid var(--color-surface-soft);
-    background: #fff;
-    padding: 12px 18px;
-    text-align: left;
-  }
-
-  .dealer-transaction-management .dealer-transaction-row:last-child {
-    border-bottom: 0;
-  }
-
-  .dealer-transaction-management .dealer-transaction-row:hover {
-    background: var(--color-surface-soft);
-  }
-
-  .dealer-transaction-management .dealer-transaction-row-main {
-    display: grid;
-    gap: 3px;
-    min-width: 0;
-  }
-
-  .dealer-transaction-management .dealer-transaction-row-main b {
-    overflow: hidden;
-    color: var(--r1-ink);
-    font-size: var(--font-sm);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .dealer-transaction-management .dealer-transaction-row-main span,
-  .dealer-transaction-management .dealer-transaction-row-meta small,
-  .dealer-transaction-management .dealer-transaction-row-lastmessage {
-    overflow: hidden;
-    color: var(--r1-muted);
-    font-size: var(--font-xs);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .dealer-transaction-management .dealer-transaction-row-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-  }
-
-  .dealer-transaction-management .dealer-transaction-row-lastmessage {
-    grid-column: 3;
-    grid-row: 1;
-  }
 
   .dealer-transaction-management .transaction-empty {
     min-height: 190px;
@@ -3581,55 +3525,6 @@ textarea:focus-visible {
     border-radius: var(--radius-md);
     background: #fff;
   }
-  .dealer-transaction-management .dealer-transaction-row {
-    display: grid;
-    grid-template-columns: minmax(240px, 1.2fr) minmax(330px, 1fr) minmax(180px, 0.7fr);
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-    min-height: 70px;
-    border-bottom: 1px solid var(--color-surface-soft);
-    background: #fff;
-    padding: 12px 18px;
-    text-align: left;
-  }
-  .dealer-transaction-management .dealer-transaction-row:last-child {
-    border-bottom: 0;
-  }
-  .dealer-transaction-management .dealer-transaction-row:hover {
-    background: var(--color-surface-soft);
-  }
-  .dealer-transaction-management .dealer-transaction-row-main {
-    display: grid;
-    gap: 3px;
-    min-width: 0;
-  }
-  .dealer-transaction-management .dealer-transaction-row-main b {
-    overflow: hidden;
-    color: var(--color-text);
-    font-size: var(--font-sm);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .dealer-transaction-management .dealer-transaction-row-main span,
-  .dealer-transaction-management .dealer-transaction-row-meta small,
-  .dealer-transaction-management .dealer-transaction-row-lastmessage {
-    overflow: hidden;
-    color: var(--color-muted);
-    font-size: var(--font-xs);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .dealer-transaction-management .dealer-transaction-row-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-  }
-  .dealer-transaction-management .dealer-transaction-row-lastmessage {
-    grid-column: 3;
-    grid-row: 1;
-  }
   .dealer-transaction-management .transaction-empty {
     min-height: 190px;
     border: 1px dashed var(--color-line);
@@ -3749,55 +3644,6 @@ textarea:focus-visible {
     border-radius: var(--radius-md);
     background: #fff;
   }
-  .dealer-transaction-management .dealer-transaction-row {
-    display: grid;
-    grid-template-columns: minmax(240px, 1.2fr) minmax(330px, 1fr) minmax(180px, 0.7fr);
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-    min-height: 70px;
-    border-bottom: 1px solid var(--color-surface-soft);
-    background: #fff;
-    padding: 12px 18px;
-    text-align: left;
-  }
-  .dealer-transaction-management .dealer-transaction-row:last-child {
-    border-bottom: 0;
-  }
-  .dealer-transaction-management .dealer-transaction-row:hover {
-    background: var(--color-surface-soft);
-  }
-  .dealer-transaction-management .dealer-transaction-row-main {
-    display: grid;
-    gap: 3px;
-    min-width: 0;
-  }
-  .dealer-transaction-management .dealer-transaction-row-main b {
-    overflow: hidden;
-    color: var(--color-text);
-    font-size: var(--font-sm);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .dealer-transaction-management .dealer-transaction-row-main span,
-  .dealer-transaction-management .dealer-transaction-row-meta small,
-  .dealer-transaction-management .dealer-transaction-row-lastmessage {
-    overflow: hidden;
-    color: var(--color-muted);
-    font-size: var(--font-xs);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .dealer-transaction-management .dealer-transaction-row-meta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-  }
-  .dealer-transaction-management .dealer-transaction-row-lastmessage {
-    grid-column: 3;
-    grid-row: 1;
-  }
   .dealer-transaction-management .transaction-empty {
     min-height: 190px;
     border: 1px dashed var(--color-line);
@@ -3891,20 +3737,6 @@ textarea:focus-visible {
   }
   .dealer-transaction-management .dealer-transaction-table-head {
     display: none;
-  }
-  .dealer-transaction-management .dealer-transaction-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 8px;
-  }
-  .dealer-transaction-management .dealer-transaction-row-schedule {
-    display: none;
-  }
-  .dealer-transaction-management .dealer-transaction-row-meta {
-    grid-column: 1/-1;
-  }
-  .dealer-transaction-management .dealer-transaction-row-next {
-    grid-column: 2;
-    grid-row: 1;
   }
   .r2-job-context {
     grid-template-columns: 1fr 1fr;
