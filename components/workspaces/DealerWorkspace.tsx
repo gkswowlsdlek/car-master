@@ -80,6 +80,8 @@ type DealerWorkspaceProps = {
   onSetContactStatus: (transaction: Transaction, status: ContactStatus) => Promise<void>;
   onFindAnotherShop: () => void;
   onMarkRead: (roomId: string) => void;
+  /** Prepends the previous page of chat history for one room. */
+  onLoadOlderMessages?: (roomId: string) => Promise<boolean>;
   onLoadContact: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   onCompanyNameChange: (name: string | undefined) => void;
@@ -108,6 +110,7 @@ export function DealerWorkspace({
   onSetContactStatus,
   onFindAnotherShop,
   onMarkRead,
+  onLoadOlderMessages,
   onLoadContact,
   onChangePassword,
   onCompanyNameChange,
@@ -475,6 +478,7 @@ export function DealerWorkspace({
           onSetContactStatus={onSetContactStatus}
           onFindAnotherShop={onFindAnotherShop}
           onMarkRead={onMarkRead}
+          onLoadOlder={onLoadOlderMessages}
           onLoadContact={onLoadContact}
           onMobileChatOpenChange={setMobileChatOpen}
         />

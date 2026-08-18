@@ -81,10 +81,17 @@ export type ChatAttachment = {
 export type ChatRoom = {
   id: string;
   transactionId: string;
+  /** The most recent CHAT_PAGE_SIZE messages, oldest-first, plus anything an
+   * explicit "이전 메시지 보기" load has prepended. Never assume this is the
+   * room's full history — check `hasMoreMessages`. */
   messages: TransactionChatMessage[];
   createdAt: string;
   updatedAt: string;
+  /** Exact, and independent of how much of `messages` is loaded: it is
+   * counted from a separate lightweight query, not from the array above. */
   unreadCount: number;
+  /** True when older messages exist beyond the loaded window. */
+  hasMoreMessages?: boolean;
 };
 
 export type UserProfile = {

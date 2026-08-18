@@ -107,6 +107,7 @@ export default function Home() {
     isLoading: isTransactionLoading,
     error: transactionLoadError,
     refresh,
+    loadOlderMessages,
     demoSchemaReady,
     sharedRoomIds,
   } = useTransactionStore(useSupabaseData, account.id);
@@ -433,6 +434,7 @@ export default function Home() {
           onFindAnotherShop={() => goToScreen("dealerMap")}
           onMarkRead={markRoomRead}
           onLoadContact={loadContact}
+          onLoadOlderMessages={loadOlderMessages}
           onChangePassword={changePassword}
           onCompanyNameChange={setDealerCompanyName}
           onUnreadMessageCountChange={setDealerUnreadMessageCount}
@@ -460,6 +462,7 @@ export default function Home() {
           onEndOutcome={endOutcome}
           onMarkRead={markRoomRead}
           onLoadContact={loadContact}
+          onLoadOlderMessages={loadOlderMessages}
           onChangePassword={changePassword}
           onUnreadMessageCountChange={setInstallerUnreadMessageCount}
           onMobileFullscreenChange={setInstallerMobileFullscreen}
