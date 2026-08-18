@@ -36,5 +36,41 @@ dealer-dashboard r3-dealer-dashboard r4-dealer-dashboard reference-prototype-das
 
 ---
 
-*이 파일은 다음 대시보드 리터치 라운드를 위한 메모다. 세션 메모리와 달리
-저장소에 커밋되어 브랜치를 넘나들며 참조할 수 있다.*
+## 시공점 정보 변경(상호·주소) Admin 알림 — 우선순위 낮음, 보류
+
+`fix/beta-security`(2026-08-18)에서 조사. 웹랩 진단 ②에 대한 대응 방향을
+"차단·재승인" 대신 "Admin에게 알림만"으로 바꾸기로 했고, 알림 자체는
+마이그레이션 없이 되는 방법이 있는지 먼저 확인했다.
+
+**결론: 마이그레이션 없이는 불가능.** 확인한 내용:
+- `update_shop_operating_profile` RPC가 편집 가능한 필드는 11개
+  (shop_name/address/detail_address/phone/contact_phone/business_hours/
+  closed_days/supported_brands/supported_services/introduction/
+  accepting_requests) — `installer_shops.business_registration_number`는
+  이 RPC에 없어 **승인된 시공점은 사업자번호를 바꿀 방법이 현재 아예 없다**.
+  그래서 실질 감시 대상은 상호·주소 2개뿐
+- `installer_shops.updated_at`은 있지만 11개 필드 중 아무거나 하나만
+  바뀌어도 덮어써진다 — 어떤 필드가 바뀌었는지 구분 불가, 이전 값도 사라짐.
+  이걸로는 "상호·주소만, 나머지는 조용히"라는 조건을 지킬 수 없다
+- 이 저장소에 필드 단위로 이전 값을 보존하는 로그/감사 테이블은
+  `transaction_stage_events`(거래 도메인 전용) 하나뿐, 시공점 프로필에
+  해당하는 건 없다. 관련 트리거도 없다
+- `services/notifications/notification-service.ts`는 v0.4용 NAVER SENS
+  placeholder로, 콘솔에 찍고 끝나는 no-op — 아무데도 저장 안 됨. Admin이
+  볼 방법이 없다
+
+**다음 라운드에서 필요한 최소 마이그레이션** (우선순위 낮음으로 보류):
+- 신규 테이블 `shop_profile_change_events`(shop_id/field/old_value/
+  new_value/changed_by/created_at) 1개
+- `installer_shops`에 `AFTER UPDATE` 트리거 1개 — shop_name/address(+
+  방어적으로 business_registration_number, 나중에 편집 가능해질 경우 대비)가
+  실제로 바뀔 때만 삽입
+- `AdminShopManagementScreen.tsx`에 이미 있는 "업체 연결 요청" 카드와 같은
+  패턴으로 "최근 정보 변경" 카드 추가
+- Demo는 손댈 것 없음 — `ShopManagementScreen.tsx`가 데모 계정이면
+  Supabase를 아예 안 타고 로컬 메모리(`demoRecord`)만 쓴다
+
+---
+
+*이 파일은 다음 라운드를 위한 메모다. 세션 메모리와 달리 저장소에 커밋되어
+브랜치를 넘나들며 참조할 수 있다.*
