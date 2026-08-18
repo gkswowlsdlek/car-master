@@ -804,3 +804,71 @@
     border-radius: var(--radius-lg);
   }
 }
+
+/* ── redesign/landing-login ─────────────────────────────────────────────
+   로고 PNG에 구워진 태그라인을 .brand-logo-clip(styles/marketing.css)으로
+   잘라내고, 랜딩 상단과 같은 간격·크기로 실제 텍스트를 다시 그린다.
+   "DEALER INSTALLATION WORKSPACE" eyebrow는 제거됐다. */
+.login-intro-brand {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  min-height: 0;
+  margin-bottom: 30px;
+}
+.login-intro-brand img {
+  width: 292px;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 0;
+}
+.login-intro-brand > small {
+  width: 292px;
+  max-width: 100%;
+  color: var(--color-text-soft);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.login-service-intro li b {
+  font-size: var(--font-body);
+}
+.login-service-intro li small {
+  font-size: var(--font-sm);
+  line-height: 1.65;
+}
+.login-trust {
+  gap: 9px;
+  font-size: var(--font-body) !important;
+  font-weight: 650;
+}
+.login-intro-actions {
+  gap: 6px;
+  margin-top: 26px;
+}
+.login-intro-actions .primary,
+.login-intro-actions .secondary {
+  min-height: 48px;
+  padding: 10px 16px;
+  font-size: var(--font-body);
+  font-weight: 700;
+}
+
+/* 로그인 카드 — 소셜 로그인이 들어올 자리를 미리 구조로 잡아둔다.
+   .login-submit-stack에 형제 버튼을 추가하면 구분선 아래(회원가입 링크,
+   보안 안내, 도움말)는 손대지 않아도 된다. */
+.login-submit-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+.login-submit-stack .full {
+  margin-top: 0;
+}
+.login-card-divider {
+  height: 1px;
+  margin: 22px 0 4px;
+  background: var(--color-line);
+}
