@@ -8,9 +8,9 @@
    AppShell's sidebar nav) and .messenger-focus/-focus-topbar/-back-to-workspace (shell-scoped,
    AppShell's desktop focus-mode chrome). */
 .messenger-screen {
-  width: min(1380px, 100%);
-  margin: 0 auto;
-  padding: 32px;
+  width: 100%;
+  margin: 0;
+  padding: 16px;
 }
 .messenger-layout {
   display: grid;
@@ -23,12 +23,12 @@
 .inbox-pane {
   display: grid;
   align-content: start;
-  gap: 10px;
+  gap: 8px;
   overflow: hidden;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lg);
   background: #fff;
-  padding: 14px;
+  padding: 10px;
 }
 .inbox-pane-head {
   display: flex;
@@ -67,6 +67,8 @@
 }
 .inbox-list {
   display: grid;
+  /* 모바일에서 flex:1로 늘어난 높이를 행에 분배하지 않는다(stretch → 행 간 공백). */
+  align-content: start;
   gap: 2px;
   margin: 0;
   padding: 0;
@@ -77,9 +79,9 @@
   grid-template-columns: 40px minmax(0, 1fr);
   gap: 10px;
   width: 100%;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: #fff;
-  padding: 11px 9px;
+  padding: 9px 10px;
   text-align: left;
 }
 .inbox-list > li > button:hover {
@@ -103,7 +105,7 @@
 .inbox-row-body {
   display: grid;
   min-width: 0;
-  gap: 3px;
+  gap: 2px;
 }
 .inbox-row-top {
   display: flex;
@@ -195,27 +197,26 @@
 }
 @media (min-width: 1024px) {
   .messenger-screen {
-    height: calc(100dvh - 126px);
+    /* 풀블리드: 프레임 패딩 48px를 걷어낸 만큼 높이도 되돌려 받는다 (126-48=78). */
+    height: calc(100dvh - 78px);
     display: grid;
     grid-template-rows: minmax(0, 1fr);
-    padding-top: 24px;
-    padding-bottom: 24px;
+    padding: 0;
   }
+  /* 데스크탑은 대화 목록을 항상 보여준다 — 카톡·슬랙과 같은 문법. 접기 레일과
+     레일 토글은 데스크탑에서 없앤다(모바일 drill-down 흐름은 그대로). listOpen
+     상태·localStorage 로직은 건드리지 않고 CSS로 무력화만 한다. */
   .messenger-layout {
     min-height: 0;
     height: 100%;
-    grid-template-columns: 60px minmax(0, 1fr);
-    gap: 12px;
+    grid-template-columns: clamp(272px, 21vw, 328px) minmax(0, 1fr);
+    gap: 0;
   }
   .messenger-layout.list-open {
-    grid-template-columns: 60px clamp(230px, 20vw, 280px) minmax(0, 1fr);
+    grid-template-columns: clamp(272px, 21vw, 328px) minmax(0, 1fr);
   }
   .messenger-rail {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding-top: 2px;
+    display: none;
   }
   .messenger-rail-toggle {
     position: relative;
@@ -239,16 +240,10 @@
     right: -6px;
   }
   .inbox-pane.desktop-collapsed {
-    display: none;
+    display: grid;
   }
   .inbox-collapse-button {
-    display: grid;
-    flex: 0 0 auto;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-    color: var(--color-muted);
+    display: none;
   }
   .inbox-collapse-button:hover {
     background: var(--color-surface-soft);
@@ -256,6 +251,8 @@
   .inbox-pane {
     min-height: 0;
     overflow-y: auto;
+    border-width: 0 1px 0 0;
+    border-radius: 0;
   }
   .messenger-chat-pane {
     display: block;
@@ -274,7 +271,6 @@
   }
   .messenger-chat-pane .messenger-center {
     min-height: 0;
-    grid-template-rows: auto auto minmax(0, 1fr) auto;
   }
   .messenger-chat-pane .messenger-messages {
     min-height: 0;
@@ -337,4 +333,9 @@
   padding: 8px 10px;
   font-size: var(--font-xs);
   line-height: 1.6;
+}
+
+/* 인박스 검색 — 전역 input 48px 최소높이를 목록 밀도에 맞게 줄인다. */
+.inbox-search input {
+  min-height: 40px;
 }

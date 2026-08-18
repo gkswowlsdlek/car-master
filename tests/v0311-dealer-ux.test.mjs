@@ -111,11 +111,14 @@ test("responsive rules cover requested desktop and mobile workspace behavior", a
   // what used to be one file.
   const css = (await read("app/globals.css")) + (await read("styles/messenger.css"));
   assert.match(css, /@media \(min-width: 1024px\)/);
-  assert.match(css, /height: calc\(100dvh - 126px\)/);
-  assert.match(css, /\.messenger-layout\s*\{[^}]*grid-template-columns:\s*60px\s+minmax\(0,\s*1fr\)/s);
+  // redesign/messenger: 풀블리드로 프레임 패딩 48px를 걷어내 126px → 78px,
+  // 데스크탑은 접이식 60px 레일 대신 대화 목록을 상시 노출한다. 검증 의도
+  // (데스크탑 고정 높이 + 목록/채팅 열 구성)는 동일하고 값만 현재 구현을 따른다.
+  assert.match(css, /height: calc\(100dvh - 78px\)/);
+  assert.match(css, /\.messenger-layout\s*\{[^}]*grid-template-columns:\s*clamp\(272px,\s*21vw,\s*328px\)\s+minmax\(0,\s*1fr\)/s);
   assert.match(
     css,
-    /\.messenger-layout\.list-open\s*\{[^}]*grid-template-columns:\s*60px\s+clamp\(230px,\s*20vw,\s*280px\)\s+minmax\(0,\s*1fr\)/s,
+    /\.messenger-layout\.list-open\s*\{[^}]*grid-template-columns:\s*clamp\(272px,\s*21vw,\s*328px\)\s+minmax\(0,\s*1fr\)/s,
   );
   assert.match(
     css,
