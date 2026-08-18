@@ -586,101 +586,18 @@
   gap: 14px;
   animation: hero-rise 0.7s 0.08s ease-out both;
 }
-.hero-workflow {
-  display: grid;
-  gap: 12px;
-  border: 1px solid var(--color-primary-soft);
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.95));
-  padding: 14px 16px 16px;
-  box-shadow:
-    0 14px 34px rgba(15, 26, 51, 0.09),
-    0 6px 18px rgba(29, 78, 216, 0.07);
-}
-.hero-workflow > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.hero-workflow > div span {
-  color: var(--color-primary);
-  font-size: var(--font-xs);
-  font-weight: 850;
-  letter-spacing: 0.11em;
-}
-.hero-workflow > div b {
-  color: var(--color-muted);
-  font-size: var(--font-xs);
-  font-weight: 650;
-}
-.hero-workflow ol {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.hero-workflow ol::before {
-  position: absolute;
-  top: 11px;
-  right: 6%;
-  left: 6%;
-  height: 1px;
-  background: linear-gradient(90deg, var(--color-primary-border), var(--color-primary), var(--color-primary));
-  content: "";
-}
-.hero-workflow li {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  justify-items: center;
-  gap: 5px;
-  color: var(--color-muted);
-  font-size: var(--font-xs);
-  font-weight: 700;
-  white-space: nowrap;
-}
-.hero-workflow li i {
-  display: grid;
-  width: 23px;
-  height: 23px;
-  place-items: center;
-  border: 2px solid var(--color-primary-soft);
-  border-radius: 50%;
-  background: #fff;
-  color: var(--color-primary);
-  font-size: var(--font-xs);
-  font-style: normal;
-  font-weight: 850;
-}
-.hero-workflow li:last-child i {
-  border-color: var(--color-primary);
-  background: var(--color-primary);
-  color: #fff;
-}
+
 .trust-strip {
   border-top: 1px solid var(--color-line);
 }
-@media (hover: hover) {
-  .hero-workflow:hover {
-    border-color: var(--color-primary-border);
-    box-shadow:
-      0 18px 42px rgba(15, 26, 51, 0.1),
-      0 8px 24px rgba(29, 78, 216, 0.1);
-  }
-}
+
 @media (max-width: 1180px) {
   .marketing-hero {
     grid-template-columns: minmax(360px, 0.8fr) minmax(540px, 1.2fr);
     gap: 34px;
     padding-top: 54px;
   }
-  .hero-workflow > div b {
-    display: none;
-  }
+
 }
 @media (max-width: 900px) {
   .marketing-hero {
@@ -690,9 +607,7 @@
   .hero-product-stack {
     width: min(700px, 100%);
   }
-  .hero-workflow > div b {
-    display: block;
-  }
+
 }
 @media (max-width: 760px) {
   .marketing-hero {
@@ -701,24 +616,7 @@
   .hero-product-stack {
     gap: 0;
   }
-  .hero-workflow {
-    padding: 15px;
-  }
-  .hero-workflow > div {
-    display: grid;
-    gap: 3px;
-  }
-  .hero-workflow ol {
-    grid-template-columns: repeat(4, 1fr);
-    row-gap: 12px;
-    margin-top: 3px;
-  }
-  .hero-workflow ol::before {
-    display: none;
-  }
-  .hero-workflow li {
-    font-size: var(--font-xs);
-  }
+
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-product-stack {
@@ -839,22 +737,7 @@
   align-items: flex-start;
 }
 /* V0.3.4.1 Landing UI update 2 */
-.hero-workflow ol {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-}
-.hero-workflow ol::before {
-  top: 14px;
-}
-.hero-workflow li {
-  gap: 7px;
-  font-size: var(--font-xs);
-}
-.hero-workflow li i {
-  width: 29px;
-  height: 29px;
-  font-size: var(--font-xs);
-}
+
 .trust-strip {
   display: grid;
   width: 100%;
@@ -887,28 +770,7 @@
   }
 }
 @media (max-width: 760px) {
-  .hero-workflow ol {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 3px;
-  }
-  .hero-workflow ol::before {
-    display: block;
-    top: 13px;
-    right: 8%;
-    left: 8%;
-  }
-  .hero-workflow li {
-    gap: 6px;
-    font-size: var(--font-xs);
-    line-height: 1.25;
-    text-align: center;
-    white-space: normal;
-    word-break: keep-all;
-  }
-  .hero-workflow li i {
-    width: 27px;
-    height: 27px;
-  }
+
   .trust-strip {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -972,6 +834,10 @@
   box-shadow:
     0 24px 60px rgba(15, 26, 51, 0.1),
     0 8px 22px rgba(29, 78, 216, 0.07);
+  /* .region-map-frame이 이 카드 자체 너비를 기준으로 60~70% 폭을 잡고, 그
+     폭이 200px 밑으로 내려가면 숨어야 하므로(아래 @container) 이 카드가
+     컨테이너 쿼리 기준점이 된다. */
+  container-type: inline-size;
 }
 .hero-coverage-head {
   display: grid;
@@ -991,34 +857,31 @@
   letter-spacing: -0.02em;
   word-break: keep-all;
 }
-.hero-coverage-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+
+/* 대한민국 지역 지도 — 카드 너비의 65%, 원본 SVG viewBox(800×1200) 비율
+   유지. 카드 너비가 308px 밑으로 줄면(지도 폭이 대략 200px 밑으로 줄어드는
+   지점) 지도를 숨기고 위 문구만 남긴다. */
+.region-map-frame {
+  width: 65%;
+  margin: 0 auto;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-lg);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--color-primary-soft);
+  padding: 14px;
 }
-.hero-coverage-grid li {
-  display: grid;
-  align-content: start;
-  gap: 6px;
-  border: 1px solid var(--color-primary-border);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.72);
-  padding: 13px 14px;
+.region-map-svg,
+.region-map-svg svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
-.hero-coverage-grid b {
-  color: var(--color-primary-hover);
-  font-size: var(--font-sm);
-  font-weight: 800;
+@container (max-width: 308px) {
+  .region-map-frame {
+    display: none;
+  }
 }
-.hero-coverage-grid small {
-  color: var(--color-muted);
-  font-size: var(--font-xs);
-  line-height: 1.6;
-  word-break: keep-all;
-}
+
 .hero-coverage-note {
   margin: 0;
   color: var(--color-muted-soft);
@@ -1028,30 +891,96 @@
   word-break: keep-all;
 }
 
-/* 1~5단계 플로우 — 글자·번호원·여백 확대 */
-.hero-workflow {
-  gap: 18px;
-  padding: 22px 24px 24px;
+/* 5단계 이용 흐름 — 예전엔 hero-coverage 옆 좁은 카드 안에 있었다. 지도
+   카드를 온전한 폭으로 쓰기 위해 별도의 전체 폭 섹션으로 분리했다. */
+.region-flow {
+  width: min(1000px, 100%);
+  margin: 0 auto;
+  padding: 8px 28px 56px;
 }
-.hero-workflow > div span,
-.hero-workflow > div b {
+.region-flow-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.region-flow-head span {
+  color: var(--color-primary);
+  font-size: var(--font-xs);
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+.region-flow-head b {
+  color: var(--color-text);
+  font-size: var(--font-body);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+.region-flow ol {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.region-flow ol::before {
+  position: absolute;
+  top: 21px;
+  right: 8%;
+  left: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-primary-border), var(--color-primary), var(--color-primary));
+  content: "";
+}
+.region-flow li {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: var(--color-muted);
   font-size: var(--font-sm);
+  font-weight: 700;
+  text-align: center;
+  word-break: keep-all;
 }
-.hero-workflow ol {
-  gap: 12px;
+.region-flow li i {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 2px solid var(--color-primary-soft);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--color-primary);
+  font-size: var(--font-body);
+  font-style: normal;
+  font-weight: 850;
+  box-shadow: 0 6px 16px rgba(29, 78, 216, 0.09);
 }
-.hero-workflow ol::before {
-  top: 18px;
+.region-flow li:last-child i {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
 }
-.hero-workflow li {
-  gap: 11px;
-  font-size: var(--font-sm);
-  font-weight: 750;
-}
-.hero-workflow li i {
-  width: 38px;
-  height: 38px;
-  font-size: var(--font-sm);
+@media (max-width: 760px) {
+  .region-flow {
+    padding: 4px 20px 40px;
+  }
+  .region-flow ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 22px;
+  }
+  .region-flow ol::before {
+    display: none;
+  }
+  .region-flow li i {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 /* 기능 4개 카드 — 아이콘 한 줄 → 제목 + 한 줄 설명 */
@@ -1135,11 +1064,7 @@
     padding: 24px 24px 22px;
   }
 }
-@media (max-width: 900px) {
-  .hero-coverage-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
+
 @media (max-width: 760px) {
   /* 앞쪽 파일의 @media (max-width: 760px)가 태그라인을 다시 --font-xs로
      되돌리므로 여기서 한 번 더 잡는다. */
@@ -1152,20 +1077,7 @@
     gap: 14px;
     padding: 20px 18px;
   }
-  .hero-coverage-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px;
-  }
-  .hero-coverage-grid li {
-    padding: 11px 12px;
-  }
-  .hero-workflow ol {
-    row-gap: 16px;
-  }
-  .hero-workflow li i {
-    width: 34px;
-    height: 34px;
-  }
+
   .trust-strip {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -1198,7 +1110,5 @@
     font-size: var(--font-sm);
     letter-spacing: 0.02em;
   }
-  .hero-coverage-grid {
-    grid-template-columns: 1fr;
-  }
+
 }
