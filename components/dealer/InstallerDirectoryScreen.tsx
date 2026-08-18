@@ -49,7 +49,10 @@ function responseMinutes(value: string) {
 export function InstallerDirectoryScreen({
   installers,
   loading,
-  selectedId,
+  // 카드 스크롤이 클릭 핸들러로 옮겨가면서 이 컴포넌트는 selectedId를 더 이상
+  // 읽지 않는다. 쓰기(setSelectedId)만 하므로 관례대로 _ 접두로 남겨둔다 —
+  // 프로퍼티를 제거하면 DealerWorkspace 쪽 시그니처까지 번진다.
+  selectedId: _selectedId,
   setSelectedId,
   favoriteIds,
   toggleFavorite,
@@ -170,14 +173,22 @@ export function InstallerDirectoryScreen({
   const selectedDistanceLabel =
     withDistance.find((item) => item.installer.id === selected?.id)?.distanceLabel ?? "거리 정보 없음";
 
-  useEffect(() => {
-    if (!selectedId) return;
-    document.getElementById(`installer-card-${selectedId}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }, [selectedId]);
+  // 카드 스크롤은 selectedId를 관찰하는 effect가 아니라 사용자 클릭 핸들러에서만
+  // 일으킨다. selectedId는 화면 진입 직후에도 자동으로 바뀌기 때문이다 — 시드
+  // 기본값에 이어 지오로케이션이 최근접 시공점을 다시 고르는(setSelectedShopId)
+  // 두 번째 변경까지 있어, effect 방식은 어떤 가드를 세워도 진입 시 창을 몇 px
+  // 끌어내렸다(fix/shell-consistency 문제 2). rAF는 setState 반영 후 카드가
+  // 실제로 그려진 다음 프레임에 스크롤하기 위함이다.
+  function scrollToCard(id: string) {
+    requestAnimationFrame(() => {
+      document.getElementById(`installer-card-${id}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }
 
   function selectInstaller(id: string) {
     setFocusedInstallerId(id);
     setSelectedId(id);
+    scrollToCard(id);
   }
   function selectAndOpenDetail(id: string) {
     selectInstaller(id);

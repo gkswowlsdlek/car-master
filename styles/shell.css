@@ -764,3 +764,34 @@
 .role-dealer .app-topbar-default {
   border-width: 0 0 1px;
 }
+
+/* ── fix/shell-consistency ──────────────────────────────────────────────
+   로고는 이 PNG 하나만 쓴다. 대시보드에서만 ::after 텍스트 로고를 그리던
+   .dealer-home-frame 규칙(globals.css)은 삭제됐다 — 화면을 옮길 때마다
+   로고가 바뀌던 원인. PNG 우하단에 구워진 태그라인은 랜딩·로그인과 같은
+   clip-path로 잘라내고, 그 자리는 <small>(역할 워크스페이스)이 대신한다. */
+.app-logo img {
+  clip-path: polygon(0 0, 100% 0, 100% 66%, 28% 66%, 28% 100%, 0 100%);
+}
+
+/* 딜러 데스크탑의 기본 상단바는 내용이 전부 숨겨져(제목·상태·아이콘·CTA 모두
+   display:none) 빈 52px 흰 띠로만 남아 있었다 — 콘텐츠 위 흰 여백의 정체.
+   데스크탑에서는 바 자체를 없애 콘텐츠가 사이드바와 같은 높이에서 시작한다.
+   모바일은 사이드바 토글이 이 바에 살고, 메신저는 자체 focus 상단바를 쓰므로
+   둘 다 영향 없다. 시공점·관리자 상단바는 내용이 보이므로 그대로 둔다. */
+@media (min-width: 1024px) {
+  .role-dealer .app-topbar-default {
+    display: none;
+  }
+}
+
+/* 콘텐츠 시작 높이 통일 — 대시보드(24px)와 나머지 화면(30px)이 달라 화면을
+   옮길 때 제목이 미세하게 출렁였다. 딜러 스코프만 24px로 맞춘다(시공점·관리자
+   화면은 각자 리듬 유지). */
+@media (min-width: 1024px) {
+  /* globals.css의 .app-main > :is(...)(0,2,0)와 동점이면 로드 순서상 지므로
+     .app-main을 끼워 (0,3,0)으로 이긴다. */
+  .role-dealer .app-main > :is(.dealer-screen, .transaction-management-screen, .profile-editor) {
+    padding-top: 24px;
+  }
+}

@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import {
   ArrowLeft,
@@ -121,6 +121,15 @@ export function AppShell({
 }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  // 화면 전환은 SPA 상태 변경이라 브라우저의 자동 스크롤 복원이 없다 — 이전
+  // 화면의 스크롤이나 자식 마운트 효과가 남긴 위치가 그대로 이어지므로, 새
+  // 화면은 항상 최상단에서 시작한다. 부모 effect는 자식 effect 뒤에 실행되므로
+  // 자식이 마운트 중 어디로 스크롤했든 여기가 마지막에 이긴다. 창 스크롤만
+  // 초기화한다 — 메신저 채팅의 최신 메시지 자동 스크롤은 .messenger-messages
+  // 내부 스크롤이라 영향받지 않는다.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [screen]);
   const roleLabel = role === "dealer" ? "딜러" : role === "shop" ? "시공점" : "관리자";
   const items = navigation[role];
   const workItems = items.filter((item) => item.group === "work");
