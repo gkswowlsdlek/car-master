@@ -182,9 +182,12 @@ test("pagination safety: the two highest-volume unbounded queries the Phase 7 re
 });
 
 test("new 시공점 관리 nav item added without touching Dealer/Shop navigation or removing the existing 운영 현황/계정 items", () => {
+  // 항목 3개가 이 순서로 남아 있는지만 본다. 각 항목 뒤에 붙는 속성(group 등)은
+  // 사이드바 표시용이라 허용한다 — 원래 검증 의도는 "운영 현황/계정이 사라지지
+  // 않고 시공점 관리가 그 사이에 추가됐는가"이지 객체 리터럴의 정확한 형태가 아니다.
   assert.match(
     appShellSource,
-    /\{ screen: "ops", label: "운영 현황", icon: UsersRound \},\s*\n\s*\{ screen: "adminShops", label: "시공점 관리", icon: Building2 \},\s*\n\s*\{ screen: "adminAccount", label: "계정", icon: UserRound \},/,
+    /\{ screen: "ops", label: "운영 현황", icon: UsersRound[^}]*\},\s*\n\s*\{ screen: "adminShops", label: "시공점 관리", icon: Building2[^}]*\},\s*\n\s*\{ screen: "adminAccount", label: "계정", icon: UserRound[^}]*\},/,
   );
   assert.match(dealerTypesSource, /"ops"\s*\|\s*"adminShops"\s*\|\s*"adminAccount"/);
 });
