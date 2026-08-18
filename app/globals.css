@@ -6719,33 +6719,6 @@ textarea:focus-visible {
 .dealer-home-frame .app-sidebar {
   background: var(--prototype-navy);
 }
-.dealer-home-frame .app-logo {
-  position: relative;
-  min-height: 108px;
-  overflow: visible;
-}
-.dealer-home-frame .app-logo img {
-  visibility: hidden;
-  height: 28px;
-}
-/* The skewed arc that used to sit above the wordmark is gone — it read as a
-   stray line rather than a mark, and the wordmark carries the brand alone. */
-.dealer-home-frame .app-logo::after {
-  content: "Car-Master";
-  position: absolute;
-  top: 39px;
-  left: 5px;
-  color: #fff;
-  font-size: var(--font-lg);
-  font-weight: 800;
-  letter-spacing: -0.045em;
-}
-.dealer-home-frame .app-logo small {
-  position: absolute;
-  top: 70px;
-  left: 5px;
-  margin: 0;
-}
 .dealer-home-frame .reference-utility > button b {
   display: none;
 }
@@ -6850,11 +6823,6 @@ textarea:focus-visible {
 .dealer-home-frame .app-sidebar nav button {
   min-height: 50px;
   padding: 0 12px;
-}
-/* Section label reads quieter than the items it introduces, so the hierarchy
-   is label < item rather than the flat 13px/13px it had. */
-.dealer-home-frame .app-logo small {
-  font-size: 12px;
 }
 .dealer-home-frame .app-main {
   margin-left: 0;

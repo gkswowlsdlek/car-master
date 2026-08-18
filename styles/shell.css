@@ -764,3 +764,12 @@
 .role-dealer .app-topbar-default {
   border-width: 0 0 1px;
 }
+
+/* ── fix/shell-consistency ──────────────────────────────────────────────
+   로고는 이 PNG 하나만 쓴다. 대시보드에서만 ::after 텍스트 로고를 그리던
+   .dealer-home-frame 규칙(globals.css)은 삭제됐다 — 화면을 옮길 때마다
+   로고가 바뀌던 원인. PNG 우하단에 구워진 태그라인은 랜딩·로그인과 같은
+   clip-path로 잘라내고, 그 자리는 <small>(역할 워크스페이스)이 대신한다. */
+.app-logo img {
+  clip-path: polygon(0 0, 100% 0, 100% 66%, 28% 66%, 28% 100%, 0 100%);
+}
