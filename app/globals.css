@@ -4026,22 +4026,25 @@ textarea:focus-visible {
   grid-template-columns: minmax(460px, 1fr) 310px;
   background: #fff;
 }
+/* 헤더/작업개요/(조건부 전화확인 배너)/메시지/컴포저 — 자식 수가 배너 유무로
+   변하므로 행 템플릿 grid는 항상 하나가 어긋난다(배너가 1fr 행을 차지해 235px로
+   늘어나던 버그). flex column이면 자식 수와 무관하게 메시지만 늘어난다. */
 .messenger-center {
   min-width: 0;
-  display: grid;
-  grid-template-rows: auto minmax(350px, 1fr) auto;
+  display: flex;
+  flex-direction: column;
   background: var(--color-bg);
 }
 .messenger-header {
   min-width: 0;
-  min-height: 76px;
+  min-height: 58px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   border-bottom: 1px solid var(--color-line);
   background: rgba(255, 255, 255, 0.96);
-  padding: 13px 20px;
+  padding: 8px 14px;
 }
 .messenger-header > div {
   min-width: 0;
@@ -4061,12 +4064,12 @@ textarea:focus-visible {
   font-weight: 850;
 }
 .messenger-avatar {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
 }
 .messenger-header h2 {
   overflow: hidden;
-  margin: 0 0 5px;
+  margin: 0 0 1px;
   font-size: var(--font-body);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4111,66 +4114,72 @@ textarea:focus-visible {
   overflow-y: auto;
   min-width: 0;
   min-height: 0;
-  padding: 22px 24px 28px;
+  flex: 1 1 0;
+  padding: 14px 16px 16px;
   scroll-behavior: smooth;
 }
 .message-date-divider {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 10px 0 22px;
+  margin: 6px 0 14px;
 }
 .message-date-divider span {
-  border: 1px solid var(--color-line);
+  border: 0;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(15, 26, 51, 0.05);
   color: var(--color-muted-soft);
-  padding: 6px 11px;
+  padding: 3px 10px;
   font-size: var(--font-xs);
 }
 .message-row {
   display: flex;
   align-items: flex-start;
-  gap: 9px;
-  margin: 13px 0;
+  gap: 8px;
+  margin: 7px 0;
 }
 .message-row.mine {
   justify-content: flex-end;
 }
 .message-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-md);
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
   background: var(--color-text-soft);
   font-size: var(--font-xs);
 }
 .message-content {
   display: grid;
-  max-width: min(72%, 620px);
-  gap: 5px;
+  max-width: min(70%, 560px);
+  gap: 3px;
 }
 .message-content > small {
   color: var(--color-muted);
   font-size: var(--font-xs);
 }
+/* 카톡·슬랙처럼 내 메시지에는 발신자 라벨을 붙이지 않는다 — 마크업은 유지하고
+   표시만 끈다(읽음·시간 로직과 무관). */
 .message-row.mine .message-content > small {
-  text-align: right;
+  display: none;
 }
+/* 말풍선이 화면의 주인공: 본문 스케일(--font-body)로 승격. 상대는 흰 면 그대로,
+   내 쪽은 브랜드 파랑 면 + 흰 글자로 대비를 준다. */
 .message-content > p {
   margin: 0;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-sm) var(--radius-lg) var(--radius-lg);
   background: #fff;
-  padding: 11px 14px;
+  padding: 9px 13px;
   color: var(--color-text);
-  font-size: var(--font-sm);
-  line-height: 1.65;
+  font-size: var(--font-body);
+  line-height: 1.55;
   white-space: pre-wrap;
 }
 .message-row.mine .message-content > p {
-  border-color: var(--color-primary-border);
+  border-color: var(--color-primary);
   border-radius: var(--radius-lg) var(--radius-sm) var(--radius-lg) var(--radius-lg);
-  background: var(--color-primary-soft);
+  background: var(--color-primary);
+  color: #fff;
 }
 .message-content time {
   color: var(--color-muted-soft);
@@ -4247,7 +4256,7 @@ textarea:focus-visible {
   min-width: 0;
   border-top: 1px solid var(--color-line);
   background: #fff;
-  padding: 12px 15px 14px;
+  padding: 8px 12px 10px;
 }
 .composer-row {
   min-width: 0;
@@ -4331,7 +4340,7 @@ textarea:focus-visible {
   overflow-y: auto;
   border-left: 1px solid var(--color-line);
   background: #fff;
-  padding: 22px;
+  padding: 16px;
 }
 .sidebar-close {
   display: none;
