@@ -35,13 +35,17 @@ test("Dashboard's raw internal stage deep-link (e.g. 견적 for 확인 대기) i
   assert.doesNotMatch(screenSource, /<option[^>]*>\{stage\}<\/option>/);
 });
 
-test("작업 상태 filter shows only dealer-facing labels (입고 전/작업 중/작업 완료/출고/취소/시공 불가) — no raw DB stage key (견적/시공예약/입고) reaches the dropdown text", () => {
-  assert.match(
-    screenSource,
-    /const STATUS_FILTER_OPTIONS = \["전체", "입고 전", "작업 중", "작업 완료", "출고", "취소", "시공 불가"\] as const;/,
-  );
+test("세분 상태 드롭다운은 제거됐고(탭과 축 중복 — redesign/transaction-list), raw DB stage key (견적/시공예약/입고)는 여전히 어떤 라벨에도 노출되지 않는다", () => {
+  // 원래 이 테스트의 의도는 "드롭다운 텍스트에 raw key 금지"였다. 드롭다운
+  // 자체가 제거된 뒤에도 의도의 핵심(사용자에게 raw key를 보이지 않는다)은
+  // 그대로 검증하고, 드롭다운이 조용히 되살아나지 않는 것도 함께 잡는다.
+  assert.doesNotMatch(screenSource, /STATUS_FILTER_OPTIONS|<select/);
   assert.doesNotMatch(screenSource, />견적</);
   assert.doesNotMatch(screenSource, />시공예약</);
+  // 상태 칩 색은 raw key가 아니라 딜러 4단계 기준으로 골라야 한다 — 견적과
+  // 시공예약이 같은 "입고 전"인데 다른 색이 나오던 문제의 회귀 방지.
+  assert.match(screenSource, /function stageChipClass\(stage: TransactionStage\)/);
+  assert.match(screenSource, /\$\{stageChipClass\(item\.status\.stage\)\}/);
 });
 
 test("차량/시공점 검색 matches maker, model and installerName only — never another dealer's data, since it filters the already dealer-scoped transactions prop", () => {

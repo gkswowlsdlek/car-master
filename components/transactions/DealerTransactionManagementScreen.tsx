@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Phone, PhoneOff, Search } from "lucide-react";
 import type { Transaction, TransactionStage } from "../../types/transactions";
-import { dealerStageLabel, isTerminalOutcome } from "../../services/transaction-state-service";
+import { dealerStageIndex, dealerStageLabel, isTerminalOutcome } from "../../services/transaction-state-service";
 
 const won = (value?: number) => (value == null ? undefined : `${value.toLocaleString("ko-KR")}원`);
 const shortDate = (value?: string) =>
@@ -32,13 +32,22 @@ function groupFromStage(stage: TransactionStage | "전체"): Group {
   return stage === "전체" ? "전체" : groupOf(stage);
 }
 
-const STATUS_FILTER_OPTIONS = ["전체", "입고 전", "작업 중", "작업 완료", "출고", "취소", "시공 불가"] as const;
-type StatusFilter = (typeof STATUS_FILTER_OPTIONS)[number];
+/* 세분 상태 드롭다운은 제거했다 — 탭(진행중/완료/종료)과 축이 겹쳤고(완료 탭
+   = 출고 필터, 종료 탭 = 취소+시공불가), 딜러의 동시 진행 거래가 월 2~3건이라
+   "진행중 안에서 작업 중만 보기" 세분이 쓰일 일이 없다. 거래량이 늘면 그때
+   다시 넣는다. */
 
-function matchesStatusFilter(stage: TransactionStage, filter: StatusFilter) {
-  if (filter === "전체") return true;
-  if (filter === "시공 불가") return stage === "시공불가";
-  return dealerStageLabel(stage) === filter;
+/* 상태 칩 색은 raw DB key가 아니라 딜러에게 보이는 4단계 기준으로 정한다.
+   raw key 기준이면 같은 "입고 전"으로 접히는 견적(노랑)과 시공예약(파랑)이
+   다른 색으로, 다른 단계인 시공예약(입고 전)과 입고(작업 중)가 같은 파랑으로
+   나온다. 색 정의 자체(design-system.css)는 그대로 두고 단계별 대표 클래스만
+   고른다: 입고 전=대기(warning), 작업 중=진행(primary), 작업 완료=success,
+   출고=완결(ink). 취소/시공불가는 raw key가 곧 UI 상태라 그대로 쓴다. */
+const STAGE_CHIP_CLASSES = ["status-견적", "status-입고", "status-작업완료", "status-출고"] as const;
+
+function stageChipClass(stage: TransactionStage) {
+  if (isTerminalOutcome(stage)) return `status-${stage}`;
+  return STAGE_CHIP_CLASSES[dealerStageIndex(stage)];
 }
 
 /**
@@ -62,7 +71,6 @@ export function DealerTransactionManagementScreen({
   onFindShop: () => void;
 }) {
   const [group, setGroup] = useState<Group>(() => groupFromStage(initialGroupFilter ?? "전체"));
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("전체");
   const [query, setQuery] = useState("");
 
   const visible = useMemo(() => transactions.filter((item) => !item.visibility.hiddenByDealer), [transactions]);
@@ -80,7 +88,6 @@ export function DealerTransactionManagementScreen({
     () =>
       visible
         .filter((item) => group === "전체" || groupOf(item.status.stage) === group)
-        .filter((item) => matchesStatusFilter(item.status.stage, statusFilter))
         .filter((item) => {
           const keyword = query.trim().toLowerCase();
           return (
@@ -94,7 +101,7 @@ export function DealerTransactionManagementScreen({
         // that reflects all of those rather than just one signal.
         .slice()
         .sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt)),
-    [visible, group, statusFilter, query],
+    [visible, group, query],
   );
 
   const empty = query.trim()
@@ -140,17 +147,6 @@ export function DealerTransactionManagementScreen({
             placeholder="차량, 시공점으로 검색"
           />
         </label>
-        <select
-          aria-label="작업 상태 필터"
-          value={statusFilter}
-          onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
-        >
-          {STATUS_FILTER_OPTIONS.map((option) => (
-            <option key={option} value={option}>
-              {option === "전체" ? "전체 상태" : option}
-            </option>
-          ))}
-        </select>
       </div>
 
       {filtered.length === 0 ? (
@@ -167,9 +163,10 @@ export function DealerTransactionManagementScreen({
       ) : (
         <div className="dealer-transaction-list" role="list" aria-label="거래 작업 목록">
           <div className="dealer-transaction-table-head" aria-hidden="true">
-            <span>차량 / Shop</span>
+            <span>차량 · 용품점</span>
+            <span>상태</span>
             <span>일정</span>
-            <span>현재 단계</span>
+            <span>최근 활동</span>
             <span>다음 행동</span>
           </div>
           {filtered.map((item) => {
@@ -201,6 +198,10 @@ export function DealerTransactionManagementScreen({
                 className="dealer-transaction-row"
                 onClick={() => onOpenTransaction(item.id)}
               >
+                {/* 한 거래 = 한 행. 5열 grid — 차량·용품점(+마지막 메시지 둘째 줄) /
+                    상태 / 일정 / 최근 활동 / 다음 행동. 마지막 메시지는 예전처럼
+                    "다음 행동" 열에 얹지 않고(전부 같은 생성 메시지라 노이즈로
+                    읽혔다) 메신저 인박스처럼 차량 아래 회색 한 줄로 둔다. */}
                 <div className="dealer-transaction-row-main">
                   <b>
                     {item.vehicle.maker} {item.vehicle.model}
@@ -208,14 +209,12 @@ export function DealerTransactionManagementScreen({
                   <span>
                     {item.installerName} · {item.service.product ?? item.service.workDescription}
                   </span>
+                  {item.lastMessage && <em className="dealer-transaction-row-lastmessage">{item.lastMessage}</em>}
                 </div>
-                <div className="dealer-transaction-row-schedule">
-                  <small>입고</small>
-                  <b>{scheduled ?? "미정"}</b>
-                  {item.schedule.desiredReleaseAt && <small>출고 {shortDate(item.schedule.desiredReleaseAt)}</small>}
-                </div>
-                <div className="dealer-transaction-row-meta">
-                  <em className={`status-chip status-${item.status.stage}`}>{dealerStageLabel(item.status.stage)}</em>
+                <div className="dealer-transaction-row-status">
+                  <em className={`status-chip ${stageChipClass(item.status.stage)}`}>
+                    {dealerStageLabel(item.status.stage)}
+                  </em>
                   {needsPhoneConfirm && (
                     <small className="phone-confirm-flag">
                       <Phone size={11} aria-hidden="true" /> 전화 확인 필요
@@ -226,14 +225,28 @@ export function DealerTransactionManagementScreen({
                       <PhoneOff size={11} aria-hidden="true" /> 연락 안 됨
                     </small>
                   )}
-                  {scheduled && <small>입고 예정 {scheduled}</small>}
-                  {price && <small>{price}</small>}
-                  <small className="dealer-transaction-row-activity">{activityTime(item.status.updatedAt)}</small>
+                  {/* 확정 시공금액 — 읽기 전용 표기(편집은 거래방에서). */}
+                  {price && <small className="dealer-transaction-row-price">{price}</small>}
+                </div>
+                <div className="dealer-transaction-row-schedule">
+                  {scheduled ? (
+                    <>
+                      <small>입고</small>
+                      <b>{scheduled}</b>
+                    </>
+                  ) : (
+                    <b className="dealer-transaction-row-blank" aria-label="일정 없음">
+                      —
+                    </b>
+                  )}
+                </div>
+                <div className="dealer-transaction-row-activity-cell">
+                  <small>활동</small>
+                  <b>{activityTime(item.status.updatedAt)}</b>
                 </div>
                 <strong className="dealer-transaction-row-next">
                   {nextAction} <span aria-hidden="true">→</span>
                 </strong>
-                {item.lastMessage && <em className="dealer-transaction-row-lastmessage">{item.lastMessage}</em>}
               </button>
             );
           })}
