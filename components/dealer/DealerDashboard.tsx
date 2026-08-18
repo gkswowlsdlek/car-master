@@ -116,15 +116,13 @@ export function DealerDashboard({
   onOpenTransaction: (id: string) => void;
   onNewRequest: () => void;
   onFindShop: () => void;
-  onSearchLocation: (area: string, workType: string) => void;
+  onSearchLocation: (area: string) => void;
   onShopSearchRequests?: () => void;
 }) {
   const [area, setArea] = useState("");
-  const [workType, setWorkType] = useState("썬팅");
   const activeDeals = deals.filter((deal) => ACTIVE_STAGES.includes(deal.status.stage));
   const recentDeals = [...activeDeals].sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt)).slice(0, 5);
-  const quickWorkTypes = ["썬팅", "블랙박스", "PPF", "유리막", "기타"];
-  const submitSearch = () => (area.trim() ? onSearchLocation(area.trim(), workType) : onFindShop());
+  const submitSearch = () => (area.trim() ? onSearchLocation(area.trim()) : onFindShop());
   const usePrototypeJobs = DESIGN_PROTOTYPE_ONLY && deals.length === 0;
 
   return (
@@ -164,20 +162,6 @@ export function DealerDashboard({
           <button className="primary ws-search-cta" onClick={submitSearch}>
             <Search size={17} /> 시공점 찾기
           </button>
-        </div>
-        <div className="reference-quick-work" aria-label="자주 찾는 작업">
-          {quickWorkTypes.map((type) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => {
-                setWorkType(type);
-                onSearchLocation(area.trim(), type);
-              }}
-            >
-              {type}
-            </button>
-          ))}
         </div>
       </section>
       <section className="reference-module-grid">

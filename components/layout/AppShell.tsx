@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   Bell,
   Building2,
+  ChevronRight,
   Gauge,
   HelpCircle,
   LogOut,
@@ -13,6 +14,7 @@ import {
   Menu,
   MessageCircle,
   MoreHorizontal,
+  MoreVertical,
   Plus,
   Settings2,
   UserRound,
@@ -30,26 +32,32 @@ import type { DemoAccount, Role, Screen } from "../../types/dealer";
 // quick-action button), never a sidebar/bottom-nav item. 마이페이지/권장 시공
 // 패키지 are real, unremoved routes — kept at the tail so they still surface
 // in the sidebar and in mobile's "더보기" sheet.
-const navigation: Record<Role, { screen?: Screen; href?: string; label: string; icon: LucideIcon }[]> = {
+// group splits the desktop rail into "업무"(the daily flow) and "지원"(help and
+// account). It is desktop-sidebar presentation only — the mobile bottom nav and
+// its 더보기 sheet still read this array in order, so MOBILE_PRIMARY_COUNT and
+// the pinned-item logic below are unaffected.
+type NavItem = { screen?: Screen; href?: string; label: string; icon: LucideIcon; group: "work" | "support" };
+
+const navigation: Record<Role, NavItem[]> = {
   dealer: [
-    { screen: "dealerDashboard", label: "대시보드", icon: Gauge },
-    { screen: "dealerMap", label: "시공점 찾기", icon: MapPin },
-    { screen: "deals", label: "거래 관리", icon: Building2 },
-    { screen: "messages", label: "메시지", icon: MessageCircle },
-    { screen: "dealerHelp", label: "고객센터", icon: HelpCircle },
-    { screen: "dealerProfile", label: "마이페이지", icon: UserRound },
+    { screen: "dealerDashboard", label: "대시보드", icon: Gauge, group: "work" },
+    { screen: "dealerMap", label: "시공점 찾기", icon: MapPin, group: "work" },
+    { screen: "deals", label: "거래 관리", icon: Building2, group: "work" },
+    { screen: "messages", label: "메시지", icon: MessageCircle, group: "work" },
+    { screen: "dealerHelp", label: "고객센터", icon: HelpCircle, group: "support" },
+    { screen: "dealerProfile", label: "마이페이지", icon: UserRound, group: "support" },
   ],
   shop: [
-    { screen: "shopDashboard", label: "홈", icon: Gauge },
-    { screen: "shopRequests", label: "거래방", icon: Building2 },
-    { screen: "messages", label: "메시지", icon: MessageCircle },
-    { screen: "dealerProfile", label: "시공점 관리", icon: Settings2 },
-    { href: "/help/shop", label: "고객센터", icon: HelpCircle },
+    { screen: "shopDashboard", label: "홈", icon: Gauge, group: "work" },
+    { screen: "shopRequests", label: "거래방", icon: Building2, group: "work" },
+    { screen: "messages", label: "메시지", icon: MessageCircle, group: "work" },
+    { screen: "dealerProfile", label: "시공점 관리", icon: Settings2, group: "support" },
+    { href: "/help/shop", label: "고객센터", icon: HelpCircle, group: "support" },
   ],
   admin: [
-    { screen: "ops", label: "운영 현황", icon: UsersRound },
-    { screen: "adminShops", label: "시공점 관리", icon: Building2 },
-    { screen: "adminAccount", label: "계정", icon: UserRound },
+    { screen: "ops", label: "운영 현황", icon: UsersRound, group: "work" },
+    { screen: "adminShops", label: "시공점 관리", icon: Building2, group: "work" },
+    { screen: "adminAccount", label: "계정", icon: UserRound, group: "support" },
   ],
 };
 
@@ -112,10 +120,16 @@ export function AppShell({
   children: ReactNode;
 }) {
   const [moreOpen, setMoreOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const roleLabel = role === "dealer" ? "딜러" : role === "shop" ? "시공점" : "관리자";
   const items = navigation[role];
-  const primaryItems = items;
-  const secondaryItems: typeof items = [];
+  const workItems = items.filter((item) => item.group === "work");
+  const supportItems = items.filter((item) => item.group === "support");
+  // 계정 메뉴에는 지금 실제로 존재하는 화면만 넣는다 — 역할별 프로필/계정 화면
+  // 하나와 로그아웃이 전부다. 없는 설정 화면을 항목으로 만들지 않는다.
+  const accountScreenItem = items.find(
+    (item) => item.screen === "dealerProfile" || item.screen === "adminAccount",
+  );
   let overflow = items.length > MOBILE_PRIMARY_COUNT ? items.slice(MOBILE_PRIMARY_COUNT) : [];
   let primary = overflow.length > 0 ? items.slice(0, MOBILE_PRIMARY_COUNT) : items;
   // "메시지"는 사이드바 순서와 무관하게 모바일 하단 네비에 항상 남아야 하므로,
@@ -155,59 +169,52 @@ export function AppShell({
           <img src="/carmaster-logo-transparent.png" alt="Car-Master" />
           <small>{roleLabel} 워크스페이스</small>
         </button>
-        <div className="sidebar-section-label">업무 메뉴</div>
-        <nav className="sidebar-primary-nav">
-          {primaryItems.map((item) => (
-            <button
-              key={item.href ?? item.screen}
-              className={item.screen ? (isActive(screen, item.screen) ? "active" : "") : ""}
-              onClick={() => go(item)}
-            >
-              <i aria-hidden="true">
-                <item.icon size={22} strokeWidth={2} />
-              </i>
-              <span>{item.label}</span>
-              {item.screen === "messages" && unreadMessageCount > 0 && (
-                <span className="nav-unread-badge">{unreadMessageCount > 99 ? "99+" : unreadMessageCount}</span>
-              )}
-            </button>
-          ))}
-        </nav>
-        {secondaryItems.length > 0 && (
-          <>
-            <div className="sidebar-subsection-label">보조 메뉴</div>
-            <nav className="sidebar-secondary-nav">
-              {secondaryItems.map((item) => (
-                <button
-                  key={item.href ?? item.screen}
-                  className={item.screen ? (isActive(screen, item.screen) ? "active" : "") : ""}
-                  onClick={() => go(item)}
-                >
-                  <i aria-hidden="true">
-                    <item.icon size={17} strokeWidth={2} />
-                  </i>
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
-          </>
+        {(
+          [
+            ["업무", workItems],
+            ["지원", supportItems],
+          ] as const
+        ).map(
+          ([label, groupItems]) =>
+            groupItems.length > 0 && (
+              <div className="sidebar-group" key={label}>
+                <div className="sidebar-group-label">{label}</div>
+                <nav>
+                  {groupItems.map((item) => (
+                    <button
+                      key={item.href ?? item.screen}
+                      className={item.screen ? (isActive(screen, item.screen) ? "active" : "") : ""}
+                      onClick={() => go(item)}
+                    >
+                      <i aria-hidden="true">
+                        <item.icon size={22} strokeWidth={2} />
+                      </i>
+                      <span>{item.label}</span>
+                      {item.screen === "messages" && unreadMessageCount > 0 && (
+                        <span className="nav-unread-badge">
+                          {unreadMessageCount > 99 ? "99+" : unreadMessageCount}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            ),
         )}
         {shopCoverage && (
-          <div className="sidebar-coverage">
-            <p className="sidebar-coverage-count">
-              <b>{shopCoverage.total}</b>
-              <span>곳 연결됨</span>
-            </p>
-            <small className="sidebar-coverage-label">전국 시공점 네트워크</small>
-            <span className="sidebar-coverage-bar" aria-hidden="true">
-              {shopCoverage.regions.map((region) => (
-                <i key={region.label} style={{ flexGrow: region.count }} />
-              ))}
+          <button
+            type="button"
+            className="sidebar-coverage"
+            onClick={() => onNavigate(role === "dealer" ? "dealerMap" : homeScreen)}
+          >
+            <b className="sidebar-coverage-title">시공점 네트워크</b>
+            <span className="sidebar-coverage-count">
+              전국 등록 <b>{shopCoverage.total}</b>곳
             </span>
-            <small className="sidebar-coverage-legend">
-              {shopCoverage.regions.map((region) => `${region.label} ${region.count}`).join(" · ")}
-            </small>
-          </div>
+            <span className="sidebar-coverage-action">
+              지역 확인 <ChevronRight size={14} aria-hidden="true" />
+            </span>
+          </button>
         )}
         <div className="sidebar-profile">
           <span>{account.name.slice(0, 1)}</span>
@@ -215,9 +222,48 @@ export function AppShell({
             <b>{account.name}</b>
             <small>{company ?? `${roleLabel} 계정`}</small>
           </div>
-          <button onClick={onLogout} aria-label="로그아웃">
-            <LogOut size={16} />
+          <button
+            className="sidebar-account-toggle"
+            onClick={() => setAccountMenuOpen((open) => !open)}
+            aria-label="계정 메뉴"
+            aria-expanded={accountMenuOpen}
+          >
+            <MoreVertical size={16} />
           </button>
+          {accountMenuOpen && (
+            <>
+              <button
+                type="button"
+                className="sidebar-account-backdrop"
+                aria-label="계정 메뉴 닫기"
+                onClick={() => setAccountMenuOpen(false)}
+              />
+              <div className="sidebar-account-menu" role="menu">
+                {accountScreenItem?.screen && (
+                  <button
+                    role="menuitem"
+                    onClick={() => {
+                      setAccountMenuOpen(false);
+                      onNavigate(accountScreenItem.screen!);
+                    }}
+                  >
+                    <accountScreenItem.icon size={15} aria-hidden="true" />
+                    {accountScreenItem.label}
+                  </button>
+                )}
+                <button
+                  role="menuitem"
+                  onClick={() => {
+                    setAccountMenuOpen(false);
+                    onLogout();
+                  }}
+                >
+                  <LogOut size={15} aria-hidden="true" />
+                  로그아웃
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </aside>
       <main className="app-main">

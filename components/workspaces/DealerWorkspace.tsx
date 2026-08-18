@@ -17,7 +17,7 @@ import { searchNearbyInstallers } from "../../services/installer-search";
 import { translateTransactionError } from "../../services/transaction-errors";
 import { searchLocation } from "../../services/location-search";
 import { notificationService } from "../../services/notifications/notification-service";
-import type { DemoAccount, RequestType, Screen, ServiceRequest } from "../../types/dealer";
+import type { DemoAccount, Screen, ServiceRequest } from "../../types/dealer";
 import type { InstallerListing } from "../../types/installer";
 import type { SearchLocation } from "../../types/location";
 import type {
@@ -235,8 +235,7 @@ export function DealerWorkspace({
     if (nearest) setSelectedShopId(nearest.shop.id);
   };
 
-  const searchHomeLocation = async (value: string, workType: string) => {
-    setRequest((current) => ({ ...current, requestType: workType as RequestType }));
+  const searchHomeLocation = async (value: string) => {
     await searchArea(value);
     onNavigate("dealerMap");
   };
