@@ -1,11 +1,36 @@
 "use client";
 import { useMemo, useState } from "react";
-import { PhoneOff } from "lucide-react";
+import { MessageSquare, PhoneOff } from "lucide-react";
 import { isTerminalOutcome, stageLogLabel, stageOrder } from "../../services/transaction-state-service";
+import { vehicleIdentityLabel, warrantyStatus, WARRANTY_STATUS_LABEL } from "../../services/transaction-state-service";
 import type { ChatRoom, Transaction, TransactionStage } from "../../types/transactions";
 
 const won = (value?: number) => (value == null ? undefined : `${value.toLocaleString("ko-KR")}원`);
 const CONTACT_STATUS_LABEL: Record<string, string> = { contacted: "연결됨", unreachable: "연락 안 됨" };
+const scheduleDate = (value?: string) =>
+  value ? new Date(value).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : "미정";
+
+/** Unified search across every field an Admin might remember when
+ * mediating a dispute — transaction id, customer, dealer (+ company), shop,
+ * vehicle maker/model, plate, VIN. All of these already live on Transaction
+ * (warranty snapshot fields added for warranty-issuance) — no new table. */
+function searchHaystack(item: Transaction): string {
+  return [
+    item.id,
+    item.warranty.customerName,
+    item.warranty.customerPhone,
+    item.dealerName,
+    item.dealerCompanyName,
+    item.installerName,
+    item.vehicle.maker,
+    item.vehicle.model,
+    item.warranty.vehicleNumber,
+    item.warranty.vin,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
 
 export type TransactionGroup = "전체" | "진행중" | "완료" | "종료";
 const GROUPS: TransactionGroup[] = ["전체", "진행중", "완료", "종료"];
@@ -35,17 +60,14 @@ export function AdminTransactionPanel({
   const [query, setQuery] = useState("");
   const [stage, setStage] = useState<TransactionStage | "전체">("전체");
   const [selectedId, setSelectedId] = useState("");
+  const [showRoom, setShowRoom] = useState(false);
   const visible = useMemo(
     () =>
       transactions
         .filter((item) => group === "전체" || groupOf(item.status.stage) === group)
         .filter((item) => stage === "전체" || item.status.stage === stage)
         .filter((item) => contactFilter === "전체" || item.contactStatus === "unreachable")
-        .filter((item) =>
-          `${item.id} ${item.vehicle.model} ${item.dealerId} ${item.installerName} ${item.status.stage}`
-            .toLowerCase()
-            .includes(query.toLowerCase()),
-        ),
+        .filter((item) => searchHaystack(item).includes(query.trim().toLowerCase())),
     [transactions, query, stage, group, contactFilter],
   );
   const selected = visible.find((item) => item.id === selectedId) ?? visible[0];
@@ -62,7 +84,8 @@ export function AdminTransactionPanel({
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="거래번호, 차량, 사용자 검색"
+            placeholder="거래번호, 고객명, 연락처, 딜러, 시공점, 차량, 차량번호, 차대번호 검색"
+            aria-label="통합 거래 검색"
           />
           <select value={stage} onChange={(event) => setStage(event.target.value as TransactionStage | "전체")}>
             <option value="전체">전체 상태</option>
@@ -93,27 +116,47 @@ export function AdminTransactionPanel({
       ) : (
         <div className="admin-transaction-layout">
           <div className="admin-transaction-list">
-            {visible.map((item) => (
-              <button
-                className={item.id === selected?.id ? "selected" : ""}
-                key={item.id}
-                onClick={() => setSelectedId(item.id)}
-              >
-                <span>
-                  <b>
-                    {item.vehicle.maker} {item.vehicle.model}
-                  </b>
-                  <small>{item.id}</small>
-                </span>
-                <span>
-                  담당 딜러<small>{item.dealerId}</small>
-                </span>
-                <span>
-                  시공점<small>{item.installerName}</small>
-                </span>
-                <em className={`status-chip status-${item.status.stage}`}>{item.status.stage}</em>
-              </button>
-            ))}
+            {visible.map((item) => {
+              const vehicleId = vehicleIdentityLabel(item.warranty);
+              const itemWarranty = warrantyStatus(item.warranty);
+              return (
+                <button
+                  className={item.id === selected?.id ? "selected" : ""}
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedId(item.id);
+                    setShowRoom(false);
+                  }}
+                >
+                  <span>
+                    <b>
+                      {item.vehicle.maker} {item.vehicle.model}
+                    </b>
+                    <small>
+                      {item.id}
+                      {vehicleId ? ` · ${vehicleId}` : ""}
+                    </small>
+                  </span>
+                  <span>
+                    담당 딜러
+                    <small>{[item.dealerName, item.dealerCompanyName].filter(Boolean).join(" · ") || "미확인"}</small>
+                  </span>
+                  <span>
+                    시공점<small>{item.installerName}</small>
+                  </span>
+                  <span>
+                    시공 항목<small>{item.service.product ?? item.service.workDescription}</small>
+                  </span>
+                  <span>
+                    일정<small>{scheduleDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt)}</small>
+                  </span>
+                  <em className={`status-chip status-${item.status.stage}`}>{item.status.stage}</em>
+                  <small className={`warranty-badge warranty-badge-${itemWarranty.toLowerCase()}`}>
+                    {WARRANTY_STATUS_LABEL[itemWarranty]}
+                  </small>
+                </button>
+              );
+            })}
           </div>
           {selected && (
             <aside className="admin-transaction-detail">
@@ -127,15 +170,49 @@ export function AdminTransactionPanel({
               <dl>
                 <div>
                   <dt>담당 딜러</dt>
-                  <dd>{selected.dealerId}</dd>
+                  <dd>{selected.dealerName || "미확인"}</dd>
+                </div>
+                <div>
+                  <dt>딜러 소속</dt>
+                  <dd>{selected.dealerCompanyName || "미확인"}</dd>
                 </div>
                 <div>
                   <dt>시공점</dt>
                   <dd>{selected.installerName}</dd>
                 </div>
                 <div>
+                  <dt>차량번호</dt>
+                  <dd>{selected.warranty.vehicleNumber || "미등록"}</dd>
+                </div>
+                <div>
+                  <dt>차대번호</dt>
+                  <dd>{selected.warranty.vin || "미등록"}</dd>
+                </div>
+                <div>
+                  <dt>고객명</dt>
+                  <dd>{selected.warranty.customerName || "미등록"}</dd>
+                </div>
+                <div>
+                  <dt>고객 연락처</dt>
+                  <dd>{selected.warranty.customerPhone || "미등록"}</dd>
+                </div>
+                <div>
                   <dt>작업</dt>
                   <dd>{selected.service.workDescription}</dd>
+                </div>
+                <div>
+                  <dt>일정</dt>
+                  <dd>{scheduleDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt)}</dd>
+                </div>
+                <div>
+                  <dt>보증서 상태</dt>
+                  <dd>
+                    <small
+                      className={`warranty-badge warranty-badge-${warrantyStatus(selected.warranty).toLowerCase()}`}
+                    >
+                      {WARRANTY_STATUS_LABEL[warrantyStatus(selected.warranty)]}
+                    </small>
+                  </dd>
                 </div>
                 <div>
                   <dt>결제</dt>
@@ -182,15 +259,23 @@ export function AdminTransactionPanel({
                   ))
                 )}
               </div>
-              <h4>최근 채팅</h4>
-              <div className="admin-chat-preview">
-                {room?.messages.slice(-4).map((message) => (
-                  <p key={message.id}>
-                    <b>{message.senderRole}</b>
-                    <span>{message.text}</span>
-                  </p>
-                )) ?? <small>채팅 기록이 없습니다.</small>}
-              </div>
+              <button type="button" className="admin-open-room-button" onClick={() => setShowRoom((value) => !value)}>
+                <MessageSquare size={16} aria-hidden="true" /> {showRoom ? "거래방 접기" : "거래방 보기"}
+              </button>
+              {showRoom && (
+                <div className="admin-chat-preview admin-chat-full">
+                  {room && room.messages.length > 0 ? (
+                    room.messages.map((message) => (
+                      <p key={message.id}>
+                        <b>{message.senderRole}</b>
+                        <span>{message.text}</span>
+                      </p>
+                    ))
+                  ) : (
+                    <small>채팅 기록이 없습니다.</small>
+                  )}
+                </div>
+              )}
             </aside>
           )}
         </div>

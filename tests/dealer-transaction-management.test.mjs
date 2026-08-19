@@ -57,8 +57,14 @@ test("최근 활동 sort uses transactions.updated_at (server-touched on every s
   assert.match(screenSource, /set_transaction_room_updated_at trigger/);
 });
 
-test("row click hands off directly to the existing Room via onOpenTransaction — no inline detail pane, no stage/price/outcome controls duplicated in the list", () => {
-  assert.match(screenSource, /onClick=\{\(\) => onOpenTransaction\(item\.id\)\}/);
+// 거래관리 재구조화(2026-08) — 목록 행 클릭은 이제 같은 화면 안의 읽기 전용
+// 상세 요약을 선택할 뿐이고, 실제 Room으로의 이동은 상세 하단 "거래방으로
+// 이동" CTA가 담당한다(onOpenTransaction 호출은 그 버튼 하나뿐). 상세 요약은
+// 여전히 순수 표시 전용 — 단계/가격/보증서 발급 같은 액션 컨트롤은 그대로
+// TransactionChatWorkspace(Room)에만 있다.
+test("row click selects a transaction for the inline read-only detail summary — actually leaving for the Room only happens via the detail's 거래방으로 이동 CTA (onOpenTransaction), and the detail itself has no stage/price/outcome controls", () => {
+  assert.match(screenSource, /onClick=\{\(\) => setSelectedId\(item\.id\)\}/);
+  assert.match(screenSource, /onClick=\{\(\) => onOpenTransaction\(selected\.id\)\}/);
   assert.doesNotMatch(screenSource, /onStageChange|onFinalPriceChange|onEndOutcome|onPaymentChange/);
   assert.doesNotMatch(screenSource, /<TransactionChatWorkspace/);
 });

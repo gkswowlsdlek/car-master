@@ -157,6 +157,43 @@ export const WARRANTY_STATUS_LABEL: Record<WarrantyStatus, string> = {
   ISSUED: "발급 완료",
 };
 
+/** Small badge className suffix per warranty status — reuses existing
+ * design-system color tokens (warning/primary/success), no new colors. */
+export const WARRANTY_STATUS_BADGE_CLASS: Record<WarrantyStatus, string> = {
+  NOT_READY: "warranty-badge-pending",
+  READY: "warranty-badge-ready",
+  ISSUED: "warranty-badge-issued",
+};
+
+/**
+ * Simplified 6-value operational-status vocabulary shared by Dealer/Shop/
+ * Admin transaction-management list & detail views (확인 필요/일정 확정/
+ * 작업 중/완료/취소/시공불가) — collapses the 7 raw DB stage keys down to
+ * what those screens need to scan at a glance (작업완료 and 출고 both read
+ * as "완료"; the existing status-* CSS classes still key off the RAW stage
+ * so 완료-작업중 vs 완료-출고 stay visually distinct even with the same text).
+ * This is deliberately separate from dealerStageLabel/DEALER_STAGE_LABELS,
+ * which drive the dealer-only 4-step progress rail inside the Room.
+ */
+export const OPERATIONAL_STATUS_LABEL: Record<TransactionStage, string> = {
+  견적: "확인 필요",
+  시공예약: "일정 확정",
+  입고: "작업 중",
+  작업완료: "완료",
+  출고: "완료",
+  취소: "취소",
+  시공불가: "시공불가",
+};
+
+/** Plate first; falls back to the VIN(차대번호)'s last 6 characters — enough
+ * to tell duplicate same-model vehicles apart in a list row without
+ * printing the full VIN. Returns undefined when neither is registered yet. */
+export function vehicleIdentityLabel(warranty: WarrantyInfo): string | undefined {
+  if (warranty.vehicleNumber) return warranty.vehicleNumber;
+  if (warranty.vin) return `차대번호 ${warranty.vin.slice(-6)}`;
+  return undefined;
+}
+
 export function transitionPayment(
   transaction: Transaction,
   next: PaymentStatus,

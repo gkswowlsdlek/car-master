@@ -8,7 +8,7 @@ test("transaction management is operational and does not duplicate Messenger", a
   const source = await read("components/transactions/TransactionManagementScreen.tsx");
   assert.doesNotMatch(source, /TransactionChatWorkspace/);
   assert.match(source, /거래 진행 단계/);
-  assert.match(source, /메시지 열기/);
+  assert.match(source, /거래방으로 이동/);
   assert.match(source, /STAGE_ACTION_LABEL/);
   assert.match(source, /transaction-detail-/);
 });

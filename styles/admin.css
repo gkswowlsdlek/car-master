@@ -130,8 +130,10 @@
   margin-top: 16px;
 }
 .admin-transaction-list button {
-  grid-template-columns: 1.2fr 1fr auto !important;
+  display: flex !important;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 6px 16px;
   border-radius: var(--radius-sm);
   padding: 13px !important;
 }
@@ -175,9 +177,26 @@
   font-size: var(--font-sm);
   font-weight: 650;
 }
+.admin-open-room-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-hover);
+  padding: 8px 14px;
+  font-size: var(--font-sm);
+  font-weight: 700;
+}
 .admin-chat-preview {
   display: grid;
   gap: 7px;
+}
+.admin-chat-full {
+  max-height: 320px;
+  overflow-y: auto;
 }
 .admin-chat-preview p {
   display: grid;

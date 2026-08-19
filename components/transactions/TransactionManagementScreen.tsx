@@ -17,8 +17,10 @@ import {
   DEALER_STAGE_LABELS,
   isTerminalOutcome,
   nextForwardStage,
+  OPERATIONAL_STATUS_LABEL,
   stageOrder,
   STAGE_ACTION_LABEL,
+  vehicleIdentityLabel,
   warrantyStatus,
   WARRANTY_STATUS_LABEL,
 } from "../../services/transaction-state-service";
@@ -40,7 +42,6 @@ export function TransactionManagementScreen({
   onUnhide,
   onFinalPriceChange,
   onStageChange,
-  onPaymentChange,
   onEndOutcome,
   onFindAnotherShop,
   onNewRequest,
@@ -72,7 +73,6 @@ export function TransactionManagementScreen({
   onLoadContact?: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
   onOpenMessages: (transactionId: string) => void;
 }) {
-  const [tab, setTab] = useState<"거래내역" | "결제 및 정산">("거래내역");
   const [query, setQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<TransactionStage | "전체" | "진행중">(initialStageFilter ?? "전체");
   const [warrantyFilter, setWarrantyFilter] = useState<WarrantyStatus | "전체">("전체");
@@ -173,14 +173,6 @@ export function TransactionManagementScreen({
           <b>{transactions.filter((item) => item.status.stage === "작업완료").length}</b>
         </button>
       </div>
-      <div className="transaction-tabs">
-        <button className={tab === "거래내역" ? "active" : ""} onClick={() => setTab("거래내역")}>
-          거래내역
-        </button>
-        <button className={tab === "결제 및 정산" ? "active" : ""} onClick={() => setTab("결제 및 정산")}>
-          결제 및 정산
-        </button>
-      </div>
       <div className="transaction-filters">
         <label className="search-field">
           <Search size={18} aria-hidden="true" />
@@ -232,56 +224,43 @@ export function TransactionManagementScreen({
             </button>
           )}
         </section>
-      ) : tab === "결제 및 정산" ? (
-        <div className="transaction-payment-table">
-          {visible.map((item) => (
-            <button
-              data-testid={`transaction-card-${item.id}`}
-              aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`}
-              key={item.id}
-              onClick={() => onSelect(item.id)}
-            >
-              <b>{item.id}</b>
-              <span>{won(item.pricing.finalPrice)}</span>
-              <span>{item.pricing.paymentStatus}</span>
-              <span>{item.schedule.completedAt ?? "시공일 미정"}</span>
-            </button>
-          ))}
-        </div>
       ) : (
         <div className="transaction-room-layout transaction-workspace-layout">
           <aside className="transaction-list">
-            {visible.map((item) => (
-              <button
-                data-testid={`transaction-card-${item.id}`}
-                aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`}
-                className={item.id === selected?.id ? "selected" : ""}
-                key={item.id}
-                onClick={() => onSelect(item.id)}
-              >
-                <b>{item.id}</b>
-                <span>
-                  {item.vehicle.maker} {item.vehicle.model}
-                </span>
-                <small>
-                  {role === "shop" ? item.dealerName || "Dealer 요청" : item.installerName} ·{" "}
-                  {role === "dealer" ? dealerStageLabel(item.status.stage) : item.status.stage}
-                </small>
-                <small className="transaction-list-schedule">
-                  입고 {scheduleDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt)}
-                  {item.schedule.desiredReleaseAt ? ` · 출고 ${scheduleDate(item.schedule.desiredReleaseAt)}` : ""}
-                </small>
-                {/* 보증서 발급 대기 필터가 켜져 있을 때만 — READY 상태 행에만
-                고객명/연락처가 있으므로 자연히 그 필터에서만 보인다. */}
-                {role === "shop" && warrantyFilter === "READY" && warrantyStatus(item.warranty) === "READY" && (
+            {visible.map((item) => {
+              const vehicleId = vehicleIdentityLabel(item.warranty);
+              const itemWarranty = warrantyStatus(item.warranty);
+              return (
+                <button
+                  data-testid={`transaction-card-${item.id}`}
+                  aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`}
+                  className={item.id === selected?.id ? "selected" : ""}
+                  key={item.id}
+                  onClick={() => onSelect(item.id)}
+                >
+                  <b>
+                    {item.vehicle.maker} {item.vehicle.model}
+                  </b>
                   <small>
-                    {item.dealerCompanyName ? `${item.dealerCompanyName} · ` : ""}
-                    {item.warranty.vehicleNumber} · {item.warranty.customerName} · {item.warranty.customerPhone}
+                    {role === "shop"
+                      ? [item.dealerName || "Dealer 요청", item.dealerCompanyName].filter(Boolean).join(" · ")
+                      : item.installerName}
                   </small>
-                )}
-                <em>{item.lastMessage}</em>
-              </button>
-            ))}
+                  <small className="transaction-list-schedule">
+                    입고 {scheduleDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt)}
+                    {item.schedule.desiredReleaseAt ? ` · 출고 ${scheduleDate(item.schedule.desiredReleaseAt)}` : ""}
+                    {vehicleId ? ` · ${vehicleId}` : ""}
+                  </small>
+                  <em className={`status-chip status-${item.status.stage}`}>
+                    {role === "dealer" ? dealerStageLabel(item.status.stage) : OPERATIONAL_STATUS_LABEL[item.status.stage]}
+                  </em>
+                  <small className={`warranty-badge warranty-badge-${itemWarranty.toLowerCase()}`}>
+                    {WARRANTY_STATUS_LABEL[itemWarranty]}
+                  </small>
+                  <em>{item.lastMessage}</em>
+                </button>
+              );
+            })}
           </aside>
           {selected && (
             <article className="transaction-operations-detail" data-testid={`transaction-detail-${selected.id}`}>
@@ -292,13 +271,16 @@ export function TransactionManagementScreen({
                     {selected.vehicle.maker} {selected.vehicle.model}
                   </h2>
                   <p>
-                    {selected.installerName} · {selected.service.product ?? selected.service.workDescription}
+                    {role === "shop"
+                      ? [selected.dealerName || "담당 딜러", selected.dealerCompanyName].filter(Boolean).join(" · ")
+                      : selected.installerName}{" "}
+                    · {selected.service.product ?? selected.service.workDescription}
                   </p>
                 </div>
                 <div className="transaction-detail-status">
                   <span>현재 상태</span>
                   <em className={`status-chip status-${selected.status.stage}`}>
-                    {role === "dealer" ? dealerStageLabel(selected.status.stage) : selected.status.stage}
+                    {role === "dealer" ? dealerStageLabel(selected.status.stage) : OPERATIONAL_STATUS_LABEL[selected.status.stage]}
                   </em>
                 </div>
               </header>
@@ -346,23 +328,49 @@ export function TransactionManagementScreen({
               <dl className="transaction-core-info">
                 <div>
                   <dt>시공 품목</dt>
-                  <dd>{selected.service.workDescription}</dd>
+                  <dd>{selected.service.product ? `${selected.service.product} · ${selected.service.workDescription}` : selected.service.workDescription}</dd>
                 </div>
                 <div>
-                  <dt>다음 일정</dt>
+                  <dt>입고 일정</dt>
                   <dd>{scheduleDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt)}</dd>
+                </div>
+                <div>
+                  <dt>출고 일정</dt>
+                  <dd>{scheduleDate(selected.schedule.desiredReleaseAt)}</dd>
+                </div>
+                <div>
+                  <dt>차량번호</dt>
+                  <dd>{selected.warranty.vehicleNumber || "미등록"}</dd>
+                </div>
+                <div>
+                  <dt>차대번호</dt>
+                  <dd>{selected.warranty.vin || "미등록"}</dd>
+                </div>
+                <div>
+                  <dt>고객명</dt>
+                  <dd>{selected.warranty.customerName || "미등록"}</dd>
+                </div>
+                <div>
+                  <dt>고객 연락처</dt>
+                  <dd>{selected.warranty.customerPhone || "미등록"}</dd>
                 </div>
                 <div>
                   <dt>최종 시공금액</dt>
                   <dd>{won(selected.pricing.finalPrice)}</dd>
                 </div>
-                <div>
-                  <dt>결제 상태</dt>
-                  <dd>{selected.pricing.paymentStatus}</dd>
-                </div>
+                {/* Free Beta에서는 payment/settlement UI 비활성. 향후 결제 모델
+                    확정 후 재검토 — 결제 상태 표시는 여기서 숨기고, DB
+                    컬럼(pricing.paymentStatus)/RPC(onPaymentChange, transitionPayment)는
+                    그대로 둔다. */}
                 <div>
                   <dt>보증서 상태</dt>
-                  <dd>{WARRANTY_STATUS_LABEL[warrantyStatus(selected.warranty)]}</dd>
+                  <dd>
+                    <small
+                      className={`warranty-badge warranty-badge-${warrantyStatus(selected.warranty).toLowerCase()}`}
+                    >
+                      {WARRANTY_STATUS_LABEL[warrantyStatus(selected.warranty)]}
+                    </small>
+                  </dd>
                 </div>
               </dl>
               {selectedTerminalOutcome && (
@@ -391,19 +399,9 @@ export function TransactionManagementScreen({
                   </div>
                 </div>
               )}
-              {role === "dealer" &&
-                selected.pricing.finalPrice != null &&
-                selected.pricing.paymentStatus === "미결제" && (
-                  <div className="transaction-price-editor">
-                    <span>시공점이 확정한 금액이에요</span>
-                    <button className="primary" onClick={() => onPaymentChange(selected, "결제대기")}>
-                      금액 확인
-                    </button>
-                  </div>
-                )}
               <footer>
-                <button className="secondary" onClick={() => onOpenMessages(selected.id)}>
-                  <MessageCircle size={17} /> 메시지 열기
+                <button className="primary" onClick={() => onOpenMessages(selected.id)}>
+                  <MessageCircle size={17} /> 거래방으로 이동
                 </button>
                 {(role === "dealer" ? selected.visibility.hiddenByDealer : selected.visibility.hiddenByInstaller) ? (
                   <button className="secondary" onClick={() => onUnhide(selected.id, role)}>

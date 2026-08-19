@@ -330,7 +330,12 @@ test("ShopDashboard 카드는 dealerLabel 하드코딩 대신 실제 dealerName�
   );
 });
 
-test("TransactionManagementScreen(시공점)은 보증서 상태 필터(전체/발급대기/발급완료)를 제공하고, 발급대기 필터에서만 고객명/연락처가 포함된 확장 행을 보여준다", () => {
+// 거래관리 재구조화(2026-08) — "발급대기 필터에서만 고객명/연락처가 보이는
+// 목록 행" 확장은 제거했다: PII(고객명/연락처)는 목록에서 과도하게 노출하지
+// 않고 상세 영역에서만 보여준다는 정책으로 바뀌면서, 목록 행은 필터와 무관하게
+// 항상 차량번호/VIN + 보증서 배지만 보여주고, 고객명/연락처는 상세 dl에서만
+// 확인한다(READY/NOT_READY/ISSUED 어떤 필터든 동일).
+test("TransactionManagementScreen(시공점)은 보증서 상태 필터(전체/발급대기/발급완료)를 제공하고, 목록 행은 필터와 무관하게 차량번호/VIN·보증서 배지만 보여주며 고객명/연락처는 상세에서만 노출한다", () => {
   assert.match(managementScreenSource, /const \[warrantyFilter, setWarrantyFilter\] = useState<WarrantyStatus \| "전체">\("전체"\);/);
   assert.match(
     managementScreenSource,
@@ -338,11 +343,13 @@ test("TransactionManagementScreen(시공점)은 보증서 상태 필터(전체/�
   );
   assert.match(managementScreenSource, /<option value="READY">발급 대기<\/option>/);
   assert.match(managementScreenSource, /<option value="ISSUED">발급 완료<\/option>/);
-  assert.match(
-    managementScreenSource,
-    /role === "shop" && warrantyFilter === "READY" && warrantyStatus\(item\.warranty\) === "READY" && \(/,
-  );
+  assert.match(managementScreenSource, /const vehicleId = vehicleIdentityLabel\(item\.warranty\);/);
+  assert.match(managementScreenSource, /warranty-badge warranty-badge-\$\{itemWarranty\.toLowerCase\(\)\}/);
+  assert.doesNotMatch(managementScreenSource, /item\.warranty\.customerName/);
+  assert.doesNotMatch(managementScreenSource, /item\.warranty\.customerPhone/);
   assert.match(managementScreenSource, /<dt>보증서 상태<\/dt>/);
+  assert.match(managementScreenSource, /<dt>고객명<\/dt>/);
+  assert.match(managementScreenSource, /<dt>고객 연락처<\/dt>/);
 });
 
 test("regression: 기존 컬럼 매핑(installer_name, shop_id, contact_status)과 기존 RPC 호출부는 이번 변경으로 자리만 옮겨졌을 뿐 값 자체는 그대로다", () => {
