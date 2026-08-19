@@ -48,6 +48,7 @@ import type {
   Transaction,
   TransactionChatMessage,
   TransactionStage,
+  WarrantyInfo,
 } from "../../types/transactions";
 import type { InstallerListing } from "../../types/installer";
 import { EndTransactionOutcomeModal } from "./EndTransactionOutcomeModal";
@@ -550,6 +551,14 @@ export function TransactionChatWorkspace({
     if (!hasName) return "고객명을 입력해 주세요.";
     if (!hasPhone) return "연락처를 입력해 주세요.";
     return "정보가 저장되었습니다.";
+  };
+  // 시공점 뷰의 NOT_READY 안내 — 정보가 아예 없는지, 차량번호만 없는지,
+  // 차량번호는 있는데 이름/연락처가 없는지를 구분해서 문구를 고른다.
+  const shopWarrantyNotReadyMessage = (warranty: WarrantyInfo) => {
+    const hasAny = Boolean(warranty.customerName || warranty.customerPhone || warranty.vehicleNumber || warranty.vin);
+    if (!hasAny) return "딜러가 아직 보증서 발급 정보를 등록하지 않았습니다.";
+    if (!warranty.vehicleNumber) return "차량번호 등록 대기 중입니다.";
+    return "보증서 발급 정보가 아직 완료되지 않았습니다.";
   };
   const saveWarrantyDraft = async () => {
     if (!onSetWarrantyInfo || warrantyPending) return;
@@ -1455,11 +1464,7 @@ export function TransactionChatWorkspace({
                     </div>
                   </dl>
                   {warrantyStatus(transaction.warranty) === "NOT_READY" && (
-                    <p className="warranty-result-message">
-                      {transaction.warranty.customerName || transaction.warranty.customerPhone || transaction.warranty.vin
-                        ? "차량번호 등록 대기 중입니다."
-                        : "딜러가 아직 보증서 발급 정보를 등록하지 않았습니다."}
-                    </p>
+                    <p className="warranty-result-message">{shopWarrantyNotReadyMessage(transaction.warranty)}</p>
                   )}
                   {warrantyStatus(transaction.warranty) === "READY" && onIssueWarranty && (
                     <button

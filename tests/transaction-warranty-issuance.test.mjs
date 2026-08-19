@@ -289,6 +289,17 @@ test("TransactionChatWorkspace 시공점 뷰는 담당딜러/딜러소속/차종
   assert.match(chatWorkspaceSource, /차량번호 등록 대기 중입니다\./);
 });
 
+test("shopWarrantyNotReadyMessage는 차량번호가 있지만 이름/연락처가 없는 경우를 '차량번호 등록 대기'와 구분한다", () => {
+  assert.match(
+    chatWorkspaceSource,
+    /const shopWarrantyNotReadyMessage = \(warranty: WarrantyInfo\) => \{\s*\n\s*const hasAny = Boolean\(warranty\.customerName \|\| warranty\.customerPhone \|\| warranty\.vehicleNumber \|\| warranty\.vin\);\s*\n\s*if \(!hasAny\) return "딜러가 아직 보증서 발급 정보를 등록하지 않았습니다\.";\s*\n\s*if \(!warranty\.vehicleNumber\) return "차량번호 등록 대기 중입니다\.";\s*\n\s*return "보증서 발급 정보가 아직 완료되지 않았습니다\.";\s*\n\s*\};/,
+  );
+  assert.match(
+    chatWorkspaceSource,
+    /\{warrantyStatus\(transaction\.warranty\) === "NOT_READY" && \(\s*\n\s*<p className="warranty-result-message">\{shopWarrantyNotReadyMessage\(transaction\.warranty\)\}<\/p>\s*\n\s*\)\}/,
+  );
+});
+
 test("입고~작업완료(출고 전) 구간에서만, role===dealer이고 READY/ISSUED가 아닐 때만 경고 배너가 뜬다 — 작업 생성 직후/입고 전에는 뜨지 않는다", () => {
   assert.match(
     chatWorkspaceSource,
