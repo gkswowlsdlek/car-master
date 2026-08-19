@@ -821,6 +821,19 @@
   margin: 4px 0 10px;
   font-size: var(--font-body);
 }
+/* 거래관리 리디자인(2026-08) — 목록 행의 상태/보증서 배지가 --font-xs(11px) +
+   전역 line-height:1.2(app/globals.css의 .status-chip 등 :where 규칙) 조합으로
+   너무 작고 답답해 보인다는 피드백. 새 색상/상태 체계를 추가하지 않고, 이미
+   있는 --font-sm(13px) 토큰과 더 넉넉한 line-height/padding으로 Dealer
+   거래관리 목록에서만 배지 크기를 키운다(다른 화면의 배지는 변경하지 않음 —
+   영향 범위를 이 리스트로만 한정). */
+.dealer-transaction-management .transaction-list .status-chip,
+.dealer-transaction-management .transaction-list .warranty-badge,
+.dealer-transaction-management .transaction-list .phone-confirm-flag {
+  padding: 5px 11px;
+  font-size: var(--font-sm);
+  line-height: 1.4;
+}
 /* Phase 6: Dealer 거래관리 완성 (browse-and-find; no inline detail pane — click always hands off to the existing Room) */
 .dealer-deal-groups em {
   margin-left: 6px;
@@ -1328,6 +1341,25 @@
 .transaction-progress-card li.complete::before,
 .transaction-progress-card li.active::before {
   background: var(--color-primary);
+}
+.dealer-next-step {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.dealer-next-step > span {
+  color: var(--color-primary-hover);
+  font-size: var(--font-xs);
+  font-weight: 700;
+}
+.dealer-next-step > b {
+  color: var(--color-ink);
+  font-size: var(--font-md);
 }
 .transaction-core-info {
   display: grid;
