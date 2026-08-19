@@ -317,13 +317,19 @@ test("shopWarrantyNotReadyMessage는 차량번호가 있지만 이름/연락처�
   );
 });
 
-test("입고~작업완료(출고 전) 구간에서만, role===dealer이고 READY/ISSUED가 아닐 때만 경고 배너가 뜬다 — 작업 생성 직후/입고 전에는 뜨지 않는다", () => {
-  assert.match(
+// 메시지 정리(2026-08) — 채팅 본문 위 별도 대형 경고 배너를 제거했다.
+// 보증서 상태/CTA는 오른쪽 "보증서 발급 정보" 카드 하나로 통합되고, 미입력
+// 안내 문구도 stage별로 갈리던 두 문장 대신 하나의 명확한 문구로 단순화됐다
+// (warrantyStatus/RPC/validation 로직 자체는 미변경 — 문구·위치만 정리).
+test("보증서 미입력 경고는 채팅 본문에 별도 배너로 뜨지 않고, 오른쪽 '보증서 발급 정보' 카드 안에서만 '출고 전 입력 필요' + 필요 정보 안내로 표시된다", () => {
+  assert.doesNotMatch(
     chatWorkspaceSource,
-    /role === "dealer" &&\s*\n\s*\(transaction\.status\.stage === "입고" \|\| transaction\.status\.stage === "작업완료"\) &&\s*\n\s*warrantyStatus\(transaction\.warranty\) !== "READY" &&\s*\n\s*warrantyStatus\(transaction\.warranty\) !== "ISSUED"/,
+    /고객명, 연락처, 차량번호가 입력되지 않으면 시공점에서 보증서를 발급할 수 없습니다\./,
   );
-  assert.match(chatWorkspaceSource, /고객명, 연락처, 차량번호가 입력되지 않으면 시공점에서 보증서를 발급할 수 없습니다\./);
-  assert.match(chatWorkspaceSource, /보증서 발급 정보가 필요합니다\. 출고 전 고객명, 연락처, 차량번호를 입력해주세요\./);
+  assert.doesNotMatch(chatWorkspaceSource, /보증서 발급 정보가 필요합니다\. 출고 전 고객명, 연락처, 차량번호를 입력해주세요\./);
+  assert.match(chatWorkspaceSource, /<p className="warranty-not-ready-title">출고 전 입력 필요<\/p>/);
+  assert.match(chatWorkspaceSource, /<p className="warranty-not-ready-detail">고객명, 연락처, 차량번호가 필요합니다\.<\/p>/);
+  assert.match(chatWorkspaceSource, /<h4>보증서 발급 정보<\/h4>/);
 });
 
 test("DealerTransactionManagementScreen 목록 배지는 입고/작업완료 구간에서만 강조 스타일을 쓰고, VIN만 있으면 '차량번호 대기'로 문구가 갈린다", () => {

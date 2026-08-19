@@ -198,14 +198,19 @@ test("TransactionChatWorkspace only lets role === dealer trigger 거래 취소 /
   );
 });
 
-test("최종 시공금액 input is available to both shop and dealer roles, unconditionally on stage, and is presented in its own clearly-labeled block separate from the pre-existing 결제 상태 flow (never conflated with payment/settlement)", () => {
+// 메시지 정리(2026-08) — Free Beta는 결제/정산을 제공하지 않으므로 "결제
+// 상태" 카드는 화면에서 숨겼다(pricing.paymentStatus/onPaymentChange 자체는
+// 그대로 prop 타입에 남아 있음). 최종 시공금액은 결제가 아니라 거래 기록
+// 데이터라 그대로 유지.
+test("최종 시공금액 input is available to both shop and dealer roles, unconditionally on stage, in its own clearly-labeled block — 결제 상태 카드는 Free Beta 범위 밖이라 더 이상 노출되지 않는다", () => {
   assert.match(chatWorkspaceSource, /<h4>최종 시공금액<\/h4>/);
   assert.match(
     chatWorkspaceSource,
     /\{\(role === "shop"\s*\|\|\s*role === "dealer"\)\s*&&\s*(?:\(\s*)?<div>\s*<input\s+value=\{finalPrice\}/,
   );
-  assert.match(chatWorkspaceSource, /<h4>결제 상태<\/h4>/);
+  assert.doesNotMatch(chatWorkspaceSource, /<h4>결제 상태<\/h4>/);
   assert.doesNotMatch(chatWorkspaceSource, /<h4>결제 및 정산<\/h4>/);
+  assert.match(chatWorkspaceSource, /onPaymentChange: \(transaction: Transaction, status: PaymentStatus\) => void;/);
 });
 
 test("advancing to 출고 with no final price nudges (not blocks) the dealer — both '나중에 입력' and '지금 입력' still let the transition proceed or open the price panel, never a hard stop", () => {

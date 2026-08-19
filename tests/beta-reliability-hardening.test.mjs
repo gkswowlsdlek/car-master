@@ -112,15 +112,21 @@ test("useTransactionActions exposes setContactStatus, using the real RPC when Su
   );
 });
 
-test("TransactionChatWorkspace shows three distinct states for the phone-confirm area — unset (record-result buttons), contacted (quiet confirmation, no more nagging), unreachable (retry + find-another-shop, reusing the existing onFindAnotherShop prop)", () => {
+// 메시지 정리(2026-08) — 전화 확인 안내는 더 이상 별도의 큰 배너가 아니라
+// 거래방 생성 시스템 메시지 바로 아래에 붙는 timeline의 "contact" 항목이다.
+// 3가지 상태(unset/contacted/unreachable)와 onFindAnotherShop 재사용은 그대로,
+// 위치와 마크업만 바뀌었다.
+test("TransactionChatWorkspace shows three distinct states for the inline phone-confirm block — unset (record-result buttons), contacted (quiet confirmation, no more nagging), unreachable (retry + find-another-shop, reusing the existing onFindAnotherShop prop)", () => {
+  assert.match(chatWorkspaceSource, /if \(entry\.kind === "contact"\)/);
   assert.match(
     chatWorkspaceSource,
-    /transaction\.contactStatus === "contacted"\s*\?\s*(?:\(\s*)?<div className="phone-confirm-banner phone-confirm-done"/,
+    /transaction\.contactStatus === "contacted"\s*\?\s*"chat-contact-inline-done-card"/,
   );
   assert.match(
     chatWorkspaceSource,
-    /transaction\.contactStatus === "unreachable"\s*\?\s*(?:\(\s*)?<div className="phone-confirm-banner phone-confirm-unreachable"/,
+    /transaction\.contactStatus === "unreachable"\s*\n\s*\?\s*"chat-contact-inline-alert"/,
   );
+  assert.match(chatWorkspaceSource, /<Check size=\{14\} \/> 전화 확인 완료/);
   assert.match(chatWorkspaceSource, /onClick=\{\(\)\s*=>\s*void recordContactResult\("contacted"\)\}\s*>\s*연결됐어요/);
   assert.match(
     chatWorkspaceSource,
@@ -128,7 +134,7 @@ test("TransactionChatWorkspace shows three distinct states for the phone-confirm
   );
   assert.match(
     chatWorkspaceSource,
-    /onFindAnotherShop\s*&&\s*(?:\(\s*)?<button\s+type="button"\s+className="button button-secondary"\s+onClick=\{onFindAnotherShop\}>\s*<Search size=\{16\}\s*\/>\s*다른 시공점 찾기\s*<\/button>/,
+    /onFindAnotherShop\s*&&\s*(?:\(\s*)?<button type="button" className="button button-secondary" onClick=\{onFindAnotherShop\}>\s*다른 시공점 찾기\s*<\/button>/,
   );
 });
 

@@ -359,50 +359,6 @@
   margin-left: 3px;
   font-size: var(--font-sm);
 }
-.r2-job-context {
-  display: grid;
-  grid-template-columns: 1.15fr 1.1fr 0.9fr 1.1fr;
-  gap: 0;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  margin-bottom: 8px;
-}
-.r2-job-context > div {
-  display: grid;
-  align-content: center;
-  gap: 2px;
-  min-height: 56px;
-  border-right: 1px solid var(--color-line);
-  padding: 7px 12px;
-}
-.r2-job-context > div:last-child {
-  border-right: 0;
-}
-.r2-context-label {
-  color: var(--color-muted);
-  font-size: var(--font-xs);
-  font-weight: 750;
-}
-.r2-job-context strong {
-  overflow: hidden;
-  color: var(--color-ink);
-  font-size: var(--font-sm);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.r2-job-context small {
-  color: var(--color-muted);
-  font-size: var(--font-xs);
-}
-.r2-job-next {
-  background: var(--color-primary-soft);
-}
-.r2-job-next strong {
-  color: var(--color-primary);
-}
 .shop-transaction-management .transaction-room-layout {
   grid-template-columns: minmax(370px, 0.92fr) minmax(0, 1.65fr);
   gap: 0;
@@ -967,85 +923,6 @@
     margin-left: 0;
   }
 }
-/* Phase E: this used to be a solid primary-soft full-width block (just a
-   "현재 상태: X" line + a big CTA) — the room read as "messenger with a
-   status banner" rather than a work screen. Now a light card holding a
-   compact, read-only stepper (clicking it can't change stage — only the
-   existing advance/revert buttons do that) so progress is legible at a
-   glance without dominating the top of the screen. */
-.shop-stage-overview {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  border-bottom: 1px solid var(--color-line);
-  background: #fff;
-  padding: 8px 14px;
-}
-.room-stepper {
-  display: flex;
-  align-items: center;
-  gap: 0;
-}
-.room-stepper span {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-muted-soft);
-  font-size: var(--font-xs);
-  font-weight: 700;
-  white-space: nowrap;
-}
-.room-stepper span:not(:last-child)::after {
-  content: "";
-  flex: 1;
-  height: 2px;
-  margin: 0 6px;
-  background: var(--color-line);
-}
-.room-stepper span.complete:not(:last-child)::after {
-  background: var(--color-success);
-}
-.room-stepper span i {
-  display: grid;
-  flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--color-line);
-  color: var(--color-muted);
-  font-size: var(--font-xs);
-  font-style: normal;
-  font-weight: 800;
-}
-.room-stepper span.active {
-  color: var(--color-primary);
-}
-.room-stepper span.active i {
-  background: var(--color-primary);
-  color: #fff;
-}
-.room-stepper span.complete {
-  color: var(--color-text-soft);
-}
-.room-stepper span.complete i {
-  background: var(--color-success);
-  color: #fff;
-}
-@media (max-width: 767px) {
-  .room-stepper {
-    overflow-x: auto;
-  }
-  .room-stepper span small {
-    display: none;
-  }
-  .room-stepper span:not(:last-child)::after {
-    min-width: 10px;
-  }
-}
 .stage-progress-rail {
   position: relative;
   display: grid;
@@ -1109,23 +986,6 @@
   font-size: var(--font-sm);
   font-weight: 600;
 }
-.stage-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px;
-}
-.dealer-stage-current {
-  margin: 0;
-  width: auto;
-  color: var(--color-text-soft);
-  font-size: var(--font-sm);
-  font-weight: 600;
-}
-.dealer-stage-current b {
-  color: var(--color-primary);
-  font-size: var(--font-sm);
-}
 .stage-cta {
   min-height: 40px;
   padding-inline: 18px;
@@ -1149,7 +1009,8 @@
   cursor: not-allowed;
 }
 @media (max-width: 767px) {
-  .stage-actions {
+  .sidebar-next-step {
+    display: flex;
     flex-direction: column;
     align-items: stretch;
   }
@@ -1245,6 +1106,90 @@
 .phone-confirm-flag-unreachable {
   background: var(--color-danger-bg) !important;
   color: var(--color-danger) !important;
+}
+/* 메시지 정리(2026-08) — 전화 확인 안내를 큰 배너 대신 거래방 생성 시스템
+   메시지 바로 아래에 붙는 작은 카드로 표시한다. 색/버튼 스타일은
+   phone-confirm-banner와 같은 토큰만 재사용, 크기만 대화 흐름에 맞게 축소. */
+.chat-contact-inline {
+  max-width: 440px;
+  margin: 2px 0 14px;
+  border: 1px solid var(--color-line);
+  border-left: 3px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  background: #fff;
+  padding: 10px 14px;
+}
+.chat-contact-inline-alert {
+  border-left-color: var(--color-danger);
+}
+.chat-contact-inline-done-card {
+  border-left-color: var(--color-line);
+}
+.chat-contact-inline p {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: var(--font-sm);
+  line-height: 1.5;
+}
+.chat-contact-inline-title {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.chat-contact-inline-shop {
+  font-weight: 650;
+}
+.chat-contact-inline-phone {
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+.chat-contact-inline-empty {
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+}
+.chat-contact-inline-done {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-muted);
+  font-weight: 650;
+}
+.chat-contact-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.chat-contact-inline-actions .button {
+  min-height: 34px;
+  padding-inline: 12px;
+  font-size: var(--font-xs);
+}
+/* 사이드바 "지금 할 일" — 기존 현재상태/Progress 카드(sidebar-stage) 안에
+   같은 그룹으로 묶는다. 새 상태 체계 없음 — 기존 stage-cta/stage-revert-link
+   버튼과 로직을 위치만 옮겨 재사용. */
+.sidebar-next-step {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-line);
+}
+.sidebar-next-step > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-muted);
+  font-size: var(--font-xs);
+  font-weight: 700;
+}
+.sidebar-next-step-done {
+  margin: 0;
+  color: var(--color-text-soft);
+  font-size: var(--font-sm);
+}
+.warranty-not-ready-title {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.warranty-not-ready-detail {
+  color: var(--color-text-soft);
 }
 .transaction-workspace-layout {
   grid-template-columns: 300px minmax(0, 1fr);
