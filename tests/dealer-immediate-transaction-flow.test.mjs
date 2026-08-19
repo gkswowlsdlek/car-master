@@ -233,17 +233,21 @@ test("MessengerScreen matches the selected installer listing against transaction
   );
 });
 
-test("TransactionChatWorkspace shows a 전화 확인 필요 banner to the dealer only while pre-입고 (견적/시공예약), with a real tel: link when a phone is on file and a non-fabricated fallback otherwise", () => {
+// 메시지 정리(2026-08) — 큰 배너 대신 timeline의 "contact" 항목(거래방 생성
+// 시스템 메시지 바로 아래)으로 위치만 옮겼다. 조건(pre-입고 & role dealer),
+// 실제 시공점명/전화번호 사용, 가짜 번호 금지, contact_status 흐름은 동일.
+test("TransactionChatWorkspace shows a compact 전화 확인 필요 block to the dealer only while pre-입고 (견적/시공예약), using the real 시공점명/전화번호 with a non-fabricated empty state otherwise", () => {
   assert.match(
     chatWorkspaceSource,
-    /role === "dealer"\s*&&\s*\(transaction\.status\.stage === "견적"\s*\|\|\s*transaction\.status\.stage === "시공예약"\)/,
+    /const showInlineContactBlock =\s*\n\s*role === "dealer" && \(transaction\.status\.stage === "견적" \|\| transaction\.status\.stage === "시공예약"\);/,
   );
+  assert.match(chatWorkspaceSource, /<p className="chat-contact-inline-title">전화 확인이 필요합니다<\/p>/);
+  assert.match(chatWorkspaceSource, /<p className="chat-contact-inline-shop">\{transaction\.installerName\}<\/p>/);
   assert.match(
     chatWorkspaceSource,
-    /이 시공점은 전화 확인이 필요합니다\. 시공 가능 여부와 입고 일정을 시공점에 직접 확인해주세요\./,
+    /<p className="chat-contact-inline-phone">\s*\{installer\?\.contactPhone \|\| "등록된 연락처가 없습니다\."\}/,
   );
   assert.match(chatWorkspaceSource, /href=\{`tel:\$\{installer\.contactPhone\.replace\(\/\[\^0-9\+\]\/g, ""\)\}`\}/);
-  assert.match(chatWorkspaceSource, /전화 또는 카카오톡 등으로 확인해주세요\./);
   assert.doesNotMatch(chatWorkspaceSource, /카카오톡.*버튼|kakao.*button/i);
 });
 

@@ -6,13 +6,10 @@ import {
   ArrowDown,
   ArrowLeft,
   Ban,
-  Bell,
-  BellOff,
   Check,
   Copy,
   FileText,
   ImagePlus,
-  Info,
   MoreHorizontal,
   Paperclip,
   Phone,
@@ -69,7 +66,6 @@ const stageActionTestId = (stage?: TransactionStage) =>
           ? "dispatch-transaction-button"
           : undefined;
 const MAX_ATTACHMENTS = 4;
-const QUICK_REPLIES = ["확인했습니다.", "가능합니다.", "일정 확인 후 답변드릴게요.", "입고 가능합니다."];
 // Dealer-facing advance button text — grammatically correct particle per label
 // (완료/출고 end in a vowel so take 로, 중 ends in a consonant so takes 으로).
 const DEALER_ADVANCE_BUTTON_TEXT: Record<string, string> = {
@@ -113,7 +109,6 @@ export function TransactionChatWorkspace({
   onHide,
   onFinalPriceChange,
   onStageChange,
-  onPaymentChange,
   onEndOutcome,
   onSetContactStatus,
   onSetWarrantyInfo,
@@ -211,6 +206,7 @@ export function TransactionChatWorkspace({
   const timeline: (
     | { key: string; createdAt: string; kind: "stage"; label: string }
     | { key: string; createdAt: string; kind: "message"; message: TransactionChatMessage }
+    | { key: string; createdAt: string; kind: "contact" }
   )[] = room
     ? [
         ...room.messages.map((message) => ({
@@ -227,6 +223,14 @@ export function TransactionChatWorkspace({
         })),
       ].sort((a, b) => a.createdAt.localeCompare(b.createdAt))
     : [];
+  // 전화 확인 안내를 별도의 큰 배너 대신, 거래방 생성 시스템 메시지(항상
+  // timeline의 첫 항목) 바로 아래에 붙는 작은 블록으로 표시한다 — 같은
+  // contact_status 흐름/데이터, 위치만 다르다.
+  const showInlineContactBlock =
+    role === "dealer" && (transaction.status.stage === "견적" || transaction.status.stage === "시공예약");
+  if (showInlineContactBlock && timeline.length > 0) {
+    timeline.splice(1, 0, { key: "inline-contact-block", createdAt: timeline[0].createdAt, kind: "contact" });
+  }
 
   const runStageChange = async (next: TransactionStage) => {
     if (stagePending) return;
@@ -470,10 +474,6 @@ export function TransactionChatWorkspace({
       setIsSending(false);
     }
   };
-  const insertQuickReply = (text: string) => {
-    setDraft((current) => (current.trim() ? `${current.trim()} ${text}` : text));
-    textareaRef.current?.focus();
-  };
   const hide = () => {
     const warning =
       !["작업완료", "출고", "취소", "시공불가"].includes(transaction.status.stage) && role === "shop"
@@ -621,14 +621,6 @@ export function TransactionChatWorkspace({
           </div>
           <nav>
             <button
-              aria-label={notificationsMuted ? "대화 알림 켜기" : "대화 알림 끄기"}
-              title={notificationsMuted ? "알림 켜기" : "알림 끄기"}
-              className={notificationsMuted ? "active" : ""}
-              onClick={() => setNotificationsMuted((value) => !value)}
-            >
-              {notificationsMuted ? <BellOff size={18} /> : <Bell size={18} />}
-            </button>
-            <button
               aria-label="전화하기"
               title={contactState === "loaded" && !contact ? "등록된 연락처가 없습니다." : "연락처 확인"}
               className="messenger-call-button"
@@ -636,13 +628,6 @@ export function TransactionChatWorkspace({
               onClick={() => void openContact()}
             >
               <Phone size={18} />
-            </button>
-            <button
-              aria-label="거래 정보"
-              className={detailPanel === "transaction" ? "active" : ""}
-              onClick={() => setDetailPanel((value) => (value === "transaction" ? "none" : "transaction"))}
-            >
-              <Info size={18} />
             </button>
             <span className="messenger-more-wrap">
               <button
@@ -713,129 +698,7 @@ export function TransactionChatWorkspace({
             </span>
           </nav>
         </header>
-        <section className="shop-stage-overview">
-          <div className="r2-job-context" aria-label="차량 작업 요약">
-            <div className="r2-job-identity">
-              <span className="r2-context-label">차량</span>
-              <strong>
-                {transaction.vehicle.maker} {transaction.vehicle.model}
-              </strong>
-              <small>{transaction.vehicle.class || "차종 미정"}</small>
-            </div>
-            <div>
-              <span className="r2-context-label">시공점</span>
-              <strong>{transaction.installerName}</strong>
-              <small>{transaction.service.product || transaction.service.workDescription || "작업 내용 미정"}</small>
-            </div>
-            <div>
-              <span className="r2-context-label">일정</span>
-              <strong>
-                {scheduleLabel(transaction.schedule.confirmedInboundAt ?? transaction.schedule.requestedInboundAt)}
-              </strong>
-              <small>출고 희망 {scheduleLabel(transaction.schedule.desiredReleaseAt)}</small>
-            </div>
-            <div className="r2-job-next">
-              <span className="r2-context-label">다음 행동</span>
-              <strong>
-                {role === "dealer"
-                  ? dealerNextLabel || "현재 단계 확인"
-                  : forwardStage
-                    ? STAGE_ACTION_LABEL[forwardStage]
-                    : "추가 작업 없음"}
-              </strong>
-            </div>
-          </div>
-          {stageError && (
-            <p className="stage-error" role="alert">
-              {stageError}
-            </p>
-          )}
-          {terminalOutcome ? (
-            <div className={`transaction-outcome-banner outcome-${transaction.status.stage}`}>
-              <b>
-                {transaction.status.stage === "취소" ? (
-                  <>
-                    <XCircle size={16} /> 이 거래는 취소되었습니다.
-                  </>
-                ) : (
-                  <>
-                    <Ban size={16} /> 이 거래는 시공 불가로 종료되었습니다.
-                  </>
-                )}
-              </b>
-              {transaction.outcomeNote && <p>{transaction.outcomeNote}</p>}
-              {role === "dealer" && onFindAnotherShop && (
-                <button type="button" className="button button-secondary" onClick={onFindAnotherShop}>
-                  <Search size={16} /> 다른 시공점 찾기
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="stage-actions">
-              {/* Phase E: a read-only stepper — clicking a step never changes stage,
-              only the existing advance/revert buttons below do — so this can't
-              be used to bypass canTransitionStage(). */}
-              <div
-                className="room-stepper"
-                role="img"
-                aria-label={`진행 단계: ${role === "dealer" ? dealerStageLabel(transaction.status.stage) : transaction.status.stage}`}
-              >
-                {(role === "dealer" ? DEALER_STAGE_LABELS : stageOrder).map((label, index) => {
-                  const current = role === "dealer" ? dealerCurrentIndex : stageIndex;
-                  return (
-                    <span key={label} className={index < current ? "complete" : index === current ? "active" : ""}>
-                      <i>{index < current ? "✓" : index + 1}</i>
-                      <small>{label}</small>
-                    </span>
-                  );
-                })}
-              </div>
-              {role === "dealer" ? (
-                <>
-                  <p className="dealer-stage-current">
-                    현재 상태: <b>{dealerStageLabel(transaction.status.stage)}</b>
-                  </p>
-                  {dealerNextLabel && (
-                    <button
-                      type="button"
-                      data-testid="dealer-stage-advance-button"
-                      className="primary stage-cta"
-                      onClick={handleDealerAdvanceClick}
-                      disabled={stagePending}
-                      aria-busy={stagePending}
-                    >
-                      {stagePending ? "처리 중…" : DEALER_ADVANCE_BUTTON_TEXT[dealerNextLabel]}
-                    </button>
-                  )}
-                </>
-              ) : (
-                <>
-                  {canAdvance && (
-                    <button
-                      data-testid={stageActionTestId(forwardStage)}
-                      className="primary stage-cta"
-                      onClick={handleAdvanceClick}
-                      disabled={stagePending}
-                      aria-busy={stagePending}
-                    >
-                      {stagePending ? "처리 중…" : STAGE_ACTION_LABEL[forwardStage!]}
-                    </button>
-                  )}
-                  {canRevert && (
-                    <button
-                      type="button"
-                      className="stage-revert-link"
-                      onClick={() => void runStageChange(backStage!)}
-                      disabled={stagePending}
-                    >
-                      ↩ {STAGE_REVERT_LABEL[backStage!]}
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
-          )}
-          {confirmCompleteOpen && (
+        {confirmCompleteOpen && (
             <div className="stage-confirm-overlay" role="dialog" aria-modal="true">
               <div className="stage-confirm-backdrop" onClick={() => setConfirmCompleteOpen(false)} />
               <div className="stage-confirm-card">
@@ -882,7 +745,6 @@ export function TransactionChatWorkspace({
               </div>
             </div>
           )}
-        </section>
         {endOutcomeModal && (
           <EndTransactionOutcomeModal
             outcome={endOutcomeModal}
@@ -893,96 +755,6 @@ export function TransactionChatWorkspace({
             }}
           />
         )}
-        {role === "dealer" &&
-          (transaction.status.stage === "견적" || transaction.status.stage === "시공예약") &&
-          (transaction.contactStatus === "contacted" ? (
-            <div className="phone-confirm-banner phone-confirm-done" role="status">
-              <p>
-                <Check size={15} /> 시공점 연락 확인됨
-              </p>
-            </div>
-          ) : transaction.contactStatus === "unreachable" ? (
-            <div className="phone-confirm-banner phone-confirm-unreachable" role="status">
-              <p>
-                <PhoneOff size={16} /> 시공점과 연락이 되지 않았어요. 다시 시도하거나 다른 시공점을 찾아보세요.
-              </p>
-              <div className="phone-confirm-actions">
-                {installer?.contactPhone ? (
-                  <a className="button button-primary" href={`tel:${installer.contactPhone.replace(/[^0-9+]/g, "")}`}>
-                    <Phone size={16} /> 다시 전화하기
-                  </a>
-                ) : (
-                  <span className="phone-confirm-fallback">전화 또는 카카오톡 등으로 다시 확인해주세요.</span>
-                )}
-                {onFindAnotherShop && (
-                  <button type="button" className="button button-secondary" onClick={onFindAnotherShop}>
-                    <Search size={16} /> 다른 시공점 찾기
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="phone-confirm-banner" role="status">
-              <p>이 시공점은 전화 확인이 필요합니다. 시공 가능 여부와 입고 일정을 시공점에 직접 확인해주세요.</p>
-              <div className="phone-confirm-actions">
-                {installer?.contactPhone ? (
-                  <a className="button button-primary" href={`tel:${installer.contactPhone.replace(/[^0-9+]/g, "")}`}>
-                    <Phone size={16} /> 전화하기
-                  </a>
-                ) : (
-                  <span className="phone-confirm-fallback">전화 또는 카카오톡 등으로 확인해주세요.</span>
-                )}
-              </div>
-              {onSetContactStatus && (
-                <div className="phone-confirm-result-row">
-                  <button
-                    type="button"
-                    className="button button-secondary"
-                    disabled={contactStatusPending}
-                    onClick={() => void recordContactResult("contacted")}
-                  >
-                    연결됐어요
-                  </button>
-                  <button
-                    type="button"
-                    className="button button-secondary"
-                    disabled={contactStatusPending}
-                    onClick={() => void recordContactResult("unreachable")}
-                  >
-                    연락이 안 돼요
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-        {/* 보증서 발급 정보 경고 — 작업 생성 직후/입고 전에는 강하게 방해하지
-        않는다(목록의 옅은 배지로 충분). 입고~작업완료(출고 전) 구간부터
-        role==dealer && 미완료일 때만 배너를 올리고, 작업완료 단계에서는
-        더 강한 문구로 바뀐다. 작업완료/출고 자체는 절대 막지 않는다. */}
-        {role === "dealer" &&
-          (transaction.status.stage === "입고" || transaction.status.stage === "작업완료") &&
-          warrantyStatus(transaction.warranty) !== "READY" &&
-          warrantyStatus(transaction.warranty) !== "ISSUED" && (
-            <div className="phone-confirm-banner phone-confirm-unreachable" role="status">
-              <p>
-                {transaction.status.stage === "작업완료"
-                  ? "보증서 발급 정보가 아직 없습니다. 고객명, 연락처, 차량번호가 입력되지 않으면 시공점에서 보증서를 발급할 수 없습니다."
-                  : "보증서 발급 정보가 필요합니다. 출고 전 고객명, 연락처, 차량번호를 입력해주세요."}
-              </p>
-              <div className="phone-confirm-actions">
-                <button
-                  type="button"
-                  className="button button-primary"
-                  onClick={() => {
-                    setDetailPanel("transaction");
-                    openWarrantyForm();
-                  }}
-                >
-                  지금 입력
-                </button>
-              </div>
-            </div>
-          )}
         <div className="messenger-messages" ref={messagesContainer} onScroll={handleScroll}>
           {room?.hasMoreMessages && onLoadOlder && (
             <div className="messenger-load-older">
@@ -1009,6 +781,86 @@ export function TransactionChatWorkspace({
                   <div className="message-system message-stage-event">
                     <span>{entry.label}</span>
                   </div>
+                </div>
+              );
+            if (entry.kind === "contact")
+              return (
+                <div
+                  key={entry.key}
+                  className={`chat-contact-inline ${
+                    transaction.contactStatus === "contacted"
+                      ? "chat-contact-inline-done-card"
+                      : transaction.contactStatus === "unreachable"
+                        ? "chat-contact-inline-alert"
+                        : "chat-contact-inline-pending"
+                  }`}
+                >
+                  {transaction.contactStatus === "contacted" ? (
+                    <p className="chat-contact-inline-done">
+                      <Check size={14} /> 전화 확인 완료
+                    </p>
+                  ) : transaction.contactStatus === "unreachable" ? (
+                    <>
+                      <p>
+                        <PhoneOff size={14} /> 연락이 되지 않았어요
+                      </p>
+                      <div className="chat-contact-inline-actions">
+                        {installer?.contactPhone ? (
+                          <a
+                            className="button button-secondary"
+                            href={`tel:${installer.contactPhone.replace(/[^0-9+]/g, "")}`}
+                          >
+                            <Phone size={14} /> 다시 전화하기
+                          </a>
+                        ) : (
+                          <span className="chat-contact-inline-empty">등록된 연락처가 없습니다.</span>
+                        )}
+                        {onFindAnotherShop && (
+                          <button type="button" className="button button-secondary" onClick={onFindAnotherShop}>
+                            다른 시공점 찾기
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p className="chat-contact-inline-title">전화 확인이 필요합니다</p>
+                      <p className="chat-contact-inline-shop">{transaction.installerName}</p>
+                      <p className="chat-contact-inline-phone">
+                        {installer?.contactPhone || "등록된 연락처가 없습니다."}
+                      </p>
+                      <div className="chat-contact-inline-actions">
+                        {installer?.contactPhone && (
+                          <a
+                            className="button button-primary"
+                            href={`tel:${installer.contactPhone.replace(/[^0-9+]/g, "")}`}
+                          >
+                            <Phone size={14} /> 전화하기
+                          </a>
+                        )}
+                        {onSetContactStatus && (
+                          <>
+                            <button
+                              type="button"
+                              className="button button-secondary"
+                              disabled={contactStatusPending}
+                              onClick={() => void recordContactResult("contacted")}
+                            >
+                              연결됐어요
+                            </button>
+                            <button
+                              type="button"
+                              className="button button-secondary"
+                              disabled={contactStatusPending}
+                              onClick={() => void recordContactResult("unreachable")}
+                            >
+                              연락이 안 돼요
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             const message = entry.message;
@@ -1095,19 +947,6 @@ export function TransactionChatWorkspace({
         )}
         <footer className="messenger-composer">
           {attachmentError && <p className="login-error">{attachmentError}</p>}
-          <div className="quick-reply-row">
-            {QUICK_REPLIES.map((reply) => (
-              <button
-                type="button"
-                key={reply}
-                className="quick-reply-chip"
-                onClick={() => insertQuickReply(reply)}
-                disabled={isSending}
-              >
-                {reply}
-              </button>
-            ))}
-          </div>
           {pending.length > 0 && (
             <div className="attachment-preview-strip">
               {pending.map((item) => (
@@ -1264,6 +1103,77 @@ export function TransactionChatWorkspace({
                       </span>
                     ))}
               </div>
+              {stageError && (
+                <p className="stage-error" role="alert">
+                  {stageError}
+                </p>
+              )}
+              {terminalOutcome ? (
+                <div className={`transaction-outcome-banner outcome-${transaction.status.stage}`}>
+                  <b>
+                    {transaction.status.stage === "취소" ? (
+                      <>
+                        <XCircle size={16} /> 이 거래는 취소되었습니다.
+                      </>
+                    ) : (
+                      <>
+                        <Ban size={16} /> 이 거래는 시공 불가로 종료되었습니다.
+                      </>
+                    )}
+                  </b>
+                  {transaction.outcomeNote && <p>{transaction.outcomeNote}</p>}
+                  {role === "dealer" && onFindAnotherShop && (
+                    <button type="button" className="button button-secondary" onClick={onFindAnotherShop}>
+                      <Search size={16} /> 다른 시공점 찾기
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="sidebar-next-step">
+                  <span>지금 할 일</span>
+                  {role === "dealer" ? (
+                    dealerNextLabel ? (
+                      <button
+                        type="button"
+                        data-testid="dealer-stage-advance-button"
+                        className="primary stage-cta"
+                        onClick={handleDealerAdvanceClick}
+                        disabled={stagePending}
+                        aria-busy={stagePending}
+                      >
+                        {stagePending ? "처리 중…" : DEALER_ADVANCE_BUTTON_TEXT[dealerNextLabel]}
+                      </button>
+                    ) : (
+                      <p className="sidebar-next-step-done">추가로 진행할 단계가 없습니다.</p>
+                    )
+                  ) : (
+                    <>
+                      {canAdvance && (
+                        <button
+                          data-testid={stageActionTestId(forwardStage)}
+                          className="primary stage-cta"
+                          onClick={handleAdvanceClick}
+                          disabled={stagePending}
+                          aria-busy={stagePending}
+                        >
+                          {stagePending ? "처리 중…" : STAGE_ACTION_LABEL[forwardStage!]}
+                        </button>
+                      )}
+                      {canRevert && (
+                        <button
+                          type="button"
+                          className="stage-revert-link"
+                          onClick={() => void runStageChange(backStage!)}
+                          disabled={stagePending}
+                        >
+                          ↩ {STAGE_REVERT_LABEL[backStage!]}
+                        </button>
+                      )}
+                      {!canAdvance && !canRevert && <p className="sidebar-next-step-done">추가로 진행할 단계가 없습니다.</p>}
+                    </>
+                  )}
+                </div>
+              )}
             </div>
             <dl className="briefing-data">
               <div>
@@ -1308,15 +1218,9 @@ export function TransactionChatWorkspace({
                 </div>
               )}
             </div>
-            <div className="sidebar-settlement">
-              <h4>결제 상태</h4>
-              <p>{transaction.pricing.paymentStatus}</p>
-              {role === "dealer" &&
-                transaction.pricing.finalPrice &&
-                transaction.pricing.paymentStatus === "미결제" && (
-                  <button onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>
-                )}
-            </div>
+            {/* Free Beta에서는 payment/settlement UI 비활성. 향후 결제 모델
+                확정 후 재검토 — pricing.paymentStatus/onPaymentChange/
+                transitionPayment RPC는 그대로 두고 이 화면에서만 숨긴다. */}
             <div className="sidebar-settlement">
               <h4>보증서 발급 정보</h4>
               {role === "dealer" ? (
@@ -1398,13 +1302,16 @@ export function TransactionChatWorkspace({
                   </div>
                 ) : (
                   <>
-                    <p>
-                      {warrantyStatus(transaction.warranty) === "ISSUED"
-                        ? "보증서 발급 완료"
-                        : warrantyStatus(transaction.warranty) === "READY"
-                          ? "발급 대기 — 시공점에서 확인 중입니다."
-                          : "차량 입고 후 출고 전까지 보증서 발급 정보를 입력해주세요. 고객명, 연락처, 차량번호가 등록되어야 시공점에서 보증서를 발급할 수 있습니다."}
-                    </p>
+                    {warrantyStatus(transaction.warranty) === "ISSUED" ? (
+                      <p>보증서 발급 완료</p>
+                    ) : warrantyStatus(transaction.warranty) === "READY" ? (
+                      <p>발급 대기 — 시공점에서 확인 중입니다.</p>
+                    ) : (
+                      <>
+                        <p className="warranty-not-ready-title">출고 전 입력 필요</p>
+                        <p className="warranty-not-ready-detail">고객명, 연락처, 차량번호가 필요합니다.</p>
+                      </>
+                    )}
                     {warrantyStatus(transaction.warranty) !== "ISSUED" && (
                       <button type="button" className="button button-secondary" onClick={openWarrantyForm}>
                         보증서 정보 입력

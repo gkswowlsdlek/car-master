@@ -3506,15 +3506,6 @@ textarea:focus-visible {
   .dealer-transaction-management .dealer-transaction-table-head {
     display: none;
   }
-  .r2-job-context {
-    grid-template-columns: 1fr 1fr;
-  }
-  .r2-job-context > div:nth-child(2) {
-    border-right: 0;
-  }
-  .r2-job-context > div:nth-child(-n + 2) {
-    border-bottom: 1px solid var(--color-line);
-  }
 }
 .shop-transaction-management .transaction-summary-strip {
   display: flex;
@@ -4803,9 +4794,6 @@ textarea:focus-visible {
   .shop-quick-work button {
     justify-content: center;
   }
-  .shop-stage-overview {
-    padding: 12px;
-  }
   .stage-progress-rail {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -5132,37 +5120,6 @@ textarea:focus-visible {
 .messenger-center {
   position: relative;
 }
-
-.quick-reply-row {
-  min-width: 0;
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  margin-bottom: 8px;
-  padding-bottom: 2px;
-}
-.quick-reply-chip {
-  flex: 0 0 auto;
-  min-height: 34px;
-  border: 1px solid var(--color-line);
-  border-radius: 999px;
-  background: #fff;
-  padding: 6px 13px;
-  color: var(--color-text-soft);
-  font-size: var(--font-sm);
-  font-weight: 600;
-  white-space: nowrap;
-}
-.quick-reply-chip:hover {
-  border-color: var(--color-primary-border);
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-}
-.quick-reply-chip:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
 
 .messenger-call-button {
   color: var(--color-primary) !important;
