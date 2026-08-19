@@ -198,10 +198,27 @@ test("normalizeTransaction과 demo-transaction-repository 매퍼는 warranty를 
   assert.match(demoRepoSource, /warranty: \{\},/);
 });
 
-test("로컬(Demo) 신규 거래 생성 시 dealerName/dealerCompanyName/warranty를 계정 정보로 즉시 채운다", () => {
+test("로컬(Demo) 신규 거래 생성 시 dealerName/dealerCompanyName을 계정 정보로 즉시 채우고, 시공 요청에서 입력한 선택 정보(차량번호/차대번호/고객명/고객연락처)가 있으면 warranty에 그대로 반영한다", () => {
   assert.match(dealerWorkspaceSource, /dealerName: account\.name,/);
   assert.match(dealerWorkspaceSource, /dealerCompanyName: defaultDealerCompanyName,/);
-  assert.match(dealerWorkspaceSource, /warranty: \{\},/);
+  assert.match(dealerWorkspaceSource, /warranty: \{\s*\n\s*\.\.\.optionalWarranty,/);
+});
+
+test("Real/Supabase 경로에서 setWarrantyInfo가 실패해도 이미 생성된 Transaction/Room은 그대로 두고(rollback 없음, catch로 삼켜서 거래 생성 실패로 보고하지 않음), 대신 사용자에게 다시 입력하라는 안내를 보여준다", () => {
+  assert.match(
+    dealerWorkspaceSource,
+    /let warrantyInfoSaveFailed = false;\s*\n\s*if \(hasOptionalWarrantyInfo\) \{\s*\n\s*try \{\s*\n\s*await supabaseTransactionRepository\.setWarrantyInfo\(created\.transactionId, optionalWarranty\);\s*\n\s*\} catch \{\s*\n\s*warrantyInfoSaveFailed = true;\s*\n\s*\}\s*\n\s*\}/,
+  );
+  assert.match(
+    dealerWorkspaceSource,
+    /if \(warrantyInfoSaveFailed\) \{\s*\n\s*alert\("시공 요청은 생성됐지만 차량·고객 정보 저장에 실패했습니다\. 거래 상세에서 다시 입력해주세요\."\);\s*\n\s*\}/,
+  );
+  // 실패 안내는 onRefresh/onNavigate("deals") 뒤에 와야 한다 — 거래 자체는
+  // 정상적으로 만들어진 채 목록/상세로 이동한 뒤에 보여주는 후속 안내지,
+  // 생성 자체를 막는 차단 알림이 아니다.
+  const failedIndex = dealerWorkspaceSource.indexOf("if (warrantyInfoSaveFailed) {");
+  const navigateIndex = dealerWorkspaceSource.indexOf('onNavigate("deals")');
+  assert.ok(navigateIndex > 0 && failedIndex > navigateIndex);
 });
 
 test("TransactionChatWorkspace 헤더는 차량번호가 있을 때만 붙이고, 시공점이 보는 상대 라벨은 실제 dealerName을 우선한다 — 고객명/연락처는 헤더에 절대 노출하지 않는다", () => {

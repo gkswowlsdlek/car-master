@@ -57,4 +57,12 @@ export type ServiceRequest = {
   requestType: RequestType;
   extraWorkNote: string;
   vehicleClass: VehicleClass | "";
+  /** All optional — filled in only when the dealer already knows them at
+   * request time. Flows into the same Transaction's warranty info via
+   * set_transaction_warranty_info right after creation (see DealerWorkspace's
+   * createTransaction) rather than a separate input later. */
+  vehicleNumber?: string;
+  vin?: string;
+  customerName?: string;
+  customerPhone?: string;
 };

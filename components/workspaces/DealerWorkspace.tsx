@@ -259,6 +259,16 @@ export function DealerWorkspace({
   const createTransaction = async () => {
     if (isCreatingTransaction) return;
     setIsCreatingTransaction(true);
+    // Optional info the dealer may already know at request time (§9 "차량·고객
+    // 정보" section) — reuses the existing warranty-info shape/RPC instead of a
+    // new column or table. Omitted entirely if nothing was filled in.
+    const optionalWarranty = {
+      vehicleNumber: request.vehicleNumber?.trim() || undefined,
+      vin: request.vin?.trim() || undefined,
+      customerName: request.customerName?.trim() || undefined,
+      customerPhone: request.customerPhone?.trim() || undefined,
+    };
+    const hasOptionalWarrantyInfo = Object.values(optionalWarranty).some(Boolean);
     try {
       if (useSupabaseData) {
         if (!approvedInstallerShops.some((shop) => shop.id === selectedShop.id)) {
@@ -277,6 +287,18 @@ export function DealerWorkspace({
             },
             schedule: { requestedInboundAt: request.inboundStart, desiredReleaseAt: request.releaseDate },
           });
+          // Best-effort — the transaction/room already exist by this point,
+          // so a failure here must never roll back or be reported as a
+          // creation failure. It only ever changes whether we show the
+          // dealer a follow-up notice after the (already-successful) create.
+          let warrantyInfoSaveFailed = false;
+          if (hasOptionalWarrantyInfo) {
+            try {
+              await supabaseTransactionRepository.setWarrantyInfo(created.transactionId, optionalWarranty);
+            } catch {
+              warrantyInfoSaveFailed = true;
+            }
+          }
           await onRefresh();
           window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
           setRequest(defaultRequest);
@@ -288,6 +310,9 @@ export function DealerWorkspace({
             transactionId: created.transactionId,
             installerId: selectedShop.id,
           });
+          if (warrantyInfoSaveFailed) {
+            alert("시공 요청은 생성됐지만 차량·고객 정보 저장에 실패했습니다. 거래 상세에서 다시 입력해주세요.");
+          }
         } catch (error) {
           alert(translateTransactionError(error, "거래를 생성하지 못했습니다."));
         }
@@ -350,7 +375,15 @@ export function DealerWorkspace({
         },
         schedule: { requestedInboundAt: request.inboundStart, desiredReleaseAt: request.releaseDate },
         status: { stage: "견적", createdAt: now, updatedAt: now },
-        warranty: {},
+        warranty: {
+          ...optionalWarranty,
+          // Mirrors set_transaction_warranty_info's own rule: stamp
+          // infoSubmittedAt only once the 3 required fields are all present.
+          infoSubmittedAt:
+            optionalWarranty.customerName && optionalWarranty.customerPhone && optionalWarranty.vehicleNumber
+              ? now
+              : undefined,
+        },
         visibility: { hiddenByDealer: false, hiddenByInstaller: false },
         chatRoomId,
         lastMessage: "새 시공 요청이 접수되었습니다.",

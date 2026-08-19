@@ -53,6 +53,25 @@ function stageChipClass(stage: TransactionStage) {
   return STAGE_CHIP_CLASSES[dealerStageIndex(stage)];
 }
 
+/** Dealer-facing "지금 할 일" — a short, natural next-step phrase, never a
+ * bare echo of the status badge (e.g. "지금 할 일: 거래 완료"). 보증서 정보
+ * 입력은 차량이 입고된 이후(입고/작업완료/출고)라면 다른 무엇보다 우선한다 —
+ * 거래가 사실상 끝나가는 중이어도 보증서 정보가 비어 있으면 그게 지금
+ * 해야 할 일이다. */
+function dealerNextStep(item: Transaction): string {
+  const stage = item.status.stage;
+  if (isTerminalOutcome(stage)) return "기록 보기";
+  if ((stage === "견적" || stage === "시공예약") && item.contactStatus == null) return "전화 확인";
+  const warranty = warrantyStatus(item.warranty);
+  const pastArrival = stage === "입고" || stage === "작업완료" || stage === "출고";
+  if (pastArrival && warranty !== "READY" && warranty !== "ISSUED") return "보증서 정보 입력";
+  if (stage === "견적") return "용품점 확인 대기";
+  if (stage === "시공예약") return "입고 일정 확인";
+  if (stage === "입고") return "입고 확인";
+  if (stage === "작업완료") return "출고 준비";
+  return "처리 완료"; // 출고 + 보증서 정보까지 이미 준비된 경우
+}
+
 /**
  * Dealer 거래관리 — 목록 + 선택한 거래의 상세 요약을 한 화면에서 보여주고,
  * "거래방으로 이동" CTA로 실제 대화/작업 화면(TransactionChatWorkspace)으로
@@ -257,25 +276,17 @@ export function DealerTransactionManagementScreen({
                   </em>
                 </div>
               </header>
+              <div className="dealer-next-step">
+                <span>지금 할 일</span>
+                <b>{dealerNextStep(selected)}</b>
+              </div>
               <dl className="transaction-core-info">
                 <div>
-                  <dt>다음 행동</dt>
-                  <dd>
-                    {isTerminalOutcome(selected.status.stage)
-                      ? "기록 보기"
-                      : selected.status.stage === "견적"
-                        ? "시공점의 요청 확인 대기"
-                        : selected.status.stage === "출고"
-                          ? "거래 완료"
-                          : "거래방에서 진행 상황 확인"}
-                  </dd>
-                </div>
-                <div>
-                  <dt>시공점</dt>
+                  <dt>용품점</dt>
                   <dd>{selected.installerName}</dd>
                 </div>
                 <div>
-                  <dt>시공 항목</dt>
+                  <dt>작업 내용</dt>
                   <dd>{selected.service.product ?? selected.service.workDescription}</dd>
                 </div>
                 <div>
@@ -287,11 +298,11 @@ export function DealerTransactionManagementScreen({
                   <dd>{selected.warranty.vin || "미등록"}</dd>
                 </div>
                 <div>
-                  <dt>입고 일정</dt>
+                  <dt>입고 예정일</dt>
                   <dd>{shortDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt) || "미정"}</dd>
                 </div>
                 <div>
-                  <dt>출고 일정</dt>
+                  <dt>출고 예정일</dt>
                   <dd>{shortDate(selected.schedule.desiredReleaseAt) || "미정"}</dd>
                 </div>
                 <div>

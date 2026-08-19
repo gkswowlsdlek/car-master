@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { classifyVehicleModel } from "../../data/vehicleClasses";
 import {
   administrativeRegionNames,
@@ -19,6 +20,7 @@ export function ServiceRequestForm({
   onSummary: () => void;
   hasSelectedShop: boolean;
 }) {
+  const [showOptionalInfo, setShowOptionalInfo] = useState(false);
   const updateModel = (model: string) =>
     setRequest({ ...request, model, vehicleClass: classifyVehicleModel(model) || request.vehicleClass });
   const selectedRegion = administrativeRegionNames.find((region) => request.deliveryArea.includes(region)) ?? "경기";
@@ -148,6 +150,55 @@ export function ServiceRequestForm({
           placeholder="예: 전면 30%, 측후면 15% 희망 / 출고 전 사진 요청"
         />
       </label>
+      <div className="form-section-title wide-field">
+        <span>03</span>
+        <div>
+          <b>차량·고객 정보 (선택)</b>
+          <small>알고 있는 정보가 있다면 미리 입력해 두세요. 몰라도 요청은 그대로 보낼 수 있고, 나중에 거래관리에서 입력해도 됩니다.</small>
+        </div>
+      </div>
+      {!showOptionalInfo ? (
+        <div className="wide-field">
+          <button type="button" className="secondary" onClick={() => setShowOptionalInfo(true)}>
+            차량·고객 정보 입력 (선택)
+          </button>
+        </div>
+      ) : (
+        <>
+          <label>
+            <span>차량번호</span>
+            <input
+              value={request.vehicleNumber ?? ""}
+              onChange={(event) => setRequest({ ...request, vehicleNumber: event.target.value })}
+              placeholder="예: 123가4567"
+            />
+          </label>
+          <label>
+            <span>차대번호</span>
+            <input
+              value={request.vin ?? ""}
+              onChange={(event) => setRequest({ ...request, vin: event.target.value })}
+              placeholder="차량번호를 모를 때 확인용"
+            />
+          </label>
+          <label>
+            <span>고객명</span>
+            <input
+              value={request.customerName ?? ""}
+              onChange={(event) => setRequest({ ...request, customerName: event.target.value })}
+              placeholder="보증서 발급 대상 고객"
+            />
+          </label>
+          <label>
+            <span>고객 연락처</span>
+            <input
+              value={request.customerPhone ?? ""}
+              onChange={(event) => setRequest({ ...request, customerPhone: event.target.value })}
+              placeholder="예: 010-1234-5678"
+            />
+          </label>
+        </>
+      )}
       <div className="request-submit-area wide-field">
         <p>{ready ? "필수 정보와 시공점 선택이 완료되었습니다." : "필수 정보를 입력하고 시공점을 선택해 주세요."}</p>
         <button type="button" className="primary request-submit-button" onClick={onSummary} disabled={!ready}>
