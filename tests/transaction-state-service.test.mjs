@@ -5,6 +5,7 @@ import {
   revertStage,
   transitionPayment,
   transitionStage,
+  warrantyStatus,
 } from "../services/transaction-state-service.ts";
 
 function makeTransaction(stage = "견적") {
@@ -87,4 +88,27 @@ test("딜러 금액 확인 후 관리자 정산 완료까지 순차 전이한다
   const settling = transitionPayment(paid, "정산대기", "admin");
   const settled = transitionPayment(settling, "정산완료", "admin");
   assert.equal(settled.pricing.paymentStatus, "정산완료");
+});
+
+test("보증서 상태는 저장값이 아니라 필드 유무로 매번 파생된다", () => {
+  assert.equal(warrantyStatus({}), "NOT_READY");
+  assert.equal(warrantyStatus({ vin: "KMHXX00XXXX000001" }), "NOT_READY", "VIN만으로는 READY가 아니다");
+  assert.equal(
+    warrantyStatus({ customerName: "김민수", vehicleNumber: "123가4567" }),
+    "NOT_READY",
+    "연락처가 빠지면 READY가 아니다",
+  );
+  assert.equal(
+    warrantyStatus({ customerName: "김민수", customerPhone: "010-1234-5678", vehicleNumber: "123가4567" }),
+    "READY",
+  );
+  assert.equal(
+    warrantyStatus({
+      customerName: "김민수",
+      customerPhone: "010-1234-5678",
+      vehicleNumber: "123가4567",
+      issuedAt: "2026-07-17T00:00:00.000Z",
+    }),
+    "ISSUED",
+  );
 });

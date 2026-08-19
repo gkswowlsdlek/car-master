@@ -19,6 +19,10 @@ function normalizeTransaction(value: Transaction): Transaction {
     ...value,
     status: mappedStage ? { ...value.status, stage: mappedStage } : value.status,
     stageLog: value.stageLog ?? [],
+    // localStorage rows saved before the warranty-issuance feature shipped
+    // have no `warranty` key at all — default it so UI code can always read
+    // transaction.warranty.x without a null-check.
+    warranty: value.warranty ?? {},
   };
 }
 
@@ -65,6 +69,8 @@ function demoSeedTransactions(): Transaction[] {
     {
       id: "CM-DEMO-0001",
       dealerId: "hanjaejin-dealer",
+      dealerName: "한재진",
+      dealerCompanyName: "카마스터",
       installerId: "SHOP-MISA-001",
       installerName: "미사 스타힐스 시공점",
       vehicle: { maker: "BMW", model: "X5", class: "수입 대형/SUV" },
@@ -72,6 +78,7 @@ function demoSeedTransactions(): Transaction[] {
       pricing: { baseGuidePrice: 450000, surcharge: 0, paymentStatus: "미결제" },
       schedule: { requestedInboundAt: seedDayOnly(3), confirmedInboundAt: seedDateAt(3, 10) },
       status: { stage: "시공예약", createdAt: DEMO_SEED_CREATED_AT, updatedAt: DEMO_SEED_CREATED_AT },
+      warranty: {},
       visibility: { hiddenByDealer: false, hiddenByInstaller: false },
       chatRoomId: "CHAT-DEMO-0001",
       lastMessage: "시공예약이 확정되었습니다.",
@@ -97,6 +104,8 @@ function demoSeedTransactions(): Transaction[] {
     {
       id: "CM-DEMO-0002",
       dealerId: "hanjaejin-dealer",
+      dealerName: "한재진",
+      dealerCompanyName: "카마스터",
       installerId: "INS-CN-001",
       installerName: "카마스터 천안점",
       vehicle: { maker: "제네시스", model: "G80", class: "국산 대형/SUV" },
@@ -104,6 +113,7 @@ function demoSeedTransactions(): Transaction[] {
       pricing: { baseGuidePrice: 1250000, surcharge: 0, paymentStatus: "미결제" },
       schedule: { requestedInboundAt: seedDayOnly(-1), confirmedInboundAt: seedDateAt(-1, 14) },
       status: { stage: "입고", createdAt: DEMO_SEED_CREATED_AT, updatedAt: seedDateAt(-1, 14) },
+      warranty: {},
       visibility: { hiddenByDealer: false, hiddenByInstaller: false },
       chatRoomId: "CHAT-DEMO-0002",
       lastMessage: "프론트 작업 중 사진 보내드립니다.",
@@ -137,6 +147,8 @@ function demoSeedTransactions(): Transaction[] {
     {
       id: "CM-DEMO-0003",
       dealerId: "hanjaejin-dealer",
+      dealerName: "한재진",
+      dealerCompanyName: "카마스터",
       installerId: "SHOP-BS-001",
       installerName: "루마버텍스 해운대점",
       vehicle: { maker: "테슬라", model: "모델 3", class: "수입 승용" },
@@ -147,6 +159,7 @@ function demoSeedTransactions(): Transaction[] {
       // dashboard and still counts as an active deal on the current one.
       schedule: { requestedInboundAt: seedDayOnly(5) },
       status: { stage: "시공예약", createdAt: DEMO_SEED_CREATED_AT, updatedAt: seedDateAt(0, 9) },
+      warranty: {},
       visibility: { hiddenByDealer: false, hiddenByInstaller: false },
       chatRoomId: "CHAT-DEMO-0003",
       lastMessage: "22일 오전 11시 가능합니다. 확정해 주세요.",

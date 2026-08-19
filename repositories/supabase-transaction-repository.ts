@@ -16,6 +16,8 @@ type TransactionRow = {
   installer_id: string | null;
   shop_id: string | null;
   installer_name: string;
+  dealer_name: string | null;
+  dealer_company_name: string | null;
   vehicle: Transaction["vehicle"];
   service: Transaction["service"];
   pricing: Transaction["pricing"];
@@ -23,6 +25,12 @@ type TransactionRow = {
   stage: Transaction["status"]["stage"];
   outcome_note: string | null;
   contact_status: ContactStatus | null;
+  customer_name: string | null;
+  customer_phone: string | null;
+  vehicle_number: string | null;
+  vin: string | null;
+  warranty_info_submitted_at: string | null;
+  warranty_issued_at: string | null;
   hidden_by_dealer: boolean;
   hidden_by_installer: boolean;
   last_message: string;
@@ -50,6 +58,8 @@ function mapTransaction(row: TransactionRow): Transaction {
     installerId: row.installer_id,
     shopId: row.shop_id ?? null,
     installerName: row.installer_name,
+    dealerName: row.dealer_name ?? undefined,
+    dealerCompanyName: row.dealer_company_name ?? undefined,
     vehicle: row.vehicle,
     service: row.service,
     pricing: row.pricing,
@@ -57,6 +67,14 @@ function mapTransaction(row: TransactionRow): Transaction {
     status: { stage: row.stage, createdAt: row.created_at, updatedAt: row.updated_at },
     outcomeNote: row.outcome_note ?? undefined,
     contactStatus: row.contact_status ?? undefined,
+    warranty: {
+      customerName: row.customer_name ?? undefined,
+      customerPhone: row.customer_phone ?? undefined,
+      vehicleNumber: row.vehicle_number ?? undefined,
+      vin: row.vin ?? undefined,
+      infoSubmittedAt: row.warranty_info_submitted_at ?? undefined,
+      issuedAt: row.warranty_issued_at ?? undefined,
+    },
     visibility: { hiddenByDealer: row.hidden_by_dealer, hiddenByInstaller: row.hidden_by_installer },
     chatRoomId: room?.id ?? "",
     lastMessage: row.last_message,
@@ -76,7 +94,7 @@ export class SupabaseTransactionRepository {
     const { data, error } = await createSupabaseBrowserClient()
       .from("transactions")
       .select(
-        "id,dealer_id,installer_id,shop_id,installer_name,vehicle,service,pricing,schedule,stage,outcome_note,contact_status,hidden_by_dealer,hidden_by_installer,last_message,created_at,updated_at,transaction_rooms(id),transaction_stage_events(id,from_stage,to_stage,actor_role,direction,created_at)",
+        "id,dealer_id,installer_id,shop_id,installer_name,dealer_name,dealer_company_name,vehicle,service,pricing,schedule,stage,outcome_note,contact_status,customer_name,customer_phone,vehicle_number,vin,warranty_info_submitted_at,warranty_issued_at,hidden_by_dealer,hidden_by_installer,last_message,created_at,updated_at,transaction_rooms(id),transaction_stage_events(id,from_stage,to_stage,actor_role,direction,created_at)",
       )
       .order("updated_at", { ascending: false })
       .limit(500);
@@ -163,6 +181,32 @@ export class SupabaseTransactionRepository {
     const { error } = await createSupabaseBrowserClient().rpc("set_transaction_contact_status", {
       p_transaction_id: transactionId,
       p_status: status,
+    });
+    if (error) throw error;
+  }
+
+  /** Partial saves are intentional — a Dealer may only have a VIN at first.
+   * "Submission blocked" (missing one of the 3 required fields) shows up as
+   * the returned row staying NOT_READY, never as a thrown error. */
+  async setWarrantyInfo(
+    transactionId: string,
+    info: { customerName?: string; customerPhone?: string; vehicleNumber?: string; vin?: string },
+  ) {
+    const { error } = await createSupabaseBrowserClient().rpc("set_transaction_warranty_info", {
+      p_transaction_id: transactionId,
+      p_customer_name: info.customerName ?? null,
+      p_customer_phone: info.customerPhone ?? null,
+      p_vehicle_number: info.vehicleNumber ?? null,
+      p_vin: info.vin ?? null,
+    });
+    if (error) throw error;
+  }
+
+  /** Shop-only — the RPC rejects if warranty info isn't READY yet or it was
+   * already issued, so those cases never need checking client-side first. */
+  async issueWarranty(transactionId: string) {
+    const { error } = await createSupabaseBrowserClient().rpc("issue_transaction_warranty", {
+      p_transaction_id: transactionId,
     });
     if (error) throw error;
   }

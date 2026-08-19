@@ -69,6 +69,10 @@ function mapTransaction(row: TransactionRow): Transaction {
     pricing: row.pricing,
     schedule: row.schedule,
     status: { stage: row.stage, createdAt: row.created_at, updatedAt: row.updated_at },
+    // Shared-demo backend has no warranty columns/RPCs (out of scope for this
+    // phase, same as contact_status before it) — always NOT_READY, which is
+    // the correct/honest state since none of these rows ever carry the info.
+    warranty: {},
     visibility: { hiddenByDealer: row.hidden_by_dealer, hiddenByInstaller: row.hidden_by_installer },
     chatRoomId: row.chat_room_id,
     lastMessage: row.last_message,

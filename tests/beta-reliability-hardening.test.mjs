@@ -95,7 +95,7 @@ test("set_transaction_contact_status posts a room-visible system message, matchi
 test("Transaction type and repository mapping carry contactStatus (undefined = 확인 전), same snake_case/camelCase convention as outcomeNote", () => {
   assert.match(transactionsTypesSource, /export type ContactStatus = "contacted" \| "unreachable";/);
   assert.match(transactionsTypesSource, /contactStatus\?: ContactStatus;/);
-  assert.match(repoSource, /contact_status,hidden_by_dealer/);
+  assert.match(repoSource, /contact_status,customer_name/);
   assert.match(repoSource, /contactStatus: row\.contact_status \?\? undefined,/);
   assert.match(repoSource, /async setContactStatus\(transactionId: string, status: ContactStatus\)/);
 });

@@ -8,6 +8,7 @@ import type {
   Transaction,
   TransactionChatMessage,
   TransactionStage,
+  WarrantyStatus,
 } from "../../types/transactions";
 import {
   canTransitionStage,
@@ -18,6 +19,8 @@ import {
   nextForwardStage,
   stageOrder,
   STAGE_ACTION_LABEL,
+  warrantyStatus,
+  WARRANTY_STATUS_LABEL,
 } from "../../services/transaction-state-service";
 import { EndTransactionOutcomeModal } from "./EndTransactionOutcomeModal";
 
@@ -72,6 +75,7 @@ export function TransactionManagementScreen({
   const [tab, setTab] = useState<"거래내역" | "결제 및 정산">("거래내역");
   const [query, setQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<TransactionStage | "전체" | "진행중">(initialStageFilter ?? "전체");
+  const [warrantyFilter, setWarrantyFilter] = useState<WarrantyStatus | "전체">("전체");
   const [showHidden, setShowHidden] = useState(false);
   const [stagePending, setStagePending] = useState(false);
   const [finalPriceDraft, setFinalPriceDraft] = useState("");
@@ -90,12 +94,13 @@ export function TransactionManagementScreen({
             (stageFilter === "진행중" && ["시공예약", "입고"].includes(item.status.stage)) ||
             item.status.stage === stageFilter,
         )
+        .filter((item) => warrantyFilter === "전체" || warrantyStatus(item.warranty) === warrantyFilter)
         .filter((item) =>
           `${item.id} ${item.vehicle.maker} ${item.vehicle.model} ${item.installerName} ${item.status.stage}`
             .toLowerCase()
             .includes(query.toLowerCase()),
         ),
-    [transactions, showHidden, role, query, stageFilter],
+    [transactions, showHidden, role, query, stageFilter, warrantyFilter],
   );
   const selected = visible.find((item) => item.id === selectedId) ?? visible[0];
   const selectedTerminalOutcome = selected ? isTerminalOutcome(selected.status.stage) : false;
@@ -198,6 +203,17 @@ export function TransactionManagementScreen({
             </option>
           ))}
         </select>
+        {role === "shop" && (
+          <select
+            aria-label="보증서 상태 필터"
+            value={warrantyFilter}
+            onChange={(event) => setWarrantyFilter(event.target.value as WarrantyStatus | "전체")}
+          >
+            <option value="전체">보증서 상태: 전체</option>
+            <option value="READY">발급 대기</option>
+            <option value="ISSUED">발급 완료</option>
+          </select>
+        )}
         <label className="compact-control">
           <input type="checkbox" checked={showHidden} onChange={(event) => setShowHidden(event.target.checked)} />
           <span>숨긴 거래 보기</span>
@@ -248,13 +264,21 @@ export function TransactionManagementScreen({
                   {item.vehicle.maker} {item.vehicle.model}
                 </span>
                 <small>
-                  {role === "shop" ? "Dealer 요청" : item.installerName} ·{" "}
+                  {role === "shop" ? item.dealerName || "Dealer 요청" : item.installerName} ·{" "}
                   {role === "dealer" ? dealerStageLabel(item.status.stage) : item.status.stage}
                 </small>
                 <small className="transaction-list-schedule">
                   입고 {scheduleDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt)}
                   {item.schedule.desiredReleaseAt ? ` · 출고 ${scheduleDate(item.schedule.desiredReleaseAt)}` : ""}
                 </small>
+                {/* 보증서 발급 대기 필터가 켜져 있을 때만 — READY 상태 행에만
+                고객명/연락처가 있으므로 자연히 그 필터에서만 보인다. */}
+                {role === "shop" && warrantyFilter === "READY" && warrantyStatus(item.warranty) === "READY" && (
+                  <small>
+                    {item.dealerCompanyName ? `${item.dealerCompanyName} · ` : ""}
+                    {item.warranty.vehicleNumber} · {item.warranty.customerName} · {item.warranty.customerPhone}
+                  </small>
+                )}
                 <em>{item.lastMessage}</em>
               </button>
             ))}
@@ -335,6 +359,10 @@ export function TransactionManagementScreen({
                 <div>
                   <dt>결제 상태</dt>
                   <dd>{selected.pricing.paymentStatus}</dd>
+                </div>
+                <div>
+                  <dt>보증서 상태</dt>
+                  <dd>{WARRANTY_STATUS_LABEL[warrantyStatus(selected.warranty)]}</dd>
                 </div>
               </dl>
               {selectedTerminalOutcome && (

@@ -61,6 +61,8 @@ export function MessengerScreen({
   onPaymentChange,
   onEndOutcome,
   onSetContactStatus,
+  onSetWarrantyInfo,
+  onIssueWarranty,
   onFindAnotherShop,
   onMarkRead,
   onLoadOlder,
@@ -85,6 +87,13 @@ export function MessengerScreen({
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
   onEndOutcome: (transaction: Transaction, outcome: "취소" | "시공불가", note?: string) => Promise<void>;
   onSetContactStatus?: (transaction: Transaction, status: ContactStatus) => Promise<void>;
+  /** Dealer-only — saves whatever warranty-issuance fields are filled in. */
+  onSetWarrantyInfo?: (
+    transaction: Transaction,
+    info: { customerName?: string; customerPhone?: string; vehicleNumber?: string; vin?: string },
+  ) => Promise<void>;
+  /** Shop-only — marks the warranty as issued once info is READY. */
+  onIssueWarranty?: (transaction: Transaction) => Promise<void>;
   /** Only meaningful for role === "dealer" on a terminated transaction. */
   onFindAnotherShop?: () => void;
   onMarkRead: (roomId: string) => void;
@@ -284,6 +293,8 @@ export function MessengerScreen({
               onPaymentChange={onPaymentChange}
               onEndOutcome={onEndOutcome}
               onSetContactStatus={onSetContactStatus}
+              onSetWarrantyInfo={onSetWarrantyInfo}
+              onIssueWarranty={onIssueWarranty}
               onFindAnotherShop={onFindAnotherShop}
               onMarkRead={onMarkRead}
               onLoadOlder={onLoadOlder}

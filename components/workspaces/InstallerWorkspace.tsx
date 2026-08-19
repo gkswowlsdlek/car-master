@@ -38,6 +38,7 @@ type InstallerWorkspaceProps = {
   onStageChange: (transaction: Transaction, stage: TransactionStage) => Promise<void>;
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
   onEndOutcome: (transaction: Transaction, outcome: "취소" | "시공불가", note?: string) => Promise<void>;
+  onIssueWarranty: (transaction: Transaction) => Promise<void>;
   onMarkRead: (roomId: string) => void;
   /** Prepends the previous page of chat history for one room. */
   onLoadOlderMessages?: (roomId: string) => Promise<boolean>;
@@ -66,6 +67,7 @@ export function InstallerWorkspace({
   onStageChange,
   onPaymentChange,
   onEndOutcome,
+  onIssueWarranty,
   onMarkRead,
   onLoadOlderMessages,
   onLoadContact,
@@ -200,6 +202,7 @@ export function InstallerWorkspace({
           onStageChange={onStageChange}
           onPaymentChange={onPaymentChange}
           onEndOutcome={onEndOutcome}
+          onIssueWarranty={onIssueWarranty}
           onMarkRead={onMarkRead}
           onLoadOlder={onLoadOlderMessages}
           onLoadContact={onLoadContact}

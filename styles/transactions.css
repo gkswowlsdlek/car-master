@@ -715,6 +715,74 @@
   color: var(--color-muted-soft);
   font-size: var(--font-xs);
 }
+/* 보증서 발급 정보 — .sidebar-settlement button은 최종금액/결제상태의
+   한 줄짜리 저장 버튼용으로 만들어져 있어(강제 파란 배경, 8px 10px 패딩)
+   그대로 두면 이 폼의 .button-secondary가 파랗게 덮인다. .button.button-*
+   조합으로 한 번 더 잡아 우선순위를 이긴다. */
+.sidebar-settlement .button.button-primary,
+.sidebar-settlement .button.button-secondary {
+  min-height: 36px;
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: var(--font-xs);
+}
+.sidebar-settlement .button.button-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+.sidebar-settlement .button.button-secondary {
+  border: 1px solid var(--color-line);
+  background: #fff;
+  color: var(--color-text-soft);
+}
+/* .sidebar-settlement > div는 "입력창+저장 버튼 한 줄"용 display:flex
+   규칙이라(0,1,1 specificity) .warranty-form 같은 일반 클래스 규칙(0,1,0)을
+   그냥 덮어버린다 — 라벨 6개가 전부 한 줄로 눌려 나온 원인이었다. 전부
+   `.sidebar-settlement `를 붙여 (0,2,*)로 specificity를 확실히 이긴다. */
+.sidebar-settlement .warranty-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.sidebar-settlement .warranty-form-group-label {
+  margin: 6px 0 -2px;
+  color: var(--color-muted-soft);
+  font-size: var(--font-xs);
+  font-weight: 700;
+}
+.sidebar-settlement .warranty-form label {
+  display: grid;
+  gap: 4px;
+  color: var(--color-muted);
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+.sidebar-settlement .warranty-form input {
+  min-width: 0;
+  height: 38px;
+  font-size: var(--font-xs);
+}
+.sidebar-settlement .warranty-form label small {
+  color: var(--color-muted-soft);
+  font-weight: 500;
+}
+.sidebar-settlement .warranty-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+.sidebar-settlement .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.sidebar-settlement .warranty-result-message {
+  margin: 4px 0 0;
+  color: var(--color-primary);
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
 /* Phase 5: 거래 Lifecycle 완성 (예외 종료 + 최종 시공금액) */
 .transaction-outcome-banner {
   display: flex;
