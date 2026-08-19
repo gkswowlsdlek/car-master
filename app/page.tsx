@@ -127,6 +127,8 @@ export default function Home() {
     changeStage,
     endOutcome,
     setContactStatus,
+    setWarrantyInfo,
+    issueWarranty,
     changeFinalPrice,
     changePayment,
   } = useTransactionActions({ useSupabaseData, transactions, sharedRoomIds, demoActorId: account.id, role, refresh });
@@ -437,6 +439,7 @@ export default function Home() {
           onPaymentChange={changePayment}
           onEndOutcome={endOutcome}
           onSetContactStatus={setContactStatus}
+          onSetWarrantyInfo={setWarrantyInfo}
           onFindAnotherShop={() => goToScreen("dealerMap")}
           onMarkRead={markRoomRead}
           onLoadContact={loadContact}
@@ -467,6 +470,7 @@ export default function Home() {
           onStageChange={changeStage}
           onPaymentChange={changePayment}
           onEndOutcome={endOutcome}
+          onIssueWarranty={issueWarranty}
           onMarkRead={markRoomRead}
           onLoadContact={loadContact}
           onLoadOlderMessages={loadOlderMessages}

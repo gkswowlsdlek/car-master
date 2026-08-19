@@ -79,6 +79,10 @@ type DealerWorkspaceProps = {
   onPaymentChange: (transaction: Transaction, status: PaymentStatus) => void;
   onEndOutcome: (transaction: Transaction, outcome: "취소" | "시공불가", note?: string) => Promise<void>;
   onSetContactStatus: (transaction: Transaction, status: ContactStatus) => Promise<void>;
+  onSetWarrantyInfo: (
+    transaction: Transaction,
+    info: { customerName?: string; customerPhone?: string; vehicleNumber?: string; vin?: string },
+  ) => Promise<void>;
   onFindAnotherShop: () => void;
   onMarkRead: (roomId: string) => void;
   /** Prepends the previous page of chat history for one room. */
@@ -110,6 +114,7 @@ export function DealerWorkspace({
   onPaymentChange,
   onEndOutcome,
   onSetContactStatus,
+  onSetWarrantyInfo,
   onFindAnotherShop,
   onMarkRead,
   onLoadOlderMessages,
@@ -331,6 +336,8 @@ export function DealerWorkspace({
       const transaction: Transaction = {
         id,
         dealerId: account.id,
+        dealerName: account.name,
+        dealerCompanyName: defaultDealerCompanyName,
         installerId: selectedShop.id,
         installerName: selectedShop.name,
         vehicle: { maker: request.maker, model: request.model, class: request.vehicleClass },
@@ -343,6 +350,7 @@ export function DealerWorkspace({
         },
         schedule: { requestedInboundAt: request.inboundStart, desiredReleaseAt: request.releaseDate },
         status: { stage: "견적", createdAt: now, updatedAt: now },
+        warranty: {},
         visibility: { hiddenByDealer: false, hiddenByInstaller: false },
         chatRoomId,
         lastMessage: "새 시공 요청이 접수되었습니다.",
@@ -487,6 +495,7 @@ export function DealerWorkspace({
           onPaymentChange={onPaymentChange}
           onEndOutcome={onEndOutcome}
           onSetContactStatus={onSetContactStatus}
+          onSetWarrantyInfo={onSetWarrantyInfo}
           onFindAnotherShop={onFindAnotherShop}
           onMarkRead={onMarkRead}
           onLoadOlder={onLoadOlderMessages}

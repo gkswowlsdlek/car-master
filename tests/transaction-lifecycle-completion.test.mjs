@@ -174,7 +174,7 @@ test("use-transaction-actions exposes a dedicated endOutcome (not routed through
   assert.match(fn, /transitionStage\(transaction, outcome, role === "shop" \? "shop" : "dealer"\)/);
   assert.match(
     actionsHookSource,
-    /return\s*\{\s*sendMessage,\s*markRoomRead,\s*loadContact,\s*hideTransaction,\s*unhideTransaction,\s*changeStage,\s*endOutcome,\s*setContactStatus,\s*changeFinalPrice,\s*changePayment\s*,?\s*\};/,
+    /return\s*\{\s*sendMessage,\s*markRoomRead,\s*loadContact,\s*hideTransaction,\s*unhideTransaction,\s*changeStage,\s*endOutcome,\s*setContactStatus,\s*setWarrantyInfo,\s*issueWarranty,\s*changeFinalPrice,\s*changePayment\s*,?\s*\};/,
   );
 });
 

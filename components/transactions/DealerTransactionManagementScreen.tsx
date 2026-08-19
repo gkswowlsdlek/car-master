@@ -1,9 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Phone, PhoneOff, Search } from "lucide-react";
+import { FileWarning, Phone, PhoneOff, Search } from "lucide-react";
 import type { Transaction, TransactionStage } from "../../types/transactions";
-import { dealerStageIndex, dealerStageLabel, isTerminalOutcome } from "../../services/transaction-state-service";
+import {
+  dealerStageIndex,
+  dealerStageLabel,
+  isTerminalOutcome,
+  warrantyStatus,
+} from "../../services/transaction-state-service";
 
 const won = (value?: number) => (value == null ? undefined : `${value.toLocaleString("ko-KR")}원`);
 const shortDate = (value?: string) =>
@@ -179,6 +184,11 @@ export function DealerTransactionManagementScreen({
                 ? shortDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt)
                 : undefined;
             const price = won(item.pricing.finalPrice);
+            // 작업 생성 직후~입고 전엔 옅게, 입고~작업완료(출고 전) 구간부터는
+            // 강조 스타일로 — 처음부터 강하게 방해하지 않는다는 요구사항 그대로.
+            const warranty = warrantyStatus(item.warranty);
+            const warrantyUrgent = item.status.stage === "입고" || item.status.stage === "작업완료";
+            const showWarrantyFlag = !terminal && warranty !== "READY" && warranty !== "ISSUED";
             const nextAction = needsPhoneConfirm
               ? "전화 확인"
               : item.status.stage === "견적"
@@ -223,6 +233,16 @@ export function DealerTransactionManagementScreen({
                   {contactUnreachable && (
                     <small className="phone-confirm-flag phone-confirm-flag-unreachable">
                       <PhoneOff size={11} aria-hidden="true" /> 연락 안 됨
+                    </small>
+                  )}
+                  {showWarrantyFlag && (
+                    <small
+                      className={`phone-confirm-flag${warrantyUrgent ? " phone-confirm-flag-unreachable" : ""}`}
+                    >
+                      <FileWarning size={11} aria-hidden="true" />{" "}
+                      {item.warranty.vehicleNumber == null && item.warranty.vin
+                        ? "차량번호 대기"
+                        : "보증서 정보 미입력"}
                     </small>
                   )}
                   {/* 확정 시공금액 — 읽기 전용 표기(편집은 거래방에서). */}

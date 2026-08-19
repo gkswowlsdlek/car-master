@@ -37,6 +37,8 @@ import {
   stageOrder,
   STAGE_ACTION_LABEL,
   STAGE_REVERT_LABEL,
+  warrantyStatus,
+  WARRANTY_STATUS_LABEL,
 } from "../../services/transaction-state-service";
 import type {
   ChatAttachment,
@@ -113,6 +115,8 @@ export function TransactionChatWorkspace({
   onPaymentChange,
   onEndOutcome,
   onSetContactStatus,
+  onSetWarrantyInfo,
+  onIssueWarranty,
   onFindAnotherShop,
   onMarkRead,
   onLoadContact,
@@ -137,6 +141,13 @@ export function TransactionChatWorkspace({
   onEndOutcome: (transaction: Transaction, outcome: "취소" | "시공불가", note?: string) => Promise<void>;
   /** Phone-contact result (Phase 8) — independent signal, never forces a stage/outcome change. */
   onSetContactStatus?: (transaction: Transaction, status: ContactStatus) => Promise<void>;
+  /** Dealer-only — saves whatever warranty-issuance fields are filled in (partial saves allowed). */
+  onSetWarrantyInfo?: (
+    transaction: Transaction,
+    info: { customerName?: string; customerPhone?: string; vehicleNumber?: string; vin?: string },
+  ) => Promise<void>;
+  /** Shop-only — marks the warranty as issued; the caller enforces READY-only server-side. */
+  onIssueWarranty?: (transaction: Transaction) => Promise<void>;
   /** Meaningful for role === "dealer" on a terminated transaction, or after an "연락이 안 돼요" contact result — sends the dealer back to Shop Search. */
   onFindAnotherShop?: () => void;
   onMarkRead?: (roomId: string) => void;
@@ -167,6 +178,11 @@ export function TransactionChatWorkspace({
   const [notificationsMuted, setNotificationsMuted] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [contactStatusPending, setContactStatusPending] = useState(false);
+  const [warrantyFormOpen, setWarrantyFormOpen] = useState(false);
+  const [warrantyDraft, setWarrantyDraft] = useState({ customerName: "", customerPhone: "", vehicleNumber: "", vin: "" });
+  const [warrantyPending, setWarrantyPending] = useState(false);
+  const [warrantyResultMessage, setWarrantyResultMessage] = useState("");
+  const [issueWarrantyPending, setIssueWarrantyPending] = useState(false);
   const [shopMessageCopied, setShopMessageCopied] = useState(false);
   const imageInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -500,6 +516,70 @@ export function TransactionChatWorkspace({
       setContactStatusPending(false);
     }
   };
+  const openWarrantyForm = () => {
+    setWarrantyDraft({
+      customerName: transaction.warranty.customerName ?? "",
+      customerPhone: transaction.warranty.customerPhone ?? "",
+      vehicleNumber: transaction.warranty.vehicleNumber ?? "",
+      vin: transaction.warranty.vin ?? "",
+    });
+    setWarrantyResultMessage("");
+    setWarrantyFormOpen(true);
+  };
+  // "보증서 정보 전달"은 3개 필수 필드가 전부 있을 때만 활성화된다 — 완료
+  // 처리는 이 버튼에서만 일어난다. VIN 등 일부만 먼저 저장하고 싶을 때는
+  // 아래 "임시 저장"(항상 클릭 가능, 같은 RPC를 그대로 호출 — 백엔드는
+  // 원래도 부분 저장을 허용한다)을 쓴다. 어느 버튼을 눌러도 warrantyStatus는
+  // 여전히 3개 필드 존재 여부로만 파생되므로, VIN만 저장하면 항상 NOT_READY.
+  const canSubmitWarranty = Boolean(
+    warrantyDraft.customerName.trim() && warrantyDraft.customerPhone.trim() && warrantyDraft.vehicleNumber.trim(),
+  );
+  // 임시 저장 후 안내 문구 — 어떤 필드가 비어 있는지에 따라 갈린다. VIN만
+  // 있고 나머지가 전부 비어 있으면(시나리오 B) "차량 확인 가능" 문구, 이름/
+  // 연락처는 있는데 차량번호만 없으면(시나리오 D) 차량번호 안내 문구를
+  // 우선한다 — 둘 다 vehicleNumber가 없다는 점은 같지만 상황이 다르다.
+  const warrantyDraftGuidance = () => {
+    const hasName = Boolean(warrantyDraft.customerName.trim());
+    const hasPhone = Boolean(warrantyDraft.customerPhone.trim());
+    const hasPlate = Boolean(warrantyDraft.vehicleNumber.trim());
+    const hasVin = Boolean(warrantyDraft.vin.trim());
+    if (hasName && hasPhone && hasPlate) return "정보가 저장되었습니다.";
+    if (!hasPlate && hasVin && !hasName && !hasPhone)
+      return "차량 확인은 가능하지만 보증서 발급 정보는 아직 완료되지 않았습니다.";
+    if (!hasPlate) return "보증서 발급에는 차량번호가 필요합니다.";
+    if (!hasName) return "고객명을 입력해 주세요.";
+    if (!hasPhone) return "연락처를 입력해 주세요.";
+    return "정보가 저장되었습니다.";
+  };
+  const saveWarrantyDraft = async () => {
+    if (!onSetWarrantyInfo || warrantyPending) return;
+    setWarrantyPending(true);
+    try {
+      await onSetWarrantyInfo(transaction, warrantyDraft);
+      setWarrantyResultMessage(warrantyDraftGuidance());
+    } finally {
+      setWarrantyPending(false);
+    }
+  };
+  const submitWarrantyInfo = async () => {
+    if (!onSetWarrantyInfo || warrantyPending || !canSubmitWarranty) return;
+    setWarrantyPending(true);
+    try {
+      await onSetWarrantyInfo(transaction, warrantyDraft);
+      setWarrantyResultMessage("보증서 발급 준비가 완료됐습니다. 시공점에 전달됩니다.");
+    } finally {
+      setWarrantyPending(false);
+    }
+  };
+  const submitIssueWarranty = async () => {
+    if (!onIssueWarranty || issueWarrantyPending) return;
+    setIssueWarrantyPending(true);
+    try {
+      await onIssueWarranty(transaction);
+    } finally {
+      setIssueWarrantyPending(false);
+    }
+  };
   const copyShopMessage = () => {
     void navigator.clipboard?.writeText(generateShopMessage(transaction)).then(() => {
       setShopMessageCopied(true);
@@ -522,9 +602,10 @@ export function TransactionChatWorkspace({
               <h2>
                 {transaction.vehicle.maker} {transaction.vehicle.model} ·{" "}
                 {transaction.service.product ?? transaction.service.workDescription}
+                {transaction.warranty.vehicleNumber ? ` · ${transaction.warranty.vehicleNumber}` : ""}
               </h2>
               <p>
-                {role === "dealer" ? transaction.installerName : "담당 딜러"} <i />{" "}
+                {role === "dealer" ? transaction.installerName : transaction.dealerName || "담당 딜러"} <i />{" "}
                 <b>{role === "dealer" ? dealerStageLabel(transaction.status.stage) : transaction.status.stage}</b>
               </p>
             </div>
@@ -865,6 +946,34 @@ export function TransactionChatWorkspace({
               )}
             </div>
           ))}
+        {/* 보증서 발급 정보 경고 — 작업 생성 직후/입고 전에는 강하게 방해하지
+        않는다(목록의 옅은 배지로 충분). 입고~작업완료(출고 전) 구간부터
+        role==dealer && 미완료일 때만 배너를 올리고, 작업완료 단계에서는
+        더 강한 문구로 바뀐다. 작업완료/출고 자체는 절대 막지 않는다. */}
+        {role === "dealer" &&
+          (transaction.status.stage === "입고" || transaction.status.stage === "작업완료") &&
+          warrantyStatus(transaction.warranty) !== "READY" &&
+          warrantyStatus(transaction.warranty) !== "ISSUED" && (
+            <div className="phone-confirm-banner phone-confirm-unreachable" role="status">
+              <p>
+                {transaction.status.stage === "작업완료"
+                  ? "보증서 발급 정보가 아직 없습니다. 고객명, 연락처, 차량번호가 입력되지 않으면 시공점에서 보증서를 발급할 수 없습니다."
+                  : "보증서 발급 정보가 필요합니다. 출고 전 고객명, 연락처, 차량번호를 입력해주세요."}
+              </p>
+              <div className="phone-confirm-actions">
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={() => {
+                    setDetailPanel("transaction");
+                    openWarrantyForm();
+                  }}
+                >
+                  지금 입력
+                </button>
+              </div>
+            </div>
+          )}
         <div className="messenger-messages" ref={messagesContainer} onScroll={handleScroll}>
           {room?.hasMoreMessages && onLoadOlder && (
             <div className="messenger-load-older">
@@ -1198,6 +1307,173 @@ export function TransactionChatWorkspace({
                 transaction.pricing.paymentStatus === "미결제" && (
                   <button onClick={() => onPaymentChange(transaction, "결제대기")}>금액 확인</button>
                 )}
+            </div>
+            <div className="sidebar-settlement">
+              <h4>보증서 발급 정보</h4>
+              {role === "dealer" ? (
+                warrantyFormOpen ? (
+                  <div className="warranty-form">
+                    <p className="warranty-form-group-label">고객 정보</p>
+                    <label>
+                      고객명 *
+                      <input
+                        value={warrantyDraft.customerName}
+                        onChange={(event) =>
+                          setWarrantyDraft((current) => ({ ...current, customerName: event.target.value }))
+                        }
+                        placeholder="고객명"
+                      />
+                    </label>
+                    <label>
+                      연락처 *
+                      <input
+                        value={warrantyDraft.customerPhone}
+                        onChange={(event) =>
+                          setWarrantyDraft((current) => ({ ...current, customerPhone: event.target.value }))
+                        }
+                        placeholder="연락처"
+                        inputMode="tel"
+                      />
+                    </label>
+                    <p className="warranty-form-group-label">차량 정보</p>
+                    <label>
+                      차량번호 *
+                      <input
+                        value={warrantyDraft.vehicleNumber}
+                        onChange={(event) =>
+                          setWarrantyDraft((current) => ({ ...current, vehicleNumber: event.target.value }))
+                        }
+                        placeholder="예: 123가4567"
+                      />
+                      <small>보증서 발급에는 차량번호가 필요합니다.</small>
+                    </label>
+                    <label>
+                      차대번호(VIN)
+                      <input
+                        value={warrantyDraft.vin}
+                        onChange={(event) => setWarrantyDraft((current) => ({ ...current, vin: event.target.value }))}
+                        placeholder="선택 입력"
+                      />
+                      <small>차대번호는 차량 확인용 선택 정보입니다.</small>
+                    </label>
+                    {warrantyResultMessage && <p className="warranty-result-message">{warrantyResultMessage}</p>}
+                    <div className="warranty-form-actions">
+                      <button type="button" className="button button-secondary" onClick={() => setWarrantyFormOpen(false)}>
+                        닫기
+                      </button>
+                      <button
+                        type="button"
+                        className="button button-secondary"
+                        disabled={warrantyPending || canSubmitWarranty}
+                        aria-busy={warrantyPending}
+                        onClick={() => void saveWarrantyDraft()}
+                        title={
+                          canSubmitWarranty
+                            ? "고객명, 연락처, 차량번호가 모두 있어요 — 보증서 정보 전달을 눌러주세요."
+                            : "차량번호가 아직 없을 때 VIN 등 일부 정보만 먼저 저장합니다."
+                        }
+                      >
+                        {warrantyPending ? "저장 중…" : "임시 저장"}
+                      </button>
+                      <button
+                        type="button"
+                        className="button button-primary"
+                        disabled={warrantyPending || !canSubmitWarranty}
+                        aria-busy={warrantyPending}
+                        title={canSubmitWarranty ? undefined : "고객명, 연락처, 차량번호가 모두 있어야 전달할 수 있습니다."}
+                        onClick={() => void submitWarrantyInfo()}
+                      >
+                        {warrantyPending ? "전달 중…" : "보증서 정보 전달"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p>
+                      {warrantyStatus(transaction.warranty) === "ISSUED"
+                        ? "보증서 발급 완료"
+                        : warrantyStatus(transaction.warranty) === "READY"
+                          ? "발급 대기 — 시공점에서 확인 중입니다."
+                          : "차량 입고 후 출고 전까지 보증서 발급 정보를 입력해주세요. 고객명, 연락처, 차량번호가 등록되어야 시공점에서 보증서를 발급할 수 있습니다."}
+                    </p>
+                    {warrantyStatus(transaction.warranty) !== "ISSUED" && (
+                      <button type="button" className="button button-secondary" onClick={openWarrantyForm}>
+                        보증서 정보 입력
+                      </button>
+                    )}
+                  </>
+                )
+              ) : (
+                <>
+                  <dl className="briefing-data warranty-info-dl">
+                    <div>
+                      <dt>담당 딜러</dt>
+                      <dd>{transaction.dealerName || "확인 중"}</dd>
+                    </div>
+                    <div>
+                      <dt>딜러 소속</dt>
+                      <dd>{transaction.dealerCompanyName || "확인 중"}</dd>
+                    </div>
+                    <div>
+                      <dt>차종</dt>
+                      <dd>
+                        {transaction.vehicle.maker} {transaction.vehicle.model}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>차량번호</dt>
+                      <dd>{transaction.warranty.vehicleNumber || "미등록"}</dd>
+                    </div>
+                    <div>
+                      <dt>VIN</dt>
+                      <dd>{transaction.warranty.vin || "미등록"}</dd>
+                    </div>
+                    <div>
+                      <dt>고객명</dt>
+                      <dd>{transaction.warranty.customerName || "미등록"}</dd>
+                    </div>
+                    <div>
+                      <dt>고객 연락처</dt>
+                      <dd>{transaction.warranty.customerPhone || "미등록"}</dd>
+                    </div>
+                    <div>
+                      <dt>정보 등록일</dt>
+                      <dd>
+                        {transaction.warranty.infoSubmittedAt
+                          ? new Date(transaction.warranty.infoSubmittedAt).toLocaleString("ko-KR", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "미등록"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>보증서 상태</dt>
+                      <dd>{WARRANTY_STATUS_LABEL[warrantyStatus(transaction.warranty)]}</dd>
+                    </div>
+                  </dl>
+                  {warrantyStatus(transaction.warranty) === "NOT_READY" && (
+                    <p className="warranty-result-message">
+                      {transaction.warranty.customerName || transaction.warranty.customerPhone || transaction.warranty.vin
+                        ? "차량번호 등록 대기 중입니다."
+                        : "딜러가 아직 보증서 발급 정보를 등록하지 않았습니다."}
+                    </p>
+                  )}
+                  {warrantyStatus(transaction.warranty) === "READY" && onIssueWarranty && (
+                    <button
+                      type="button"
+                      className="button button-primary"
+                      disabled={issueWarrantyPending}
+                      aria-busy={issueWarrantyPending}
+                      onClick={() => void submitIssueWarranty()}
+                    >
+                      {issueWarrantyPending ? "처리 중…" : "보증서 발급 완료"}
+                    </button>
+                  )}
+                </>
+              )}
             </div>
             <div className="sidebar-stage-log">
               <button

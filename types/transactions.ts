@@ -11,6 +11,29 @@ export type PaymentStatus = "미결제" | "결제대기" | "결제완료" | "정
  * outcome (취소/시공불가). undefined = 확인 전; never inferred from stage. */
 export type ContactStatus = "contacted" | "unreachable";
 
+/** Never stored — always derived by services/transaction-state-service.ts's
+ * warrantyStatus(). ISSUED iff issuedAt is set; READY iff not issued and
+ * customerName+customerPhone+vehicleNumber are all present; NOT_READY
+ * otherwise. Storing this as its own column would let it drift from the
+ * fields it summarizes — deriving it makes that class of bug impossible. */
+export type WarrantyStatus = "NOT_READY" | "READY" | "ISSUED";
+
+/** Warranty-issuance info — separate from customer/CRM data (this app has
+ * none): the Dealer fills this in only when there's a warranty to issue.
+ * vehicleNumber is required for issuance; vin is an optional vehicle-ID aid
+ * for before the plate exists (e.g. a brand-new car at intake) and never
+ * substitutes for it. */
+export type WarrantyInfo = {
+  customerName?: string;
+  customerPhone?: string;
+  vehicleNumber?: string;
+  vin?: string;
+  /** Stamped once, the first time all three required fields become present
+   * (NOT_READY -> READY) — re-saving afterward does not move it. */
+  infoSubmittedAt?: string;
+  issuedAt?: string;
+};
+
 /** One row of the 거래 로그: every forward advance and every one-step revert. */
 export type TransactionStageEvent = {
   id: string;
@@ -29,6 +52,12 @@ export type Transaction = {
   /** Real Supabase Shop id; optional while legacy and Demo transactions coexist. */
   shopId?: string | null;
   installerName: string;
+  /** Dealer identity snapshot, taken at creation time — the mirror of
+   * installerName. Optional: not every backend path populates it yet
+   * (Demo/local transactions predating this field, shared-demo rows). Falls
+   * back to the existing per-role generic label when absent. */
+  dealerName?: string;
+  dealerCompanyName?: string;
   vehicle: { maker: string; model: string; class: VehicleClass | "" };
   service: { brand?: string; product?: string; workDescription: string; extraRequest?: string };
   pricing: {
@@ -49,6 +78,9 @@ export type Transaction = {
   /** Short reason for the current 취소/시공불가 outcome, if any — never shown as a payment/settlement field. */
   outcomeNote?: string;
   contactStatus?: ContactStatus;
+  /** Always an object (never undefined) so UI can read transaction.warranty.x
+   * without a null-check — every construction site sets at least {}. */
+  warranty: WarrantyInfo;
   visibility: { hiddenByDealer: boolean; hiddenByInstaller: boolean };
   chatRoomId: string;
   lastMessage: string;

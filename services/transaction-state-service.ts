@@ -1,4 +1,11 @@
-import type { PaymentStatus, Transaction, TransactionStage, TransactionStageEvent } from "../types/transactions";
+import type {
+  PaymentStatus,
+  Transaction,
+  TransactionStage,
+  TransactionStageEvent,
+  WarrantyInfo,
+  WarrantyStatus,
+} from "../types/transactions";
 
 export type TransactionActorRole = "dealer" | "shop" | "admin";
 
@@ -134,6 +141,21 @@ export function transitionStage(
     stageLog: [...(transaction.stageLog ?? []), event],
   };
 }
+
+/** Never stored — see WarrantyStatus's doc comment. Pure function so
+ * Supabase/shared-demo/local rows all compute the same label from whatever
+ * fields they actually carry. */
+export function warrantyStatus(warranty: WarrantyInfo): WarrantyStatus {
+  if (warranty.issuedAt) return "ISSUED";
+  if (warranty.customerName && warranty.customerPhone && warranty.vehicleNumber) return "READY";
+  return "NOT_READY";
+}
+
+export const WARRANTY_STATUS_LABEL: Record<WarrantyStatus, string> = {
+  NOT_READY: "보증서 정보 미입력",
+  READY: "발급 대기",
+  ISSUED: "발급 완료",
+};
 
 export function transitionPayment(
   transaction: Transaction,

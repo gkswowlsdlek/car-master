@@ -42,6 +42,13 @@ function serviceLabel(item: Transaction) {
     ? `${item.service.brand} · ${item.service.workDescription}`
     : item.service.workDescription || "시공 품목 미정";
 }
+/** 차량번호가 아직 없으면 VIN으로 차량 확인이 가능하게 — VIN도 없으면
+ * 아무것도 보여줄 게 없다는 뜻이므로 빈 문자열(호출부가 그 줄 자체를 건너뜀). */
+function vehicleIdLabel(item: Transaction) {
+  if (item.warranty.vehicleNumber) return item.warranty.vehicleNumber;
+  if (item.warranty.vin) return `VIN ${item.warranty.vin}`;
+  return "";
+}
 const won = (value?: number) => (value == null ? "미확정" : `${value.toLocaleString("ko-KR")}원`);
 
 export function ShopDashboard({
@@ -169,8 +176,11 @@ export function ShopDashboard({
                     <CarFront size={16} /> {item.vehicle.maker} {item.vehicle.model}
                   </b>
                   <small>
-                    딜러: {dealerLabel(item.dealerId)} · {serviceLabel(item)}
+                    딜러: {item.dealerName || dealerLabel(item.dealerId)} · {serviceLabel(item)}
                   </small>
+                  {(item.dealerCompanyName || vehicleIdLabel(item)) && (
+                    <small>{[item.dealerCompanyName, vehicleIdLabel(item)].filter(Boolean).join(" · ")}</small>
+                  )}
                   <em className={`status-chip status-${item.status.stage}`}>{item.status.stage}</em>
                 </button>
                 <div className="installer-vehicle-actions">
@@ -211,8 +221,11 @@ export function ShopDashboard({
                     <CarFront size={16} /> {item.vehicle.maker} {item.vehicle.model}
                   </b>
                   <small>
-                    딜러: {dealerLabel(item.dealerId)} · {serviceLabel(item)}
+                    딜러: {item.dealerName || dealerLabel(item.dealerId)} · {serviceLabel(item)}
                   </small>
+                  {(item.dealerCompanyName || vehicleIdLabel(item)) && (
+                    <small>{[item.dealerCompanyName, vehicleIdLabel(item)].filter(Boolean).join(" · ")}</small>
+                  )}
                   <em className={`status-chip status-${item.status.stage}`}>{item.status.stage}</em>
                 </button>
                 <div className="installer-vehicle-actions">

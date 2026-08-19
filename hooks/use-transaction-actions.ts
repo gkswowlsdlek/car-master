@@ -10,7 +10,7 @@ import { transactionRepository } from "../repositories/transaction-repository";
 import { resolveDemoContact } from "../services/contact-directory";
 import { createId } from "../services/id-service";
 import { notificationService } from "../services/notifications/notification-service";
-import { transitionPayment, transitionStage } from "../services/transaction-state-service";
+import { transitionPayment, transitionStage, warrantyStatus } from "../services/transaction-state-service";
 import { translateTransactionError } from "../services/transaction-errors";
 import type { Role } from "../types/dealer";
 import type {
@@ -19,6 +19,7 @@ import type {
   Transaction,
   TransactionChatMessage,
   TransactionStage,
+  WarrantyInfo,
 } from "../types/transactions";
 
 type UseTransactionActionsOptions = {
@@ -234,6 +235,69 @@ export function useTransactionActions({
     [refresh, useSupabaseData],
   );
 
+  /** Dealer-only (own transaction) or admin — Real gets the RPC (which also
+   * stamps infoSubmittedAt on the first NOT_READY -> READY transition and
+   * posts a system message, server-side). Demo/local: no demo RPC exists for
+   * this field yet (same shortcut as setContactStatus), so it's a local
+   * update that mirrors the RPC's own "stamp submittedAt only on first
+   * transition to READY" rule. Partial saves are intentional — a Dealer
+   * with only a VIN so far can still save that much. */
+  const setWarrantyInfo = useCallback(
+    async (
+      transaction: Transaction,
+      info: { customerName?: string; customerPhone?: string; vehicleNumber?: string; vin?: string },
+    ) => {
+      try {
+        if (useSupabaseData) {
+          await supabaseTransactionRepository.setWarrantyInfo(transaction.id, info);
+          await refresh();
+          return;
+        }
+        const nextWarranty: WarrantyInfo = { ...transaction.warranty, ...info };
+        const wasReady = warrantyStatus(transaction.warranty) !== "NOT_READY";
+        const nowReady = warrantyStatus(nextWarranty) !== "NOT_READY";
+        transactionRepository.update({
+          ...transaction,
+          warranty: {
+            ...nextWarranty,
+            infoSubmittedAt: nowReady && !wasReady ? new Date().toISOString() : transaction.warranty.infoSubmittedAt,
+          },
+          status: { ...transaction.status, updatedAt: new Date().toISOString() },
+        });
+      } catch (error) {
+        alert(translateTransactionError(error, "보증서 발급 정보를 저장하지 못했습니다."));
+      }
+    },
+    [refresh, useSupabaseData],
+  );
+
+  /** Shop-only. Real: the RPC itself refuses an issue when info isn't READY
+   * yet or it was already issued (Scenario K — never let a transaction end
+   * up wrongly ISSUED). Demo/local mirrors both checks client-side since
+   * there's no RPC to enforce them there. */
+  const issueWarranty = useCallback(
+    async (transaction: Transaction) => {
+      try {
+        if (useSupabaseData) {
+          await supabaseTransactionRepository.issueWarranty(transaction.id);
+          await refresh();
+          return;
+        }
+        if (warrantyStatus(transaction.warranty) !== "READY") {
+          throw new Error("보증서 발급 정보가 아직 준비되지 않았습니다.");
+        }
+        transactionRepository.update({
+          ...transaction,
+          warranty: { ...transaction.warranty, issuedAt: new Date().toISOString() },
+          status: { ...transaction.status, updatedAt: new Date().toISOString() },
+        });
+      } catch (error) {
+        alert(translateTransactionError(error, "보증서 발급 처리를 완료하지 못했습니다."));
+      }
+    },
+    [refresh, useSupabaseData],
+  );
+
   const changeFinalPrice = useCallback(
     async (transaction: Transaction, finalPrice: number) => {
       try {
@@ -283,6 +347,8 @@ export function useTransactionActions({
     changeStage,
     endOutcome,
     setContactStatus,
+    setWarrantyInfo,
+    issueWarranty,
     changeFinalPrice,
     changePayment,
   };
