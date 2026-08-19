@@ -38,8 +38,11 @@ test("TransactionManagementScreen exposes a 거래 숨기기 action (not just �
   assert.match(source, /onHide\(selected\.id, role\)/);
 });
 
-test("Admin transaction list shows 담당 딜러 (dealerId) and 시공점 (installerName) as two distinct fields, not installerName mislabeled as 담당 딜러", async () => {
+test("Admin transaction list shows 담당 딜러 (dealer name, not the raw uuid) and 시공점 (installerName) as two distinct fields, not installerName mislabeled as 담당 딜러", async () => {
   const source = await read("components/admin/AdminTransactionPanel.tsx");
-  assert.match(source, /담당 딜러<small>\{item\.dealerId\}<\/small>/);
+  assert.match(
+    source,
+    /담당 딜러\s*<small>\{\[item\.dealerName, item\.dealerCompanyName\]\.filter\(Boolean\)\.join\(" · "\) \|\| "미확인"\}<\/small>/,
+  );
   assert.match(source, /시공점<small>\{item\.installerName\}<\/small>/);
 });

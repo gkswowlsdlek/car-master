@@ -37,9 +37,15 @@ test("TransactionChatWorkspace shows the collapsed dealer label only for role ==
   assert.match(source, /role === "dealer"\s*\?\s*DEALER_STAGE_LABELS\.map/);
 });
 
-test("TransactionManagementScreen's status chip, progress list, and list-row label all respect role === dealer for the collapsed view", async () => {
+test("TransactionManagementScreen's status chip, progress list, and list-row label all respect role === dealer for the collapsed view — the shop branch now shows the unified OPERATIONAL_STATUS_LABEL vocabulary instead of the raw DB stage key", async () => {
   const source = normalize(await read("components/transactions/TransactionManagementScreen.tsx"));
-  assert.match(source, /role === "dealer" \? dealerStageLabel\(item\.status\.stage\) : item\.status\.stage/);
-  assert.match(source, /role === "dealer" \? dealerStageLabel\(selected\.status\.stage\) : selected\.status\.stage/);
+  assert.match(
+    source,
+    /role === "dealer" \? dealerStageLabel\(item\.status\.stage\) : OPERATIONAL_STATUS_LABEL\[item\.status\.stage\]/,
+  );
+  assert.match(
+    source,
+    /role === "dealer" \? dealerStageLabel\(selected\.status\.stage\) : OPERATIONAL_STATUS_LABEL\[selected\.status\.stage\]/,
+  );
   assert.match(source, /role === "dealer"\s*\?\s*DEALER_STAGE_LABELS\.map/);
 });

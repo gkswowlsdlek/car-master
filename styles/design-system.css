@@ -306,6 +306,30 @@ select.invalid,
   background: var(--color-ink);
   color: #fff;
 }
+/* 보증서 상태 배지 — Dealer/Shop/Admin 거래관리 목록·상세에서 공통으로 쓰는
+   3색(NOT_READY/READY/ISSUED) 배지. 기존 status-chip과 같은 토큰만 재사용. */
+.warranty-badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: var(--font-xs);
+  font-weight: 800;
+  font-style: normal;
+}
+.warranty-badge-not_ready {
+  background: var(--color-line);
+  color: var(--color-muted);
+}
+.warranty-badge-ready {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-hover);
+}
+.warranty-badge-issued {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
 .section-heading {
   display: flex;
   align-items: center;

@@ -1,25 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FileWarning, Phone, PhoneOff, Search } from "lucide-react";
+import { FileWarning, Phone, PhoneOff } from "lucide-react";
+import { Search } from "lucide-react";
 import type { Transaction, TransactionStage } from "../../types/transactions";
 import {
   dealerStageIndex,
-  dealerStageLabel,
   isTerminalOutcome,
+  OPERATIONAL_STATUS_LABEL,
+  vehicleIdentityLabel,
   warrantyStatus,
+  WARRANTY_STATUS_LABEL,
 } from "../../services/transaction-state-service";
 
 const won = (value?: number) => (value == null ? undefined : `${value.toLocaleString("ko-KR")}원`);
 const shortDate = (value?: string) =>
   value ? new Date(value).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : undefined;
-const activityTime = (value: string) => {
-  const date = new Date(value);
-  const sameDay = date.toDateString() === new Date().toDateString();
-  return sameDay
-    ? date.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })
-    : date.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
-};
 
 type Group = "전체" | "진행중" | "완료" | "종료";
 const GROUPS: Group[] = ["전체", "진행중", "완료", "종료"];
@@ -47,7 +43,9 @@ function groupFromStage(stage: TransactionStage | "전체"): Group {
    다른 색으로, 다른 단계인 시공예약(입고 전)과 입고(작업 중)가 같은 파랑으로
    나온다. 색 정의 자체(design-system.css)는 그대로 두고 단계별 대표 클래스만
    고른다: 입고 전=대기(warning), 작업 중=진행(primary), 작업 완료=success,
-   출고=완결(ink). 취소/시공불가는 raw key가 곧 UI 상태라 그대로 쓴다. */
+   출고=완결(ink). 취소/시공불가는 raw key가 곧 UI 상태라 그대로 쓴다. 배지에
+   보이는 텍스트는 OPERATIONAL_STATUS_LABEL(Dealer/Shop/Admin 공통 어휘)로
+   통일한다 — 색은 그대로 4단계, 글자만 확인 필요/일정 확정/작업 중/완료. */
 const STAGE_CHIP_CLASSES = ["status-견적", "status-입고", "status-작업완료", "status-출고"] as const;
 
 function stageChipClass(stage: TransactionStage) {
@@ -56,10 +54,10 @@ function stageChipClass(stage: TransactionStage) {
 }
 
 /**
- * Dealer 거래관리 (Phase 6) — a browse-and-find surface only. Selecting a
- * transaction always hands off to the existing Room (거래방); this screen
- * intentionally has no inline detail pane and no stage/price/outcome
- * actions of its own — those already live in TransactionChatWorkspace.
+ * Dealer 거래관리 — 목록 + 선택한 거래의 상세 요약을 한 화면에서 보여주고,
+ * "거래방으로 이동" CTA로 실제 대화/작업 화면(TransactionChatWorkspace)으로
+ * 넘긴다. 상세 패널은 읽기 전용 요약일 뿐 — 단계 전환/가격/보증서 발급 같은
+ * 액션은 여기 두지 않는다(이미 거래방에 있음). Backend/DB/RLS는 미변경.
  */
 export function DealerTransactionManagementScreen({
   transactions,
@@ -77,6 +75,7 @@ export function DealerTransactionManagementScreen({
 }) {
   const [group, setGroup] = useState<Group>(() => groupFromStage(initialGroupFilter ?? "전체"));
   const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState("");
 
   const visible = useMemo(() => transactions.filter((item) => !item.visibility.hiddenByDealer), [transactions]);
   const counts = useMemo(
@@ -108,6 +107,11 @@ export function DealerTransactionManagementScreen({
         .sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt)),
     [visible, group, query],
   );
+
+  // 필터가 바뀌어 선택된 행이 목록에서 사라지면 새 목록의 첫 행으로 자연히
+  // 대체된다(별도 effect 없이) — selectedId 자체는 갱신하지 않아도, 다음
+  // 클릭이 selectedId를 다시 유효한 값으로 되돌리므로 문제 없다.
+  const selected = filtered.find((item) => item.id === selectedId) ?? filtered[0];
 
   const empty = query.trim()
     ? { title: "검색 결과가 없습니다.", body: "차량, 시공점 이름으로 다시 검색해 보세요." }
@@ -166,75 +170,45 @@ export function DealerTransactionManagementScreen({
           )}
         </section>
       ) : (
-        <div className="dealer-transaction-list" role="list" aria-label="거래 작업 목록">
-          <div className="dealer-transaction-table-head" aria-hidden="true">
-            <span>차량 · 용품점</span>
-            <span>상태</span>
-            <span>일정</span>
-            <span>최근 활동</span>
-            <span>다음 행동</span>
-          </div>
-          {filtered.map((item) => {
-            const terminal = isTerminalOutcome(item.status.stage);
-            const inPhoneConfirmWindow = item.status.stage === "견적" || item.status.stage === "시공예약";
-            const needsPhoneConfirm = inPhoneConfirmWindow && item.contactStatus == null;
-            const contactUnreachable = item.contactStatus === "unreachable";
-            const scheduled =
-              !terminal && item.status.stage !== "출고"
-                ? shortDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt)
-                : undefined;
-            const price = won(item.pricing.finalPrice);
-            // 작업 생성 직후~입고 전엔 옅게, 입고~작업완료(출고 전) 구간부터는
-            // 강조 스타일로 — 처음부터 강하게 방해하지 않는다는 요구사항 그대로.
-            const warranty = warrantyStatus(item.warranty);
-            const warrantyUrgent = item.status.stage === "입고" || item.status.stage === "작업완료";
-            const showWarrantyFlag = !terminal && warranty !== "READY" && warranty !== "ISSUED";
-            const nextAction = needsPhoneConfirm
-              ? "전화 확인"
-              : item.status.stage === "견적"
-                ? "요청 확인"
-                : item.status.stage === "출고"
-                  ? "완료"
-                  : terminal
-                    ? "기록 보기"
-                    : "거래방 열기";
-            return (
-              <button
-                key={item.id}
-                role="listitem"
-                data-testid={`transaction-card-${item.id}`}
-                data-stage={item.status.stage}
-                aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`}
-                className="dealer-transaction-row"
-                onClick={() => onOpenTransaction(item.id)}
-              >
-                {/* 한 거래 = 한 행. 5열 grid — 차량·용품점(+마지막 메시지 둘째 줄) /
-                    상태 / 일정 / 최근 활동 / 다음 행동. 마지막 메시지는 예전처럼
-                    "다음 행동" 열에 얹지 않고(전부 같은 생성 메시지라 노이즈로
-                    읽혔다) 메신저 인박스처럼 차량 아래 회색 한 줄로 둔다. */}
-                <div className="dealer-transaction-row-main">
+        <div className="transaction-room-layout dealer-transaction-workspace-layout">
+          <aside className="transaction-list dealer-transaction-list" role="list" aria-label="거래 작업 목록">
+            {filtered.map((item) => {
+              const terminal = isTerminalOutcome(item.status.stage);
+              const inPhoneConfirmWindow = item.status.stage === "견적" || item.status.stage === "시공예약";
+              const needsPhoneConfirm = inPhoneConfirmWindow && item.contactStatus == null;
+              const contactUnreachable = item.contactStatus === "unreachable";
+              const scheduled =
+                !terminal && item.status.stage !== "출고"
+                  ? shortDate(item.schedule.confirmedInboundAt ?? item.schedule.requestedInboundAt)
+                  : undefined;
+              // 작업 생성 직후~입고 전엔 옅게, 입고~작업완료(출고 전) 구간부터는
+              // 강조 스타일로 — 처음부터 강하게 방해하지 않는다는 요구사항 그대로.
+              const warranty = warrantyStatus(item.warranty);
+              const warrantyUrgent = item.status.stage === "입고" || item.status.stage === "작업완료";
+              const showWarrantyFlag = !terminal && warranty !== "READY" && warranty !== "ISSUED";
+              const vehicleId = vehicleIdentityLabel(item.warranty);
+              return (
+                <button
+                  key={item.id}
+                  role="listitem"
+                  data-testid={`transaction-card-${item.id}`}
+                  data-stage={item.status.stage}
+                  aria-label={`${item.id} ${item.vehicle.maker} ${item.vehicle.model}`}
+                  className={item.id === selected?.id ? "selected" : ""}
+                  onClick={() => setSelectedId(item.id)}
+                >
                   <b>
                     {item.vehicle.maker} {item.vehicle.model}
                   </b>
                   <span>
                     {item.installerName} · {item.service.product ?? item.service.workDescription}
                   </span>
-                  {item.lastMessage && <em className="dealer-transaction-row-lastmessage">{item.lastMessage}</em>}
-                </div>
-                <div className="dealer-transaction-row-status">
+                  <small className="dealer-transaction-row-meta">
+                    {[scheduled ? `입고 ${scheduled}` : "일정 미정", vehicleId].filter(Boolean).join(" · ")}
+                  </small>
                   <em className={`status-chip ${stageChipClass(item.status.stage)}`}>
-                    {dealerStageLabel(item.status.stage)}
+                    {OPERATIONAL_STATUS_LABEL[item.status.stage]}
                   </em>
-                  {needsPhoneConfirm && (
-                    <small className="phone-confirm-flag">
-                      <Phone size={11} aria-hidden="true" /> 전화 확인 필요
-                    </small>
-                  )}
-                  {contactUnreachable && (
-                    <small className="phone-confirm-flag phone-confirm-flag-unreachable">
-                      <PhoneOff size={11} aria-hidden="true" /> 연락 안 됨
-                    </small>
-                  )}
                   {showWarrantyFlag && (
                     <small
                       className={`phone-confirm-flag${warrantyUrgent ? " phone-confirm-flag-unreachable" : ""}`}
@@ -245,31 +219,109 @@ export function DealerTransactionManagementScreen({
                         : "보증서 정보 미입력"}
                     </small>
                   )}
-                  {/* 확정 시공금액 — 읽기 전용 표기(편집은 거래방에서). */}
-                  {price && <small className="dealer-transaction-row-price">{price}</small>}
-                </div>
-                <div className="dealer-transaction-row-schedule">
-                  {scheduled ? (
-                    <>
-                      <small>입고</small>
-                      <b>{scheduled}</b>
-                    </>
-                  ) : (
-                    <b className="dealer-transaction-row-blank" aria-label="일정 없음">
-                      —
-                    </b>
+                  {(warranty === "READY" || warranty === "ISSUED") && (
+                    <small className={`warranty-badge warranty-badge-${warranty.toLowerCase()}`}>
+                      {WARRANTY_STATUS_LABEL[warranty]}
+                    </small>
                   )}
+                  {needsPhoneConfirm && (
+                    <small className="phone-confirm-flag">
+                      <Phone size={11} aria-hidden="true" /> 전화 확인 필요
+                    </small>
+                  )}
+                  {contactUnreachable && (
+                    <small className="phone-confirm-flag phone-confirm-flag-unreachable">
+                      <PhoneOff size={11} aria-hidden="true" /> 연락 안 됨
+                    </small>
+                  )}
+                </button>
+              );
+            })}
+          </aside>
+          {selected && (
+            <article className="transaction-operations-detail" data-testid={`transaction-detail-${selected.id}`}>
+              <header>
+                <div>
+                  <small>{selected.id}</small>
+                  <h2>
+                    {selected.vehicle.maker} {selected.vehicle.model}
+                  </h2>
+                  <p>
+                    {selected.installerName} · {selected.service.product ?? selected.service.workDescription}
+                  </p>
                 </div>
-                <div className="dealer-transaction-row-activity-cell">
-                  <small>활동</small>
-                  <b>{activityTime(item.status.updatedAt)}</b>
+                <div className="transaction-detail-status">
+                  <span>현재 상태</span>
+                  <em className={`status-chip ${stageChipClass(selected.status.stage)}`}>
+                    {OPERATIONAL_STATUS_LABEL[selected.status.stage]}
+                  </em>
                 </div>
-                <strong className="dealer-transaction-row-next">
-                  {nextAction} <span aria-hidden="true">→</span>
-                </strong>
-              </button>
-            );
-          })}
+              </header>
+              <dl className="transaction-core-info">
+                <div>
+                  <dt>다음 행동</dt>
+                  <dd>
+                    {isTerminalOutcome(selected.status.stage)
+                      ? "기록 보기"
+                      : selected.status.stage === "견적"
+                        ? "시공점의 요청 확인 대기"
+                        : selected.status.stage === "출고"
+                          ? "거래 완료"
+                          : "거래방에서 진행 상황 확인"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>시공점</dt>
+                  <dd>{selected.installerName}</dd>
+                </div>
+                <div>
+                  <dt>시공 항목</dt>
+                  <dd>{selected.service.product ?? selected.service.workDescription}</dd>
+                </div>
+                <div>
+                  <dt>차량번호</dt>
+                  <dd>{selected.warranty.vehicleNumber || "미등록"}</dd>
+                </div>
+                <div>
+                  <dt>차대번호</dt>
+                  <dd>{selected.warranty.vin || "미등록"}</dd>
+                </div>
+                <div>
+                  <dt>입고 일정</dt>
+                  <dd>{shortDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt) || "미정"}</dd>
+                </div>
+                <div>
+                  <dt>출고 일정</dt>
+                  <dd>{shortDate(selected.schedule.desiredReleaseAt) || "미정"}</dd>
+                </div>
+                <div>
+                  <dt>고객명</dt>
+                  <dd>{selected.warranty.customerName || "미등록"}</dd>
+                </div>
+                <div>
+                  <dt>고객 연락처</dt>
+                  <dd>{selected.warranty.customerPhone || "미등록"}</dd>
+                </div>
+                <div>
+                  <dt>보증서 상태</dt>
+                  <dd>
+                    <small className={`warranty-badge warranty-badge-${warrantyStatus(selected.warranty).toLowerCase()}`}>
+                      {WARRANTY_STATUS_LABEL[warrantyStatus(selected.warranty)]}
+                    </small>
+                  </dd>
+                </div>
+                <div>
+                  <dt>최종 시공금액</dt>
+                  <dd>{won(selected.pricing.finalPrice) ?? "미확정"}</dd>
+                </div>
+              </dl>
+              <footer className="dealer-transaction-detail-footer">
+                <button className="primary" onClick={() => onOpenTransaction(selected.id)}>
+                  거래방으로 이동
+                </button>
+              </footer>
+            </article>
+          )}
         </div>
       )}
     </section>
