@@ -68,6 +68,13 @@ export class AdminShopRepository {
         supportedBrands: input.supportedBrands,
         requestId: input.requestId,
         confirmDuplicate: input.confirmDuplicate ?? false,
+        // Omitted entirely (not sent as null) when geocoding didn't run/failed —
+        // admin_register_shop's nullif(...,'') coercion only sees the key at
+        // all when it's actually present, same effect either way but this
+        // keeps the payload honest about what was actually known.
+        ...(input.latitude != null && input.longitude != null
+          ? { latitude: input.latitude, longitude: input.longitude }
+          : {}),
       },
     });
     if (error) throw error;

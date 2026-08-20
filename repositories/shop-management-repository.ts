@@ -116,6 +116,12 @@ export class ShopManagementRepository {
     payload: Partial<
       Omit<ShopManagementRecord, "id" | "approvalStatus" | "ownershipStatus" | "membershipRole" | "membershipStatus">
     >,
+    /** Real geocoded coordinates for the NEW `payload.address`
+     * (services/geocoding-service.ts) — pass only when the address actually
+     * changed and geocoding succeeded. Omitted otherwise so the RPC's own
+     * address-changed guard clears any now-stale coordinate to NULL instead
+     * of silently keeping one that points at the old address. */
+    coordinates?: { latitude: number; longitude: number },
   ): Promise<ShopManagementRecord> {
     const { data, error } = await createSupabaseBrowserClient().rpc("update_shop_operating_profile", {
       p_shop_id: shopId,
@@ -131,6 +137,7 @@ export class ShopManagementRepository {
         supported_services: payload.supportedServices,
         introduction: payload.introduction,
         accepting_requests: payload.acceptingRequests,
+        ...(coordinates ? { latitude: coordinates.latitude, longitude: coordinates.longitude } : {}),
       },
     });
     if (error) throw error;

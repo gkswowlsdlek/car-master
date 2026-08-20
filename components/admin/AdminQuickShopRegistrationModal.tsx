@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { brands, workTypes, type Brand, type WorkType } from "../../lib/dealer-flow-data";
 import { adminShopRepository, DUPLICATE_CANDIDATE_ERROR } from "../../repositories/admin-shop-repository";
+import { geocodeAddress } from "../../services/geocoding-service";
 import type { DuplicateShopCandidate, RegisteredShopResult } from "../../types/admin-shop";
 
 /** Admin-only "phone-call speed" registration — no Installer Account, no
@@ -41,6 +42,12 @@ export function AdminQuickShopRegistrationModal({
     setSubmitting(true);
     setError("");
     try {
+      // Best-effort — a shop this Admin verified by phone must still register
+      // even when geocoding is unavailable/fails. No fabricated coordinate
+      // fallback here (unlike the Dealer's search-origin path): an address
+      // that can't be geocoded just stays NULL, same as it already does
+      // today, ready to be filled in later by the backfill script.
+      const geocoded = await geocodeAddress(address.trim()).catch(() => null);
       const shopId = await adminShopRepository.quickRegister({
         shopName: shopName.trim(),
         address: address.trim(),
@@ -49,6 +56,8 @@ export function AdminQuickShopRegistrationModal({
         supportedBrands: selectedBrands,
         requestId,
         confirmDuplicate,
+        latitude: geocoded?.latitude,
+        longitude: geocoded?.longitude,
       });
       setDuplicates(null);
       setResult({
