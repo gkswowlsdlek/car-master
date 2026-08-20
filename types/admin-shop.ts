@@ -9,6 +9,11 @@ export type QuickRegisterShopInput = {
   /** Links back to the Phase 2 shop_search_requests row this registration came from, if any. */
   requestId?: string;
   confirmDuplicate?: boolean;
+  /** Real geocoded coordinates for `address` (services/geocoding-service.ts),
+   * best-effort — undefined when geocoding wasn't configured/failed. Never a
+   * fabricated fallback coordinate; registration must still succeed either way. */
+  latitude?: number;
+  longitude?: number;
 };
 
 export type DuplicateShopCandidate = {

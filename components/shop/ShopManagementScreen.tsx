@@ -5,6 +5,7 @@ import { Building2, Clock3, Tags, Wrench } from "lucide-react";
 import { isDemoAccountId } from "../../data/demo-accounts";
 import { profileRepository } from "../../repositories/profile-repository";
 import { shopManagementRepository, type ShopManagementRecord } from "../../repositories/shop-management-repository";
+import { geocodeAddress } from "../../services/geocoding-service";
 import { PasswordChangeForm } from "../auth/PasswordChangeForm";
 
 type Props = { userId: string; onChangePassword: (currentPassword: string, newPassword: string) => Promise<void> };
@@ -169,7 +170,17 @@ export function ShopManagementScreen({ userId, onChangePassword }: Props) {
         setRecord({ ...record, ...draft });
         setMessage("Demo 운영정보를 저장했습니다.");
       } else {
-        const updated = await shopManagementRepository.updateOperatingProfile(record.id, draft);
+        // 주소가 바뀌면 새 주소 기준으로 좌표를 다시 계산해 전달한다 — 그러지
+        // 않으면 update_shop_operating_profile이 옛 주소를 가리키는 좌표를
+        // NULL로 비운다("거리 정보 없음"이 잘못된 거리보다 안전하므로). 실패해도
+        // 저장 자체는 막지 않고 안내 문구만 다르게 보여준다.
+        const addressChanged = draft.address.trim() !== record.address.trim();
+        const geocoded = addressChanged ? await geocodeAddress(draft.address.trim()).catch(() => null) : null;
+        const updated = await shopManagementRepository.updateOperatingProfile(
+          record.id,
+          draft,
+          geocoded ? { latitude: geocoded.latitude, longitude: geocoded.longitude } : undefined,
+        );
         setRecord({
           ...record,
           ...updated,
@@ -177,7 +188,11 @@ export function ShopManagementScreen({ userId, onChangePassword }: Props) {
           membershipStatus: record.membershipStatus,
         });
         setDraft(toEditable({ ...record, ...updated }));
-        setMessage("운영정보를 저장했습니다.");
+        setMessage(
+          addressChanged && !geocoded
+            ? "운영정보를 저장했습니다. 새 주소의 위치 좌표를 확인하지 못해 거리 계산에는 잠시 반영되지 않을 수 있습니다."
+            : "운영정보를 저장했습니다.",
+        );
       }
     } catch {
       setError("운영정보 저장 기능을 사용할 수 없습니다. 관리자에게 문의해 주세요.");
