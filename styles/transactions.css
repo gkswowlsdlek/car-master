@@ -543,12 +543,25 @@
   line-height: 1.5;
   text-align: right;
 }
+/* 거래방 사이드바는 이미 하나의 패널이다. 그 안에서 현재상태·최종금액·보증서·
+   기록을 각각 테두리+배경 카드로 그리면 카드 속 카드가 네 겹으로 쌓이고, 무엇이
+   중요한지가 사라진다(전부 같은 무게로 강조되므로). 전부 구분선으로 나눈 평면
+   섹션으로 낮추고, 시각적 강조는 실제로 눌러야 하는 "지금 할 일" 한 곳에만 남긴다. */
 .sidebar-stage,
-.sidebar-settlement {
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
-  padding: 14px;
+.sidebar-settlement,
+.sidebar-stage-log {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  border-radius: 0;
+  background: transparent;
+  margin-top: 18px;
+  padding: 18px 0 0;
+}
+/* 첫 섹션은 패널 제목 바로 아래라 구분선이 필요 없다. */
+.sidebar-stage {
+  margin-top: 14px;
+  border-top: 0;
+  padding-top: 0;
 }
 .sidebar-stage > span {
   color: var(--color-muted);
@@ -570,13 +583,7 @@
 .sidebar-stage-rail small {
   font-size: var(--font-xs);
 }
-.sidebar-stage-log {
-  margin-top: 12px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-soft);
-  padding: 14px;
-}
+
 .sidebar-stage-log > span {
   color: var(--color-muted);
   font-size: var(--font-xs);
@@ -631,11 +638,19 @@
   color: var(--color-text-soft);
   font-weight: 600;
 }
-.sidebar-settlement {
-  margin-top: 12px;
-}
-.sidebar-settlement h4 {
+.sidebar-settlement h4,
+.messenger-sidebar .briefing-title h3 {
   margin: 0 0 10px;
+}
+/* 섹션 제목은 전부 같은 크기·색으로 — 예전에는 h3(거래 정보)와 h4(최종
+   시공금액/보증서)가 카드 테두리에 기대어 구분됐는데, 테두리를 걷어낸 뒤에는
+   글자 자체가 위계를 만들어야 한다. */
+.sidebar-settlement h4,
+.sidebar-stage > span {
+  color: var(--color-muted);
+  font-size: var(--font-xs);
+  font-weight: 800;
+  letter-spacing: 0.01em;
 }
 .sidebar-settlement p {
   display: flex;
@@ -1173,10 +1188,19 @@
 /* 사이드바 "지금 할 일" — 기존 현재상태/Progress 카드(sidebar-stage) 안에
    같은 그룹으로 묶는다. 새 상태 체계 없음 — 기존 stage-cta/stage-revert-link
    버튼과 로직을 위치만 옮겨 재사용. */
+/* 사이드바에서 유일하게 배경을 갖는 블록. 딜러가 이 패널에서 실제로 누르는
+   곳이 여기 하나뿐이라, 강조도 하나만 준다(design.md "한 화면에 CTA 하나").
+   파랑이 아니라 중립 회색인 이유: 파란 버튼이 이미 이 안에 들어 있고, 파란
+   블록 안의 파란 버튼은 서로를 죽인다. */
 .sidebar-next-step {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-line);
+  margin-top: 14px;
+}
+/* 강조는 실제로 누를 게 있을 때만. 진행할 단계가 없는 거래(출고 완료 등)에
+   같은 블록을 칠하면 "할 일 없음"이 화면에서 가장 눈에 띄는 요소가 된다. */
+.sidebar-next-step:has(button) {
+  border-radius: var(--radius-md);
+  background: var(--color-surface-soft);
+  padding: 12px 14px 14px;
 }
 .sidebar-next-step > span {
   display: block;
@@ -1598,4 +1622,15 @@
 }
 .dealer-next-step-call:hover {
   text-decoration: underline;
+}
+
+/* 모바일 거래 목록 높이. 공용 규칙(globals.css, max-width:760px)은 300px로
+   묶여 있는데, 데모/실사용 거래가 10건대로 늘면 390px 화면에서 2.5행짜리
+   상자 안을 계속 굴려야 한다 — 페이지 스크롤과 목록 스크롤이 겹쳐 특히
+   불편한 구간이다. 딜러 거래관리에서만 화면 높이에 맞춰 늘린다(상세 패널은
+   여전히 바로 아래에 있어야 하므로 무제한으로는 두지 않는다). */
+@media (max-width: 760px) {
+  .dealer-transaction-management .transaction-list {
+    max-height: min(58vh, 460px);
+  }
 }

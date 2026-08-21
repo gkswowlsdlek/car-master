@@ -18,9 +18,6 @@ export type InstallerShop = {
   hours: string;
   available: boolean;
   approved: boolean;
-  rating: number;
-  responseTime: string;
-  recentTransactionCount: number;
 };
 
 export const brands: Brand[] = [

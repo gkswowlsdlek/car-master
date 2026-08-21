@@ -48,11 +48,6 @@ export class InstallerDirectoryRepository {
         hours: item.hours ?? "영업시간 확인 필요",
         available: item.available,
         approved: true,
-        rating: 0,
-        reviewCount: 0,
-        responseTime: "응답 정보 없음",
-        recentTransactionCount: 0,
-        nextAvailableDate: "일정 확인 필요",
         isDemo: false,
         contactPhone: item.phone ?? undefined,
       };

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { MessageCircle, Search, X } from "lucide-react";
+import { MapPin, MessageCircle, MessagesSquare, Search, SearchX, X } from "lucide-react";
+import { EmptyState, ErrorState, SkeletonList } from "../common/ScreenState";
 import type {
   ChatRoom,
   ContactStatus,
@@ -68,6 +69,8 @@ export function MessengerScreen({
   onLoadOlder,
   onLoadContact,
   onMobileChatOpenChange,
+  onRetry,
+  onFindShop,
 }: {
   role: "dealer" | "shop";
   userId: string;
@@ -101,6 +104,10 @@ export function MessengerScreen({
   onLoadOlder?: (roomId: string) => Promise<boolean>;
   onLoadContact?: (transaction: Transaction) => Promise<{ name: string; phone: string } | null>;
   onMobileChatOpenChange?: (open: boolean) => void;
+  /** 불러오기 실패 시 다시 시도. 없으면 오류 상태에 재시도 버튼을 그리지 않는다. */
+  onRetry?: () => void;
+  /** Dealer 전용 — 거래가 한 건도 없을 때 빈 화면에서 곧장 시공점 찾기로 보낸다. */
+  onFindShop?: () => void;
 }) {
   const [query, setQuery] = useState("");
   // Desktop-only: conversation list starts collapsed behind a slim icon rail
@@ -167,6 +174,12 @@ export function MessengerScreen({
   // transaction, so this also still matches old transactions unchanged.
   const selectedInstaller = installers?.find((item) => item.id === selected?.transaction.shopId);
 
+  /* 인박스도 비고 채팅도 비었을 때 두 칸에 같은 문구와 같은 버튼을 나란히
+     그리면, 화면이 두 번 사과하는 것처럼 읽힌다. 목록 자체가 없으면 레이아웃을
+     펼치지 않고 한 장으로 답한다. */
+  const nothingToShow = !isLoading && !loadError && rows.length === 0;
+  const allHidden = nothingToShow && transactions.length > 0;
+
   const openRoom = (id: string) => {
     onSelect(id);
     setMobileView("chat");
@@ -176,6 +189,30 @@ export function MessengerScreen({
     setMobileView("list");
     onMobileChatOpenChange?.(false);
   };
+
+  if (nothingToShow)
+    return (
+      <section className="messenger-screen messenger-screen-blank">
+        {allHidden ? (
+          <EmptyState
+            icon={MessagesSquare}
+            title="표시할 거래방이 없습니다."
+            description="숨긴 거래방만 남아 있습니다. 거래 관리 화면에서 다시 보이게 할 수 있어요."
+          />
+        ) : (
+          <EmptyState
+            icon={role === "dealer" ? MapPin : MessagesSquare}
+            title={role === "dealer" ? "첫 거래방을 열어보세요." : "아직 들어온 요청이 없습니다."}
+            description={
+              role === "dealer"
+                ? "고객 차량이 있는 지역의 시공점에 시공 요청을 보내면 거래방이 즉시 만들어지고, 이후 모든 연락과 진행 상황이 이 화면에 모입니다."
+                : "딜러가 시공 요청을 보내면 이 화면에 거래방이 나타납니다. 요청이 오면 알림으로 알려드립니다."
+            }
+            action={role === "dealer" && onFindShop ? { label: "시공점 찾기", onClick: onFindShop } : undefined}
+          />
+        )}
+      </section>
+    );
 
   return (
     <section className="messenger-screen">
@@ -221,27 +258,26 @@ export function MessengerScreen({
             </p>
           )}
           {isLoading ? (
-            <div className="inbox-state" role="status">
-              대화 목록을 불러오는 중입니다…
-            </div>
+            <SkeletonList rows={5} label="대화 목록을 불러오는 중입니다." />
           ) : loadError ? (
-            <div className="inbox-state inbox-state-error" role="alert">
-              {loadError}
-            </div>
+            <ErrorState compact title="대화 목록을 불러오지 못했습니다." description={loadError} onRetry={onRetry} />
           ) : filtered.length === 0 ? (
-            <div className="inbox-state inbox-empty">
-              {query ? (
-                <>
-                  <b>검색 결과가 없습니다.</b>
-                  <span>다른 검색어로 다시 시도해 보세요.</span>
-                </>
-              ) : (
-                <>
-                  <b>아직 대화가 없습니다.</b>
-                  <span>거래가 시작되면 여기에서 대화를 확인할 수 있어요.</span>
-                </>
-              )}
-            </div>
+            query ? (
+              <EmptyState
+                compact
+                icon={SearchX}
+                title="검색 결과가 없습니다."
+                description="업체명, 차량, 대화 내용 중 하나로 다시 찾아보세요."
+                action={{ label: "검색어 지우기", onClick: () => setQuery("") }}
+              />
+            ) : (
+              <EmptyState
+                compact
+                icon={MessagesSquare}
+                title="표시할 거래방이 없습니다."
+                description="숨긴 거래방은 거래 관리 화면에서 다시 보이게 할 수 있어요."
+              />
+            )
           ) : (
             <ul className="inbox-list">
               {filtered.map(({ transaction, room }) => {
@@ -300,11 +336,22 @@ export function MessengerScreen({
               onLoadOlder={onLoadOlder}
               onLoadContact={onLoadContact}
               onBack={backToList}
+              roomLoading={isLoading}
+              onRetry={onRetry}
             />
+          ) : isLoading ? (
+            <div className="messenger-no-selection">
+              <SkeletonList rows={3} variant="card" label="거래방을 불러오는 중입니다." />
+            </div>
           ) : (
             <div className="messenger-no-selection">
-              <b>대화를 선택하세요.</b>
-              <span>왼쪽 목록에서 거래방을 선택하면 대화가 여기에 표시됩니다.</span>
+              {/* 이미 테두리가 있는 패널 안이라 compact — 카드 속 카드를 만들지 않는다. */}
+              <EmptyState
+                compact
+                icon={MessageCircle}
+                title="대화를 선택하세요."
+                description="왼쪽 목록에서 거래방을 고르면 대화와 거래 정보가 여기에 표시됩니다."
+              />
             </div>
           )}
         </div>

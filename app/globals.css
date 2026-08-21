@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../styles/design-system.css";
+@import "../styles/screen-state.css";
 @import "../styles/help.css";
 @import "../styles/legal.css";
 @import "../styles/marketing.css";
@@ -38,7 +39,8 @@
 .r4-dealer-dashboard {
   width: min(1280px, 100%);
   padding: 8px 36px 64px;
-}.r4-dealer-dashboard .r3-hero-title {
+}
+.r4-dealer-dashboard .r3-hero-title {
   margin-bottom: 28px;
 }
 .r4-dealer-dashboard .r3-hero-title h2 {
@@ -57,7 +59,8 @@
   background: var(--color-surface-soft);
   border-color: var(--color-line);
   font-size: var(--font-body);
-}.r4-dealer-dashboard .r3-recent-work {
+}
+.r4-dealer-dashboard .r3-recent-work {
   margin-top: 64px;
   border-color: var(--color-line);
 }
@@ -71,7 +74,8 @@
 @media (max-width: 760px) {
   .r4-dealer-dashboard {
     padding: 22px 16px 42px;
-  }  .r4-dealer-dashboard .r3-hero-title h2 {
+  }
+  .r4-dealer-dashboard .r3-hero-title h2 {
     font-size: var(--font-lg);
   }
   .r4-dealer-dashboard .r3-search-form {
@@ -85,9 +89,6 @@
     margin-top: 34px;
   }
 }
-
-
-
 
 .app-sidebar nav button.active {
   background: var(--color-primary-soft);
@@ -386,6 +387,7 @@
   .dealer-dashboard,
   .dealer-screen,
   .transaction-management-screen,
+  .messenger-screen-blank,
   .profile-editor {
     padding: 20px 14px;
   }
@@ -441,7 +443,6 @@
     display: grid;
   }
 }
-
 
 .dealer-welcome {
   display: flex;
@@ -559,7 +560,6 @@
 .vehicle-class-picker button.active b {
   color: var(--color-primary);
 }
-
 
 .shop-row.selected {
   background: var(--color-primary-soft);
@@ -1502,7 +1502,6 @@ button:active:not(:disabled) {
   }
 }
 
-
 /* V0.3.1.3 global typography and readability */
 :where(.marketing-page, .login-ad-page, .app-main, .system-state-page) {
   font-kerning: normal;
@@ -1649,12 +1648,12 @@ table td {
   }
 }
 
-
 /* R3 Dealer dashboard: search-first workspace, compact recent-work ledger. */
 .r3-dealer-dashboard {
   width: min(1480px, 100%);
   padding: 34px 48px 64px;
-}.r3-hero-title {
+}
+.r3-hero-title {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1686,7 +1685,8 @@ table td {
   border-color: var(--color-line);
   border-radius: var(--radius-sm);
   background: #fbfcfe;
-}.r3-recent-work {
+}
+.r3-recent-work {
   margin-top: 24px;
   border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
@@ -1717,7 +1717,8 @@ table td {
 @media (max-width: 760px) {
   .r3-dealer-dashboard {
     padding: 24px 16px 42px;
-  }  .r3-hero-title {
+  }
+  .r3-hero-title {
     justify-content: flex-start;
   }
   .r3-hero-title h2 {
@@ -1727,7 +1728,8 @@ table td {
   .r3-search-form {
     grid-template-columns: 1fr;
     margin-top: 18px;
-  }  .r3-recent-work .ws-section-head {
+  }
+  .r3-recent-work .ws-section-head {
     align-items: flex-start;
     padding: 14px 16px;
   }
@@ -1948,7 +1950,6 @@ table td {
     background: #fff;
   }
 
-
   .dealer-transaction-management .transaction-empty {
     min-height: 190px;
     border: 1px dashed var(--r1-rule);
@@ -1957,7 +1958,6 @@ table td {
     box-shadow: none;
   }
 }
-
 
 /* v0.3.5.1 responsive dealer workspace */
 :root {
@@ -1997,6 +1997,7 @@ textarea:focus-visible {
     .dealer-dashboard,
     .dealer-screen,
     .transaction-management-screen,
+    .messenger-screen-blank,
     .profile-editor,
     .request-page,
     .summary-page,
@@ -2123,8 +2124,6 @@ textarea:focus-visible {
   min-width: 0;
 }
 
-
-
 .profile-editor > :is(.page-title, .profile-activity-summary, .profile-saved, .login-error) {
   grid-column: 1 / -1;
 }
@@ -2179,6 +2178,7 @@ textarea:focus-visible {
       .dealer-dashboard,
       .dealer-screen,
       .transaction-management-screen,
+      .messenger-screen-blank,
       .profile-editor,
       .request-page,
       .summary-page,
@@ -2204,8 +2204,7 @@ textarea:focus-visible {
     position: static;
     max-height: none;
   }
-  .profile-editor-actions,
-  .profile-editor > p:last-child {
+  .shop-management-page > :is(.profile-editor-actions, .profile-editor-note) {
     grid-column: 1;
   }
 }
@@ -2244,6 +2243,7 @@ textarea:focus-visible {
       .dealer-dashboard,
       .dealer-screen,
       .transaction-management-screen,
+      .messenger-screen-blank,
       .profile-editor,
       .request-page,
       .summary-page,
@@ -2376,6 +2376,7 @@ textarea:focus-visible {
       .dealer-dashboard,
       .dealer-screen,
       .transaction-management-screen,
+      .messenger-screen-blank,
       .profile-editor,
       .request-page,
       .summary-page,
@@ -2713,7 +2714,8 @@ textarea:focus-visible {
 .r4-dealer-dashboard {
   width: min(1220px, 100%) !important;
   padding: 0 36px 56px !important;
-}.r4-dealer-dashboard .r3-hero-title {
+}
+.r4-dealer-dashboard .r3-hero-title {
   justify-content: center;
   margin-bottom: 22px !important;
 }
@@ -2729,7 +2731,8 @@ textarea:focus-visible {
   border-radius: var(--radius-sm) !important;
   border-color: var(--color-line) !important;
   background: var(--color-surface-soft) !important;
-}.r4-dealer-dashboard .r3-recent-work {
+}
+.r4-dealer-dashboard .r3-recent-work {
   margin-top: 52px !important;
   border-right: 0 !important;
   border-left: 0 !important;
@@ -2756,7 +2759,8 @@ textarea:focus-visible {
 .r4-dealer-dashboard {
   max-width: 1220px !important;
   margin-inline: auto !important;
-}.r4-dealer-dashboard .r3-hero-title {
+}
+.r4-dealer-dashboard .r3-hero-title {
   margin-bottom: 20px !important;
 }
 .r4-dealer-dashboard .r3-hero-title h2 {
@@ -2772,7 +2776,8 @@ textarea:focus-visible {
   height: 58px !important;
   background: var(--color-surface-soft) !important;
   border: 1px solid var(--color-line) !important;
-}.r4-dealer-dashboard .r3-recent-work {
+}
+.r4-dealer-dashboard .r3-recent-work {
   margin-top: 58px !important;
   border: 1px solid var(--color-line) !important;
   border-radius: var(--radius-md) !important;
@@ -2790,7 +2795,8 @@ textarea:focus-visible {
 @media (max-width: 760px) {
   .role-dealer .app-frame {
     display: block !important;
-  }  .r4-dealer-dashboard .r3-hero-title h2 {
+  }
+  .r4-dealer-dashboard .r3-hero-title h2 {
     font-size: var(--font-lg) !important;
   }
   .r4-dealer-dashboard .r3-search-form {
@@ -2800,7 +2806,8 @@ textarea:focus-visible {
 
 .role-dealer .app-sidebar nav button.active {
   background: var(--color-primary) !important;
-}.r4-dealer-dashboard .r3-hero-title h2 {
+}
+.r4-dealer-dashboard .r3-hero-title h2 {
   font-size: var(--font-xl) !important;
   font-weight: 720 !important;
 }
@@ -2810,7 +2817,8 @@ textarea:focus-visible {
 }
 .r4-dealer-dashboard .r3-search-form input {
   font-size: var(--font-sm) !important;
-}.r4-dealer-dashboard .r3-recent-work {
+}
+.r4-dealer-dashboard .r3-recent-work {
   margin-top: 52px !important;
 }
 .r4-dealer-dashboard .r3-recent-work .ws-section-head h2 {
@@ -2851,7 +2859,8 @@ textarea:focus-visible {
   border: 1px solid var(--cm-border);
   border-top: 0;
   border-radius: 0 0 var(--radius-md) var(--radius-md);
-}.r4-dealer-dashboard .r3-hero-title h2 {
+}
+.r4-dealer-dashboard .r3-hero-title h2 {
   color: var(--cm-text) !important;
   font-size: var(--font-xl) !important;
 }
@@ -2866,7 +2875,8 @@ textarea:focus-visible {
    outline would double it, so only the border override remains. */
 .r4-dealer-dashboard .r3-search-form input:focus {
   border-color: var(--cm-primary) !important;
-}.r4-dealer-dashboard .r3-recent-work {
+}
+.r4-dealer-dashboard .r3-recent-work {
   background: var(--cm-surface) !important;
   border-color: var(--cm-border) !important;
 }
@@ -2972,7 +2982,8 @@ textarea:focus-visible {
 .reference-search-panel .r3-search-form .ws-search-cta {
   border-radius: var(--radius-sm) !important;
   background: var(--color-primary) !important;
-}.reference-module-grid {
+}
+.reference-module-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
@@ -3487,20 +3498,6 @@ textarea:focus-visible {
   gap: 8px;
   min-width: 0;
 }
-.dealer-dashboard .ws-dashboard-empty {
-  display: grid;
-  justify-items: center;
-  gap: 14px;
-  padding: 36px 4px 30px;
-  text-align: center;
-}
-.dealer-dashboard .ws-dashboard-empty p {
-  margin: 0;
-  color: var(--color-muted);
-  font-size: var(--font-sm);
-}
-
-
 
 @media (max-width: 760px) {
   .dealer-dashboard .ws-work-grid {
@@ -4284,15 +4281,11 @@ textarea:focus-visible {
   }
 }
 
-
-
-
 .status-chip.status-취소,
 .status-chip.status-시공불가 {
   background: var(--color-danger-bg);
   color: var(--color-danger);
 }
-
 
 .installer-registration-editor {
   padding: 28px;
@@ -4338,8 +4331,6 @@ textarea:focus-visible {
     grid-template-columns: 1fr;
   }
 }
-
-
 
 /* V0.3.4.1 Workspace UI update 1 */
 .role-home :is(.metric-card, .shop-metric-card, .admin-summary-grid .card) > i {
@@ -4595,6 +4586,7 @@ textarea:focus-visible {
     .dealer-dashboard,
     .dealer-screen,
     .transaction-management-screen,
+    .messenger-screen-blank,
     .profile-editor,
     .request-page,
     .summary-page,
@@ -4665,6 +4657,7 @@ textarea:focus-visible {
       .dealer-dashboard,
       .dealer-screen,
       .transaction-management-screen,
+      .messenger-screen-blank,
       .profile-editor,
       .request-page,
       .summary-page,
@@ -4701,6 +4694,7 @@ textarea:focus-visible {
       .dealer-dashboard,
       .dealer-screen,
       .transaction-management-screen,
+      .messenger-screen-blank,
       .profile-editor,
       .request-page,
       .summary-page,
@@ -4993,7 +4987,6 @@ textarea:focus-visible {
   }
 }
 
-
 /* Chat: read receipt + honest naming for the info panel */
 .message-status {
   display: inline-flex;
@@ -5008,18 +5001,12 @@ textarea:focus-visible {
   color: var(--color-primary);
 }
 
-
-
-
-
-
 .installer-card-works,
 .installer-card-brands {
   margin: 0;
   color: var(--color-muted);
   font-size: var(--font-sm);
 }
-
 
 @keyframes naver-spin {
   to {
@@ -5067,8 +5054,6 @@ textarea:focus-visible {
   box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.25);
 }
 
-
-
 @media (min-width: 1024px) {
   /* Desktop can show every search condition at once — filters move out of
      the sheet into the search bar itself, and the shop detail always opens
@@ -5085,7 +5070,6 @@ textarea:focus-visible {
   }
 }
 
-
 .mobile-nav-icon {
   position: relative;
   display: inline-grid;
@@ -5096,7 +5080,6 @@ textarea:focus-visible {
   top: -6px;
   right: -9px;
 }
-
 
 /* Timeline pills: chat "system" messages (room created, etc.) and projected stage-log entries share the same quiet, non-bubble treatment. */
 .message-system {
@@ -5206,7 +5189,6 @@ textarea:focus-visible {
   font-size: var(--font-sm);
 }
 
-
 @media (max-width: 760px) {
   /* Non-fullscreen (Inbox list) mobile view. .app-topbar's real rendered
      height varies (padding/content, not just its min-height), so rather
@@ -5214,7 +5196,9 @@ textarea:focus-visible {
      column: the topbar keeps its natural height and .messenger-screen
      takes exactly whatever is left, scoped to this one screen via :has()
      so no other mobile page's layout is touched. */
-  .app-main:has(> .messenger-screen) {
+  /* 빈 메신저 화면은 다른 화면과 똑같이 스크롤되는 일반 페이지다 —
+     100dvh 고정 + overflow:hidden을 걸면 안내문만 있는 화면이 잘린다. */
+  .app-main:has(> .messenger-screen):not(:has(> .messenger-screen-blank)) {
     display: flex;
     flex-direction: column;
     height: 100dvh;
@@ -5244,16 +5228,13 @@ textarea:focus-visible {
   .inbox-pane-head {
     flex: 0 0 auto;
   }
-  .inbox-list {
+  .inbox-list,
+  .inbox-pane > .screen-state,
+  .inbox-pane > .skeleton-list {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     padding-bottom: 6px;
-  }
-  .inbox-state {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
   }
   .inbox-pane.mobile-hidden {
     display: none;
@@ -5420,7 +5401,6 @@ textarea:focus-visible {
   }
 }
 
-
 @media (max-width: 760px) {
   .topbar-actions > .primary {
     display: none;
@@ -5484,8 +5464,6 @@ textarea:focus-visible {
   }
 }
 
-
-
 /* Phase A: Dealer Workspace Rebuild — R1-scale Sidebar on a softer
    Navy/Blue-Slate surface (not R1's near-black, not R2.1's plain white).
    This is deliberately the last word on .app-sidebar/.app-logo/nav sizing —
@@ -5509,7 +5487,6 @@ textarea:focus-visible {
   background: var(--color-primary);
   color: #fff;
 }
-
 
 .ws-search-form {
   display: grid;
@@ -5755,9 +5732,6 @@ textarea:focus-visible {
   font-size: var(--font-sm);
   text-align: left;
 }
-
-
-
 
 /* Phase E: below this width the 거래 정보 panel stays the existing
    click-to-open overlay (untouched — same as before this phase). At wide
@@ -6048,7 +6022,8 @@ textarea:focus-visible {
   background: var(--prototype-primary);
   font-size: var(--font-sm);
   box-shadow: none;
-}.reference-module-grid {
+}
+.reference-module-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
@@ -6169,13 +6144,6 @@ textarea:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.reference-module-empty {
-  margin: 15px 0 0;
-  padding: 20px 4px;
-  color: var(--color-muted);
-  font-size: var(--font-sm);
-  text-align: center;
 }
 .getting-started ol {
   gap: 10px;
@@ -6484,7 +6452,8 @@ textarea:focus-visible {
 .dealer-home-frame .reference-search-panel .ws-search-cta {
   height: 56px;
   font-size: var(--font-body);
-}.dealer-home-frame .reference-module-grid {
+}
+.dealer-home-frame .reference-module-grid {
   grid-template-columns: 1fr 1fr;
   gap: 14px;
   margin-bottom: 16px;
@@ -6545,7 +6514,8 @@ textarea:focus-visible {
   }
   .dealer-home-frame .reference-module-grid {
     grid-template-columns: 1fr;
-  }}
+  }
+}
 @media (max-width: 900px) {
   .dealer-home-frame .app-topbar-default {
     display: flex;

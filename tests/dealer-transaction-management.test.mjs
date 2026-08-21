@@ -91,9 +91,23 @@ test("hidden-by-dealer transactions are excluded from both counts and the list �
 });
 
 test("empty states are distinct for zero-transactions (with a 시공점 찾기 CTA into the existing Shop Search flow), empty search, and empty group — no ERP-style bare table", () => {
-  assert.match(screenSource, /아직 진행 중인 거래가 없습니다\./);
-  assert.match(screenSource, /onClick=\{onFindShop\}>\s*시공점 찾기\s*</);
+  // 문구/마크업은 공용 EmptyState(components/common/ScreenState.tsx)로 옮겼지만,
+  // 이 테스트가 지키려는 건 "세 가지 빈 상태가 서로 구분되고, 거래 0건일 때는
+  // 시공점 찾기로 연결된다"는 것이다.
+  assert.match(screenSource, /아직 등록된 거래가 없습니다\./);
+  assert.match(screenSource, /action=\{\{ label: "시공점 찾기", onClick: onFindShop \}\}/);
   assert.match(screenSource, /검색 결과가 없습니다\./);
+  assert.match(screenSource, /\$\{group\} 거래가 없습니다\./);
+});
+
+test("빈 목록과 '아직 안 불러온 목록'은 다른 화면이다 — 첫 로드 중에는 빈 상태 대신 스켈레톤, 실패 시에는 재시도가 있는 오류 상태", () => {
+  assert.match(screenSource, /const emptyView = loadError \? \(\s*<ErrorState/);
+  assert.match(screenSource, /\) : loading \? \(\s*<SkeletonList/);
+  assert.match(screenSource, /onRetry=\{onRetry\}/);
+});
+
+test("거래가 한 건도 없으면 탭·검색 같은 필터 크롬을 띄우지 않는다 — 0이 네 개 붙은 탭 줄은 신규 딜러에게 잘못된 필터 신호가 된다", () => {
+  assert.match(screenSource, /\{visible\.length > 0 && \(/);
 });
 
 test("list rows keep the established transaction-card- E2E testid convention", () => {
@@ -112,7 +126,9 @@ test("DealerWorkspace wires the new screen for role dealer's 거래관리 tab, a
     // installers는 "지금 할 일: 전화 확인"에서 시공점 번호를 바로 걸 수 있게
     // 추가된 선택 prop — 이 테스트가 지키려는 건 화면 연결과 Room 핸드오프이지
     // prop 목록 고정이 아니므로, 사이에 추가 prop이 오는 것을 허용한다.
-    /screen === "deals"\s*&&\s*(?:\(\s*)?<DealerTransactionManagementScreen\s+transactions=\{transactions\}[\s\S]*?initialGroupFilter=\{dealFilter\}\s+onOpenTransaction=\{\(id\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*onNavigate\("messages"\);\s*\}\}\s+onNewRequest=\{\(\)\s*=>\s*onNavigate\("request"\)\}\s+onFindShop=\{\(\)\s*=>\s*onNavigate\("dealerMap"\)\}\s*\/>/,
+    // loading/loadError/onRetry처럼 뒤에 붙는 prop도 허용한다 — 이 테스트가
+    // 고정하려는 건 화면 연결과 Room 핸드오프이지 prop 목록 전체가 아니다.
+    /screen === "deals"\s*&&\s*(?:\(\s*)?<DealerTransactionManagementScreen\s+transactions=\{transactions\}[\s\S]*?initialGroupFilter=\{dealFilter\}\s+onOpenTransaction=\{\(id\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*onNavigate\("messages"\);\s*\}\}\s+onNewRequest=\{\(\)\s*=>\s*onNavigate\("request"\)\}\s+onFindShop=\{\(\)\s*=>\s*onNavigate\("dealerMap"\)\}[\s\S]*?\/>/,
   );
   assert.match(
     workspaceSource,

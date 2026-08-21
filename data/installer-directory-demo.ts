@@ -697,15 +697,6 @@ const HOURS_SET = [
   "평일 10:00-20:00, 토요일 예약제",
   "평일 09:00-18:30, 일요일 휴무",
 ];
-const NEXT_AVAILABLE_SET = [
-  "오늘 가능",
-  "내일 가능",
-  "7/27(월) 가능",
-  "7/28(화) 가능",
-  "7/29(수) 가능",
-  "7/30(목) 가능",
-  "이번 주 마감, 다음주 가능",
-];
 
 export const demoInstallerListings: InstallerListing[] = RAW_POINTS.map((point, index) => {
   // RAW_POINTS는 지역 기준점일 뿐 실제 사업장 좌표가 아닙니다. 지도에서는
@@ -729,11 +720,6 @@ export const demoInstallerListings: InstallerListing[] = RAW_POINTS.map((point, 
     hours: HOURS_SET[index % HOURS_SET.length],
     available: index % 11 !== 0,
     approved: true,
-    rating: Number((4.4 + (index % 6) * 0.1).toFixed(1)),
-    reviewCount: 18 + (index % 13) * 11,
-    responseTime: `평균 ${15 + (index % 9) * 6}분`,
-    recentTransactionCount: 24 + (index % 17) * 5,
-    nextAvailableDate: NEXT_AVAILABLE_SET[index % NEXT_AVAILABLE_SET.length],
     isDemo: true,
   };
 });

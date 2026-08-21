@@ -17,8 +17,6 @@ export function calculateDistanceKm(
 export function formatDistanceKm(value: number) {
   return `${value.toFixed(value < 10 ? 1 : 0)}km`;
 }
-const responseMinutes = (value: string) => Number(value.match(/\d+/)?.[0] ?? Number.MAX_SAFE_INTEGER);
-
 export function searchNearbyInstallers(location: SearchLocation, shops: InstallerListing[]): InstallerSearchResult[] {
   return shops
     .map((shop) => {
@@ -26,15 +24,15 @@ export function searchNearbyInstallers(location: SearchLocation, shops: Installe
       const distanceKm = calculateDistanceKm(location, { latitude: shop.lat, longitude: shop.lng });
       return { shop, distanceKm, distanceLabel: formatDistanceKm(distanceKm) };
     })
+    // Distance is the only ranking signal the product actually has. The old
+    // tie-breakers (응답시간 → 최근 거래 → 평점) ranked on numbers no real Shop
+    // has, so they only ever reordered demo fixtures — see decisions.md,
+    // "가짜 평점·리뷰·거래건수". Ties fall back to a stable name order.
     .sort((a, b) => {
       if (a.distanceKm == null) return b.distanceKm == null ? 0 : 1;
       if (b.distanceKm == null) return -1;
       const distanceDifference = a.distanceKm - b.distanceKm;
       if (Math.abs(distanceDifference) > 0.01) return distanceDifference;
-      return (
-        responseMinutes(a.shop.responseTime) - responseMinutes(b.shop.responseTime) ||
-        b.shop.recentTransactionCount - a.shop.recentTransactionCount ||
-        b.shop.rating - a.shop.rating
-      );
+      return a.shop.name.localeCompare(b.shop.name, "ko");
     });
 }

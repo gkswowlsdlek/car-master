@@ -78,15 +78,17 @@
 .profile-notification-settings {
   margin-top: 0;
 }
-.profile-editor-actions {
+/* Shop 관리 화면만 단일 그리드에 항목을 직접 배치한다. 딜러 마이페이지는
+   .profile-editor-main / -aside 로 칸을 스스로 묶으므로, 여기서 열 번호를
+   못박으면 저장 버튼이 자기 폼을 떠나 옆 칸으로 끌려간다(실제로 그랬다).
+   ".profile-editor > p:last-child" 규칙은 삭제했다 — 그 <p> 뒤에는 항상
+   비밀번호 카드가 있어 :last-child가 성립한 적이 없는 죽은 규칙이었다. */
+.shop-management-page > .profile-editor-actions {
   grid-column: 2;
   margin-top: 0;
 }
-.profile-editor > p:last-child {
+.shop-management-page > .profile-editor-note {
   grid-column: 2;
-  margin: 0;
-  color: var(--color-muted);
-  font-size: var(--font-sm);
 }
 .profile-editor-grid .profile-checkbox-field {
   display: flex;
@@ -219,4 +221,25 @@
 }
 .profile-editor-grid :is(input, select) {
   width: 100%;
+}
+
+/* 딜러 마이페이지는 좌(내 정보 + 저장)/우(알림 + 비밀번호) 두 칸을 명시적으로
+   묶는다. 예전에는 같은 그리드에 여섯 항목을 던져놓고 자동 배치에 맡겨서,
+   "변경사항 저장"이 자기가 저장할 폼이 아니라 알림 카드 밑에 붙고 저장 위치
+   안내문은 폼에서 100px 떨어진 빈 칸에 홀로 남았다. */
+.profile-editor-main,
+.profile-editor-aside {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+}
+.profile-editor-main .profile-editor-actions {
+  margin-top: 0;
+}
+.profile-editor-note {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+  line-height: 1.65;
 }

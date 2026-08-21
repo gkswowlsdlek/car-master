@@ -1,0 +1,213 @@
+/* 빈 / 오류 / 권한없음 / 로딩 상태 — components/common/ScreenState.tsx 전용.
+   실제 계정으로 갓 가입한 딜러가 가장 먼저 보는 화면이라, 화면별로 제각각이던
+   "아직 ~가 없습니다" 한 줄을 하나의 위계로 통일한다. 토큰은 design-system.css의
+   기존 --color-* 를 그대로 쓴다(리디자인이라고 토큰부터 갈아엎지 않는다). */
+
+.screen-state {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0;
+  min-height: 320px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  padding: 48px 28px;
+  text-align: center;
+}
+.screen-state-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+.screen-state-title {
+  margin-top: 18px;
+  color: var(--color-text);
+  font-size: var(--font-md);
+  font-weight: 800;
+  letter-spacing: -0.024em;
+  line-height: 1.45;
+}
+.screen-state-description {
+  max-width: 46ch;
+  margin: 8px 0 0;
+  color: var(--color-muted);
+  font-size: var(--font-caption);
+  line-height: 1.7;
+}
+
+/* 다음 행동이 한 번의 클릭으로 안 끝날 때만 쓴다. 빈 화면이 "그래서 지금 뭘
+   하면 되는지"까지 답하게 만드는 부분이라, 장식이 아니라 안내 본문이다. */
+.screen-state-steps {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0 0;
+  padding: 0;
+  text-align: left;
+  list-style: none;
+}
+.screen-state-steps li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+  color: var(--color-text-soft);
+  font-size: var(--font-caption);
+  line-height: 1.6;
+}
+.screen-state-steps i {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--font-xs);
+  font-style: normal;
+  font-weight: 800;
+}
+.screen-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 22px;
+}
+.screen-state-actions .button {
+  min-height: 42px;
+  padding-inline: 20px;
+}
+.screen-state-actions .button svg {
+  margin-right: 6px;
+}
+
+.screen-state-error .screen-state-icon {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+.screen-state-denied .screen-state-icon {
+  background: var(--color-surface-soft);
+  color: var(--color-muted);
+}
+
+/* 카드 안쪽·인박스처럼 이미 테두리가 있는 자리에 들어가는 축약형.
+   테두리를 한 겹 더 그리면 카드 속 카드가 된다. */
+.screen-state-compact {
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  padding: 28px 20px;
+}
+.screen-state-compact .screen-state-icon {
+  width: 38px;
+  height: 38px;
+}
+.screen-state-compact .screen-state-title {
+  margin-top: 14px;
+  font-size: var(--font-body);
+}
+.screen-state-compact .screen-state-actions {
+  margin-top: 16px;
+}
+.screen-state-compact .screen-state-actions .button {
+  min-height: 38px;
+  font-size: var(--font-sm);
+}
+
+/* 스켈레톤 — 목록이 들어올 자리를 실제 행 모양으로 잡아둔다. 텍스트 한 줄짜리
+   로딩 안내와 달리 데이터가 도착할 때 레이아웃이 튀지 않는다. */
+.skeleton-list {
+  display: grid;
+  gap: 2px;
+  padding: 4px 0;
+}
+.skeleton-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 62px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 4px;
+}
+.skeleton-list-row .skeleton-row + .skeleton-row {
+  border-top: 1px solid var(--color-line);
+}
+.skeleton-list-card {
+  gap: 10px;
+}
+.skeleton-list-card .skeleton-row {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: 16px 14px;
+}
+.skeleton-lines {
+  display: grid;
+  gap: 8px;
+}
+.skeleton-block {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+.skeleton-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+}
+.skeleton-line-strong {
+  width: 42%;
+  min-width: 96px;
+  height: 12px;
+}
+.skeleton-line {
+  width: 72%;
+  height: 10px;
+}
+.skeleton-pill {
+  width: 62px;
+  height: 22px;
+  border-radius: 999px;
+}
+/* 행마다 살짝 어긋나게 — 전체가 한 덩어리로 깜빡이면 배너처럼 보인다. */
+.skeleton-row:nth-child(2n) .skeleton-block {
+  animation-delay: 0.18s;
+}
+.skeleton-row:nth-child(3n) .skeleton-block {
+  animation-delay: 0.34s;
+}
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block {
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .screen-state {
+    min-height: 260px;
+    padding: 36px 20px;
+  }
+  /* 부모가 justify-items:center 그리드라 액션 줄이 내용 폭으로 줄어든다 —
+     폭을 먼저 되돌려야 버튼의 width:100%가 의미를 갖는다. 다만 화면 끝까지
+     늘리지는 않는다(작은 화면에서 버튼 하나가 띠처럼 보인다). */
+  .screen-state-actions {
+    width: 100%;
+    max-width: 320px;
+  }
+  .screen-state-actions .button {
+    flex: 1 1 100%;
+  }
+}

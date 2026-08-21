@@ -160,13 +160,25 @@ test("types: ShopSearchRequest (dealer view) has no adminNote field; AdminShopSe
   assert.match(typesSource, /adminNote\?: string;/);
 });
 
-test("Dealer directory screen surfaces the '시공점 찾기 요청' CTA only in the empty (0-result) state, and only when the Real-mode handler is passed in", () => {
-  const emptyState = directoryScreenSource.slice(
-    directoryScreenSource.indexOf('installer-empty-state">'),
-    directoryScreenSource.indexOf('installer-empty-state">') + 900,
+test("Dealer directory screen surfaces the '시공점 찾기 요청' CTA only in the empty state, and only when the Real-mode handler is passed in", () => {
+  // 빈 상태 마크업은 공용 EmptyState로 옮겼고, "결과 0건"과 "디렉터리 자체가
+  // 비어 있음"을 이제 구분한다(실계정 신규 딜러는 후자를 본다). 두 경우 모두
+  // 요청 CTA는 onShopSearchRequest가 넘어온 Real 모드에서만 나타나야 한다.
+  const emptyStates = directoryScreenSource.slice(
+    directoryScreenSource.indexOf("installers.length === 0 ?"),
+    directoryScreenSource.indexOf("<div className=\"installer-list\""),
   );
-  assert.match(emptyState, /onShopSearchRequest\s*&&\s*(?:\(\s*)?<div className="installer-empty-state-shop-search">/);
-  assert.match(emptyState, /원하는 시공점을 찾지 못하셨나요\?/);
+  assert.match(emptyStates, /아직 등록된 시공점이 없습니다\./);
+  assert.match(emptyStates, /조건에 맞는 시공점이 없습니다\./);
+  // 두 상태 모두 CTA는 핸들러 존재 여부로 가려진다.
+  assert.match(
+    emptyStates,
+    /action=\{onShopSearchRequest \? \{ label: "시공점 찾기 요청", onClick: onShopSearchRequest \} : undefined\}/,
+  );
+  assert.match(
+    emptyStates,
+    /secondaryAction=\{\s*onShopSearchRequest \? \{ label: "카마스터에 찾기 요청", onClick: onShopSearchRequest \} : undefined\s*\}/,
+  );
 });
 
 test("DealerWorkspace only passes the shop-search-request entry points (directory CTA, dashboard button, screen render) in Real/Supabase mode — never for Demo/local", () => {

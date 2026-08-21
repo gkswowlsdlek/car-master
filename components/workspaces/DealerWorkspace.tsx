@@ -35,6 +35,7 @@ import { RequestSummary } from "../dealer/RequestSummary";
 import { ServiceRequestScreen } from "../dealer/ServiceRequestScreen";
 import { ShopSearchRequestScreen } from "../dealer/ShopSearchRequestScreen";
 import { MessengerScreen } from "../messenger/MessengerScreen";
+import { PermissionState } from "../common/ScreenState";
 import { ProfileEditor, defaultDealerCompanyName } from "../profile/ProfileEditor";
 import { HelpCenterScreen } from "../support/HelpCenterScreen";
 import { DealerTransactionManagementScreen } from "../transactions/DealerTransactionManagementScreen";
@@ -220,11 +221,13 @@ export function DealerWorkspace({
     return () => onMobileFullscreenChange(false);
   }, [mobileChatOpen, onMobileFullscreenChange, screen]);
 
+  /** Returns whether the address resolved — the directory screen shows its own
+   * inline error when it did not, instead of failing silently. */
   const searchArea = async (value = query) => {
     const result = await searchLocation(value);
     if (!result) {
       setLocationError("검색 가능한 행정구역을 찾지 못했습니다.");
-      return;
+      return false;
     }
     setLocationError("");
     setLocation(result);
@@ -235,6 +238,7 @@ export function DealerWorkspace({
       (item) => item.shop.approved && item.shop.available,
     );
     if (nearest) setSelectedShopId(nearest.shop.id);
+    return true;
   };
 
   const searchHomeLocation = async (value: string) => {
@@ -436,6 +440,9 @@ export function DealerWorkspace({
           onFindShop={() => onNavigate("dealerMap")}
           onSearchLocation={searchHomeLocation}
           onShopSearchRequests={useSupabaseData ? () => onNavigate("shopSearchRequests") : undefined}
+          loading={isLoading}
+          loadError={loadError}
+          onRetry={() => void onRefresh()}
         />
       )}
       {screen === "dealerMap" && (
@@ -454,6 +461,7 @@ export function DealerWorkspace({
           searchOrigin={searchOrigin}
           onRequest={() => onNavigate("request")}
           onShopSearchRequest={useSupabaseData ? () => onNavigate("shopSearchRequests") : undefined}
+          onSearchAddress={searchArea}
         />
       )}
       {screen === "request" && locationError && (
@@ -493,6 +501,9 @@ export function DealerWorkspace({
           }}
           onNewRequest={() => onNavigate("request")}
           onFindShop={() => onNavigate("dealerMap")}
+          loading={isLoading}
+          loadError={loadError}
+          onRetry={() => void onRefresh()}
         />
       )}
       {screen === "messages" && (
@@ -521,6 +532,18 @@ export function DealerWorkspace({
           onLoadOlder={onLoadOlderMessages}
           onLoadContact={onLoadContact}
           onMobileChatOpenChange={setMobileChatOpen}
+          onRetry={() => void onRefresh()}
+          onFindShop={() => onNavigate("dealerMap")}
+        />
+      )}
+      {/* Demo 세션은 시공점 찾기 요청(Admin 컨시어지 접수)에 접근할 수 없다.
+          예전에는 이 조건이 false면 작업 영역이 그냥 빈 화면이 됐다 — 권한이
+          없는 것과 화면이 깨진 것을 사용자가 구분할 수 없었다. */}
+      {screen === "shopSearchRequests" && !useSupabaseData && (
+        <PermissionState
+          title="데모 계정에서는 사용할 수 없는 기능입니다."
+          description="시공점 찾기 요청은 카마스터 운영팀이 직접 확인해 연결하는 절차라 실제 회원 계정에서만 이용할 수 있습니다. 데모에서는 전국 시공점 목록을 그대로 둘러보실 수 있어요."
+          action={{ label: "시공점 목록 보기", onClick: () => onNavigate("dealerMap") }}
         />
       )}
       {screen === "shopSearchRequests" && useSupabaseData && (
@@ -535,11 +558,7 @@ export function DealerWorkspace({
         />
       )}
       {screen === "dealerProfile" && (
-        <ProfileEditor
-          role="dealer"
-          userId={account.id}
-          onChangePassword={onChangePassword}
-        />
+        <ProfileEditor role="dealer" userId={account.id} onChangePassword={onChangePassword} />
       )}
       {screen === "dealerHelp" && <HelpCenterScreen role="dealer" embedded />}
     </>

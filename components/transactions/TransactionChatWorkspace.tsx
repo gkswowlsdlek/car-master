@@ -19,6 +19,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import { ErrorState } from "../common/ScreenState";
 import { attachmentProvider, supabaseAttachmentProvider, type AttachmentProvider } from "../../services/attachments";
 import { generateShopMessage } from "../../services/shop-message";
 import { translateTransactionError } from "../../services/transaction-errors";
@@ -118,6 +119,8 @@ export function TransactionChatWorkspace({
   onLoadContact,
   onLoadOlder,
   onBack,
+  roomLoading = false,
+  onRetry,
 }: {
   role: "dealer" | "shop";
   userId: string;
@@ -152,6 +155,10 @@ export function TransactionChatWorkspace({
   onLoadOlder?: (roomId: string) => Promise<boolean>;
   /** Only passed by MessengerScreen — renders a mobile-only back-to-Inbox button. TransactionManagementScreen never passes this, so its header is unchanged. */
   onBack?: () => void;
+  /** 방 목록을 아직 불러오는 중인지. 이게 없으면 방을 못 받아온 경우와
+   * 아직 안 온 경우를 구분할 수 없어 "잠시만 기다려 주세요"가 영원히 남는다. */
+  roomLoading?: boolean;
+  onRetry?: () => void;
 }) {
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState<ChatAttachment[]>([]);
@@ -175,7 +182,12 @@ export function TransactionChatWorkspace({
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [contactStatusPending, setContactStatusPending] = useState(false);
   const [warrantyFormOpen, setWarrantyFormOpen] = useState(false);
-  const [warrantyDraft, setWarrantyDraft] = useState({ customerName: "", customerPhone: "", vehicleNumber: "", vin: "" });
+  const [warrantyDraft, setWarrantyDraft] = useState({
+    customerName: "",
+    customerPhone: "",
+    vehicleNumber: "",
+    vin: "",
+  });
   const [warrantyPending, setWarrantyPending] = useState(false);
   const [warrantyResultMessage, setWarrantyResultMessage] = useState("");
   const [issueWarrantyPending, setIssueWarrantyPending] = useState(false);
@@ -699,52 +711,46 @@ export function TransactionChatWorkspace({
           </nav>
         </header>
         {confirmCompleteOpen && (
-            <div className="stage-confirm-overlay" role="dialog" aria-modal="true">
-              <div className="stage-confirm-backdrop" onClick={() => setConfirmCompleteOpen(false)} />
-              <div className="stage-confirm-card">
-                <h3>작업완료 처리할까요?</h3>
-                <p>
-                  작업완료로 표시하면 이 거래는 완료 상태가 됩니다. 실수였다면 이후에도 입고 상태로 되돌릴 수 있어요.
-                </p>
-                <div className="stage-confirm-buttons">
-                  <button
-                    type="button"
-                    className="button button-secondary"
-                    onClick={() => setConfirmCompleteOpen(false)}
-                  >
-                    취소
-                  </button>
-                  <button type="button" className="button button-primary" onClick={confirmComplete}>
-                    작업완료 처리
-                  </button>
-                </div>
+          <div className="stage-confirm-overlay" role="dialog" aria-modal="true">
+            <div className="stage-confirm-backdrop" onClick={() => setConfirmCompleteOpen(false)} />
+            <div className="stage-confirm-card">
+              <h3>작업완료 처리할까요?</h3>
+              <p>작업완료로 표시하면 이 거래는 완료 상태가 됩니다. 실수였다면 이후에도 입고 상태로 되돌릴 수 있어요.</p>
+              <div className="stage-confirm-buttons">
+                <button type="button" className="button button-secondary" onClick={() => setConfirmCompleteOpen(false)}>
+                  취소
+                </button>
+                <button type="button" className="button button-primary" onClick={confirmComplete}>
+                  작업완료 처리
+                </button>
               </div>
             </div>
-          )}
-          {confirmDispatchOpen && (
-            <div className="stage-confirm-overlay" role="dialog" aria-modal="true">
-              <div className="stage-confirm-backdrop" onClick={() => setConfirmDispatchOpen(false)} />
-              <div className="stage-confirm-card">
-                <h3>최종 시공금액을 먼저 입력할까요?</h3>
-                <p>아직 최종 시공금액이 기록되지 않았어요. 나중에 입력해도 출고 처리에는 영향이 없어요.</p>
-                <div className="stage-confirm-buttons">
-                  <button type="button" className="button button-secondary" onClick={confirmDispatch}>
-                    나중에 입력
-                  </button>
-                  <button
-                    type="button"
-                    className="button button-primary"
-                    onClick={() => {
-                      setConfirmDispatchOpen(false);
-                      setDetailPanel("transaction");
-                    }}
-                  >
-                    지금 입력
-                  </button>
-                </div>
+          </div>
+        )}
+        {confirmDispatchOpen && (
+          <div className="stage-confirm-overlay" role="dialog" aria-modal="true">
+            <div className="stage-confirm-backdrop" onClick={() => setConfirmDispatchOpen(false)} />
+            <div className="stage-confirm-card">
+              <h3>최종 시공금액을 먼저 입력할까요?</h3>
+              <p>아직 최종 시공금액이 기록되지 않았어요. 나중에 입력해도 출고 처리에는 영향이 없어요.</p>
+              <div className="stage-confirm-buttons">
+                <button type="button" className="button button-secondary" onClick={confirmDispatch}>
+                  나중에 입력
+                </button>
+                <button
+                  type="button"
+                  className="button button-primary"
+                  onClick={() => {
+                    setConfirmDispatchOpen(false);
+                    setDetailPanel("transaction");
+                  }}
+                >
+                  지금 입력
+                </button>
               </div>
             </div>
-          )}
+          </div>
+        )}
         {endOutcomeModal && (
           <EndTransactionOutcomeModal
             outcome={endOutcomeModal}
@@ -926,12 +932,23 @@ export function TransactionChatWorkspace({
               </div>
             );
           })}
-          {!room && (
-            <div className="messenger-empty" role="status">
-              <b>거래방을 연결하고 있어요.</b>
-              <span>잠시만 기다려 주세요.</span>
-            </div>
-          )}
+          {/* 로딩이 끝났는데도 방이 없다면 그건 기다림이 아니라 실패다.
+              예전에는 두 경우가 같은 문구를 써서 "잠시만 기다려 주세요"가
+              영원히 남아 있었다. */}
+          {!room &&
+            (roomLoading ? (
+              <div className="messenger-empty" role="status">
+                <b>거래방을 연결하고 있어요.</b>
+                <span>잠시만 기다려 주세요.</span>
+              </div>
+            ) : (
+              <ErrorState
+                compact
+                title="거래방을 열지 못했습니다."
+                description="네트워크가 끊겼거나 대화를 불러오는 데 실패했습니다. 거래 자체는 그대로 유지되며, 다시 시도하면 대화가 복구됩니다."
+                onRetry={onRetry}
+              />
+            ))}
           {room && timeline.length === 0 && (
             <div className="messenger-empty">
               <b>아직 나눈 대화가 없어요.</b>
@@ -1170,7 +1187,9 @@ export function TransactionChatWorkspace({
                           ↩ {STAGE_REVERT_LABEL[backStage!]}
                         </button>
                       )}
-                      {!canAdvance && !canRevert && <p className="sidebar-next-step-done">추가로 진행할 단계가 없습니다.</p>}
+                      {!canAdvance && !canRevert && (
+                        <p className="sidebar-next-step-done">추가로 진행할 단계가 없습니다.</p>
+                      )}
                     </>
                   )}
                 </div>
@@ -1272,7 +1291,11 @@ export function TransactionChatWorkspace({
                     </label>
                     {warrantyResultMessage && <p className="warranty-result-message">{warrantyResultMessage}</p>}
                     <div className="warranty-form-actions">
-                      <button type="button" className="button button-secondary" onClick={() => setWarrantyFormOpen(false)}>
+                      <button
+                        type="button"
+                        className="button button-secondary"
+                        onClick={() => setWarrantyFormOpen(false)}
+                      >
                         닫기
                       </button>
                       <button
@@ -1294,7 +1317,9 @@ export function TransactionChatWorkspace({
                         className="button button-primary"
                         disabled={warrantyPending || !canSubmitWarranty}
                         aria-busy={warrantyPending}
-                        title={canSubmitWarranty ? undefined : "고객명, 연락처, 차량번호가 모두 있어야 전달할 수 있습니다."}
+                        title={
+                          canSubmitWarranty ? undefined : "고객명, 연락처, 차량번호가 모두 있어야 전달할 수 있습니다."
+                        }
                         onClick={() => void submitWarrantyInfo()}
                       >
                         {warrantyPending ? "전달 중…" : "보증서 정보 전달"}

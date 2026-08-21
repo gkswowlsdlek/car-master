@@ -1,8 +1,18 @@
-import { Bell, ChevronRight, MessageCircle, Phone, Search } from "lucide-react";
+import { Bell, CalendarCheck, ChevronRight, MapPin, MessageCircle, Phone, Search } from "lucide-react";
 import { useState } from "react";
 import type { AppNotification } from "../../hooks/use-notifications";
 import type { Transaction, TransactionStage } from "../../types/transactions";
 import { dealerStageLabel } from "../../services/transaction-state-service";
+import { EmptyState, ErrorState, SkeletonList } from "../common/ScreenState";
+
+/** 실제 계정으로 갓 가입한 딜러가 처음 보는 화면이 바로 이 상태다. 빈 카드
+ * 세 개를 나란히 보여주는 대신, 딜러가 실제로 밟아야 하는 세 단계를 한 블록에
+ * 담아 시공점 찾기로 곧장 연결한다. */
+const FIRST_RUN_STEPS = [
+  "고객 차량이 있는 지역을 검색합니다.",
+  "시공점을 고르고 시공 요청을 보냅니다.",
+  "거래방에서 일정과 진행 상황을 관리합니다.",
+];
 
 const ACTIVE_STAGES: TransactionStage[] = ["시공예약", "입고"];
 
@@ -51,6 +61,9 @@ export function DealerDashboard({
   onSearchLocation,
   onShopSearchRequests,
   relativeTime,
+  loading = false,
+  loadError = "",
+  onRetry,
 }: {
   dealerName: string;
   deals: Transaction[];
@@ -67,6 +80,11 @@ export function DealerDashboard({
   onSearchLocation: (area: string) => void;
   onShopSearchRequests?: () => void;
   relativeTime: (iso: string) => string;
+  /** 첫 로드가 끝나기 전에는 "아직 작업이 없습니다"를 보여주지 않는다 — 잠깐
+   * 스쳐 지나가는 빈 상태는 신규 딜러에게 "이 서비스는 비어 있다"로 읽힌다. */
+  loading?: boolean;
+  loadError?: string;
+  onRetry?: () => void;
 }) {
   const [area, setArea] = useState("");
   const activeDeals = deals.filter((deal) => ACTIVE_STAGES.includes(deal.status.stage));
@@ -113,99 +131,137 @@ export function DealerDashboard({
           </button>
         </div>
       </section>
-      <section className="reference-module-grid">
-        <article className="reference-module">
-          <header>
-            <h2>
-              <Bell size={19} /> 최근 알림
-            </h2>
-            <button type="button" onClick={() => onFilterDeals("전체")}>
-              전체 보기 <ChevronRight size={14} />
-            </button>
-          </header>
-          {recentNotifications.length > 0 ? (
-            <ul>
-              {recentNotifications.map((item) => (
-                <li key={item.id}>
-                  <button type="button" onClick={() => openNotification(item)}>
-                    <i />
-                    <span>
-                      {item.type === "message"
-                        ? `${item.title}님이 메시지를 보냈습니다.`
-                        : item.type === "stage_change"
-                          ? `${item.title} — ${item.body}`
-                          : item.type === "shop_proposed"
-                            ? `${item.title}을(를) 제안드렸습니다.`
-                            : item.body}
-                    </span>
-                    <small>{relativeTime(item.createdAt)}</small>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="reference-module-empty">아직 알림이 없습니다.</p>
-          )}
-        </article>
-        <article className="reference-module">
-          <header>
-            <h2>
-              <MessageCircle size={19} /> 새 메시지
-            </h2>
-            <button type="button" onClick={onOpenMessages}>
-              전체 보기 <ChevronRight size={14} />
-            </button>
-          </header>
-          {messageNotifications.length > 0 ? (
-            <ul>
-              {messageNotifications.slice(0, 5).map((item) => (
-                <li key={item.id}>
-                  <button type="button" onClick={() => openNotification(item)}>
-                    <div>
-                      <b>{item.title}</b>
-                      <span>{item.body}</span>
-                    </div>
-                    <small>{relativeTime(item.createdAt)}</small>
-                    <em>1</em>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="reference-module-empty">아직 대화가 없습니다.</p>
-          )}
-        </article>
-      </section>
-      <section className="ws-card ws-list-card r3-recent-work reference-recent-work">
-        <div className="ws-section-head">
-          <div>
-            <h2>진행 중인 작업</h2>
-          </div>
-          <button onClick={() => onFilterDeals("전체")}>
-            전체 보기 <ChevronRight size={14} />
-          </button>
-        </div>
-        {recentDeals.length > 0 && (
-          <div className="ws-row-columns" aria-hidden="true">
-            <span>차량 / 작업</span>
-            <span>입고</span>
-            <span>상태</span>
-            <span />
-          </div>
-        )}
-        {recentDeals.length > 0 ? (
-          recentDeals.map((deal) => <DealRow key={deal.id} deal={deal} onOpenTransaction={onOpenTransaction} />)
-        ) : (
-          /* 실제 거래가 없을 때 예시 차량·시공점을 지어내지 않는다 — 빈 상태에서
-           * 해야 할 다음 행동(시공점 찾기)으로 그대로 연결한다. */
-          <div className="ws-dashboard-empty">
-            <p>아직 진행 중인 작업이 없습니다.</p>
-            <button type="button" className="button button-primary" onClick={onFindShop}>
-              시공점 찾고 첫 작업 요청하기
-            </button>
-          </div>
-        )}
-      </section>
+      {loadError && deals.length === 0 ? (
+        <ErrorState title="오늘의 작업을 불러오지 못했습니다." description={loadError} onRetry={onRetry} />
+      ) : loading && deals.length === 0 ? (
+        <SkeletonList rows={4} variant="card" label="오늘 확인할 작업을 불러오는 중입니다." />
+      ) : deals.length === 0 ? (
+        /* 신규 딜러: 빈 카드 세 개(알림·메시지·진행 중인 작업)를 나란히 세우면
+         * 화면 대부분이 "없습니다"가 된다. 아직 아무것도 없는 계정에는 카드
+         * 대신 시작 경로 하나만 보여주고, 데이터가 생기는 순간 원래 레이아웃이
+         * 그대로 돌아온다. */
+        <EmptyState
+          icon={MapPin}
+          title="아직 진행 중인 작업이 없습니다."
+          description="카마스터는 고객 차량이 있는 지역의 시공점을 찾는 것에서 시작합니다. 위 검색창에 지역이나 주소를 넣거나, 아래 버튼으로 전국 시공점을 둘러보세요."
+          steps={FIRST_RUN_STEPS}
+          action={{ label: "시공점 찾기", onClick: onFindShop }}
+          secondaryAction={
+            onShopSearchRequests ? { label: "카마스터에 시공점 찾기 요청", onClick: onShopSearchRequests } : undefined
+          }
+        />
+      ) : (
+        <>
+          <section className="reference-module-grid">
+            <article className="reference-module">
+              <header>
+                <h2>
+                  <Bell size={19} /> 최근 알림
+                </h2>
+                <button type="button" onClick={() => onFilterDeals("전체")}>
+                  전체 보기 <ChevronRight size={14} />
+                </button>
+              </header>
+              {recentNotifications.length > 0 ? (
+                <ul>
+                  {recentNotifications.map((item) => (
+                    <li key={item.id}>
+                      <button type="button" onClick={() => openNotification(item)}>
+                        <i />
+                        <span>
+                          {item.type === "message"
+                            ? `${item.title}님이 메시지를 보냈습니다.`
+                            : item.type === "stage_change"
+                              ? `${item.title} — ${item.body}`
+                              : item.type === "shop_proposed"
+                                ? `${item.title}을(를) 제안드렸습니다.`
+                                : item.body}
+                        </span>
+                        <small>{relativeTime(item.createdAt)}</small>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <EmptyState
+                  compact
+                  icon={Bell}
+                  title="새로 확인할 알림이 없습니다."
+                  description="거래 단계가 바뀌거나 시공점이 답하면 여기에 바로 표시됩니다."
+                />
+              )}
+            </article>
+            <article className="reference-module">
+              <header>
+                <h2>
+                  <MessageCircle size={19} /> 새 메시지
+                </h2>
+                <button type="button" onClick={onOpenMessages}>
+                  전체 보기 <ChevronRight size={14} />
+                </button>
+              </header>
+              {messageNotifications.length > 0 ? (
+                <ul>
+                  {messageNotifications.slice(0, 5).map((item) => (
+                    <li key={item.id}>
+                      <button type="button" onClick={() => openNotification(item)}>
+                        <div>
+                          <b>{item.title}</b>
+                          <span>{item.body}</span>
+                        </div>
+                        <small>{relativeTime(item.createdAt)}</small>
+                        <em>1</em>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <EmptyState
+                  compact
+                  icon={MessageCircle}
+                  title="읽지 않은 메시지가 없습니다."
+                  description="거래방에 새 메시지가 오면 여기에서 먼저 확인할 수 있어요."
+                  action={{ label: "거래방 전체 보기", onClick: onOpenMessages }}
+                />
+              )}
+            </article>
+          </section>
+          <section className="ws-card ws-list-card r3-recent-work reference-recent-work">
+            <div className="ws-section-head">
+              <div>
+                <h2>진행 중인 작업</h2>
+              </div>
+              <button onClick={() => onFilterDeals("전체")}>
+                전체 보기 <ChevronRight size={14} />
+              </button>
+            </div>
+            {recentDeals.length > 0 && (
+              <div className="ws-row-columns" aria-hidden="true">
+                <span>차량 / 작업</span>
+                <span>입고</span>
+                <span>상태</span>
+                <span />
+              </div>
+            )}
+            {recentDeals.length > 0 ? (
+              recentDeals.map((deal) => <DealRow key={deal.id} deal={deal} onOpenTransaction={onOpenTransaction} />)
+            ) : (
+              /* 여기까지 왔다는 건 거래는 있는데 "예약/작업 중"만 없다는 뜻이다
+               * (전부 완료·종료됨). 신규 딜러 문구를 그대로 쓰면 거짓말이 되므로
+               * 지난 거래로 가는 길과 새 요청을 함께 준다. 예시 차량·시공점을
+               * 지어내지 않는 원칙은 그대로. */
+              <EmptyState
+                compact
+                icon={CalendarCheck}
+                title="지금 진행 중인 작업이 없습니다."
+                description="예약되었거나 작업 중인 차량이 생기면 여기에 표시됩니다."
+                action={{ label: "시공점 찾기", onClick: onFindShop }}
+                secondaryAction={{ label: "지난 거래 보기", onClick: () => onFilterDeals("전체") }}
+              />
+            )}
+          </section>
+        </>
+      )}
       {/* Real 모드 전용 시공점 찾기 요청 진입점. 현재 CSS에서
        * .prototype-legacy-actions가 display:none이라 화면에는 보이지 않지만,
        * Real 계정의 기능 진입점이라 이번 UI polish 범위에서 임의로 제거하지

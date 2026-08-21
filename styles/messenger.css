@@ -12,6 +12,15 @@
   margin: 0;
   padding: 16px;
 }
+/* 목록도 대화도 없을 때는 메신저 2단 레이아웃을 펼치지 않는다. 그때는 이
+   화면이 100dvh짜리 빈 상자가 되어 안내문 한 줄이 세로 한가운데 떠버리는데,
+   같은 상황의 대시보드·거래관리는 안내를 위쪽에 두므로 화면끼리 어긋난다.
+   높이 강제를 풀고 다른 화면과 같은 자리에서 시작하게 한다. */
+.messenger-screen-blank {
+  height: auto;
+  min-height: 0;
+  display: block;
+}
 .messenger-layout {
   display: grid;
   grid-template-columns: 330px minmax(0, 1fr);
@@ -44,26 +53,6 @@
 }
 .inbox-search {
   width: 100%;
-}
-.inbox-state {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  padding: 40px 14px;
-  color: var(--color-muted);
-  text-align: center;
-  font-size: var(--font-sm);
-}
-.inbox-state.inbox-empty b {
-  color: var(--color-text-soft);
-  font-size: var(--font-sm);
-}
-.inbox-state.inbox-empty span {
-  color: var(--color-muted-soft);
-  font-size: var(--font-sm);
-}
-.inbox-state-error {
-  color: var(--color-danger);
 }
 .inbox-list {
   display: grid;
@@ -207,6 +196,10 @@
     display: grid;
     grid-template-rows: minmax(0, 1fr);
     padding: 0;
+  }
+  .messenger-screen-blank {
+    height: auto;
+    display: block;
   }
   /* 데스크탑은 대화 목록을 항상 보여준다 — 카톡·슬랙과 같은 문법. 접기 레일과
      레일 토글은 데스크탑에서 없앤다(모바일 drill-down 흐름은 그대로). listOpen

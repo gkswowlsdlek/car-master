@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FileWarning, Phone, PhoneOff } from "lucide-react";
+import { Building2, FileWarning, Phone, PhoneOff, SearchX } from "lucide-react";
 import { Search } from "lucide-react";
+import { EmptyState, ErrorState, SkeletonList } from "../common/ScreenState";
 import type { Transaction, TransactionStage } from "../../types/transactions";
 import type { InstallerListing } from "../../types/installer";
 import {
@@ -92,6 +93,9 @@ export function DealerTransactionManagementScreen({
   onOpenTransaction,
   onNewRequest,
   onFindShop,
+  loading = false,
+  loadError = "",
+  onRetry,
 }: {
   transactions: Transaction[];
   /** 시공점 디렉터리 목록 — "지금 할 일: 전화 확인"일 때 해당 시공점 번호를
@@ -104,6 +108,11 @@ export function DealerTransactionManagementScreen({
   onOpenTransaction: (id: string) => void;
   onNewRequest: () => void;
   onFindShop: () => void;
+  /** 첫 로드 중에는 빈 상태 대신 스켈레톤 — 잠깐 뜨는 "거래가 없습니다"가
+   * 실제로는 "아직 안 왔습니다"인 경우가 대부분이다. */
+  loading?: boolean;
+  loadError?: string;
+  onRetry?: () => void;
 }) {
   const [group, setGroup] = useState<Group>(() => groupFromStage(initialGroupFilter ?? "전체"));
   const [query, setQuery] = useState("");
@@ -152,17 +161,49 @@ export function DealerTransactionManagementScreen({
     ? installers?.find((item) => item.id === selectedShopKey)?.contactPhone
     : undefined;
 
-  const empty = query.trim()
-    ? { title: "검색 결과가 없습니다.", body: "차량, 시공점 이름으로 다시 검색해 보세요." }
-    : visible.length === 0
-      ? { title: "아직 진행 중인 거래가 없습니다.", body: "시공점을 찾아 첫 시공 요청을 시작해 보세요." }
-      : group === "진행중"
-        ? { title: "진행 중인 거래가 없습니다.", body: "" }
-        : group === "완료"
-          ? { title: "완료된 거래가 없습니다.", body: "" }
-          : group === "종료"
-            ? { title: "종료된 거래가 없습니다.", body: "" }
-            : { title: "해당 조건의 거래가 없습니다.", body: "검색어나 필터를 확인해 주세요." };
+  /* 빈 목록은 세 가지가 전혀 다른 사건이다: (1) 아직 거래를 한 건도 만들지
+     않은 신규 딜러, (2) 검색어에 걸리는 게 없음, (3) 이 탭만 비었음. 셋을 같은
+     문구로 처리하면 신규 딜러가 "내가 뭘 잘못 눌렀나" 하고 되돌아간다.
+     각 경우가 서로 다른 다음 행동으로 연결되게 나눈다. */
+  const emptyView = loadError ? (
+    <ErrorState title="거래 목록을 불러오지 못했습니다." description={loadError} onRetry={onRetry} />
+  ) : loading ? (
+    <SkeletonList rows={5} label="거래 목록을 불러오는 중입니다." />
+  ) : query.trim() ? (
+    <EmptyState
+      icon={SearchX}
+      title="검색 결과가 없습니다."
+      description={`'${query.trim()}'과(와) 일치하는 거래를 찾지 못했습니다. 차량 이름이나 시공점 이름으로 다시 찾아보세요.`}
+      action={{ label: "검색어 지우기", onClick: () => setQuery("") }}
+    />
+  ) : visible.length === 0 ? (
+    <EmptyState
+      icon={Building2}
+      title="아직 등록된 거래가 없습니다."
+      description="시공점에 시공 요청을 보내면 거래와 거래방이 즉시 만들어지고, 그때부터 이 화면에서 진행 상황을 관리합니다."
+      steps={[
+        "고객 차량이 있는 지역의 시공점을 찾습니다.",
+        "시공 요청을 보내면 거래가 생성됩니다.",
+        "입고·작업·출고 단계를 거래방에서 갱신합니다.",
+      ]}
+      action={{ label: "시공점 찾기", onClick: onFindShop }}
+    />
+  ) : (
+    <EmptyState
+      icon={Building2}
+      title={`${group} 거래가 없습니다.`}
+      description={
+        group === "진행중"
+          ? "예약·입고·작업 중인 거래가 생기면 여기에 모입니다."
+          : group === "완료"
+            ? "출고까지 끝난 거래가 여기에 쌓입니다."
+            : group === "종료"
+              ? "취소되거나 시공 불가로 끝난 거래만 모아 보는 탭입니다."
+              : "조건에 맞는 거래가 없습니다."
+      }
+      action={{ label: "전체 거래 보기", onClick: () => setGroup("전체") }}
+    />
+  );
 
   return (
     <section className="transaction-management-screen dealer-transaction-management">
@@ -176,37 +217,35 @@ export function DealerTransactionManagementScreen({
         </button>
       </div>
 
-      <div className="transaction-tabs dealer-deal-groups">
-        {GROUPS.map((value) => (
-          <button key={value} className={group === value ? "active" : ""} onClick={() => setGroup(value)}>
-            {value} <em>{counts[value]}</em>
-          </button>
-        ))}
-      </div>
+      {/* 걸러낼 게 없을 때 필터와 검색을 띄워두지 않는다 — 신규 딜러에게 0이
+          네 개 붙은 탭 줄은 "내가 뭘 잘못 걸렀나"로 읽힌다. 거래가 한 건이라도
+          생기면 그대로 돌아온다. */}
+      {visible.length > 0 && (
+        <>
+          <div className="transaction-tabs dealer-deal-groups">
+            {GROUPS.map((value) => (
+              <button key={value} className={group === value ? "active" : ""} onClick={() => setGroup(value)}>
+                {value} <em>{counts[value]}</em>
+              </button>
+            ))}
+          </div>
 
-      <div className="transaction-filters">
-        <label className="search-field">
-          <Search size={18} aria-hidden="true" />
-          <input
-            aria-label="거래 검색"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="차량, 시공점으로 검색"
-          />
-        </label>
-      </div>
+          <div className="transaction-filters">
+            <label className="search-field">
+              <Search size={18} aria-hidden="true" />
+              <input
+                aria-label="거래 검색"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="차량, 시공점으로 검색"
+              />
+            </label>
+          </div>
+        </>
+      )}
 
       {filtered.length === 0 ? (
-        <section className="empty-state transaction-empty">
-          <span>↗</span>
-          <h2>{empty.title}</h2>
-          {empty.body && <p>{empty.body}</p>}
-          {visible.length === 0 && !query.trim() && (
-            <button className="primary" onClick={onFindShop}>
-              시공점 찾기
-            </button>
-          )}
-        </section>
+        emptyView
       ) : (
         <div className="transaction-room-layout dealer-transaction-workspace-layout">
           <aside className="transaction-list dealer-transaction-list" role="list" aria-label="거래 작업 목록">
@@ -248,9 +287,7 @@ export function DealerTransactionManagementScreen({
                     {OPERATIONAL_STATUS_LABEL[item.status.stage]}
                   </em>
                   {showWarrantyFlag && (
-                    <small
-                      className={`phone-confirm-flag${warrantyUrgent ? " phone-confirm-flag-unreachable" : ""}`}
-                    >
+                    <small className={`phone-confirm-flag${warrantyUrgent ? " phone-confirm-flag-unreachable" : ""}`}>
                       <FileWarning size={11} aria-hidden="true" />{" "}
                       {item.warranty.vehicleNumber == null && item.warranty.vin
                         ? "차량번호 대기"
@@ -311,7 +348,11 @@ export function DealerTransactionManagementScreen({
                   </a>
                 )}
                 {!isTerminalOutcome(selected.status.stage) && (
-                  <button type="button" className="button button-primary" onClick={() => onOpenTransaction(selected.id)}>
+                  <button
+                    type="button"
+                    className="button button-primary"
+                    onClick={() => onOpenTransaction(selected.id)}
+                  >
                     {dealerNextStep(selected)}하러 가기
                   </button>
                 )}
@@ -335,7 +376,12 @@ export function DealerTransactionManagementScreen({
                 </div>
                 <div>
                   <dt>입고 예정일</dt>
-                  <dd>{fieldValue(shortDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt), "미정")}</dd>
+                  <dd>
+                    {fieldValue(
+                      shortDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt),
+                      "미정",
+                    )}
+                  </dd>
                 </div>
                 <div>
                   <dt>출고 예정일</dt>
@@ -352,7 +398,9 @@ export function DealerTransactionManagementScreen({
                 <div>
                   <dt>보증서 상태</dt>
                   <dd>
-                    <small className={`warranty-badge warranty-badge-${warrantyStatus(selected.warranty).toLowerCase()}`}>
+                    <small
+                      className={`warranty-badge warranty-badge-${warrantyStatus(selected.warranty).toLowerCase()}`}
+                    >
                       {WARRANTY_STATUS_LABEL[warrantyStatus(selected.warranty)]}
                     </small>
                   </dd>

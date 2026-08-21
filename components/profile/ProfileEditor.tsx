@@ -181,6 +181,56 @@ export function ProfileEditor({
     </section>
   );
 
+  const dealerForm = (
+    <div className="profile-editor-grid">
+      {field("name", "담당자명")}
+      {field("companyName", "회사명 / 소속")}
+      {field("phone", "휴대전화", "tel")}
+      {field("email", "이메일", "email")}
+      <label>
+        기본 활동지역
+        <select
+          value={profile.activityArea ?? ""}
+          onChange={(event) => {
+            setSaved(false);
+            setProfile({ ...profile, activityArea: event.target.value });
+          }}
+        >
+          <option value="">지역 선택</option>
+          {regions.map((region) => (
+            <option key={region}>{region}</option>
+          ))}
+        </select>
+      </label>
+    </div>
+  );
+  const formActions = (
+    <>
+      <div className="profile-editor-actions">
+        <button className="primary" onClick={() => void save()} disabled={saving}>
+          {saving ? "저장 중…" : "변경사항 저장"}
+        </button>
+      </div>
+      <p className="profile-editor-note">
+        {useMemberDatabase
+          ? "회원 정보는 안전한 회원 DB에 저장됩니다. 이메일 변경 시 새 주소로 전송된 인증이 필요할 수 있습니다."
+          : "시험 계정의 설정은 현재 브라우저에 저장됩니다."}
+      </p>
+    </>
+  );
+  const passwordSection = useMemberDatabase ? (
+    <PasswordChangeForm onChangePassword={onChangePassword} />
+  ) : (
+    <section className="profile-password-card shop-management-card">
+      <header>
+        <div>
+          <h2>비밀번호 변경</h2>
+        </div>
+      </header>
+      <p className="profile-demo-password-note">Demo 계정에서는 비밀번호를 변경하지 않아요.</p>
+    </section>
+  );
+
   return (
     <section className={`profile-editor ${role === "shop" ? "shop-management-page" : ""}`}>
       <div className="page-title">
@@ -214,29 +264,7 @@ export function ProfileEditor({
        * 신규 딜러에게는 "0건"만 세 칸 남아 화면 첫인상만 비게 만들었다. */}
       {saved && <p className="profile-saved">변경사항을 저장했습니다.</p>}
       {error && <p className="login-error">{error}</p>}
-      {role === "dealer" ? (
-        <div className="profile-editor-grid">
-          {field("name", "담당자명")}
-          {field("companyName", "회사명 / 소속")}
-          {field("phone", "휴대전화", "tel")}
-          {field("email", "이메일", "email")}
-          <label>
-            기본 활동지역
-            <select
-              value={profile.activityArea ?? ""}
-              onChange={(event) => {
-                setSaved(false);
-                setProfile({ ...profile, activityArea: event.target.value });
-              }}
-            >
-              <option value="">지역 선택</option>
-              {regions.map((region) => (
-                <option key={region}>{region}</option>
-              ))}
-            </select>
-          </label>
-        </div>
-      ) : (
+      {role === "shop" && (
         <div className="shop-management-grid">
           <section className="shop-management-card">
             <header>
@@ -325,28 +353,28 @@ export function ProfileEditor({
           </section>
         </div>
       )}
-      {notifications}
-      <div className="profile-editor-actions">
-        <button className="primary" onClick={() => void save()} disabled={saving}>
-          {saving ? "저장 중…" : "변경사항 저장"}
-        </button>
-      </div>
-      <p>
-        {useMemberDatabase
-          ? "회원 정보는 안전한 회원 DB에 저장됩니다. 이메일 변경 시 새 주소로 전송된 인증이 필요할 수 있습니다."
-          : "시험 계정의 설정은 현재 브라우저에 저장됩니다."}
-      </p>
-      {useMemberDatabase ? (
-        <PasswordChangeForm onChangePassword={onChangePassword} />
+      {role === "dealer" ? (
+        /* 딜러 마이페이지는 "내 정보를 고치고 저장한다" 한 흐름이라, 저장
+         * 버튼과 저장 위치 안내가 폼에서 떨어져 오른쪽 칸으로 흘러가 있으면
+         * 안 된다. 예전에는 2열 그리드의 자동 배치에 맡겨 저장 버튼이 알림
+         * 카드 밑으로, 안내문은 폼 아래 100px 떨어진 허공에 놓였다. 좌/우
+         * 칸을 명시적으로 묶어 각 칸이 스스로 끝나게 한다. */
+        <>
+          <div className="profile-editor-main">
+            {dealerForm}
+            {formActions}
+          </div>
+          <div className="profile-editor-aside">
+            {notifications}
+            {passwordSection}
+          </div>
+        </>
       ) : (
-        <section className="profile-password-card shop-management-card">
-          <header>
-            <div>
-              <h2>비밀번호 변경</h2>
-            </div>
-          </header>
-          <p className="profile-demo-password-note">Demo 계정에서는 비밀번호를 변경하지 않아요.</p>
-        </section>
+        <>
+          {notifications}
+          {formActions}
+          {passwordSection}
+        </>
       )}
     </section>
   );
