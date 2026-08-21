@@ -35,12 +35,10 @@ export function ServiceRequestScreen({
   onFindShops: (area?: string) => void;
   onSummary: () => void;
 }) {
-  const selectedTrust = shopTrustParts(selectedShop, true).join(" · ");
   return (
     <section className="section request-page">
       <header className="page-title">
         <div>
-          <p className="eyebrow">NEW REQUEST</p>
           <h1>새 시공 요청</h1>
           <p className="page-subtitle">필수 정보만 입력하고 작업을 맡길 시공점을 선택하세요.</p>
         </div>
@@ -77,12 +75,10 @@ export function ServiceRequestScreen({
               );
             })}
           </div>
-          <div className="selected-installer">
-            <span>선택된 시공점</span>
-            <b>{selectedShop.name}</b>
-            <small>{selectedShop.address}</small>
-            {selectedTrust && <p>{selectedTrust}</p>}
-          </div>
+          {/* "선택된 시공점" 요약 카드는 뺐다 — 바로 위 목록에서 해당 업체가
+           * 이미 파란 테두리 + "선택됨" 배지로 표시되는데 같은 업체명·주소를
+           * 한 패널 안에서 두 번 반복했고, 그 카드가 패널 밖으로 잘려 나가기도
+           * 했다. */}
         </aside>
       </div>
     </section>

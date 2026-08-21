@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { FileWarning, Phone, PhoneOff } from "lucide-react";
 import { Search } from "lucide-react";
 import type { Transaction, TransactionStage } from "../../types/transactions";
+import type { InstallerListing } from "../../types/installer";
 import {
   dealerStageIndex,
   isTerminalOutcome,
@@ -16,6 +17,12 @@ import {
 const won = (value?: number) => (value == null ? undefined : `${value.toLocaleString("ko-KR")}원`);
 const shortDate = (value?: string) =>
   value ? new Date(value).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : undefined;
+
+/** 아직 안 들어온 값을 실제 값과 같은 굵기로 그리지 않는다 — 신규 거래는 10칸
+ * 중 6칸이 "미등록/미정/미확정"이라, 전부 굵게 두면 화면 대부분이 데이터처럼
+ * 보이고 정작 확정된 용품점·작업 내용·입고일이 묻힌다. */
+const fieldValue = (value: string | undefined, placeholder: string) =>
+  value ? value : <span className="transaction-core-pending">{placeholder}</span>;
 
 type Group = "전체" | "진행중" | "완료" | "종료";
 const GROUPS: Group[] = ["전체", "진행중", "완료", "종료"];
@@ -80,12 +87,18 @@ function dealerNextStep(item: Transaction): string {
  */
 export function DealerTransactionManagementScreen({
   transactions,
+  installers,
   initialGroupFilter,
   onOpenTransaction,
   onNewRequest,
   onFindShop,
 }: {
   transactions: Transaction[];
+  /** 시공점 디렉터리 목록 — "지금 할 일: 전화 확인"일 때 해당 시공점 번호를
+   * 바로 걸 수 있게 shopId로 찾아 쓴다. MessengerScreen이 쓰는 것과 같은
+   * 매칭 방식(installers[].id === transaction.shopId). 없으면 번호를 그냥
+   * 표시하지 않는다 — 지어내지 않는다. */
+  installers?: InstallerListing[];
   /** One-shot initial group (Dashboard's "확인 대기" / "전체 보기" quick actions) — read once on mount only. */
   initialGroupFilter?: TransactionStage | "전체";
   onOpenTransaction: (id: string) => void;
@@ -131,6 +144,13 @@ export function DealerTransactionManagementScreen({
   // 대체된다(별도 effect 없이) — selectedId 자체는 갱신하지 않아도, 다음
   // 클릭이 selectedId를 다시 유효한 값으로 되돌리므로 문제 없다.
   const selected = filtered.find((item) => item.id === selectedId) ?? filtered[0];
+  // Shop 모델 거래는 shopId(installer_shops.id), 레거시/데모 거래는
+  // installerId가 시공점 식별자다. 둘 다 정확한 ID라 이름 기반 추정 없이
+  // 안전하게 찾을 수 있고, 어느 쪽으로도 못 찾으면 번호를 표시하지 않는다.
+  const selectedShopKey = selected?.shopId ?? selected?.installerId;
+  const selectedInstallerPhone = selectedShopKey
+    ? installers?.find((item) => item.id === selectedShopKey)?.contactPhone
+    : undefined;
 
   const empty = query.trim()
     ? { title: "검색 결과가 없습니다.", body: "차량, 시공점 이름으로 다시 검색해 보세요." }
@@ -148,7 +168,6 @@ export function DealerTransactionManagementScreen({
     <section className="transaction-management-screen dealer-transaction-management">
       <div className="page-title transaction-page-title">
         <div>
-          <p className="eyebrow">TRANSACTION WORKSPACE</p>
           <h1>거래 관리</h1>
           <p className="page-subtitle">진행 중인 차량과 거래를 빠르게 찾아 거래방으로 이동하세요.</p>
         </div>
@@ -276,9 +295,26 @@ export function DealerTransactionManagementScreen({
                   </em>
                 </div>
               </header>
+              {/* "지금 할 일"을 알려주면서 그 일을 할 수단은 화면 반대편
+               * 아래쪽 "거래방으로 이동" 버튼뿐이라, 딜러가 할 일을 읽고도
+               * 어디로 가야 하는지 다시 찾아야 했다. 할 일 바로 옆에서 그
+               * 작업이 실제로 이뤄지는 거래방으로 연결한다. */}
               <div className="dealer-next-step">
                 <span>지금 할 일</span>
                 <b>{dealerNextStep(selected)}</b>
+                {/* 할 일이 "전화 확인"이면 번호가 곧 그 일이다 — 거래방까지
+                 * 들어가지 않고 여기서 바로 걸 수 있게 시공점 번호를 붙인다.
+                 * 등록된 번호가 없으면 아무것도 보여주지 않는다(지어내지 않음). */}
+                {dealerNextStep(selected) === "전화 확인" && selectedInstallerPhone && (
+                  <a className="dealer-next-step-call" href={`tel:${selectedInstallerPhone.replace(/[^0-9+]/g, "")}`}>
+                    <Phone size={14} aria-hidden="true" /> {selectedInstallerPhone}
+                  </a>
+                )}
+                {!isTerminalOutcome(selected.status.stage) && (
+                  <button type="button" className="button button-primary" onClick={() => onOpenTransaction(selected.id)}>
+                    {dealerNextStep(selected)}하러 가기
+                  </button>
+                )}
               </div>
               <dl className="transaction-core-info">
                 <div>
@@ -291,27 +327,27 @@ export function DealerTransactionManagementScreen({
                 </div>
                 <div>
                   <dt>차량번호</dt>
-                  <dd>{selected.warranty.vehicleNumber || "미등록"}</dd>
+                  <dd>{fieldValue(selected.warranty.vehicleNumber, "미등록")}</dd>
                 </div>
                 <div>
                   <dt>차대번호</dt>
-                  <dd>{selected.warranty.vin || "미등록"}</dd>
+                  <dd>{fieldValue(selected.warranty.vin, "미등록")}</dd>
                 </div>
                 <div>
                   <dt>입고 예정일</dt>
-                  <dd>{shortDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt) || "미정"}</dd>
+                  <dd>{fieldValue(shortDate(selected.schedule.confirmedInboundAt ?? selected.schedule.requestedInboundAt), "미정")}</dd>
                 </div>
                 <div>
                   <dt>출고 예정일</dt>
-                  <dd>{shortDate(selected.schedule.desiredReleaseAt) || "미정"}</dd>
+                  <dd>{fieldValue(shortDate(selected.schedule.desiredReleaseAt), "미정")}</dd>
                 </div>
                 <div>
                   <dt>고객명</dt>
-                  <dd>{selected.warranty.customerName || "미등록"}</dd>
+                  <dd>{fieldValue(selected.warranty.customerName, "미등록")}</dd>
                 </div>
                 <div>
                   <dt>고객 연락처</dt>
-                  <dd>{selected.warranty.customerPhone || "미등록"}</dd>
+                  <dd>{fieldValue(selected.warranty.customerPhone, "미등록")}</dd>
                 </div>
                 <div>
                   <dt>보증서 상태</dt>
@@ -323,14 +359,19 @@ export function DealerTransactionManagementScreen({
                 </div>
                 <div>
                   <dt>최종 시공금액</dt>
-                  <dd>{won(selected.pricing.finalPrice) ?? "미확정"}</dd>
+                  <dd>{fieldValue(won(selected.pricing.finalPrice), "미확정")}</dd>
                 </div>
               </dl>
-              <footer className="dealer-transaction-detail-footer">
-                <button className="primary" onClick={() => onOpenTransaction(selected.id)}>
-                  거래방으로 이동
-                </button>
-              </footer>
+              {/* 진행 중인 거래는 위 "지금 할 일" 옆 버튼이 같은 거래방으로
+               * 데려가므로 여기서 한 번 더 반복하지 않는다. 종료된 거래는 그
+               * 버튼이 없으니(할 일이 없음) 기록을 열 통로로 남긴다. */}
+              {isTerminalOutcome(selected.status.stage) && (
+                <footer className="dealer-transaction-detail-footer">
+                  <button className="primary" onClick={() => onOpenTransaction(selected.id)}>
+                    거래방으로 이동
+                  </button>
+                </footer>
+              )}
             </article>
           )}
         </div>

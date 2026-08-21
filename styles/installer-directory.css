@@ -124,6 +124,28 @@
   color: var(--color-muted);
   font-size: var(--font-sm);
 }
+/* 검색 기준 주소는 회색 보조문구가 아니라 눈에 남는 칩으로 — 딜러가 지금
+   어느 지점 기준으로 거리를 보고 있는지 화면에서 즉시 확인할 수 있어야 한다. */
+.installer-origin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  border: 1px solid var(--color-primary-border);
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  padding: 7px 14px;
+  color: var(--color-primary);
+  font-size: var(--font-sm);
+  line-height: 1.2;
+}
+.installer-origin-chip b {
+  color: var(--color-text);
+  font-weight: 700;
+}
+.installer-origin-chip span {
+  color: var(--color-muted);
+}
 .installer-mobile-tabs {
   display: none;
 }

@@ -1071,10 +1071,11 @@ export function TransactionChatWorkspace({
           </>
         ) : (
           <>
+            {/* 한 패널에 eyebrow + 제목 + 설명 3단을 쌓지 않는다 — 매번 보는
+             * 상시 사이드바라 제목 한 줄이면 충분하고, 걷어낸 높이는 실제
+             * 거래 정보가 가져간다. */}
             <div className="briefing-title">
-              <span>거래 요약</span>
               <h3>거래 정보</h3>
-              <p>대화 중에도 핵심 작업 정보를 바로 확인하세요.</p>
             </div>
             <div className="sidebar-stage">
               <span>현재 상태</span>

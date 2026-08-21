@@ -104,6 +104,10 @@
 }
 .inbox-row-body {
   display: grid;
+  /* 트랙을 명시적으로 minmax(0, 1fr)로 잡는다 — auto 트랙은 미리보기 문장의
+     max-content 폭으로 부풀어, 행 전체가 목록 밖으로 밀려 나가면서 오른쪽
+     타임스탬프("1시간 전")가 잘려 보였다. */
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   gap: 2px;
 }
@@ -112,6 +116,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
+  min-width: 0;
 }
 .inbox-row-top b {
   overflow: hidden;

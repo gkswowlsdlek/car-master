@@ -2943,6 +2943,8 @@ textarea:focus-visible {
   color: var(--color-primary);
   font-weight: 800;
 }
+/* 시공점 찾기는 딜러의 메인 행동이라 의도적으로 크게 유지한다 — 대시보드에서
+   가장 먼저 눈에 들어와야 하는 진입점. */
 .reference-search-panel {
   padding: 30px 22px 26px;
   border: 1px solid var(--color-line);
@@ -3476,6 +3478,26 @@ textarea:focus-visible {
   font-size: var(--font-xs);
   font-weight: 750;
   text-align: right;
+}
+/* 상태 칩 + 전화 확인 칩이 함께 들어가는 한 칸. 배지를 별도 그리드 항목으로
+   두면 4열을 넘겨 다음 줄 전체를 차지하는 경고 띠가 됐다. */
+.dealer-dashboard .ws-row-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.dealer-dashboard .ws-dashboard-empty {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 36px 4px 30px;
+  text-align: center;
+}
+.dealer-dashboard .ws-dashboard-empty p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--font-sm);
 }
 
 
@@ -6316,6 +6338,13 @@ textarea:focus-visible {
   margin: 0;
   border-bottom: 1px solid var(--prototype-border);
 }
+/* "전체 보기 ›"가 두 줄로 깨지던 문제 — 링크는 항상 한 줄로 둔다. */
+.reference-recent-work .ws-section-head > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
 .reference-recent-work .ws-section-head p {
   margin: 4px 0 0;
   color: var(--prototype-muted);
@@ -6348,8 +6377,11 @@ textarea:focus-visible {
 .reference-recent-work .status-chip {
   font-size: var(--font-xs);
 }
-.reference-recent-work .ws-badge {
-  order: 3;
+.reference-recent-work .ws-row-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 .reference-recent-work .ws-row-schedule {
   display: grid;
@@ -6550,5 +6582,30 @@ textarea:focus-visible {
   .prototype-job-row > button {
     grid-column: 2;
     grid-row: 1 / span 2;
+  }
+}
+
+/* ── Dealer 대시보드 모바일 교정 ───────────────────────────────────────────
+   두 규칙 모두 미디어쿼리 밖의 높은 특이도 선택자가 기존 모바일 규칙을 이기고
+   있어서, 390px에서 실제로 화면이 깨지고 있었다:
+   1) .has-deals .reference-module-grid(0,3,0)가 2열을 강제해 "새 메시지"
+      카드가 화면 밖으로 약 167px 잘려 나갔다.
+   2) .reference-search-panel .r3-search-form(0,2,0 + !important)의 고정
+      174px CTA 열이 남아 입력창이 "예: 서울"만 겨우 보일 만큼 좁아졌다 —
+      주소 입력이 사실상 불가능했다.
+   같은 특이도로 모바일에서만 되돌린다. Desktop 레이아웃은 그대로. */
+@media (max-width: 900px) {
+  .reference-prototype-dashboard.has-deals .reference-module-grid,
+  .dealer-home-frame .reference-prototype-dashboard.has-deals .reference-module-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .reference-search-panel .r3-search-form {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px;
+  }
+  .reference-search-panel .r3-search-form input,
+  .reference-search-panel .r3-search-form .ws-search-cta {
+    width: 100%;
+    height: 48px !important;
   }
 }

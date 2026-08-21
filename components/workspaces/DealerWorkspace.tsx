@@ -170,20 +170,6 @@ export function DealerWorkspace({
   );
   const notifications = useNotifications({ role: "dealer", transactions, rooms, useSupabaseData });
   const activeTransactionId = selectedTransactionId || transactions[0]?.id || "";
-  const profileActivity = useMemo(() => {
-    const now = new Date();
-    const monthly = transactions.filter((item) => {
-      const date = new Date(item.status.createdAt);
-      return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
-    }).length;
-    return {
-      total: transactions.length,
-      monthly,
-      completed: transactions.filter((item) => item.status.stage === "작업완료" || item.status.stage === "출고").length,
-      favorites: favoriteShopIds.length,
-    };
-  }, [favoriteShopIds.length, transactions]);
-
   useEffect(() => {
     if (JSON.stringify(request) === JSON.stringify(defaultRequest)) {
       window.sessionStorage.removeItem(SERVICE_REQUEST_DRAFT_KEY);
@@ -499,6 +485,7 @@ export function DealerWorkspace({
       {screen === "deals" && (
         <DealerTransactionManagementScreen
           transactions={transactions}
+          installers={availableShops}
           initialGroupFilter={dealFilter}
           onOpenTransaction={(id) => {
             setSelectedTransactionId(id);
@@ -551,7 +538,6 @@ export function DealerWorkspace({
         <ProfileEditor
           role="dealer"
           userId={account.id}
-          activity={profileActivity}
           onChangePassword={onChangePassword}
         />
       )}
