@@ -6609,3 +6609,29 @@ textarea:focus-visible {
     height: 48px !important;
   }
 }
+
+/* ── 사이드바 컬러: 네이비 → 카마스터 블루 ──────────────────────────────────
+   대시보드가 이미 파랑을 주요 액션 색으로 쓰고 있어서(시공점 찾기 CTA, 활성
+   메뉴, 로고 강조), 사이드바가 같은 파랑을 가져가면 브랜드가 한 색으로 모인다.
+   전 역할(딜러/시공점/Admin)에 동일 적용한다 — 역할마다 사이드바 색이 다르면
+   같은 제품으로 보이지 않는다. */
+.app-sidebar,
+.role-dealer .app-sidebar {
+  background: var(--color-primary) !important;
+  border-right-color: rgba(255, 255, 255, 0.16) !important;
+}
+/* 파랑 위에 파랑을 겹칠 수 없으므로 현재 메뉴는 흰 면으로 반전한다. */
+.app-sidebar nav button.active,
+.role-dealer .app-sidebar nav button.active {
+  background: #fff !important;
+  color: var(--color-primary-hover) !important;
+  box-shadow: none !important;
+}
+.app-sidebar nav button.active i,
+.role-dealer .app-sidebar nav button.active i {
+  background: transparent !important;
+  color: var(--color-primary-hover) !important;
+}
+.app-sidebar nav button:not(.active):hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
