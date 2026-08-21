@@ -109,7 +109,10 @@ test("DealerWorkspace wires the new screen for role dealer's 거래관리 tab, a
   assert.doesNotMatch(workspaceSource, /<TransactionManagementScreen /);
   assert.match(
     workspaceSource,
-    /screen === "deals"\s*&&\s*(?:\(\s*)?<DealerTransactionManagementScreen\s+transactions=\{transactions\}\s+initialGroupFilter=\{dealFilter\}\s+onOpenTransaction=\{\(id\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*onNavigate\("messages"\);\s*\}\}\s+onNewRequest=\{\(\)\s*=>\s*onNavigate\("request"\)\}\s+onFindShop=\{\(\)\s*=>\s*onNavigate\("dealerMap"\)\}\s*\/>/,
+    // installers는 "지금 할 일: 전화 확인"에서 시공점 번호를 바로 걸 수 있게
+    // 추가된 선택 prop — 이 테스트가 지키려는 건 화면 연결과 Room 핸드오프이지
+    // prop 목록 고정이 아니므로, 사이에 추가 prop이 오는 것을 허용한다.
+    /screen === "deals"\s*&&\s*(?:\(\s*)?<DealerTransactionManagementScreen\s+transactions=\{transactions\}[\s\S]*?initialGroupFilter=\{dealFilter\}\s+onOpenTransaction=\{\(id\)\s*=>\s*\{\s*setSelectedTransactionId\(id\);\s*onNavigate\("messages"\);\s*\}\}\s+onNewRequest=\{\(\)\s*=>\s*onNavigate\("request"\)\}\s+onFindShop=\{\(\)\s*=>\s*onNavigate\("dealerMap"\)\}\s*\/>/,
   );
   assert.match(
     workspaceSource,

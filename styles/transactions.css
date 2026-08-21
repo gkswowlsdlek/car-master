@@ -885,15 +885,21 @@
 .dealer-transaction-row-activity {
   margin-left: auto;
 }
+/* 목록 카드의 상태 플래그. 이전에는 노랑/빨강 배경 pill이었는데, 부모가
+   stretch시켜 카드 폭 전체를 채우는 색 띠가 되면서 정작 차량명·시공점보다
+   시선을 먼저 가져갔다(3건이 모두 같은 문구라 정보량은 거의 없는데도).
+   배경 블록을 걷어내고 아이콘 + 색 텍스트만 남긴다 — 신호는 유지, 소음만
+   제거. */
 .phone-confirm-flag {
   display: inline-flex;
+  align-self: flex-start;
+  width: fit-content;
   align-items: center;
-  gap: 4px;
-  border-radius: 999px;
-  background: var(--color-warning-bg);
+  gap: 5px;
+  background: transparent;
   color: var(--color-warning);
-  padding: 2px 8px;
-  font-weight: 700;
+  padding: 1px 0;
+  font-weight: 600;
 }
 .dealer-transaction-row-lastmessage {
   display: block;
@@ -1104,7 +1110,7 @@
   flex: 1 1 100%;
 }
 .phone-confirm-flag-unreachable {
-  background: var(--color-danger-bg) !important;
+  background: transparent !important;
   color: var(--color-danger) !important;
 }
 /* 메시지 정리(2026-08) — 전화 확인 안내를 큰 배너 대신 거래방 생성 시스템
@@ -1289,13 +1295,19 @@
 }
 .dealer-next-step {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
   border: 1px solid var(--color-primary-border);
   border-radius: var(--radius-md);
   background: var(--color-primary-soft);
   padding: 12px 16px;
   margin-bottom: 16px;
+}
+/* 할 일 문구와 그 일을 하러 가는 버튼을 한 줄에 둔다 — 버튼은 오른쪽 끝. */
+.dealer-next-step > button {
+  margin-left: auto;
+  min-height: 38px;
+  white-space: nowrap;
 }
 .dealer-next-step > span {
   color: var(--color-primary-hover);
@@ -1336,6 +1348,13 @@
   margin: 0;
   font-weight: 750;
   line-height: 1.5;
+}
+/* 아직 입력되지 않은 값("미등록"/"미정"/"미확정")은 확정된 값과 같은 무게로
+   강조하지 않는다 — 신규 거래에서 빈 칸이 과반이라, 같은 굵기면 화면 전체가
+   채워진 데이터처럼 보이고 실제 확정 정보가 묻힌다. */
+.transaction-core-pending {
+  color: var(--color-muted);
+  font-weight: 500;
 }
 .transaction-price-editor {
   display: flex;
@@ -1551,4 +1570,32 @@
     grid-area: next;
     align-self: center;
   }
+}
+
+/* 390px에서 거래관리 탭 4개(전체/진행중/완료/종료)가 13px 모자라 마지막
+   "종료"가 반쯤 잘려 나갔다. 스크롤 컨테이너라 페이지가 깨지진 않지만,
+   스크롤 힌트가 없어 종료 탭이 있다는 걸 모른 채 지나치게 된다. 좌우 여백만
+   줄여 네 탭이 모두 한 화면에 들어오게 한다. */
+@media (max-width: 420px) {
+  .dealer-deal-groups.transaction-tabs button {
+    padding-inline: 10px;
+  }
+  .dealer-deal-groups.transaction-tabs {
+    gap: 2px;
+  }
+}
+
+/* "지금 할 일: 전화 확인" 옆의 실제 시공점 번호 — 클릭하면 바로 통화. */
+.dealer-next-step-call {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary);
+  font-size: var(--font-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+}
+.dealer-next-step-call:hover {
+  text-decoration: underline;
 }

@@ -1,4 +1,4 @@
-import { Building2, Check } from "lucide-react";
+import { Building2 } from "lucide-react";
 import type { InstallerListing } from "../../types/installer";
 
 /**
@@ -53,20 +53,18 @@ export function InstallerCard({
           <p className="installer-card-location">
             {installer.province} {installer.city}
           </p>
+          {/* 목록의 모든 카드에 똑같이 붙던 배지는 뺐다 — 62곳을 비교하는
+           * 화면에서 전 카드 공통 배지는 정보량이 0인데 시선만 가져간다.
+           * "✓ 위치"는 바로 위에 실제 거리(4.3km)가 이미 있어 중복이었고,
+           * "요청 가능"은 기본 상태라 예외인 "마감"만 남긴다. Demo/Real
+           * 구분은 실제로 달라지는 정보라 유지. */}
           <div className="installer-card-heading">
             {installer.isDemo ? (
-              <>
-                <span className="demo-badge">데모 시공점</span>
-                <span className="demo-location-badge">
-                  <Check size={14} strokeWidth={3.2} /> 위치
-                </span>
-              </>
+              <span className="demo-badge">데모 시공점</span>
             ) : (
               <span className="verified-badge">카마스터 등록 시공점</span>
             )}
-            <span className={`installer-availability ${installer.available ? "open" : "closed"}`}>
-              {installer.available ? "요청 가능" : "마감"}
-            </span>
+            {!installer.available && <span className="installer-availability closed">마감</span>}
           </div>
           <p className="installer-card-works">{installer.works.slice(0, 3).join(", ")}</p>
         </div>

@@ -115,20 +115,6 @@ export function InstallerWorkspace({
     [rooms, roleTransactions],
   );
   const notifications = useNotifications({ role: "shop", transactions: roleTransactions, rooms });
-  const profileActivity = useMemo(() => {
-    const now = new Date();
-    const monthly = roleTransactions.filter((item) => {
-      const date = new Date(item.status.createdAt);
-      return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
-    }).length;
-    return {
-      total: roleTransactions.length,
-      monthly,
-      completed: roleTransactions.filter((item) => item.status.stage === "작업완료" || item.status.stage === "출고")
-        .length,
-      favorites: 0,
-    };
-  }, [roleTransactions]);
 
   useEffect(() => onUnreadMessageCountChange(unreadMessageCount), [onUnreadMessageCountChange, unreadMessageCount]);
   useEffect(

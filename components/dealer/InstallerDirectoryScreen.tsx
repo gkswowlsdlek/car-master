@@ -262,7 +262,6 @@ export function InstallerDirectoryScreen({
   return (
     <section className="dealer-screen installer-directory">
       <header className="ws-dashboard-header">
-        <p className="ws-eyebrow">Dealer Workspace</p>
         <h1>시공점 찾기</h1>
         <p className="ws-page-subtitle">지역과 작업 조건에 맞는 시공점을 찾아보세요.</p>
       </header>
@@ -275,7 +274,7 @@ export function InstallerDirectoryScreen({
               aria-label="시공점 검색"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="시공점, 지역, 브랜드, 작업 종류로 검색"
+              placeholder="시공점 이름, 브랜드, 작업 종류로 좁히기"
             />
           </label>
           <label className="installer-filter-toggle">
@@ -292,8 +291,17 @@ export function InstallerDirectoryScreen({
         </div>
         <div className="ws-shop-search-filters">{filterControls}</div>
       </div>
+      {/* 검색한 주소를 화면에 계속 남긴다. 이전에는 대시보드에서 넘어온 주소가
+       * 검색창에도 남지 않고 작은 회색 안내문에만 있어서, 딜러가 "내가 뭘로
+       * 찾았더라" 하고 옆 검색창에 주소를 다시 치면 그 칸은 이름/브랜드
+       * 필터라 결과가 오히려 사라졌다 — 같은 칸이 두 가지 일을 하는 것처럼
+       * 보이던 문제. */}
       {sortKey === "distance" && searchOrigin && (
-        <p className="installer-location-note">{searchOrigin.label} 기준으로 가까운 순서입니다.</p>
+        <p className="installer-origin-chip">
+          <MapPin size={14} aria-hidden="true" />
+          <b>{searchOrigin.label}</b>
+          <span>기준 · 가까운 순</span>
+        </p>
       )}
       {sortKey === "distance" && !searchOrigin && locationStatus === "unavailable" && (
         <p className="installer-location-note">

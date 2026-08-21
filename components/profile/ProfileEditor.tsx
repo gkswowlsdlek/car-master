@@ -76,12 +76,10 @@ function formatPhone(value: string) {
 export function ProfileEditor({
   role,
   userId,
-  activity,
   onChangePassword,
 }: {
   role: "dealer" | "shop";
   userId?: string;
-  activity: { total: number; monthly: number; completed: number; favorites: number };
   onChangePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }) {
   const profileId = userId ?? defaults[role].id;
@@ -187,12 +185,11 @@ export function ProfileEditor({
     <section className={`profile-editor ${role === "shop" ? "shop-management-page" : ""}`}>
       <div className="page-title">
         <div>
-          <p className="eyebrow">운영 정보 관리</p>
           <h1>{role === "dealer" ? "딜러 마이페이지" : "시공점 관리"}</h1>
           <p className="page-subtitle">
             {role === "shop"
               ? "고객에게 노출되는 정보와 요청 수신 설정을 섹션별로 관리합니다."
-              : "내 정보와 알림 설정, 최근 활동을 관리합니다."}
+              : "내 정보와 알림 설정을 관리합니다."}
           </p>
         </div>
         {role === "shop" && (
@@ -212,24 +209,9 @@ export function ProfileEditor({
           </div>
         )}
       </div>
-      <section className="profile-activity-summary">
-        <article>
-          <span>총 거래</span>
-          <b>{activity.total}건</b>
-        </article>
-        <article>
-          <span>이번 달 거래</span>
-          <b>{activity.monthly}건</b>
-        </article>
-        <article>
-          <span>완료 거래</span>
-          <b>{activity.completed}건</b>
-        </article>
-        <article>
-          <span>{role === "shop" ? "요청 수신" : "즐겨찾는 시공점"}</span>
-          <b>{role === "shop" ? (profile.emergencyAvailable ? "운영 중" : "중지") : `${activity.favorites}곳`}</b>
-        </article>
-      </section>
+      {/* 거래 건수 KPI 4칸은 뺐다 — 마이페이지는 내 정보·알림을 고치러 오는
+       * 화면이고, 거래 현황은 대시보드와 거래관리가 이미 실제 목록으로 보여준다.
+       * 신규 딜러에게는 "0건"만 세 칸 남아 화면 첫인상만 비게 만들었다. */}
       {saved && <p className="profile-saved">변경사항을 저장했습니다.</p>}
       {error && <p className="login-error">{error}</p>}
       {role === "dealer" ? (
