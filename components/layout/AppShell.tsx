@@ -174,7 +174,7 @@ export function AppShell({
 
   return (
     <div
-      className={`app-frame role-${role}${screen === "dealerDashboard" ? " dealer-home-frame" : ""}${mobileFullscreen ? " mobile-chat-fullscreen" : ""}${messengerFocus ? " messenger-focus" : ""}`}
+      className={`app-frame role-${role}${mobileFullscreen ? " mobile-chat-fullscreen" : ""}${messengerFocus ? " messenger-focus" : ""}`}
     >
       <aside className="app-sidebar">
         <button className="app-logo" onClick={() => onNavigate(homeScreen)}>
