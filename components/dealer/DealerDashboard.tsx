@@ -1,13 +1,14 @@
-import { Bell, ChevronRight, MessageCircle, Phone, Search } from "lucide-react";
+import { Bell, ChevronRight, MessageCircle, Search } from "lucide-react";
 import { useState } from "react";
 import type { AppNotification } from "../../hooks/use-notifications";
 import type { Transaction, TransactionStage } from "../../types/transactions";
-import { dealerStageLabel } from "../../services/transaction-state-service";
+import { dealerDashboardNextAction, dealerStageLabel } from "../../services/transaction-state-service";
 
-const ACTIVE_STAGES: TransactionStage[] = ["시공예약", "입고"];
+const ACTIVE_STAGES: TransactionStage[] = ["시공예약", "입고", "작업완료"];
 
 function DealRow({ deal, onOpenTransaction }: { deal: Transaction; onOpenTransaction: (id: string) => void }) {
   const inbound = deal.schedule.confirmedInboundAt ?? deal.schedule.requestedInboundAt;
+  const nextAction = dealerDashboardNextAction(deal);
   return (
     <button className="ws-row" onClick={() => onOpenTransaction(deal.id)}>
       <span className="ws-row-main">
@@ -22,16 +23,13 @@ function DealRow({ deal, onOpenTransaction }: { deal: Transaction; onOpenTransac
         <small>입고</small>
         <b>{inbound ? new Date(inbound).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }) : "미정"}</b>
       </span>
-      {/* 상태 칩과 전화 확인 칩을 한 칸에 묶는다 — 배지가 그리드의 5번째
-       * 항목이 되면서 행마다 폭 전체를 차지하는 경고 띠로 흘러내렸고, 3건이
-       * 모두 같은 문구라 실제 정보보다 목록을 시끄럽게 만들고 있었다. */}
+      {/* 상태 칩(지금 단계)과 다음 행동(지금 뭘 해야 하는지)을 한 칸에 묶는다 —
+       * 배지가 그리드의 5번째 항목이 되면 행마다 폭 전체를 차지하는 띠로
+       * 흘러내렸던 이력이 있다. 다음 행동이 딜러의 일이면 강조 배지로, 상대방
+       * 대기면 조용한 텍스트로 — 행만 보고 "내가 할 일인지"가 읽히게 한다. */}
       <span className="ws-row-status">
         <em className={`status-chip status-${deal.status.stage}`}>{dealerStageLabel(deal.status.stage)}</em>
-        {deal.contactStatus === undefined && (
-          <span className="ws-badge ws-badge-red">
-            <Phone size={11} /> 전화 확인
-          </span>
-        )}
+        <span className={`ws-next-action ws-next-action-${nextAction.actor}`}>{nextAction.label}</span>
       </span>
       <span className="ws-row-next" aria-hidden="true">
         <ChevronRight size={16} />
@@ -71,6 +69,11 @@ export function DealerDashboard({
   const [area, setArea] = useState("");
   const activeDeals = deals.filter((deal) => ACTIVE_STAGES.includes(deal.status.stage));
   const recentDeals = [...activeDeals].sort((a, b) => b.status.updatedAt.localeCompare(a.status.updatedAt)).slice(0, 5);
+  // 인사말 아래 한 줄 요약 — 기존 activeDeals/다음 행동 판정에서 그대로 파생
+  // (새 필드·집계 없음). 진행 거래가 아예 없는 신규 딜러 화면에서는 숨긴다.
+  const callsNeeded = activeDeals.filter(
+    (deal) => dealerDashboardNextAction(deal).label === "시공점에 전화 확인",
+  ).length;
   const submitSearch = () => (area.trim() ? onSearchLocation(area.trim()) : onFindShop());
   const messageNotifications = notifications.filter((item) => item.type === "message");
   // "새 메시지" 카드가 이미 message 알림을 전부 보여주므로, 옆의 "최근 알림"은
@@ -91,6 +94,11 @@ export function DealerDashboard({
       <header className="dealer-dashboard-top">
         <div>
           <h1>{dealerName}님, 오늘 확인할 작업입니다.</h1>
+          {activeDeals.length > 0 && (
+            <p>
+              진행 {activeDeals.length}건 · 전화 확인 필요 {callsNeeded}건
+            </p>
+          )}
         </div>
       </header>
       {/* 시공점 찾기는 딜러의 메인 행동이라 대시보드에서 의도적으로 크게 둔다. */}
@@ -113,11 +121,44 @@ export function DealerDashboard({
           </button>
         </div>
       </section>
+      <section className="ws-card ws-list-card dealer-dashboard-recent-work">
+        <div className="ws-section-head">
+          <div>
+            <h2>진행 중인 작업</h2>
+          </div>
+          <button onClick={() => onFilterDeals("전체")}>
+            전체 보기 <ChevronRight size={14} />
+          </button>
+        </div>
+        {recentDeals.length > 0 && (
+          <div className="ws-row-columns" aria-hidden="true">
+            <span>차량 / 작업</span>
+            <span>입고</span>
+            <span>상태</span>
+            <span />
+          </div>
+        )}
+        {recentDeals.length > 0 ? (
+          recentDeals.map((deal) => <DealRow key={deal.id} deal={deal} onOpenTransaction={onOpenTransaction} />)
+        ) : (
+          /* 실제 거래가 없을 때 예시 차량·시공점을 지어내지 않는다 — 빈 상태에서
+           * 해야 할 다음 행동(시공점 찾기)으로 그대로 연결한다. */
+          <div className="ws-dashboard-empty">
+            <p>아직 진행 중인 작업이 없습니다.</p>
+            <button type="button" className="button button-primary" onClick={onFindShop}>
+              시공점 찾고 첫 작업 요청하기
+            </button>
+          </div>
+        )}
+      </section>
+      {/* 알림·메시지는 진행 작업보다 한 단계 낮은 보조 정보라 하나의 조용한
+       * 패널로 묶는다 — 각각 독립된 흰색 카드로 두면 진행 작업 카드와 같은
+       * 무게로 경쟁한다. */}
       <section className="dealer-dashboard-module-grid">
         <article className="dealer-dashboard-module">
           <header>
             <h2>
-              <Bell size={19} /> 최근 알림
+              <Bell size={16} /> 최근 알림
             </h2>
             <button type="button" onClick={() => onFilterDeals("전체")}>
               전체 보기 <ChevronRight size={14} />
@@ -150,7 +191,7 @@ export function DealerDashboard({
         <article className="dealer-dashboard-module">
           <header>
             <h2>
-              <MessageCircle size={19} /> 새 메시지
+              <MessageCircle size={16} /> 새 메시지
             </h2>
             <button type="button" onClick={onOpenMessages}>
               전체 보기 <ChevronRight size={14} />
@@ -175,36 +216,6 @@ export function DealerDashboard({
             <p className="dealer-dashboard-module-empty">아직 대화가 없습니다.</p>
           )}
         </article>
-      </section>
-      <section className="ws-card ws-list-card dealer-dashboard-recent-work">
-        <div className="ws-section-head">
-          <div>
-            <h2>진행 중인 작업</h2>
-          </div>
-          <button onClick={() => onFilterDeals("전체")}>
-            전체 보기 <ChevronRight size={14} />
-          </button>
-        </div>
-        {recentDeals.length > 0 && (
-          <div className="ws-row-columns" aria-hidden="true">
-            <span>차량 / 작업</span>
-            <span>입고</span>
-            <span>상태</span>
-            <span />
-          </div>
-        )}
-        {recentDeals.length > 0 ? (
-          recentDeals.map((deal) => <DealRow key={deal.id} deal={deal} onOpenTransaction={onOpenTransaction} />)
-        ) : (
-          /* 실제 거래가 없을 때 예시 차량·시공점을 지어내지 않는다 — 빈 상태에서
-           * 해야 할 다음 행동(시공점 찾기)으로 그대로 연결한다. */
-          <div className="ws-dashboard-empty">
-            <p>아직 진행 중인 작업이 없습니다.</p>
-            <button type="button" className="button button-primary" onClick={onFindShop}>
-              시공점 찾고 첫 작업 요청하기
-            </button>
-          </div>
-        )}
       </section>
       {/* Real 모드 전용 시공점 찾기 요청 진입점. 현재 CSS에서
        * .prototype-legacy-actions가 display:none이라 화면에는 보이지 않지만,

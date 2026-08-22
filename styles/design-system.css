@@ -16,6 +16,10 @@
   --color-bg: #f5f7fb;
   --color-surface: #fff;
   --color-surface-soft: #f7f9fd;
+  /* Half a tone darker than --color-bg — a "paper floor" for a white card to
+     visibly sit on top of, for screens where the card and the frame behind
+     it would otherwise both read as plain white. */
+  --color-canvas: #eef1f6;
   --color-text: #171e2e;
   --color-text-soft: #353d50;
   --color-muted: #505a70;
@@ -274,8 +278,7 @@ select.invalid,
   letter-spacing: 0.12em;
 }
 .badge,
-.status-chip,
-.brand-check-badge {
+.status-chip {
   display: inline-flex;
   width: fit-content;
   align-items: center;

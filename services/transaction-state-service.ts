@@ -41,6 +41,36 @@ export function isTerminalOutcome(stage: TransactionStage): boolean {
   return TERMINAL_OUTCOME_STAGES.includes(stage);
 }
 
+export type DealerNextAction = {
+  label: string;
+  /** "dealer": 딜러가 지금 해야 할 일 — 행에서 강조한다.
+   *  "counterpart": 시공점 응답/작업을 기다리는 중 — 조용하게 표시한다. */
+  actor: "dealer" | "counterpart";
+};
+
+/**
+ * 대시보드 "진행 중인 작업" 목록의 다음 행동 문구 — stage/contactStatus에서만
+ * 파생하는 순수 함수(새 DB 컬럼·RPC 없음). 전화 확인은 견적/시공예약 단계에서만
+ * 의미가 있어 그 두 단계에서만 검사한다 — DealerTransactionManagementScreen의
+ * dealerNextStep과 동일한 전제. 두 화면은 서로 다른 문구 세트를 쓰므로(대시보드는
+ * 짧은 한 줄 배지, 거래관리는 보증서 안내까지 포함한 문장) 함수를 공유하지 않되,
+ * 각 화면 안에서는 이 함수 하나로만 다음 행동을 판정한다.
+ */
+export function dealerDashboardNextAction(
+  deal: Pick<Transaction, "status" | "contactStatus">,
+): DealerNextAction {
+  const stage = deal.status.stage;
+  if (isTerminalOutcome(stage)) return { label: "처리 완료", actor: "counterpart" };
+  if ((stage === "견적" || stage === "시공예약") && deal.contactStatus == null) {
+    return { label: "시공점에 전화 확인", actor: "dealer" };
+  }
+  if (stage === "견적") return { label: "시공점 응답 대기", actor: "counterpart" };
+  if (stage === "시공예약") return { label: "입고 확정하기", actor: "dealer" };
+  if (stage === "입고") return { label: "시공점 작업 완료 대기", actor: "counterpart" };
+  if (stage === "작업완료") return { label: "출고 처리하기", actor: "dealer" };
+  return { label: "처리 완료", actor: "counterpart" }; // 출고
+}
+
 /** Button label for moving forward INTO this stage (the "다음 행동" CTA). */
 export const STAGE_ACTION_LABEL: Record<TransactionStage, string> = {
   견적: "견적 확정",

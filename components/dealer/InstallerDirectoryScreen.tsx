@@ -56,8 +56,6 @@ export function InstallerDirectoryScreen({
   setSelectedId,
   favoriteIds,
   toggleFavorite,
-  selectedBrand,
-  isOtherBrand,
   onRequest,
   onShopSearchRequest,
   searchOrigin = null,
@@ -68,8 +66,6 @@ export function InstallerDirectoryScreen({
   setSelectedId: (id: string) => void;
   favoriteIds: string[];
   toggleFavorite: (id: string) => void;
-  selectedBrand?: string;
-  isOtherBrand: boolean;
   onRequest: () => void;
   /** Only passed in Real (Supabase) mode — surfaces the "원하는 시공점을 찾지 못하셨나요?" CTA when the filtered list is empty. */
   onShopSearchRequest?: () => void;
@@ -404,8 +400,6 @@ export function InstallerDirectoryScreen({
               <InstallerDetailPanel
                 installer={selected}
                 distanceLabel={selectedDistanceLabel}
-                selectedBrand={selectedBrand}
-                isOtherBrand={isOtherBrand}
                 onRequest={() => {
                   setSelectedId(selected.id);
                   onRequest();

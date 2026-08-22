@@ -26,7 +26,7 @@ test("Dealer Dashboard quick-action filters actually reach the 거래 관리 scr
 // can't diverge.
 test("Dealer Dashboard's 진행 중인 거래 list and its click-through both key off the same ACTIVE_STAGES definition — no separate, potentially-drifting count", async () => {
   const dashboard = await read("components/dealer/DealerDashboard.tsx");
-  assert.match(dashboard, /const ACTIVE_STAGES: TransactionStage\[\] = \["시공예약", "입고"\];/);
+  assert.match(dashboard, /const ACTIVE_STAGES: TransactionStage\[\] = \["시공예약", "입고", "작업완료"\];/);
   assert.match(dashboard, /ACTIVE_STAGES\.includes\(deal\.status\.stage\)/);
   assert.match(dashboard, /onClick=\{\(\) => onOpenTransaction\(deal\.id\)\}/);
 });
