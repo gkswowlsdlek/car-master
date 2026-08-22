@@ -84,21 +84,21 @@ export function DealerDashboard({
 
   return (
     <section
-      className={`dealer-dashboard r3-dealer-dashboard r4-dealer-dashboard reference-prototype-dashboard ${deals.length > 0 ? "has-deals" : "new-dealer"}`}
+      className={`dealer-dashboard ${deals.length > 0 ? "has-deals" : "new-dealer"}`}
     >
       {/* 알림·메시지·프로필 아이콘은 상시 사이드바가 이미 갖고 있다 — 같은
        * 진입점을 화면마다 두 번 그리지 않는다. */}
-      <header className="reference-dashboard-top">
+      <header className="dealer-dashboard-top">
         <div>
           <h1>{dealerName}님, 오늘 확인할 작업입니다.</h1>
         </div>
       </header>
       {/* 시공점 찾기는 딜러의 메인 행동이라 대시보드에서 의도적으로 크게 둔다. */}
-      <section className="reference-search-panel">
-        <div className="r3-hero-title">
+      <section className="dealer-dashboard-search-panel">
+        <div className="dealer-dashboard-hero-title">
           <h2>어디에서 차량용품 작업이 필요하세요?</h2>
         </div>
-        <div className="ws-search-form r3-search-form">
+        <div className="ws-search-form">
           <label>
             <span className="sr-only">지역 또는 주소</span>
             <input
@@ -113,8 +113,8 @@ export function DealerDashboard({
           </button>
         </div>
       </section>
-      <section className="reference-module-grid">
-        <article className="reference-module">
+      <section className="dealer-dashboard-module-grid">
+        <article className="dealer-dashboard-module">
           <header>
             <h2>
               <Bell size={19} /> 최근 알림
@@ -144,10 +144,10 @@ export function DealerDashboard({
               ))}
             </ul>
           ) : (
-            <p className="reference-module-empty">아직 알림이 없습니다.</p>
+            <p className="dealer-dashboard-module-empty">아직 알림이 없습니다.</p>
           )}
         </article>
-        <article className="reference-module">
+        <article className="dealer-dashboard-module">
           <header>
             <h2>
               <MessageCircle size={19} /> 새 메시지
@@ -172,11 +172,11 @@ export function DealerDashboard({
               ))}
             </ul>
           ) : (
-            <p className="reference-module-empty">아직 대화가 없습니다.</p>
+            <p className="dealer-dashboard-module-empty">아직 대화가 없습니다.</p>
           )}
         </article>
       </section>
-      <section className="ws-card ws-list-card r3-recent-work reference-recent-work">
+      <section className="ws-card ws-list-card dealer-dashboard-recent-work">
         <div className="ws-section-head">
           <div>
             <h2>진행 중인 작업</h2>
@@ -210,7 +210,7 @@ export function DealerDashboard({
        * .prototype-legacy-actions가 display:none이라 화면에는 보이지 않지만,
        * Real 계정의 기능 진입점이라 이번 UI polish 범위에서 임의로 제거하지
        * 않는다(노출 여부는 별도 판단 필요 — 보고서 참고). */}
-      <div className="prototype-legacy-actions" aria-hidden="true">
+      <div className="dealer-dashboard-legacy-actions" aria-hidden="true">
         {onShopSearchRequests && (
           <button className="button button-ghost" onClick={onShopSearchRequests}>
             시공점 찾기

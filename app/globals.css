@@ -35,60 +35,6 @@
 .role-dealer .app-topbar-default > .topbar-actions > .primary {
   display: none;
 }
-.r4-dealer-dashboard {
-  width: min(1280px, 100%);
-  padding: 8px 36px 64px;
-}.r4-dealer-dashboard .r3-hero-title {
-  margin-bottom: 28px;
-}
-.r4-dealer-dashboard .r3-hero-title h2 {
-  font-size: var(--font-xl);
-}
-.r4-dealer-dashboard .r3-search-form {
-  max-width: 860px;
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-.r4-dealer-dashboard .r3-search-form label:nth-child(2) {
-  display: none;
-}
-.r4-dealer-dashboard .r3-search-form input {
-  height: 54px;
-  border-radius: var(--radius-sm);
-  background: var(--color-surface-soft);
-  border-color: var(--color-line);
-  font-size: var(--font-body);
-}.r4-dealer-dashboard .r3-recent-work {
-  margin-top: 64px;
-  border-color: var(--color-line);
-}
-.r4-dealer-dashboard .r3-recent-work .ws-section-head {
-  padding: 20px 26px;
-}
-.r4-dealer-dashboard .r3-recent-work .ws-row-columns,
-.r4-dealer-dashboard .r3-recent-work .ws-row {
-  padding-inline: 26px;
-}
-@media (max-width: 760px) {
-  .r4-dealer-dashboard {
-    padding: 22px 16px 42px;
-  }  .r4-dealer-dashboard .r3-hero-title h2 {
-    font-size: var(--font-lg);
-  }
-  .r4-dealer-dashboard .r3-search-form {
-    grid-template-columns: 1fr;
-  }
-  .r4-dealer-dashboard .r3-search-form input,
-  .r4-dealer-dashboard .r3-search-hero .ws-search-cta {
-    height: 48px;
-  }
-  .r4-dealer-dashboard .r3-recent-work {
-    margin-top: 34px;
-  }
-}
-
-
-
-
 .app-sidebar nav button.active {
   background: var(--color-primary-soft);
   color: var(--color-primary);
@@ -96,11 +42,6 @@
 }
 
 /* Dashboard */
-.dealer-dashboard {
-  width: min(1200px, 100%);
-  margin: 0 auto;
-  padding: 32px;
-}
 .dealer-welcome h1 {
   margin: 0;
   font-size: var(--font-xl);
@@ -383,7 +324,6 @@
   .app-topbar {
     display: none;
   }
-  .dealer-dashboard,
   .dealer-screen,
   .transaction-management-screen,
   .profile-editor {
@@ -1119,9 +1059,6 @@ button:active:not(:disabled) {
     transform: none;
   }
 }
-.dealer-dashboard {
-  padding: 44px 56px 72px;
-}
 .dealer-welcome {
   margin-bottom: 32px;
 }
@@ -1275,9 +1212,6 @@ button:active:not(:disabled) {
   .preview-app {
     grid-template-columns: 100px 1fr;
   }
-  .dealer-dashboard {
-    padding-inline: 32px;
-  }
   .section {
     padding-inline: 32px;
   }
@@ -1392,7 +1326,6 @@ button:active:not(:disabled) {
   .compact-login-card {
     padding: 28px 22px;
   }
-  .dealer-dashboard,
   .section {
     padding: 30px 18px 52px;
   }
@@ -1650,256 +1583,14 @@ table td {
 }
 
 
-/* R3 Dealer dashboard: search-first workspace, compact recent-work ledger. */
-.r3-dealer-dashboard {
-  width: min(1480px, 100%);
-  padding: 34px 48px 64px;
-}.r3-hero-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--color-text);
-}
-.r3-hero-title svg {
-  color: var(--color-primary);
-}
-.r3-hero-title h2 {
-  margin: 0;
-  font-size: clamp(24px, 2.6vw, 36px);
-  letter-spacing: -0.045em;
-  text-align: center;
-}
-.r3-search-form {
-  grid-template-columns: minmax(300px, 1fr) 180px auto;
-  align-items: end;
-  margin: 24px auto 0;
-  max-width: 980px;
-}
-.r3-search-form label span {
-  color: var(--color-muted);
-  font-size: var(--font-xs);
-}
-.r3-search-form input,
-.r3-search-form select {
-  min-height: 48px;
-  border-color: var(--color-line);
-  border-radius: var(--radius-sm);
-  background: #fbfcfe;
-}.r3-recent-work {
-  margin-top: 24px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  box-shadow: none;
-}
-.r3-recent-work .ws-section-head {
-  min-height: 64px;
-  padding-inline: 22px;
-}
-.r3-recent-work .ws-section-head h2 {
-  font-size: var(--font-md);
-}
-.r3-recent-work .ws-section-head p {
-  font-size: var(--font-sm);
-}
-.r3-recent-work .ws-row-columns {
-  grid-template-columns: minmax(0, 1fr) 90px 150px 100px;
-  padding-inline: 22px;
-}
-.r3-recent-work .ws-row {
-  grid-template-columns: minmax(0, 1fr) 90px 150px 100px;
-  min-height: 72px;
-  padding-inline: 22px;
-}
-.r3-recent-work .ws-row:hover {
-  background: #fbfcfe;
-}
-@media (max-width: 760px) {
-  .r3-dealer-dashboard {
-    padding: 24px 16px 42px;
-  }  .r3-hero-title {
-    justify-content: flex-start;
-  }
-  .r3-hero-title h2 {
-    font-size: var(--font-lg);
-    text-align: left;
-  }
-  .r3-search-form {
-    grid-template-columns: 1fr;
-    margin-top: 18px;
-  }  .r3-recent-work .ws-section-head {
-    align-items: flex-start;
-    padding: 14px 16px;
-  }
-  .r3-recent-work .ws-row {
-    padding-inline: 16px;
-  }
-}
-
 /* R1 Dealer Core — Workshop Ledger presentation layer.
    This cascade changes hierarchy/density only; data and actions remain untouched. */
 @media (min-width: 1200px) {
-  .dealer-dashboard,
   .dealer-transaction-management,
   .transaction-management-screen {
     --r1-rule: var(--color-line);
     --r1-ink: var(--color-text);
     --r1-muted: var(--color-muted);
-  }
-
-  .dealer-dashboard {
-    width: min(1480px, 100%);
-    padding: 34px 48px 56px;
-  }
-
-  .dealer-dashboard .ws-dashboard-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 18px;
-  }
-
-  .dealer-dashboard .ws-dashboard-header .ws-eyebrow {
-    display: none;
-  }
-
-  .dealer-dashboard .ws-dashboard-header h1 {
-    margin: 0;
-    color: var(--r1-ink);
-    font-size: var(--font-xl);
-    letter-spacing: -0.035em;
-  }
-
-  .dealer-dashboard .ws-search-hero {
-    border: 1px solid var(--r1-rule);
-    border-radius: var(--radius-md);
-    background: #fff;
-    box-shadow: none;
-    padding: 24px 28px 20px;
-  }
-
-  .dealer-dashboard .ws-search-hero-copy {
-    align-items: center;
-  }
-
-  .dealer-dashboard .ws-search-hero-copy h2 {
-    margin: 0;
-    color: var(--r1-ink);
-    font-size: var(--font-lg);
-    letter-spacing: -0.025em;
-  }
-
-  .dealer-dashboard .ws-search-hero-copy p {
-    margin: 4px 0 0;
-    color: var(--r1-muted);
-    font-size: var(--font-sm);
-  }
-
-  .dealer-dashboard .ws-search-form {
-    grid-template-columns: minmax(300px, 1fr) 170px auto;
-    align-items: end;
-    gap: 10px;
-    margin-top: 18px;
-  }
-
-  .dealer-dashboard .ws-search-form label span {
-    color: var(--r1-muted);
-    font-size: var(--font-xs);
-    font-weight: 700;
-  }
-
-  .dealer-dashboard .ws-search-cta {
-    min-height: 46px;
-    padding-inline: 20px;
-  }
-
-  .dealer-dashboard .ws-search-hero-shortcuts {
-    justify-content: flex-start;
-    margin-top: 12px;
-    border-top: 1px solid var(--color-surface-soft);
-    padding-top: 12px;
-  }
-
-  .dealer-dashboard .ws-search-hero-shortcuts .button {
-    min-height: 32px;
-    border: 0;
-    color: var(--r1-muted);
-    font-size: var(--font-sm);
-  }
-
-  .dealer-dashboard .ws-summary-row {
-    display: flex;
-    gap: 0;
-    margin: 26px 0 14px;
-    border-top: 1px solid var(--r1-rule);
-    border-bottom: 1px solid var(--r1-rule);
-    background: transparent;
-  }
-
-  .dealer-dashboard .ws-summary-card {
-    min-height: 68px;
-    flex: 1;
-    border: 0;
-    border-right: 1px solid var(--r1-rule);
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    padding: 14px 18px;
-  }
-
-  .dealer-dashboard .ws-summary-card:last-child {
-    border-right: 0;
-  }
-
-  .dealer-dashboard .ws-summary-card b {
-    color: var(--r1-ink);
-    font-size: var(--font-lg);
-  }
-
-  .dealer-dashboard .ws-summary-card small {
-    color: var(--r1-muted);
-    font-size: var(--font-sm);
-  }
-
-  .dealer-dashboard .ws-work-grid {
-    gap: 14px;
-  }
-
-  .dealer-dashboard .ws-card {
-    border: 1px solid var(--r1-rule);
-    border-radius: var(--radius-md);
-    box-shadow: none;
-  }
-
-  .dealer-dashboard .ws-section-head {
-    min-height: 46px;
-    border-bottom: 1px solid var(--color-surface-soft);
-    padding: 0 16px;
-  }
-
-  .dealer-dashboard .ws-section-head h2 {
-    color: var(--r1-ink);
-    font-size: var(--font-sm);
-  }
-
-  .dealer-dashboard .ws-list-card .ws-row {
-    min-height: 64px;
-    border-bottom: 1px solid var(--color-surface-soft);
-    padding: 10px 16px;
-  }
-
-  .dealer-dashboard .ws-list-card .ws-row:last-child {
-    border-bottom: 0;
-  }
-
-  .dealer-dashboard .dashboard-empty {
-    min-height: 170px;
-    margin-top: 14px;
-    border: 1px dashed var(--r1-rule);
-    border-radius: var(--radius-md);
-    background: #fbfcfe;
-    box-shadow: none;
-    padding: 32px;
   }
 
   .dealer-transaction-management {
@@ -1994,7 +1685,6 @@ textarea:focus-visible {
 }
 .app-main
   > :is(
-    .dealer-dashboard,
     .dealer-screen,
     .transaction-management-screen,
     .profile-editor,
@@ -2176,7 +1866,6 @@ textarea:focus-visible {
   }
   .app-main
     > :is(
-      .dealer-dashboard,
       .dealer-screen,
       .transaction-management-screen,
       .profile-editor,
@@ -2241,7 +1930,6 @@ textarea:focus-visible {
   }
   .app-main
     > :is(
-      .dealer-dashboard,
       .dealer-screen,
       .transaction-management-screen,
       .profile-editor,
@@ -2373,7 +2061,6 @@ textarea:focus-visible {
 @media (max-width: 389px) {
   .app-main
     > :is(
-      .dealer-dashboard,
       .dealer-screen,
       .transaction-management-screen,
       .profile-editor,
@@ -2710,282 +2397,24 @@ textarea:focus-visible {
 .role-dealer .app-topbar .topbar-actions > .primary {
   display: none !important;
 }
-.r4-dealer-dashboard {
-  width: min(1220px, 100%) !important;
-  padding: 0 36px 56px !important;
-}.r4-dealer-dashboard .r3-hero-title {
-  justify-content: center;
-  margin-bottom: 22px !important;
-}
-.r4-dealer-dashboard .r3-hero-title h2 {
-  font-size: var(--font-xl) !important;
-  letter-spacing: -0.055em;
-}
-.r4-dealer-dashboard .r3-search-form {
-  max-width: 880px !important;
-  margin: 0 auto !important;
-}
-.r4-dealer-dashboard .r3-search-form input {
-  border-radius: var(--radius-sm) !important;
-  border-color: var(--color-line) !important;
-  background: var(--color-surface-soft) !important;
-}.r4-dealer-dashboard .r3-recent-work {
-  margin-top: 52px !important;
-  border-right: 0 !important;
-  border-left: 0 !important;
-  border-radius: 0 !important;
-}
-.r4-dealer-dashboard .r3-recent-work .ws-section-head,
-.r4-dealer-dashboard .r3-recent-work .ws-row-columns,
-.r4-dealer-dashboard .r3-recent-work .ws-row {
-  padding-inline: 0 !important;
-}
-@media (max-width: 760px) {
-  .r4-dealer-dashboard {
-    padding: 20px 16px 42px !important;
-  }
-  .r4-dealer-dashboard .r3-hero-title {
-    justify-content: flex-start;
-  }
-  .r4-dealer-dashboard .r3-hero-title h2 {
-    font-size: var(--font-lg) !important;
-  }
-}
-
-.r6-dealer-dashboard,
-.r4-dealer-dashboard {
-  max-width: 1220px !important;
-  margin-inline: auto !important;
-}.r4-dealer-dashboard .r3-hero-title {
-  margin-bottom: 20px !important;
-}
-.r4-dealer-dashboard .r3-hero-title h2 {
-  font-size: var(--font-xl) !important;
-  font-weight: 760 !important;
-  color: var(--color-text) !important;
-}
-.r4-dealer-dashboard .r3-search-form {
-  max-width: 900px !important;
-  grid-template-columns: minmax(0, 1fr) 160px !important;
-}
-.r4-dealer-dashboard .r3-search-form input {
-  height: 58px !important;
-  background: var(--color-surface-soft) !important;
-  border: 1px solid var(--color-line) !important;
-}.r4-dealer-dashboard .r3-recent-work {
-  margin-top: 58px !important;
-  border: 1px solid var(--color-line) !important;
-  border-radius: var(--radius-md) !important;
-}
-.r4-dealer-dashboard .r3-recent-work .ws-section-head {
-  padding: 20px 28px !important;
-}
-.r4-dealer-dashboard .r3-recent-work .ws-row-columns,
-.r4-dealer-dashboard .r3-recent-work .ws-row {
-  padding-inline: 28px !important;
-}
-.r4-dealer-dashboard .r3-recent-work .ws-row {
-  min-height: 70px;
-}
 @media (max-width: 760px) {
   .role-dealer .app-frame {
     display: block !important;
-  }  .r4-dealer-dashboard .r3-hero-title h2 {
-    font-size: var(--font-lg) !important;
-  }
-  .r4-dealer-dashboard .r3-search-form {
-    grid-template-columns: 1fr !important;
   }
 }
 
 .role-dealer .app-sidebar nav button.active {
   background: var(--color-primary) !important;
-}.r4-dealer-dashboard .r3-hero-title h2 {
-  font-size: var(--font-xl) !important;
-  font-weight: 720 !important;
-}
-.r4-dealer-dashboard .r3-search-form input,
-.r4-dealer-dashboard .r3-search-hero .ws-search-cta {
-  height: 54px !important;
-}
-.r4-dealer-dashboard .r3-search-form input {
-  font-size: var(--font-sm) !important;
-}.r4-dealer-dashboard .r3-recent-work {
-  margin-top: 52px !important;
-}
-.r4-dealer-dashboard .r3-recent-work .ws-section-head h2 {
-  font-size: var(--font-md) !important;
-}
-.r4-dealer-dashboard .r3-recent-work .ws-section-head p,
-.r4-dealer-dashboard .r3-recent-work .ws-row small {
-  font-size: var(--font-sm) !important;
-}
-.r4-dealer-dashboard .r3-recent-work .ws-row {
-  min-height: 66px;
-  font-size: var(--font-sm);
-}
-@media (max-width: 760px) {
-  .r4-dealer-dashboard .r3-hero-title h2 {
-    font-size: var(--font-lg) !important;
-  }
-  .r4-dealer-dashboard .r3-search-form input,
-  .r4-dealer-dashboard .r3-search-hero .ws-search-cta {
-    height: 48px !important;
-  }
 }
 
-/* Final reference foundation: preserve real flows, calibrate the shared workspace surface. */
-:root {
-  --cm-navy: #0f1a33;
-  --cm-primary: var(--color-primary);
-  --cm-background: var(--color-bg);
-  --cm-surface: #fff;
-  --cm-border: var(--color-line);
-  --cm-text: var(--color-text);
-  --cm-muted: var(--color-muted);
-}
-.r4-dealer-dashboard {
-  margin-right: 14px !important;
-  padding: 0 36px 48px !important;
-  background: var(--cm-surface);
-  border: 1px solid var(--cm-border);
-  border-top: 0;
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
-}.r4-dealer-dashboard .r3-hero-title h2 {
-  color: var(--cm-text) !important;
-  font-size: var(--font-xl) !important;
-}
-.r4-dealer-dashboard .r3-search-form input {
-  color: var(--cm-text) !important;
-  background: #fbfcfe !important;
-  border-color: var(--color-line-strong) !important;
-}
-/* This input used to carry an `inset ... !important` resting shadow, which
-   beat the design system's focus glow, so a bespoke 2px outline stood in for
-   it. With that shadow gone the shared focus treatment applies again and the
-   outline would double it, so only the border override remains. */
-.r4-dealer-dashboard .r3-search-form input:focus {
-  border-color: var(--cm-primary) !important;
-}.r4-dealer-dashboard .r3-recent-work {
-  background: var(--cm-surface) !important;
-  border-color: var(--cm-border) !important;
-}
 @media (max-width: 760px) {
   .role-dealer .app-topbar-default {
     margin: 0;
     border: 0;
     border-radius: 0;
   }
-  .r4-dealer-dashboard {
-    margin-right: 0 !important;
-    border: 0;
-    border-radius: 0;
-  }
 }
 
-/* DESIGN_PROTOTYPE_ONLY dashboard composition. */
-.reference-prototype-dashboard {
-  padding-top: 0 !important;
-}
-.reference-dashboard-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px 0 18px;
-}
-.reference-dashboard-top h1 {
-  margin: 0;
-  color: var(--color-text);
-  font-size: var(--font-lg);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-}
-.reference-dashboard-top p {
-  margin: 7px 0 0;
-  color: var(--color-muted-soft);
-  font-size: var(--font-sm);
-}
-.reference-utility {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.reference-utility button {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border: 0;
-  background: transparent;
-  color: var(--color-text);
-}
-.reference-utility button b {
-  position: absolute;
-  top: 0;
-  right: -1px;
-  display: grid;
-  min-width: 16px;
-  height: 16px;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: var(--font-xs);
-}
-.reference-avatar {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-weight: 800;
-}
-/* 시공점 찾기는 딜러의 메인 행동이라 의도적으로 크게 유지한다 — 대시보드에서
-   가장 먼저 눈에 들어와야 하는 진입점. */
-.reference-search-panel {
-  padding: 30px 22px 26px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  background: #fff;
-}
-.reference-search-panel .r3-hero-title {
-  margin: 0 0 24px;
-}
-.reference-search-panel .r3-hero-title h2 {
-  font-size: var(--font-xl) !important;
-}
-.reference-search-panel .r3-search-form {
-  max-width: 840px !important;
-  grid-template-columns: minmax(0, 1fr) 174px !important;
-}
-.reference-search-panel .r3-search-form input,
-.reference-search-panel .r3-search-hero .ws-search-cta {
-  height: 56px !important;
-}
-.reference-search-panel .r3-search-form input {
-  border: 2px solid var(--color-primary) !important;
-  background: #fff !important;
-}
-.reference-search-panel .r3-search-form .ws-search-cta {
-  border-radius: var(--radius-sm) !important;
-  background: var(--color-primary) !important;
-}.reference-module-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 18px;
-}
-.reference-module {
-  min-height: 166px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  padding: 16px 18px;
-}
-.reference-module header,
 .prototype-recent-work > header {
   display: flex;
   align-items: center;
@@ -2993,7 +2422,6 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--color-line);
   padding-bottom: 11px;
 }
-.reference-module header h2,
 .prototype-recent-work > header h2 {
   display: flex;
   align-items: center;
@@ -3002,7 +2430,6 @@ textarea:focus-visible {
   color: var(--color-text);
   font-size: var(--font-body);
 }
-.reference-module header button,
 .prototype-recent-work > header button {
   display: inline-flex;
   align-items: center;
@@ -3011,52 +2438,6 @@ textarea:focus-visible {
   background: transparent;
   color: var(--color-muted-soft);
   font-size: var(--font-xs);
-}
-.reference-module ul,
-.reference-module ol {
-  display: grid;
-  gap: 12px;
-  margin: 15px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.reference-module li {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: var(--color-text-soft);
-  font-size: var(--font-sm);
-}
-.reference-module li i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--color-primary);
-}
-.reference-module li small {
-  margin-left: auto;
-  color: var(--color-muted-soft);
-  font-size: var(--font-xs);
-}
-.reference-module li div {
-  display: grid;
-  gap: 3px;
-  min-width: 0;
-}
-.reference-module li div span {
-  color: var(--color-muted-soft);
-  font-size: var(--font-xs);
-}
-.reference-module li em {
-  display: grid;
-  width: 17px;
-  height: 17px;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: var(--font-xs);
-  font-style: normal;
 }
 .getting-started ol {
   gap: 10px;
@@ -3168,9 +2549,6 @@ textarea:focus-visible {
   text-align: right;
 }
 @media (max-width: 900px) {
-  .reference-module-grid {
-    grid-template-columns: 1fr;
-  }
   .prototype-job-head {
     display: none;
   }
@@ -3187,95 +2565,13 @@ textarea:focus-visible {
 
 /* R1 final desktop hierarchy. */
 @media (min-width: 1200px) {
-  .dealer-dashboard {
-    width: min(1480px, 100%);
-    padding: 34px 48px 56px;
-  }
-  .dealer-dashboard .ws-dashboard-header .ws-eyebrow,
   .dealer-transaction-management .page-title .eyebrow {
     display: none;
   }
-  .dealer-dashboard .ws-dashboard-header h1,
   .dealer-transaction-management .page-title h1 {
     margin: 0;
     font-size: var(--font-xl);
     letter-spacing: -0.035em;
-  }
-  .dealer-dashboard .ws-search-hero {
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-md);
-    box-shadow: none;
-    padding: 24px 28px 20px;
-  }
-  .dealer-dashboard .ws-search-form {
-    grid-template-columns: minmax(300px, 1fr) 170px auto;
-    align-items: end;
-    gap: 10px;
-    margin-top: 18px;
-  }
-  .dealer-dashboard .ws-search-cta {
-    min-height: 46px;
-    padding-inline: 20px;
-  }
-  .dealer-dashboard .ws-search-hero-shortcuts {
-    justify-content: flex-start;
-    margin-top: 12px;
-    border-top: 1px solid var(--color-surface-soft);
-    padding-top: 12px;
-  }
-  .dealer-dashboard .ws-search-hero-shortcuts .button {
-    min-height: 32px;
-    border: 0;
-    color: var(--color-muted);
-    font-size: var(--font-sm);
-  }
-  .dealer-dashboard .ws-summary-row {
-    display: flex;
-    gap: 0;
-    margin: 26px 0 14px;
-    border-top: 1px solid var(--color-line);
-    border-bottom: 1px solid var(--color-line);
-  }
-  .dealer-dashboard .ws-summary-card {
-    min-height: 68px;
-    flex: 1;
-    border: 0;
-    border-right: 1px solid var(--color-line);
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    padding: 14px 18px;
-  }
-  .dealer-dashboard .ws-summary-card:last-child {
-    border-right: 0;
-  }
-  .dealer-dashboard .ws-summary-card b {
-    color: var(--color-text);
-    font-size: var(--font-lg);
-  }
-  .dealer-dashboard .ws-card {
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-md);
-    box-shadow: none;
-  }
-  .dealer-dashboard .ws-section-head {
-    min-height: 46px;
-    border-bottom: 1px solid var(--color-surface-soft);
-    padding: 0 16px;
-  }
-  .dealer-dashboard .ws-list-card .ws-row {
-    min-height: 64px;
-    border-bottom: 1px solid var(--color-surface-soft);
-    padding: 10px 16px;
-  }
-  .dealer-dashboard .dashboard-empty {
-    min-height: 170px;
-    margin-top: 14px;
-    border: 1px dashed var(--color-line);
-    border-radius: var(--radius-md);
-    background: #fbfcfe;
-    box-shadow: none;
-    padding: 32px;
   }
   .dealer-transaction-management {
     width: min(1480px, 100%);
@@ -3306,95 +2602,13 @@ textarea:focus-visible {
 
 /* R1 final precedence: dense Dealer work surfaces at desktop widths. */
 @media (min-width: 1200px) {
-  .dealer-dashboard {
-    width: min(1480px, 100%);
-    padding: 34px 48px 56px;
-  }
-  .dealer-dashboard .ws-dashboard-header .ws-eyebrow,
   .dealer-transaction-management .page-title .eyebrow {
     display: none;
   }
-  .dealer-dashboard .ws-dashboard-header h1,
   .dealer-transaction-management .page-title h1 {
     margin: 0;
     font-size: var(--font-xl);
     letter-spacing: -0.035em;
-  }
-  .dealer-dashboard .ws-search-hero {
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-md);
-    box-shadow: none;
-    padding: 24px 28px 20px;
-  }
-  .dealer-dashboard .ws-search-form {
-    grid-template-columns: minmax(300px, 1fr) 170px auto;
-    align-items: end;
-    gap: 10px;
-    margin-top: 18px;
-  }
-  .dealer-dashboard .ws-search-cta {
-    min-height: 46px;
-    padding-inline: 20px;
-  }
-  .dealer-dashboard .ws-search-hero-shortcuts {
-    justify-content: flex-start;
-    margin-top: 12px;
-    border-top: 1px solid var(--color-surface-soft);
-    padding-top: 12px;
-  }
-  .dealer-dashboard .ws-search-hero-shortcuts .button {
-    min-height: 32px;
-    border: 0;
-    color: var(--color-muted);
-    font-size: var(--font-sm);
-  }
-  .dealer-dashboard .ws-summary-row {
-    display: flex;
-    gap: 0;
-    margin: 26px 0 14px;
-    border-top: 1px solid var(--color-line);
-    border-bottom: 1px solid var(--color-line);
-  }
-  .dealer-dashboard .ws-summary-card {
-    min-height: 68px;
-    flex: 1;
-    border: 0;
-    border-right: 1px solid var(--color-line);
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    padding: 14px 18px;
-  }
-  .dealer-dashboard .ws-summary-card:last-child {
-    border-right: 0;
-  }
-  .dealer-dashboard .ws-summary-card b {
-    color: var(--color-text);
-    font-size: var(--font-lg);
-  }
-  .dealer-dashboard .ws-card {
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-md);
-    box-shadow: none;
-  }
-  .dealer-dashboard .ws-section-head {
-    min-height: 46px;
-    border-bottom: 1px solid var(--color-surface-soft);
-    padding: 0 16px;
-  }
-  .dealer-dashboard .ws-list-card .ws-row {
-    min-height: 64px;
-    border-bottom: 1px solid var(--color-surface-soft);
-    padding: 10px 16px;
-  }
-  .dealer-dashboard .dashboard-empty {
-    min-height: 170px;
-    margin-top: 14px;
-    border: 1px dashed var(--color-line);
-    border-radius: var(--radius-md);
-    background: #fbfcfe;
-    box-shadow: none;
-    padding: 32px;
   }
   .dealer-transaction-management {
     width: min(1480px, 100%);
@@ -4592,7 +3806,6 @@ textarea:focus-visible {
 
 .app-main
   > :is(
-    .dealer-dashboard,
     .dealer-screen,
     .transaction-management-screen,
     .profile-editor,
@@ -4662,7 +3875,6 @@ textarea:focus-visible {
   }
   .app-main
     > :is(
-      .dealer-dashboard,
       .dealer-screen,
       .transaction-management-screen,
       .profile-editor,
@@ -4698,7 +3910,6 @@ textarea:focus-visible {
 @media (max-width: 389px) {
   .app-main
     > :is(
-      .dealer-dashboard,
       .dealer-screen,
       .transaction-management-screen,
       .profile-editor,
@@ -5924,220 +5135,245 @@ textarea:focus-visible {
   }
 }
 
-.prototype-legacy-actions {
-  display: none !important;
+/* shell.css의 .role-dealer 상단바/본문 배경 규칙(공용, 대시보드 전용 아님)이
+   참조하는 별칭 — 원래 대시보드 전용 블록의 :root 선언에 얹혀 있었을 뿐 실제로는
+   전 화면에 걸쳐 쓰인다. */
+:root {
+  --cm-background: var(--color-bg);
+  --cm-border: var(--color-line);
+  --cm-text: var(--color-text);
 }
 
-/* Local reference prototype calibration: one workspace header, restrained surfaces,
-   and a denser work-first composition. */
-.dealer-home-frame .app-topbar-default {
-  display: none;
+/* Dealer dashboard: dedicated screen root, decoupled from AppShell. Sidebar/
+   topbar/main skeleton stays in shell.css; only the sidebar tweaks below
+   react to the dashboard being mounted, via :has() instead of a shell
+   modifier class (same pattern as .app-main:has(> .messenger-screen)). */
+.app-frame:has(> .app-main > .dealer-dashboard) .app-sidebar nav button span {
+  font-size: 15px;
+  font-weight: 700;
 }
-.dealer-home-frame .app-main {
+.app-frame:has(> .app-main > .dealer-dashboard) .sidebar-profile {
+  padding: 14px 10px 0;
+}
+
+.dealer-dashboard {
+  width: min(1220px, 100%);
+  margin-right: 14px;
+  padding: 0 36px 48px;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+.app-main > .dealer-dashboard {
   padding-top: 0;
 }
-.reference-prototype-dashboard {
-  --prototype-navy: #0f1a33;
-  --prototype-primary: var(--color-primary);
-  --prototype-text: var(--color-text);
-  --prototype-muted: var(--color-muted);
-  --prototype-border: var(--color-line);
-  --prototype-bg: var(--color-surface-soft);
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 34px 42px 52px;
-  color: var(--prototype-text);
+@media (max-width: 760px) {
+  .dealer-dashboard {
+    margin-right: 0;
+    border: 0;
+    border-radius: 0;
+  }
 }
-.reference-dashboard-top {
+
+.dealer-dashboard-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  min-height: 54px;
-  margin-bottom: 26px;
+  min-height: 55px;
+  margin: 0 0 25px;
+  padding: 24px 0 18px;
 }
-.reference-dashboard-top h1 {
+.dealer-dashboard-top h1 {
   margin: 0;
-  font-size: var(--font-lg);
+  color: var(--color-text);
+  font-size: var(--font-xl);
+  font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.035em;
 }
-.reference-dashboard-top p {
+.dealer-dashboard-top p {
   margin: 7px 0 0;
-  color: var(--prototype-muted);
+  color: var(--color-muted-soft);
   font-size: var(--font-sm);
 }
-.reference-utility {
+
+/* 시공점 찾기는 딜러의 메인 행동이라 의도적으로 크게 유지한다 — 대시보드에서
+   가장 먼저 눈에 들어와야 하는 진입점. */
+.dealer-dashboard-search-panel {
+  margin-bottom: 20px;
+  padding: 34px 28px 24px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: #fff;
+  text-align: center;
+}
+.dealer-dashboard-hero-title {
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: center;
+  margin: 0 0 20px;
 }
-.reference-utility > button {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  color: var(--prototype-navy);
-}
-.reference-utility > button b {
-  position: absolute;
-  top: -3px;
-  right: -4px;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  background: var(--prototype-primary);
-  color: #fff;
-  font-size: var(--font-xs);
-  line-height: 16px;
-  text-align: center;
-}
-.reference-avatar {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--color-primary-soft);
-  color: var(--prototype-primary);
-  font-size: var(--font-sm);
-  font-weight: 800;
-}
-.reference-search-panel {
-  margin-bottom: 24px;
-  padding: 18px 0 2px;
-  text-align: center;
-}
-.reference-search-panel .r3-hero-title h2 {
-  margin: 0 0 26px;
-  color: var(--prototype-navy);
+.dealer-dashboard-hero-title h2 {
+  margin: 0 0 27px;
   font-size: var(--font-xl);
+  font-weight: 720;
   line-height: 1.2;
   letter-spacing: -0.055em;
 }
-.reference-search-panel .ws-search-form {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 174px;
-  max-width: 860px;
+.dealer-dashboard-search-panel .ws-search-form {
+  max-width: 840px;
   margin: 0 auto;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) 174px;
   align-items: center;
 }
-.reference-search-panel .ws-search-form label {
-  display: block;
-}
-.reference-search-panel .ws-search-form input {
+.dealer-dashboard-search-panel .ws-search-form input {
+  display: inline-block;
   width: 100%;
-  height: 50px;
-  border: 1px solid var(--prototype-border);
+  min-width: 0;
+  height: 56px;
+  padding: 0 16px;
+  border: 2px solid var(--color-primary);
   border-radius: var(--radius-sm);
   background: #fff;
-  padding: 0 16px;
-  color: var(--prototype-text);
   font-size: var(--font-sm);
+  font-weight: 700;
+  line-height: 22.36px;
+  letter-spacing: -0.13px;
 }
-.reference-search-panel .ws-search-form input:focus {
-  border-color: var(--prototype-primary);
-  outline: 3px solid rgba(29, 78, 216, 0.12);
-  box-shadow: none;
-}
-.reference-search-panel .ws-search-cta {
-  height: 50px;
-  border: 0;
+.dealer-dashboard-search-panel .ws-search-cta {
+  height: 56px;
+  padding-inline: 20px;
   border-radius: var(--radius-sm);
-  background: var(--prototype-primary);
-  font-size: var(--font-sm);
-  box-shadow: none;
-}.reference-module-grid {
+  background: var(--color-primary);
+}
+/* !important 고정 폭 CTA 열 때문에 390px에서 입력창이 "예: 서울"만 겨우 보일
+   만큼 좁아져 주소 입력이 사실상 불가능했던 이력이 있다 — 모바일에서는 같은
+   특이도로 명시적으로 되돌린다. */
+@media (max-width: 900px) {
+  .dealer-dashboard-hero-title {
+    justify-content: flex-start;
+  }
+  .dealer-dashboard-hero-title h2 {
+    text-align: left;
+  }
+  .dealer-dashboard-search-panel .ws-search-form {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px;
+  }
+  .dealer-dashboard-search-panel .ws-search-form input,
+  .dealer-dashboard-search-panel .ws-search-cta {
+    width: 100%;
+    height: 48px !important;
+    min-height: 48px;
+  }
+  .dealer-dashboard-search-panel .ws-search-cta {
+    padding-inline: 22px;
+  }
+}
+
+.dealer-dashboard-module-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
-  margin-bottom: 24px;
+  margin: 18px 0 16px;
 }
-.reference-module {
-  min-height: 168px;
-  border: 1px solid var(--prototype-border);
+.has-deals .dealer-dashboard-module-grid {
+  grid-template-columns: 1fr 1fr;
+}
+.new-dealer .dealer-dashboard-module-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+/* has-deals가 강제하던 2열이 390px에서 "새 메시지" 카드를 화면 밖으로 약
+   167px 밀어냈던 이력이 있다 — 모바일에서는 1열로 되돌린다. */
+@media (max-width: 900px) {
+  .has-deals .dealer-dashboard-module-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.dealer-dashboard-module {
+  min-height: 204px;
+  border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   background: #fff;
-  padding: 16px 18px;
+  padding: 18px 22px;
 }
-.reference-module {
-}
-.reference-module:hover {
+.dealer-dashboard-module:hover {
   border-color: var(--color-line-strong);
 }
-.reference-module > header {
+.dealer-dashboard-module > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
 }
-.reference-module h2 {
+.dealer-dashboard-module h2 {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 0;
-  color: var(--prototype-text);
-  font-size: var(--font-body);
+  color: var(--color-text);
+  font-size: var(--font-md);
+  line-height: 1.35;
   letter-spacing: -0.025em;
 }
-.reference-module h2 svg {
-  color: var(--prototype-primary);
+.dealer-dashboard-module h2 svg {
+  color: var(--color-primary);
 }
-.reference-module > header button {
-  color: var(--prototype-muted);
+.dealer-dashboard-module > header button {
+  color: var(--color-muted);
   font-size: var(--font-xs);
 }
-.reference-module ul,
-.reference-module ol {
+.dealer-dashboard-module ul,
+.dealer-dashboard-module ol {
   display: grid;
   gap: 11px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.reference-module li {
+.dealer-dashboard-module li {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: 25px;
+  padding: 0;
   color: var(--color-text-soft);
   font-size: var(--font-sm);
   line-height: 1.35;
 }
-.reference-module li {
-  min-height: 25px;
-}
-.reference-module li i {
+.dealer-dashboard-module li i {
   width: 6px;
   height: 6px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: var(--prototype-primary);
+  background: var(--color-primary);
 }
-.reference-module li small {
+.dealer-dashboard-module li small {
   margin-left: auto;
-  color: var(--prototype-muted);
+  color: var(--color-muted);
   font-size: var(--font-xs);
   white-space: nowrap;
 }
-.reference-module li > div {
+.dealer-dashboard-module li > div {
   display: grid;
   min-width: 0;
   gap: 2px;
 }
-.reference-module li > div span {
+.dealer-dashboard-module li > div span {
   overflow: hidden;
-  color: var(--prototype-muted);
+  color: var(--color-muted);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.reference-module li em {
+.dealer-dashboard-module li em {
   display: grid;
   place-items: center;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--prototype-primary);
+  background: var(--color-primary);
   color: #fff;
   font-size: var(--font-xs);
   font-style: normal;
@@ -6146,10 +5382,7 @@ textarea:focus-visible {
    이동해야 해서 <li> 안에 <button>이 하나 더 생겼다. i/small/div/em 셀렉터는
    자손 선택자라 그 button을 거쳐도 그대로 매치되고, button 자체만 이전
    <li>처럼 보이게 편다. */
-.reference-module li {
-  padding: 0;
-}
-.reference-module li > button {
+.dealer-dashboard-module li > button {
   display: flex;
   align-items: center;
   width: 100%;
@@ -6162,452 +5395,117 @@ textarea:focus-visible {
   text-align: left;
   cursor: pointer;
 }
-.reference-module li > button:hover {
+.dealer-dashboard-module li > button:hover {
   color: var(--color-primary);
 }
-.reference-module li > button span {
+.dealer-dashboard-module li > button span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.reference-module-empty {
+.dealer-dashboard-module-empty {
   margin: 15px 0 0;
   padding: 20px 4px;
   color: var(--color-muted);
   font-size: var(--font-sm);
   text-align: center;
 }
-.getting-started ol {
-  gap: 10px;
+.new-dealer .dealer-dashboard-module {
+  display: none;
 }
-.getting-started li b {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--color-line-strong);
-  border-radius: 50%;
-  color: var(--prototype-text);
-  font-size: var(--font-xs);
-}
-.getting-started li span {
-  flex: 1;
-}
-.getting-started li em {
-  width: auto;
-  height: auto;
-  background: none;
-  color: var(--prototype-primary);
-  font-size: var(--font-xs);
-}
-.getting-started li em.done {
-  color: #159570;
-}
-.getting-started li em.pending {
-  color: #f08c32;
-}
-.prototype-recent-work {
-  overflow: hidden;
-  border: 1px solid var(--prototype-border);
+
+.dealer-dashboard-recent-work {
+  margin-top: 52px;
+  border: 1px solid var(--color-line);
   border-radius: var(--radius-md);
   background: #fff;
 }
-.prototype-recent-work > header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 18px 13px;
-}
-.prototype-recent-work > header h2 {
+.dealer-dashboard-recent-work .ws-section-head {
+  min-height: 46px;
+  padding: 20px 28px;
   margin: 0;
-  font-size: var(--font-md);
-  letter-spacing: -0.03em;
-}
-.prototype-recent-work > header button {
-  color: var(--prototype-primary);
-  font-size: var(--font-xs);
-}
-.prototype-job-head,
-.prototype-job-row {
-  display: grid;
-  grid-template-columns: 1.3fr 1.1fr 1.15fr 0.85fr 1fr 1fr 0.72fr;
-  align-items: center;
-  gap: 14px;
-  padding: 0 18px;
-}
-.prototype-job-head {
-  min-height: 34px;
-  border-top: 1px solid var(--prototype-border);
-  border-bottom: 1px solid var(--prototype-border);
-  background: #fbfcfe;
-  color: var(--prototype-muted);
-  font-size: var(--font-xs);
-}
-.prototype-job-row {
-  min-height: 70px;
-  border-bottom: 1px solid var(--prototype-border);
-  color: var(--color-text-soft);
-  font-size: var(--font-sm);
-}
-.prototype-job-row:last-child {
-  border-bottom: 0;
-}
-.prototype-job-vehicle {
-  display: grid;
-  gap: 3px;
-}
-.prototype-job-vehicle b {
-  color: var(--prototype-text);
-  font-size: var(--font-sm);
-}
-.prototype-job-vehicle small {
-  color: var(--prototype-muted);
-  font-size: var(--font-xs);
-}
-.prototype-job-row > button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  min-height: 32px;
-  border: 1px solid var(--prototype-border);
-  border-radius: var(--radius-sm);
-  background: #fff;
-  color: var(--prototype-text);
-  font-size: var(--font-xs);
-}
-.prototype-status {
-  justify-self: start;
-  border-radius: 999px;
-  padding: 5px 9px;
-  font-size: var(--font-xs);
-  font-style: normal;
-  font-weight: 800;
-  white-space: nowrap;
-}
-.prototype-status.blue {
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-}
-.prototype-status.green {
-  background: #e3f7ed;
-  color: #16855d;
-}
-.prototype-status.purple {
-  background: #eeeaff;
-  color: #6d54d8;
-}
-.prototype-only-label {
-  display: block;
-  margin-top: 8px;
-  color: var(--color-muted-soft);
-  font-size: var(--font-xs);
-  text-align: right;
-}
-.dealer-home-frame .app-sidebar {
-  background: var(--prototype-navy);
-}
-.reference-prototype-dashboard.has-deals .reference-module-grid {
-  grid-template-columns: 1fr 1fr;
-}
-.reference-prototype-dashboard.has-deals .getting-started {
-  display: none;
-}
-.reference-prototype-dashboard.new-dealer .reference-module-grid {
-  grid-template-columns: minmax(0, 1fr);
-}
-.reference-prototype-dashboard.new-dealer .reference-module:not(.getting-started) {
-  display: none;
-}
-.reference-prototype-dashboard.new-dealer .getting-started {
-  min-height: 136px;
-}
-.reference-prototype-dashboard.new-dealer .getting-started ol {
-  grid-template-columns: repeat(3, 1fr);
-}
-.reference-prototype-dashboard.has-deals .prototype-only-label {
-  display: none;
-}
-.reference-recent-work {
-  border: 1px solid var(--prototype-border);
-  border-radius: var(--radius-md);
-  background: #fff;
-}
-.reference-recent-work .ws-section-head {
-  padding: 16px 18px 12px;
-  margin: 0;
-  border-bottom: 1px solid var(--prototype-border);
+  border-bottom: 1px solid var(--color-line);
 }
 /* "전체 보기 ›"가 두 줄로 깨지던 문제 — 링크는 항상 한 줄로 둔다. */
-.reference-recent-work .ws-section-head > button {
+.dealer-dashboard-recent-work .ws-section-head > button {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   white-space: nowrap;
 }
-.reference-recent-work .ws-section-head p {
+.dealer-dashboard-recent-work .ws-section-head p {
   margin: 4px 0 0;
-  color: var(--prototype-muted);
+  color: var(--color-muted);
   font-size: var(--font-xs);
 }
-.reference-recent-work .ws-row {
-  min-height: 68px;
-  padding: 12px 18px;
-  border-top: 0;
-  border-bottom: 1px solid var(--prototype-border);
+.dealer-dashboard-recent-work .ws-row-columns {
+  padding-inline: 28px;
 }
-.reference-recent-work .ws-row:last-child {
+.dealer-dashboard-recent-work .ws-row,
+.ws-list-card.dealer-dashboard-recent-work .ws-row {
+  min-height: 76px;
+  padding: 13px 28px;
+  border-top: 0;
+  border-bottom: 1px solid var(--color-line);
+  font-size: var(--font-sm);
+}
+/* 데스크톱 폭(≥1200px)에서는 구분선이 --color-line이 아니라 거의 안 보이는
+   --color-surface-soft로 더 옅게 그려진다 — 원래 이 화면 폭 전용 계산 규칙.
+   위 :first-of-type 특이도 대응 선택자와 같은 (0,3,0)으로 맞춘다. */
+@media (min-width: 1200px) {
+  .dealer-dashboard-recent-work .ws-row,
+  .ws-list-card.dealer-dashboard-recent-work .ws-row {
+    border-bottom-color: var(--color-surface-soft);
+  }
+}
+.dealer-dashboard-recent-work .ws-row:last-child {
   border-bottom: 0;
 }
-.reference-recent-work .ws-row:hover {
+@media (max-width: 900px) {
+  .dealer-dashboard-recent-work .ws-section-head {
+    min-height: 64px;
+  }
+}
+.dealer-dashboard-recent-work .ws-row:hover {
   background: var(--color-surface-soft);
 }
-.reference-recent-work .ws-row:focus-visible,
+.dealer-dashboard-recent-work .ws-row:focus-visible,
 .prototype-job-row > button:focus-visible,
-.reference-module > header button:focus-visible {
+.dealer-dashboard-module > header button:focus-visible {
   outline: 3px solid rgba(29, 78, 216, 0.18);
   outline-offset: 2px;
 }
-.reference-recent-work .ws-row-next {
-  color: var(--prototype-primary);
+.dealer-dashboard-recent-work .ws-row-next {
+  color: var(--color-primary);
   font-size: var(--font-xs);
   font-weight: 750;
   white-space: nowrap;
 }
-.reference-recent-work .status-chip {
+.dealer-dashboard-recent-work .status-chip {
   font-size: var(--font-xs);
 }
-.reference-recent-work .ws-row-status {
+.dealer-dashboard-recent-work .ws-row-status {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
 }
-.reference-recent-work .ws-row-schedule {
+.dealer-dashboard-recent-work .ws-row-schedule {
   display: grid;
   min-width: 58px;
   gap: 2px;
 }
-.reference-recent-work .ws-row-schedule small {
-  color: var(--prototype-muted);
+.dealer-dashboard-recent-work .ws-row-schedule small {
+  color: var(--color-muted);
   font-size: var(--font-xs);
 }
-.reference-recent-work .ws-row-schedule b {
-  color: var(--prototype-text);
+.dealer-dashboard-recent-work .ws-row-schedule b {
+  color: var(--color-text);
   font-size: var(--font-sm);
 }
 
-/* Reference lock: local dashboard composition calibrated to the supplied 1680px frame. */
-.dealer-home-frame {
-  grid-template-columns: 296px minmax(0, 1fr);
-}
-.dealer-home-frame .app-sidebar {
-  width: 296px;
-  flex-basis: 296px;
-  box-sizing: border-box;
-  padding: 14px 16px 16px;
-}
-/* Sidebar nav is primary navigation, not caption text. The type-scale pass
-   rounded these labels from 14px down to --font-sm (13px), which is the same
-   step as field hints, so the nav read as secondary. 15px sits between the
-   scale's sm and body on purpose — a deliberate sidebar-only exception. */
-.dealer-home-frame .app-sidebar nav button span {
-  font-size: 15px;
-  font-weight: 700;
-}
-.dealer-home-frame .app-sidebar nav button {
-  min-height: 50px;
-  padding: 0 12px;
-}
-.dealer-home-frame .app-main {
-  margin-left: 0;
-  background: var(--color-surface-soft);
-}
-.dealer-home-frame .sidebar-profile {
-  margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 0;
-  background: transparent;
-  padding: 14px 10px 0;
-}
-/* 커버리지 블록도 margin-top:auto로 아래로 밀리기 때문에, 둘 다 auto면 남은
-   공간이 반씩 나뉘어 사이가 크게 벌어진다. 커버리지가 있을 때는 그쪽이 밀어주므로
-   프로필의 auto를 끈다 — 커버리지가 없을 때(shopCoverage=null)는 위 규칙이 그대로
-   적용돼 프로필이 계속 하단에 붙는다. */
-.dealer-home-frame .sidebar-coverage + .sidebar-profile {
-  margin-top: 0;
-}
-.dealer-home-frame .sidebar-profile > span {
-  width: 42px;
-  height: 42px;
-  font-size: var(--font-body);
-}
-.dealer-home-frame .sidebar-profile b {
-  font-size: var(--font-body);
-}
-.dealer-home-frame .sidebar-profile small {
-  font-size: var(--font-sm);
-}
-.dealer-home-frame .reference-prototype-dashboard {
-  max-width: none;
-  padding: 34px 44px 54px;
-}
-.dealer-home-frame .reference-dashboard-top {
-  min-height: 55px;
-  margin-bottom: 25px;
-}
-.dealer-home-frame .reference-dashboard-top h1 {
-  font-size: var(--font-xl);
-}
-.dealer-home-frame .reference-dashboard-top p {
-  font-size: var(--font-body);
-}
-.dealer-home-frame .reference-search-panel {
-  margin-bottom: 20px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-md);
-  background: #fff;
-  padding: 34px 28px 24px;
-}
-.dealer-home-frame .reference-search-panel .r3-hero-title h2 {
-  margin-bottom: 27px;
-  font-size: var(--font-xl);
-}
-.dealer-home-frame .reference-search-panel .ws-search-form {
-  max-width: 996px;
-  grid-template-columns: minmax(0, 1fr) 204px;
-}
-.dealer-home-frame .reference-search-panel .ws-search-form input {
-  height: 56px;
-  font-size: var(--font-sm);
-}
-.dealer-home-frame .reference-search-panel .ws-search-cta {
-  height: 56px;
-  font-size: var(--font-body);
-}.dealer-home-frame .reference-module-grid {
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-.dealer-home-frame .reference-module {
-  min-height: 204px;
-  border-radius: var(--radius-md);
-  padding: 18px 22px;
-}
-.dealer-home-frame .reference-module h2 {
-  font-size: var(--font-md);
-}
-.dealer-home-frame .reference-module li {
-  min-height: 34px;
-  font-size: var(--font-sm);
-}
-.dealer-home-frame .reference-module li small {
-  font-size: var(--font-sm);
-}
-.dealer-home-frame .reference-module.getting-started {
-  display: none;
-}
-.dealer-home-frame .reference-recent-work {
-  border-radius: var(--radius-md);
-}
-.dealer-home-frame .reference-recent-work .ws-section-head {
-  padding: 19px 22px 14px;
-}
-.dealer-home-frame .reference-recent-work .ws-section-head h2 {
-  font-size: var(--font-md);
-}
-.dealer-home-frame .reference-recent-work .ws-section-head p {
-  font-size: var(--font-sm);
-}
-.dealer-home-frame .reference-recent-work .ws-row {
-  min-height: 76px;
-  padding: 13px 22px;
-}
-.dealer-home-frame .reference-recent-work .ws-row-main b {
-  font-size: var(--font-sm);
-}
-.dealer-home-frame .reference-recent-work .ws-row-main small {
-  font-size: var(--font-sm);
-}
-.dealer-home-frame .reference-recent-work .ws-row-schedule b {
-  font-size: var(--font-sm);
-}
-@media (max-width: 900px) {
-  .dealer-home-frame .app-sidebar {
-    width: 296px;
-    flex-basis: 296px;
-  }
-  .dealer-home-frame .app-main {
-    margin-left: 0;
-  }
-  .dealer-home-frame .reference-prototype-dashboard {
-    padding: 22px 16px 36px;
-  }
-  .dealer-home-frame .reference-module-grid {
-    grid-template-columns: 1fr;
-  }}
-@media (max-width: 900px) {
-  .dealer-home-frame .app-topbar-default {
-    display: flex;
-  }
-  .reference-prototype-dashboard {
-    padding: 22px 16px 36px;
-  }
-  .reference-dashboard-top {
-    margin-bottom: 18px;
-  }
-  .reference-search-panel .r3-hero-title h2 {
-    font-size: var(--font-xl);
-  }
-  .reference-search-panel .ws-search-form {
-    grid-template-columns: 1fr;
-  }
-  .reference-module-grid {
-    grid-template-columns: 1fr;
-  }
-  .prototype-job-head {
-    display: none;
-  }
-  .prototype-job-row {
-    grid-template-columns: 1fr auto;
-    gap: 8px 14px;
-    padding: 14px 16px;
-  }
-  .prototype-job-row > span:nth-child(2),
-  .prototype-job-row > span:nth-child(3),
-  .prototype-job-row > span:nth-child(5),
-  .prototype-job-row > span:nth-child(6) {
-    display: none;
-  }
-  .prototype-job-row > button {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-  }
-}
-
-/* ── Dealer 대시보드 모바일 교정 ───────────────────────────────────────────
-   두 규칙 모두 미디어쿼리 밖의 높은 특이도 선택자가 기존 모바일 규칙을 이기고
-   있어서, 390px에서 실제로 화면이 깨지고 있었다:
-   1) .has-deals .reference-module-grid(0,3,0)가 2열을 강제해 "새 메시지"
-      카드가 화면 밖으로 약 167px 잘려 나갔다.
-   2) .reference-search-panel .r3-search-form(0,2,0 + !important)의 고정
-      174px CTA 열이 남아 입력창이 "예: 서울"만 겨우 보일 만큼 좁아졌다 —
-      주소 입력이 사실상 불가능했다.
-   같은 특이도로 모바일에서만 되돌린다. Desktop 레이아웃은 그대로. */
-@media (max-width: 900px) {
-  .reference-prototype-dashboard.has-deals .reference-module-grid,
-  .dealer-home-frame .reference-prototype-dashboard.has-deals .reference-module-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .reference-search-panel .r3-search-form {
-    grid-template-columns: minmax(0, 1fr) !important;
-    gap: 10px;
-  }
-  .reference-search-panel .r3-search-form input,
-  .reference-search-panel .r3-search-form .ws-search-cta {
-    width: 100%;
-    height: 48px !important;
-  }
+.dealer-dashboard-legacy-actions {
+  display: none !important;
 }
 
 /* ── 사이드바 컬러: 네이비 → 카마스터 블루 ──────────────────────────────────
