@@ -344,13 +344,16 @@
   align-items: center;
   gap: 12px;
 }
+/* 로그인은 이 화면에서 딜러가 누를 유일한 상단 진입점이라 눈에 띄어야 한다 —
+   히어로 카피를 키운 만큼 같이 올린다. */
 .marketing-nav .button {
-  font-size: var(--font-sm);
+  font-size: var(--font-md);
 }
 .marketing-nav .button-primary {
-  min-width: 92px;
-  min-height: 50px;
-  padding-inline: 20px;
+  min-width: 120px;
+  min-height: 58px;
+  padding-inline: 30px;
+  font-weight: 750;
 }
 .marketing-hero {
   position: relative;
