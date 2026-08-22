@@ -15,14 +15,6 @@
   font-size: var(--font-xs);
   font-weight: 800;
 }
-.brand-check-badge.supported {
-  background: var(--color-success-bg);
-  color: var(--color-success);
-}
-.brand-check-badge.inquiry {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
-}
 .favorite-star {
   display: grid;
   width: 44px;

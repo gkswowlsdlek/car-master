@@ -1,4 +1,3 @@
-import type { Brand } from "../lib/dealer-flow-data";
 import type { VehicleClass } from "../data/vehicle-class-options";
 import type { LegacyUserRole } from "./auth";
 
@@ -46,7 +45,6 @@ export type ServiceRequest = {
   model: string;
   vehicleType: "신차" | "재시공";
   deliveryArea: string;
-  preferredBrand: Brand;
   works: string[];
   workDescription: string;
   extraRequest: string;

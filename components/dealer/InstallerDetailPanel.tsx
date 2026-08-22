@@ -2,31 +2,20 @@ import { Check } from "lucide-react";
 import type { InstallerListing } from "../../types/installer";
 import { NaverMapView } from "../map/NaverMapView";
 
-function supportsBrand(installer: InstallerListing, selectedBrand?: string) {
-  if (!selectedBrand) return true;
-  if (selectedBrand.startsWith("솔라가드")) return installer.brands.includes("솔라가드");
-  return installer.brands.some((brand) => selectedBrand.includes(brand) || brand.includes(selectedBrand));
-}
-
 const NO_DISTANCE = "거리 정보 없음";
 const NO_RESPONSE = "응답 정보 없음";
 
 export function InstallerDetailPanel({
   installer,
   distanceLabel,
-  selectedBrand,
-  isOtherBrand,
   onRequest,
   onClose,
 }: {
   installer: InstallerListing;
   distanceLabel: string;
-  selectedBrand?: string;
-  isOtherBrand: boolean;
   onRequest: () => void;
   onClose?: () => void;
 }) {
-  const brandSupported = supportsBrand(installer, selectedBrand);
   const hasDistance = distanceLabel !== NO_DISTANCE;
   // 평점/응답/최근작업은 실데이터가 생기기 전까지는 항목 자체를 숨긴다
   // ("정보 없음"을 반복 노출하지 않는다) — 하나라도 실데이터가 있을 때만
@@ -102,11 +91,6 @@ export function InstallerDetailPanel({
         <section className="installer-detail-section">
           <p className="installer-detail-label">취급 브랜드</p>
           <p className="installer-detail-value">{installer.brands.join(" · ")}</p>
-          <span className={`brand-check-badge ${isOtherBrand || !brandSupported ? "inquiry" : "supported"}`}>
-            {!isOtherBrand && brandSupported
-              ? `${selectedBrand ?? "선택 브랜드"} 취급 가능`
-              : "해당 브랜드 취급 여부 확인 필요"}
-          </span>
         </section>
       )}
 

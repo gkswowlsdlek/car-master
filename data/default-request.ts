@@ -5,7 +5,6 @@ export const defaultRequest: ServiceRequest = {
   model: "GV80",
   vehicleType: "신차",
   deliveryArea: "경기 하남시 미사",
-  preferredBrand: "버텍스",
   works: ["버텍스 900 썬팅"],
   workDescription: "버텍스 900 썬팅",
   extraRequest: "PPF, 블랙박스",

@@ -450,7 +450,6 @@ export function DealerWorkspace({
               current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
             )
           }
-          isOtherBrand={false}
           searchOrigin={searchOrigin}
           onRequest={() => onNavigate("request")}
           onShopSearchRequest={useSupabaseData ? () => onNavigate("shopSearchRequests") : undefined}
