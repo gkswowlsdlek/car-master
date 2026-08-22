@@ -197,12 +197,15 @@
 .marketing-brand img {
   width: 196px;
 }
+/* 좌측 카피는 위로 붙인다. 지도 카드가 훨씬 높아서 가운데 정렬하면 카피가
+   허공에 뜨고 위아래로 여백이 갈라진다 — 위 기준으로 맞춰 남는 공간을 좌측
+   하단 한 곳에 모으는 편이 의도적으로 읽힌다. */
 .marketing-hero {
   width: min(1440px, 100%);
   display: grid;
   grid-template-columns: minmax(440px, 0.9fr) minmax(600px, 1.1fr);
   gap: 72px;
-  align-items: center;
+  align-items: start;
   padding: 88px 64px 104px;
   text-align: left;
 }
@@ -218,8 +221,8 @@
   border-radius: 999px;
   background: var(--color-primary-soft);
   color: var(--color-primary-hover);
-  padding: 7px 12px;
-  font-size: var(--font-sm);
+  padding: 13px 24px;
+  font-size: var(--font-lg);
   font-weight: 750;
 }
 .marketing-hero h1 {
@@ -241,10 +244,11 @@
 }
 .hero-assurance {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   margin-top: 24px;
-  color: var(--color-muted);
-  font-size: var(--font-sm);
+  color: var(--color-text-soft);
+  font-size: var(--font-md);
+  font-weight: 600;
 }
 .hero-assurance span {
   display: inline-flex;
@@ -340,13 +344,16 @@
   align-items: center;
   gap: 12px;
 }
+/* 로그인은 이 화면에서 딜러가 누를 유일한 상단 진입점이라 눈에 띄어야 한다 —
+   히어로 카피를 키운 만큼 같이 올린다. */
 .marketing-nav .button {
-  font-size: var(--font-sm);
+  font-size: var(--font-md);
 }
 .marketing-nav .button-primary {
-  min-width: 92px;
-  min-height: 50px;
-  padding-inline: 20px;
+  min-width: 120px;
+  min-height: 58px;
+  padding-inline: 30px;
+  font-weight: 750;
 }
 .marketing-hero {
   position: relative;
@@ -807,10 +814,10 @@
   width: 286px;
   margin-top: 10px;
   color: var(--color-text-soft);
-  font-size: var(--font-sm);
+  font-size: var(--font-md);
   font-weight: 700;
   line-height: 1.3;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-align: center;
   white-space: nowrap;
 }
@@ -851,7 +858,7 @@
 }
 .hero-coverage-head b {
   color: var(--color-text);
-  font-size: var(--font-md);
+  font-size: var(--font-lg);
   font-weight: 800;
   line-height: 1.4;
   letter-spacing: -0.02em;
@@ -912,7 +919,7 @@
 }
 .region-flow-head b {
   color: var(--color-text);
-  font-size: var(--font-body);
+  font-size: var(--font-lg);
   font-weight: 800;
   letter-spacing: -0.02em;
   word-break: keep-all;
@@ -928,7 +935,7 @@
 }
 .region-flow ol::before {
   position: absolute;
-  top: 21px;
+  top: 25px;
   right: 8%;
   left: 8%;
   height: 1px;
@@ -941,16 +948,16 @@
   display: grid;
   justify-items: center;
   gap: 10px;
-  color: var(--color-muted);
-  font-size: var(--font-sm);
+  color: var(--color-text-soft);
+  font-size: var(--font-md);
   font-weight: 700;
   text-align: center;
   word-break: keep-all;
 }
 .region-flow li i {
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 50px;
+  height: 50px;
   place-items: center;
   border: 2px solid var(--color-primary-soft);
   border-radius: 50%;
@@ -996,13 +1003,13 @@
   border: 1px solid var(--color-primary-soft);
   border-radius: var(--radius-lg);
   background: #fff;
-  padding: 22px 22px 24px;
+  padding: 26px 26px 28px;
   text-align: left;
 }
 .trust-strip article > i {
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 50px;
+  height: 50px;
   place-items: center;
   border-radius: var(--radius-md);
   background: var(--color-primary-soft);
@@ -1010,15 +1017,15 @@
 }
 .trust-strip article > b {
   color: var(--color-text);
-  font-size: var(--font-body);
+  font-size: var(--font-lg);
   font-weight: 800;
   line-height: 1.4;
   letter-spacing: -0.02em;
   word-break: keep-all;
 }
 .trust-strip article > small {
-  color: var(--color-muted);
-  font-size: var(--font-sm);
+  color: var(--color-text-soft);
+  font-size: var(--font-md);
   line-height: 1.65;
   word-break: keep-all;
 }
@@ -1111,4 +1118,80 @@
     letter-spacing: 0.02em;
   }
 
+}
+
+/* ── 푸터 정렬 교정 ────────────────────────────────────────────────────────
+   .marketing-footer div (0,1,1) 이 .footer-brand (0,1,0) 를 특이도로 이겨서
+   세로로 쌓여야 할 브랜드 블록이 가로 한 줄로 붙어 있었다. 같은 특이도로
+   되돌리고, 좌우 두 덩어리를 위쪽 기준으로 맞춘다. */
+.marketing-footer .footer-brand {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 12px;
+}
+.marketing-footer .footer-brand p {
+  margin: 0;
+  max-width: 42ch;
+}
+.marketing-footer {
+  align-items: flex-start;
+  gap: 48px;
+}
+.marketing-footer .footer-meta {
+  align-items: start;
+  padding-top: 4px;
+}
+
+/* ── 히어로 좌측 이용 흐름 (세로) ─────────────────────────────────────────
+   지도 카드가 높아 비던 좌측 하단을 채운다. 좁은 칸이라 가로 5단이 아니라
+   세로 목록으로 두고, 번호를 잇는 선으로 순서를 드러낸다. */
+.hero-flow {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  margin: 36px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.hero-flow::before {
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 15px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--color-primary-border), var(--color-primary));
+  content: "";
+}
+.hero-flow li {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--color-text-soft);
+  font-size: var(--font-md);
+  font-weight: 700;
+}
+.hero-flow li i {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 2px solid var(--color-primary-soft);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--color-primary);
+  font-size: var(--font-sm);
+  font-style: normal;
+  font-weight: 850;
+}
+.hero-flow li:last-child i {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+.hero-flow li:last-child {
+  color: var(--color-text);
 }

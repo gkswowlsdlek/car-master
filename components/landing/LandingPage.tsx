@@ -48,17 +48,12 @@ export function LandingPage({ onStart }: { onStart: () => void }) {
       </nav>
       <section className="marketing-hero">
         <div className="marketing-hero-copy">
-          <div className="hero-kicker">자동차 딜러를 위한 용품 작업 플랫폼</div>
+          <div className="hero-kicker">자동차 딜러를 위한 차량용품 작업 플랫폼</div>
           <h1>
             전국 어디로 출고해도,
             <br />
             <span>가까운 차량용품점을 바로 찾으세요.</span>
           </h1>
-          <p className="page-subtitle hero-message">
-            지역과 필요한 작업 조건으로 용품점을 찾고,{" "}
-            <br />
-            시공 요청부터 작업 관리까지 이어가세요.
-          </p>
           <div className="marketing-cta">
             <button className="button button-primary button-large" onClick={onStart}>
               카마스터 시작하기 <ArrowRight size={18} />
@@ -66,17 +61,28 @@ export function LandingPage({ onStart }: { onStart: () => void }) {
           </div>
           <div className="hero-assurance">
             <span>
-              <MapPin size={16} /> 가까운 용품점 우선 탐색
+              <MapPin size={19} /> 가까운 용품점 우선 탐색
             </span>
             <span>
-              <Clock3 size={16} /> 거래별 기록 관리
+              <Clock3 size={19} /> 거래별 기록 관리
             </span>
           </div>
+          {/* 이용 흐름을 히어로 좌측으로 올린다. 제목으로 "무엇을 해주는지"를
+           * 읽은 직후에 "어떻게 쓰는지"가 이어지는 게 자연스럽고, 지도 카드가
+           * 높아서 비던 좌측 하단도 이 내용이 채운다. 좁은 칸이라 가로 5단이
+           * 아니라 세로 목록으로 둔다 — 순서는 세로가 더 잘 읽힌다. */}
+          <ol className="hero-flow" aria-label="카마스터 이용 흐름">
+            {workflow.map((item, index) => (
+              <li key={item}>
+                <i>{index + 1}</i>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ol>
         </div>
         <div className="hero-product-stack">
           <div className="hero-coverage">
             <div className="hero-coverage-head">
-              <span>NATIONWIDE COVERAGE</span>
               <b>전국 어디든 가까운 곳부터 찾아드립니다</b>
             </div>
             <RegionMap />
@@ -85,20 +91,6 @@ export function LandingPage({ onStart }: { onStart: () => void }) {
             </p>
           </div>
         </div>
-      </section>
-      <section className="region-flow" aria-label="카마스터 이용 흐름">
-        <div className="region-flow-head">
-          <span>NEARBY SHOP FIRST</span>
-          <b>가까운 용품점을 찾고, 요청하고, 연결하세요</b>
-        </div>
-        <ol>
-          {workflow.map((item, index) => (
-            <li key={item}>
-              <i>{index + 1}</i>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ol>
       </section>
       <section className="trust-strip">
         {benefits.map(({ icon: Icon, title, description }) => (
@@ -112,7 +104,6 @@ export function LandingPage({ onStart }: { onStart: () => void }) {
         ))}
       </section>
       <section className="marketing-final-cta">
-        <p className="eyebrow">READY TO START</p>
         <h2>다음 출고 지역의 용품점부터 찾아보세요.</h2>
         <p className="final-cta-description">
           지역과 작업 조건에 맞는 용품점을 찾고, 시공 요청부터 작업 관리까지 카마스터에서 이어가세요.
@@ -141,7 +132,7 @@ export function LandingPage({ onStart }: { onStart: () => void }) {
             <small>문의</small>채널 준비 중
           </span>
           <span>
-            <small>Copyright</small>© 2026 Car-Master
+            <small>저작권</small>© 2026 Car-Master
           </span>
         </div>
       </footer>
